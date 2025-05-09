@@ -41,7 +41,7 @@
 		...params
 	});
 
-	let reversed = component_params.reversed;
+	let reversed = $state(component_params.reversed);
 
 	beforeNavigate(({ from, to, type }) => {
 		// if navigating to a previous page, or a parent page, reverse the pagetransition direction

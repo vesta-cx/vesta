@@ -27,4 +27,4 @@ src/lib/paraglide
 
 .dev.vars*
 
-project.inlang/cache/**/* */
+project.inlang/cache

@@ -2,8 +2,8 @@
 
 # .github
 
-Organization-wide defaults for all [`mia.cx/*`](https://github.com/orgs/mia-cx/repositories) repositories.
+Organization-wide defaults for all [`canvas-ac/*`](https://github.com/orgs/canavs-ac/repositories) repositories.
 
 See [Creating default Community Health Files](https://docs.github.com/en/communities/setting-up-your-project-for-healthy-contributions/creating-a-default-community-health-file) for more information on creating community health files.
 
-See [`./profile/README.md`](./profile/README.md) for more information about [mia.cx](https://mia.cx) as an organization.
+See [`./profile/README.md`](./profile/README.md) for more information about [canavs](https://canvas.ac) as an organization.

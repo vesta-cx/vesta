@@ -6,7 +6,7 @@
 [subrepo]
 	remote = git@github.com:canvas-ac/.github
 	branch = main
-	commit = e3f78f2e19d32252620e581d597be7dffb52a561
-	parent = 13273b3935ffcc3bc1c88deb4a96822e2a36debe
+	commit = f358840ace4cc26372e0e0df4590c007ac863329
+	parent = 68fe071a1a5fac0233d7d5394eb00545a7b4a8e5
 	method = merge
 	cmdver = 0.4.9

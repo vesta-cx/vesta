@@ -42,6 +42,16 @@
       "require": "./dist/tailwindcss/*.cjs",
       "import": "./dist/tailwindcss/*.js"
     },
+    "./lint-staged": {
+      "types": "./dist/lint-staged/base.d.ts",
+      "require": "./dist/lint-staged/base.cjs",
+      "import": "./dist/lint-staged/base.js"
+    },
+    "./lint-staged/*": {
+      "types": "./dist/lint-staged/*.d.?(c)ts",
+      "require": "./dist/lint-staged/*.cjs",
+      "import": "./dist/lint-staged/*.js"
+    },
     "./typescript": "./src/typescript/tsconfig.base.json",
     "./typescript/node16": "./src/typescript/tsconfig.node16.json",
     "./typescript/node18": "./src/typescript/tsconfig.node18.json",
@@ -59,7 +69,7 @@
     "./types/**/*.ts"
   ],
   "scripts": {
-    "build": "tsup; tsc",
+    "build": "tsup",
     "dev": "tsup --watch",
     "format": "prettier --write . --ignore-path ../../.*ignore",
     "lint": "prettier --check . --ignore-path ../../.*ignore && eslint .",

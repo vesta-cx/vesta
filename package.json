@@ -11,8 +11,9 @@
     "prepare": "husky"
   },
   "devDependencies": {
-    "config": "workspace:*",
     "@changesets/cli": "^2.29.3",
+    "config": "workspace:*",
+    "eslint": "^9.26.0",
     "husky": "^9.1.7",
     "lint-staged": "^16.0.0",
     "prettier": "^3.5.3",

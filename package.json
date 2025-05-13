@@ -11,7 +11,7 @@
     "prepare": "husky"
   },
   "devDependencies": {
-    "@canvas-ac/config": "workspace:*",
+    "config": "workspace:*",
     "@changesets/cli": "^2.29.3",
     "husky": "^9.1.7",
     "lint-staged": "^16.0.0",

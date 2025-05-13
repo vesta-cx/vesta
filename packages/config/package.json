@@ -1,5 +1,6 @@
 {
-  "name": "@canvas-ac/config",
+  "name": "config",
+  "private": true,
   "version": "1.0.0",
   "description": "shared configs for the canvas-ac monorepo",
   "keywords": [

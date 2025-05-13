@@ -1,0 +1,12 @@
+; DO NOT EDIT (unless you know what you are doing)
+;
+; This subdirectory is a git "subrepo", and this file is maintained by the
+; git-subrepo command. See https://github.com/ingydotnet/git-subrepo#readme
+;
+[subrepo]
+	remote = git@github.com:canvas-ac/.github
+	branch = main
+	commit = 0f0b5b240e5024c95091ec23ce28b52fef960e2a
+	parent = 13273b3935ffcc3bc1c88deb4a96822e2a36debe
+	method = merge
+	cmdver = 0.4.9

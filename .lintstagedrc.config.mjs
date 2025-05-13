@@ -1,0 +1,7 @@
+export default {
+	"*.{ts,tsx,cts,mts,js,jsx,cjs,mjs}": [
+		'prettier --ignore-path "" --write',
+		"eslint",
+	],
+	"*{.md,rc*,config,.json,.yaml}": ['prettier --ignore-path "" --write'],
+};

@@ -4,9 +4,9 @@
 ; git-subrepo command. See https://github.com/ingydotnet/git-subrepo#readme
 ;
 [subrepo]
-	remote = git@github.com:canvas-ac/.github
-	branch = main
-	commit = f358840ace4cc26372e0e0df4590c007ac863329
-	parent = 8409dc930a636488fbffc84b134c7994c2efc5d2
+	remote = git@github.com:canvas-ac/canvas-ac
+	branch = packages/config
+	commit = 4aeaade9ee74c91fca0d3503177826959294192c
 	method = merge
 	cmdver = 0.4.9
+	parent = f9303852baa8dd9adf1ad237ce45714bd02a4ef7

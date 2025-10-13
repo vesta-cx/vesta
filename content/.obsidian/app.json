@@ -1,0 +1,8 @@
+{
+  "promptDelete": false,
+  "alwaysUpdateLinks": true,
+  "attachmentFolderPath": "/Assets",
+  "showUnsupportedFiles": true,
+  "useMarkdownLinks": false,
+  "propertiesInDocument": "visible"
+}

@@ -1,0 +1,20 @@
+{
+  "version": 20002,
+  "settings": {
+    "formatOnSave": true,
+    "formatOnFileChange": true,
+    "formatCodeBlock": true,
+    "removeExtraSpaces": false,
+    "addTrailingSpaces": true,
+    "languageMappings": {
+      "dataviewjs": "js"
+    },
+    "formatOptions": {
+      "trailingComma": "es5",
+      "tabWidth": 2,
+      "semi": false,
+      "singleQuote": true
+    },
+    "ignorePatterns": "**/.git\n**/.svn\n**/.hg\n**/node_modules\n\nTemplates/"
+  }
+}

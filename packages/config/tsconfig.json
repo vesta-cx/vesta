@@ -1,0 +1,22 @@
+{
+    "schema": "https://json.schemastore.org/tsconfig",
+    "extends": "./src/typescript/tsconfig.tsup.json",
+    "include": [
+        "src/**/*.ts",
+        "src/**/*.tsx",
+        "src/**/*.mts",
+        "src/**/*.cts",
+        "tests/**/*.ts",
+        "tests/**/*.tsx",
+        "tests/**/*.mts",
+        "tests/**/*.cts",
+    ],
+    "exclude": ["dist", "node_modules"],
+    "compilerOptions": {
+        "declaration": true,
+        "emitDeclarationOnly": true,
+        "declarationDir": "dist/",
+        "outDir": "dist/",
+        "rootDir": "src/",
+    }
+}

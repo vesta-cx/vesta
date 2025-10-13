@@ -1,23 +1,17 @@
-# mia.cx
+# canvas
 
-A multifaceted service provider with a passion for creative endeavours in fields like: Web Design, Web Development, Graphic Design & Audio Engineering.
-Works on a freelance basis.
+A collective venture aiming to make knowledge, experience and skill accessible for young artists..
 
 ## about
 
 <!-- TODO
-    Write a bio about mia.cx and Mia Riezebos
+    Write a bio about canvas and its mission.
  -->
 
 lorem ipsum dolor sit amet.
 
 ## projects
 
-[mia.cx](https://mia.cx) is constantly working on interesting, creative projects. You can find an extensive list [here](./PROJECTS.md).
-
-- [Tissues](./PROJECTS.md#tissues) - Coming Soon
-- [nuphory.com](./PROJECTS.md#nuphorycom)
-- [hypertrance.eu](./PROJECTS.md#hypertranceeu)
-- [dancex.nl](./PROJECTS.md#dance-xperience) - Coming Soon
+[canvas](https://canvas.ac) is constantly working on interesting, creative things. You can find an extensive list [here](./PROJECTS.md).
 
 [More Projects...](./PROJECTS.md)

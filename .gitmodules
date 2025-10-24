@@ -1,0 +1,3 @@
+[submodule "erato"]
+    path = apps/erato
+    url = git@github.com:vesta-cx/erato.git

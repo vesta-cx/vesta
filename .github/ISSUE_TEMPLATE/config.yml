@@ -1,12 +1,12 @@
 blank_issues_enabled: false
 contact_links:
-  - name: "Report a Security Vulnerability or Risk"
-    url: "https://github.com/canvas-ac"
-    about: "If you find a dangerous Security Vulnerability, please email us in stead."
-  # TODO
-  # - name: "Get a Quote"
-  #   url: "https://github.com/canvas-ac"
-  #   about: "Hire us for your project"
-  # - name: "Job Opportunities"
-  #   url: "https://github.com/canvas-ac"
-  #   about: "Work with or at canvas"
+    - name: 'Report a Security Vulnerability or Risk'
+      url: 'https://github.com/canvas-ac'
+      about: 'If you find a dangerous Security Vulnerability, please email us in stead.'
+    # TODO
+    # - name: "Get a Quote"
+    #   url: "https://github.com/canvas-ac"
+    #   about: "Hire us for your project"
+    # - name: "Job Opportunities"
+    #   url: "https://github.com/canvas-ac"
+    #   about: "Work with or at canvas"

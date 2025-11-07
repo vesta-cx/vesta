@@ -1,6 +1,6 @@
 /** @format */
 
-import base from "config/prettier/base";
+import base from "config/prettier";
 
 /** @type {import("prettier").Config} */
 export default {

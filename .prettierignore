@@ -8,8 +8,8 @@
 
 **/*-lock*
 
-**/apps/**
-**/packages/**
+# **/apps/**
+# **/packages/**
 
 **/package-lock.json
 **/pnpm-lock.yaml

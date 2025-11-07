@@ -1,3 +1,6 @@
 [submodule "apps/erato"]
 	path = apps/erato
 	url = https://github.com/vesta-cx/erato.git
+[submodule "apps/quality-survey"]
+	path = apps/quality-survey
+	url = https://github.com/vesta-cx/quality-survey

@@ -2,14 +2,14 @@
   "name": "config",
   "private": true,
   "version": "1.0.0",
-  "description": "shared configs for the canvas-ac monorepo",
+  "description": "shared configs for the vesta monorepo",
   "keywords": [
     "config",
     "shared",
     "monorepo"
   ],
   "license": "MIT",
-  "author": "canvas-ac",
+  "author": "vesta",
   "type": "module",
   "exports": {
     "./eslint": {

@@ -9,3 +9,7 @@
 [submodule "apps/euterpe"]
 	path = apps/euterpe
 	url = https://github.com/vesta-cx/euterpe.git
+
+[submodule "packages/ui"]
+	path = packages/ui
+	url = https://github.com/vesta-cx/ui.git

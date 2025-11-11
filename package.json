@@ -29,7 +29,10 @@
     "onlyBuiltDependencies": [
       "@tailwindcss/oxide",
       "esbuild",
-      "prisma"
+      "svelte-preprocess"
+    ],
+    "ignoredBuiltDependencies": [
+      "svelte-preprocess"
     ]
   }
 }

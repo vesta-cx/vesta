@@ -4,3 +4,9 @@ packages:
 onlyBuiltDependencies:
   - esbuild
   - "@tailwindcss/oxide"
+  - "@parcel/watcher"
+  - "@tailwindcss/oxide"
+  - esbuild
+  - sharp
+  - svelte-preprocess
+  - workerd

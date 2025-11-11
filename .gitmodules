@@ -13,3 +13,10 @@
 [submodule "packages/ui"]
 	path = packages/ui
 	url = https://github.com/vesta-cx/ui.git
+
+[submodule "packages/utils"]
+	path = packages/utils
+	url = https://github.com/vesta-cx/utils.git
+[submodule "packages/packages/utils"]
+	path = packages/packages/utils
+	url = https://github.com/vesta-cx/utils.git

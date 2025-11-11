@@ -1,13 +1,31 @@
 {
-  "name": "utils",
-  "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "packageManager": "pnpm@10.20.0"
+    "name": "@vesta-cx/utils",
+    "version": "1.0.0",
+    "description": "",
+    "main": "dist/index.js",
+    "scripts": {
+        "build": "tsc",
+        "dev": "tsc --watch",
+        "lint": "eslint .",
+        "format": "prettier --write .",
+        "test": "echo \"Error: no test specified\" && exit 1"
+    },
+    "exports": {
+        ".": {
+            "types": "./dist/index.d.ts",
+            "require": "./dist/index.js",
+            "import": "./dist/index.js"
+        }
+    },
+    "keywords": [],
+    "author": "",
+    "license": "ISC",
+    "packageManager": "pnpm@10.20.0",
+    "devDependencies": {
+        "@types/node": "^24.10.0",
+        "config": "workspace:*",
+        "eslint": "^9.39.1",
+        "prettier": "^3.6.2",
+        "typescript": "^5.9.3"
+    }
 }

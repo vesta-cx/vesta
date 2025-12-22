@@ -4,5 +4,8 @@
   "attachmentFolderPath": "/Assets",
   "showUnsupportedFiles": true,
   "useMarkdownLinks": false,
-  "propertiesInDocument": "visible"
+  "propertiesInDocument": "visible",
+  "useTab": true,
+  "tabSize": 4,
+  "smartIndentList": true
 }

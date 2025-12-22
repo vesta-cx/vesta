@@ -173,7 +173,7 @@
       "line-break-indicator": "  "
     },
     "unordered-list-style": {
-      "enabled": true,
+      "enabled": false,
       "list-style": "-"
     },
     "compact-yaml": {
@@ -247,7 +247,7 @@
       "two-space-line-break": false
     },
     "add-blockquote-indentation-on-paste": {
-      "enabled": false
+      "enabled": true
     },
     "prevent-double-checklist-indicator-on-paste": {
       "enabled": false

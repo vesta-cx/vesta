@@ -11,14 +11,9 @@
   "auto_jump_to_cursor": true,
   "enable_system_commands": false,
   "shell_path": "",
-  "user_scripts_folder": "99 Meta/Templates/Scripts",
+  "user_scripts_folder": "",
   "enable_folder_templates": true,
-  "folder_templates": [
-    {
-      "folder": "03 Content/Mods",
-      "template": "99 Meta/Templates/Mod.md"
-    }
-  ],
+  "folder_templates": [],
   "enable_file_templates": false,
   "file_templates": [
     {

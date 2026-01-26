@@ -1,22 +1,20 @@
 <script>
+	import { GradientBlur } from '@/utils/gradient-blur/index.js';
 	import * as Section from '@/layout/section/index.js';
 	import { Image } from '@/ui/image/index.js';
 </script>
 
-<Section.Root>
+<Section.Root data-section="hero" class="h-[calc(100svh-20rem)] justify-center">
 	<Section.Background>
 		<Image
-			src="https://picsum.photos/seed/picsum/1000/400"
+			src="https://picsum.photos/seed/music/2560/1440"
 			alt="random banner"
 			class="h-full w-full object-cover"
 		/>
 	</Section.Background>
 
-	<h1>Welcome to your library project</h1>
-	<p>Create your package using @sveltejs/package and preview/showcase your work with SvelteKit</p>
-	<p>
-		Visit <a href="https://svelte.dev/docs/kit">svelte.dev/docs/kit</a> to read the documentation
-	</p>
+	<h1>Vesta UI</h1>
+	<p>Welcome to the Vesta UI component library!</p>
 </Section.Root>
 
 <Section.Root class="flex flex-col items-center *:container">

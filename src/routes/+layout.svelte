@@ -1,9 +1,9 @@
 <script lang="ts">
 	import '$lib/styles/index.scss';
-	import Footer from '@/layout/Footer.svelte';
+	import { Footer } from '@/layout/footer/index.js';
 	import * as Header from '@/layout/header/index.js';
-	import Main from '@/layout/Main.svelte';
-	import ViewTransition from '@/utils/view-transition.svelte';
+	import { Main } from '@/layout/main/index.js';
+	import { ViewTransition } from '@/utils/view-transition/index.js';
 	import '../app.css';
 
 	let { children } = $props();
@@ -11,8 +11,19 @@
 
 <ViewTransition />
 
-<Header.Root>vesta</Header.Root>
+<Header.Root class="z-50">
+	<a href="/">@vesta-cx/ui</a>
+	<nav class="contents">
+		<ul class="flex gap-6">
+			<li>Components</li>
+			<li>About</li>
+			<li>GitHub</li>
+		</ul>
+	</nav>
+</Header.Root>
 <Main>
 	{@render children()}
 </Main>
-<Footer></Footer>
+<Footer>
+	<p>Footer</p>
+</Footer>

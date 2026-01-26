@@ -11,3 +11,5 @@ export {
 	Background as SectionBackground,
 	Content as SectionContent
 };
+
+export default Root;

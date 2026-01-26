@@ -1,5 +1,6 @@
 <script lang="ts">
-	import { setContext, type Snippet } from 'svelte';
+	import { setSlotContext } from '#lib/utils/slot-context-helper.svelte.js';
+	import { type Snippet } from 'svelte';
 	import type { HTMLAttributes } from 'svelte/elements';
 	import { SectionContent } from './index.js';
 
@@ -11,29 +12,15 @@
 		...restProps
 	}: { children: Snippet; class?: string } & SectionProps = $props();
 
-	let background: Snippet | undefined = $state(undefined);
-	let content: Snippet | undefined = $state(undefined);
-
-	// Create context for HeroBackground to register itself
-	setContext('section-background', {
-		register: (snippet: Snippet) => {
-			background = snippet;
-		}
-	});
-	// Create context for HeroContent to register itself
-	setContext('section-content', {
-		register: (snippet: Snippet) => {
-			content = snippet;
-		}
-	});
+	const slots = setSlotContext<'background' | 'content'>('section');
 </script>
 
 <section class="relative flex flex-col items-center py-4 {className}" {...restProps}>
-	{@render background?.()}
+	{@render slots.background?.()}
 
-	{@render content?.()}
+	{@render slots.content?.()}
 
-	{#if !content}
+	{#if !slots.content}
 		<SectionContent>
 			{@render children?.()}
 		</SectionContent>

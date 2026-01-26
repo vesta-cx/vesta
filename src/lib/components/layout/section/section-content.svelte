@@ -1,10 +1,7 @@
 <script lang="ts">
-	import { getContext, type Snippet } from 'svelte';
+	import { getSlotContext } from '#lib/utils/slot-context-helper.svelte.js';
+	import { type Snippet } from 'svelte';
 	import type { HTMLAttributes } from 'svelte/elements';
-
-	export interface SectionContentContext {
-		register: (snippet: Snippet) => void;
-	}
 
 	type SectionContentProps = HTMLAttributes<HTMLDivElement>;
 
@@ -14,10 +11,10 @@
 		...restProps
 	}: { children: Snippet } & SectionContentProps = $props();
 
-	const ctx = getContext<SectionContentContext | undefined>('section-content');
+	const ctx = getSlotContext<'content'>('section');
 
 	if (ctx && content) {
-		ctx.register(content);
+		ctx.register('content', content);
 	}
 </script>
 

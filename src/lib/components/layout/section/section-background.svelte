@@ -1,18 +1,15 @@
 <script lang="ts">
-	import { getContext, onMount, type Snippet } from 'svelte';
-
-	export interface SectionBackgroundContext {
-		register: (snippet: Snippet) => void;
-	}
+	import { getSlotContext } from '#lib/utils/slot-context-helper.svelte.js';
+	import { type Snippet } from 'svelte';
 
 	let { children, class: className }: { children: Snippet; class?: string } = $props();
 
-	const ctx = getContext<SectionBackgroundContext | undefined>('section-background');
+	const ctx = getSlotContext<'background'>('section');
 
 	$effect(() => {
 		// Register the background snippet with the context
 		if (ctx && background) {
-			ctx.register(background);
+			ctx.register('background',background);
 		}
 	});
 </script>
@@ -21,9 +18,5 @@
 {#snippet background()}
 	<figure class="absolute inset-0 -z-10 {className}" data-slot="section-background">
 		{@render children()}
-		<!-- If browser supports backdrop-filter, add a background color to the hero background -->
-		<div
-			class="absolute inset-0 bg-background/75 supports-backdrop-filter:bg-background/50 supports-backdrop-filter:backdrop-blur"
-		></div>
 	</figure>
 {/snippet}

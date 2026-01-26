@@ -12,7 +12,9 @@
 <ViewTransition />
 
 <Header.Root class="z-50">
-	<a href="/">@vesta-cx/ui</a>
+	<Header.Logo>
+		<a href="/">@vesta-cx/ui</a>
+	</Header.Logo>
 	<nav class="contents">
 		<ul class="flex gap-6">
 			<li>Components</li>

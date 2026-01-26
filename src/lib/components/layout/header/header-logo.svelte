@@ -15,7 +15,7 @@
 
 <!-- Hero Background Component (in a snippet so it can be registered with the context) -->
 {#snippet logo()}
-	<figure class="absolute inset-0 -z-10 {className}" data-slot="header-logo">
+	<figure class="{className}" data-slot="header-logo">
 		{@render children()}
 	</figure>
 {/snippet}

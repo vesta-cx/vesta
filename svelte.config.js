@@ -1,17 +1,15 @@
+import { mdsvex } from 'mdsvex';
 import adapter from '@sveltejs/adapter-cloudflare';
-import { vitePreprocess } from '@sveltejs/vite-plugin-svelte';
+import { sveltePreprocess } from 'svelte-preprocess';
+import { reactivePreprocess } from 'svelte-reactive-preprocessor';
 
 /** @type {import('@sveltejs/kit').Config} */
 const config = {
 	// Consult https://svelte.dev/docs/kit/integrations
 	// for more information about preprocessors
-	preprocess: vitePreprocess(),
-	kit: {
-		adapter: adapter(),
-		alias: {
-			'@': 'src/lib/components',
-		}
-	}
+	preprocess: [sveltePreprocess({ scss: true }), reactivePreprocess(), mdsvex()],
+	kit: { adapter: adapter(), alias: { '@': 'src/lib/components' } },
+	extensions: ['.svelte', '.svx']
 };
 
 export default config;

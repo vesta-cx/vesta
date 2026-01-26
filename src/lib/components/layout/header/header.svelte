@@ -11,7 +11,7 @@
 
 	let { children, class: className, ...restProps }: HeaderProps = $props();
 
-	let heroVisible = $state(false);
+	let heroVisible = $state(true);
 
 	onMount(() => {
 		// set css var --header-height on :root to the height of the header
@@ -26,11 +26,13 @@
 				([entry]) => {
 					heroVisible = entry.isIntersecting;
 				},
-				{threshold: 0.1 }
-			)
+				{ threshold: 0.1 }
+			);
 
 			observer.observe(hero);
 			return () => observer.disconnect();
+		} else {
+			heroVisible = false;
 		}
 	});
 
@@ -63,29 +65,36 @@
 		}}
 	/>
 
-	<div 
-	    class="
-			relative z-10 container 
-			flex-row flex justify-between 
-			gap-6 p-4 mt-2
+	<div
+		class="
+			relative z-10 container
+			flex flex-row
+			justify-between gap-6 overflow-clip
+			sm:rounded-2xl rounded-none
+			max-sm:pt-6 p-4 sm:mt-2
 			text-card-foreground
-			rounded-xl
-			overflow-clip
-			transition-[background-color,color,border-width,border-color,box-shadow,margin-top]
-			ease-out
+			transition-[background-color,color,border-width,border-color,box-shadow,margin,padding,width,height,border-radius]
 			duration-300
-			{!heroVisible ? 'bg-card text-card-foreground border border-border shadow-sm mt-4' : 'border border-border/0'}
+			ease-out
+			{!heroVisible
+			? 'sm:mt-4 sm:border border-border bg-card text-card-foreground shadow-sm'
+			: 'sm:border border-border/0'}
 		"
 	>
-		{@render children()}
+		{#if slots.logo}
+			{@render slots.logo?.()}
+		{/if}
+		{#if slots.nav}
+			{@render slots.nav?.()}
+		{/if}
+		<div class="absolute right-0 bottom-0 left-0 h-px bg-border"></div>
 		<div
 			data-component="scroll-progress"
-			class="absolute right-0 bottom-0 left-0 h-px bg-border/50"
+			class="absolute right-(--right) bottom-0 left-0 h-px bg-primary/50"
 		></div>
-		<div
-			data-component="scroll-progress"
-			class="absolute right-(--right) bottom-0 left-0 h-px bg-primary"
-		></div>
+	</div>
+	<div class="hidden">
+		{@render children?.()}
 	</div>
 </header>
 
@@ -144,7 +153,7 @@
 
 		header + main section:first-of-type {
 			@apply first:pt-(--header-height);
-			
+
 			&[data-section='hero'] {
 				view-timeline-name: --hero-timeline;
 			}

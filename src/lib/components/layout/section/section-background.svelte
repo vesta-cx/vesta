@@ -1,8 +1,11 @@
 <script lang="ts">
 	import { getSlotContext } from '#lib/utils/slot-context-helper.svelte.js';
 	import { type Snippet } from 'svelte';
+	import type { HTMLAttributes } from 'svelte/elements';
 
-	let { children, class: className }: { children: Snippet; class?: string } = $props();
+	type SectionBackgroundProps = HTMLAttributes<HTMLDivElement>;
+
+	let { children, class: className }: { children: Snippet } & SectionBackgroundProps = $props();
 
 	const ctx = getSlotContext<'background'>('section');
 

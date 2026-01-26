@@ -1,20 +1,21 @@
 <script>
-	import { GradientBlur } from '@/utils/gradient-blur/index.js';
 	import * as Section from '@/layout/section/index.js';
 	import { Image } from '@/ui/image/index.js';
 </script>
 
-<Section.Root data-section="hero" class="h-[calc(100svh-20rem)] justify-center">
-	<Section.Background>
+<Section.Root data-section="hero" class="h-[max(calc(100svh-20rem),40rem)] justify-center">
+	<Section.Background data-section="hero-background">
 		<Image
-			src="https://picsum.photos/seed/music/2560/1440"
+			src="https://picsum.photos/id/444/2560/1440"
 			alt="random banner"
 			class="h-full w-full object-cover"
 		/>
 	</Section.Background>
 
-	<h1>Vesta UI</h1>
-	<p>Welcome to the Vesta UI component library!</p>
+	<Section.Content data-section="hero-content" class="bg-background/50 rounded-2xl">
+		<h1>Vesta UI</h1>
+		<p>Welcome to the Vesta UI component library!</p>
+	</Section.Content>
 </Section.Root>
 
 <Section.Root class="flex flex-col items-center *:container">

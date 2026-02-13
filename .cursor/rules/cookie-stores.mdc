@@ -1,0 +1,25 @@
+---
+description: Cookie consent, settings stores, and cross-domain cookie utilities
+globs:
+  - packages/utils/src/cookies/**
+  - "**/cookies/**"
+---
+
+# Cookie Stores (`@vesta-cx/utils/cookies`)
+
+Client-side cookie utilities using nanostores + `@nanostores/persistent`.
+
+## Architecture
+
+- **`configureCookies({ domain })`** — call once at app startup for cross-subdomain sharing (e.g. `.vesta.cx`). Sets `domain` on all cookies automatically.
+- **`consentStore`** — `persistentMap` of `CookieConsent`. Categories: `essential` (always true), `preferences`, `analytics`, `marketing`.
+- **`setConsentCookie(category, key, value)`** — set a cookie only if the user consented to that category. Cookie key is prefixed `{category}:{key}`.
+- **`settingsStore`** — `persistentMap` of `UserSettings`. Auto-applies `theme` → `data-theme`, `locale` → `<html lang>`, persists all as `preferences:settings.*` cookies.
+
+## Gotchas
+
+- `CookieConsent` has an index signature (`[key: string]: string | undefined`) to satisfy `persistentMap` — access known keys directly for type safety.
+- `deleteCookie` uses `max-age=0` (not `expires` in the past) for broader compatibility.
+- Module is browser-only (`document.cookie`). Guarded with `typeof document !== "undefined"` for SSR safety.
+- `SameSite=None` automatically sets `Secure=true`.
+- Consent listener auto-purges cookies when a category is revoked.

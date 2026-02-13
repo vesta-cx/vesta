@@ -2,7 +2,6 @@ export * as Accordion from './accordion/index.js';
 export * as AlertDialog from './alert-dialog/index.js';
 export * as Alert from './alert/index.js';
 export * as AspectRatio from './aspect-ratio/index.js';
-export * as AudioPlayer from './audio-player/index.js';
 export * as Avatar from './avatar/index.js';
 export * as Badge from './badge/index.js';
 export * as Breadcrumb from './breadcrumb/index.js';

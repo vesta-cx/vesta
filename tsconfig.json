@@ -11,7 +11,7 @@
         "tests/**/*.mts",
         "tests/**/*.cts"
     ],
-    "exclude": ["dist", "node_modules"],
+    "exclude": ["dist", "node_modules", "tests"],
     // Visit https://aka.ms/tsconfig to read more about this file
     "compilerOptions": {
         // File Layout
@@ -25,6 +25,7 @@
         // "types": [],
         // For nodejs:
         // "lib": ["esnext"],
+        "lib": ["esnext", "dom"],
         "types": ["node"],
         // and npm install -D @types/node
 

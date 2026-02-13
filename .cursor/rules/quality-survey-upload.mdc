@@ -1,0 +1,17 @@
+---
+description: Multi-track directory upload pattern for quality-survey admin sources
+globs:
+  - apps/quality-survey/src/routes/(app)/admin/sources/**
+alwaysApply: false
+---
+
+# Multi-track directory upload
+
+The directory upload expects files in the structure produced by `generate-permutations.sh`:
+`{codec}/{basename}_{codec}_{bitrate}.{ext}`.
+
+- **Grouping**: Files are grouped by basename (regex: `^(.+)_(flac|opus|mp3|aac)_(\d+)\.[a-z0-9]+$`). One `TrackEntry` per unique basename.
+- **Metadata**: Prefer MP3 for `parseBlob()` (most reliable ID3 tags), fall back to FLAC. Auto-fill title, artist, genre, duration. Title and license URL are required.
+- **Form submission**: Client sends `files` (from webkitdirectory) + `license_url` (shared default) + `tracks` (JSON array of metadata). Server groups files by basename, matches to track entries, creates one `source_files` row per track with its candidates.
+- **Validation**: Incomplete tracks (missing title or license) use `border-destructive` and red indicator. Submit disabled until all complete and shared license filled.
+- **License**: Shared default at top; per-track override optional. Effective license = track.licenseUrl || sharedLicenseUrl.

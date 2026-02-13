@@ -1,7 +1,8 @@
 ---
-description: Cookie consent, settings stores, and cross-domain cookie utilities
+description: Cookie consent, settings stores, vendor-based consent model, and UI components
 globs:
   - packages/utils/src/cookies/**
+  - packages/ui/src/lib/components/utils/cookie-consent-*/**
   - "**/cookies/**"
 ---
 
@@ -9,17 +10,33 @@ globs:
 
 Client-side cookie utilities using nanostores + `@nanostores/persistent`.
 
-## Architecture
+## Consent model
 
-- **`configureCookies({ domain })`** — call once at app startup for cross-subdomain sharing (e.g. `.vesta.cx`). Sets `domain` on all cookies automatically.
-- **`consentStore`** — `persistentMap` of `CookieConsent`. Categories: `essential` (always true), `preferences`, `analytics`, `marketing`.
-- **`setConsentCookie(category, key, value)`** — set a cookie only if the user consented to that category. Cookie key is prefixed `{category}:{key}`.
-- **`settingsStore`** — `persistentMap` of `UserSettings`. Auto-applies `theme` → `data-theme`, `locale` → `<html lang>`, persists all as `preferences:settings.*` cookies.
+Per-vendor granularity. `essential` (always true) and `preferences` are simple toggles. Analytics and advertising consent is per-vendor via `vendors: Record<string, VendorConsent>`.
+
+- **`consentStore`** — `persistentAtom<CookieConsent>` with JSON encode/decode.
+- **`setConsentCookie(category, key, value)`** — for `essential` / `preferences` categories.
+- **`setVendorCookie(vendor, purpose, key, value)`** — checks `vendors[vendor]?.[purpose]` before setting. Cookie key: `{vendor}:{purpose}:{key}`.
+- **`acceptAllVendors(ids)` / `rejectAllVendors()`** — bulk helpers for UI.
+- **`hasConsented()`** — checks if localStorage key exists (dialog visibility).
+
+## Settings store
+
+- **`settingsStore`** — `persistentMap<UserSettings>`. Auto-applies `theme` → `data-theme`, `locale` → `<html lang>`, persists as `preferences:settings.*` cookies.
+
+## UI components (`@vesta-cx/ui`)
+
+- **`CookieConsentForm`** — Full form with vendor toggles. Uses `@container` queries to adapt between narrow (dialog) and wide (page) layouts.
+- **`CookieConsentDialog`** — Bottom-right sticky card. Compact → Expanded → Hidden. No overlay/backdrop.
+
+Both accept `vendors: VendorDefinition[]` — the app defines its vendor list.
+
+## Cross-domain
+
+Call `configureCookies({ domain: '.vesta.cx' })` at app startup. Sets `domain` on all cookies. `SameSite=None` auto-sets `Secure`.
 
 ## Gotchas
 
-- `CookieConsent` has an index signature (`[key: string]: string | undefined`) to satisfy `persistentMap` — access known keys directly for type safety.
-- `deleteCookie` uses `max-age=0` (not `expires` in the past) for broader compatibility.
-- Module is browser-only (`document.cookie`). Guarded with `typeof document !== "undefined"` for SSR safety.
-- `SameSite=None` automatically sets `Secure=true`.
-- Consent listener auto-purges cookies when a category is revoked.
+- `deleteCookie` uses `max-age=0` (not `expires` in the past) for broader compat.
+- Browser-only module — guarded with `typeof document !== "undefined"`.
+- `CookieConsent` no longer has an index signature — `persistentAtom` handles nested objects via JSON.

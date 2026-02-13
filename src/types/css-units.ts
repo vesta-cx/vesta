@@ -7,8 +7,14 @@ export type LengthDimension = "w" | "h" | "min" | "max" | "b" | "i";
 
 export type ViewportRelativeLengthUnit = `${"d" | "s" | "l"}v${LengthDimension}`;
 export type ContainerQueryLengthUnit = `c${LengthDimension}`;
+export type PercentageLengthUnit = `%`;
 
-export type RelativeLengthUnit = FontRelativeLengthUnit | RootFontRelativeLengthUnit | ViewportRelativeLengthUnit | ContainerQueryLengthUnit;
+export type RelativeLengthUnit =
+    | FontRelativeLengthUnit
+    | RootFontRelativeLengthUnit
+    | ViewportRelativeLengthUnit
+    | ContainerQueryLengthUnit
+    | PercentageLengthUnit;
 
 // Absolute Length Units
 
@@ -20,6 +26,13 @@ export type InchLengthUnit = `in`;
 export type PicaLengthUnit = `pc`;
 export type PointLengthUnit = `pt`;
 
-export type AbsoluteLengthUnit = PixelLengthUnit | CentimeterLengthUnit | MillimeterLengthUnit | QuarterMillimeterLengthUnit | InchLengthUnit | PicaLengthUnit | PointLengthUnit;
+export type AbsoluteLengthUnit =
+    | PixelLengthUnit
+    | CentimeterLengthUnit
+    | MillimeterLengthUnit
+    | QuarterMillimeterLengthUnit
+    | InchLengthUnit
+    | PicaLengthUnit
+    | PointLengthUnit;
 
 export type LengthUnit = RelativeLengthUnit | AbsoluteLengthUnit;

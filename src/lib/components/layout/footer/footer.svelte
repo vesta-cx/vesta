@@ -4,7 +4,7 @@
 	let { children }: { children: Snippet } = $props();
 </script>
 
-<footer>
+<footer class="flex w-full items-center justify-center">
 	{@render children()}
 </footer>
 

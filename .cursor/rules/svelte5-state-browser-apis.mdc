@@ -1,0 +1,24 @@
+---
+description: Gotcha when using Svelte 5 $state with browser API objects
+globs:
+  - "**/*.svelte"
+---
+
+# Svelte 5: never use $state for browser API objects
+
+`$state` wraps objects in Proxies for deep reactivity. Browser API objects (AudioContext, GainNode, MediaElementAudioSourceNode, HTMLAudioElement, WebSocket, IntersectionObserver, etc.) have internal slots and native methods that break or behave unexpectedly through Proxy wrappers.
+
+Symptoms: `$effect` re-triggers in a loop, methods throw, or property reads return unexpected values.
+
+**Use plain `let` variables** for browser API objects. Only use `$state` for values the template reads (booleans, strings, numbers). Use `untrack(() => expr)` when an `$effect` needs to read `$state` without subscribing.
+
+```svelte
+<!-- BAD: Proxy-wrapped AudioContext triggers phantom effect dependencies -->
+let audioCtx: AudioContext | null = $state(null);
+
+<!-- GOOD: plain variable, not reactive -->
+let audioCtx: AudioContext | null = null;
+
+<!-- GOOD: untrack to read $state without dependency -->
+masterGain.gain.value = untrack(() => volume);
+```

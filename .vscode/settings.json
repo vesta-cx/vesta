@@ -4,6 +4,9 @@
       "mode": "auto"
     }
   ],
+  "files.associations": {
+       "*.svx": "markdown"
+     },
   "explorer.fileNesting.enabled": true,
   "explorer.fileNesting.patterns": {
     "//": "Last update at 5/13/2025, 5:17:09 PM",

@@ -4,36 +4,52 @@ overview: An exhaustive inventory of every visualization concept mentioned in th
 todos:
   - id: snapshot-schema
     content: Add result_snapshots schema with scalar columns (total_responses, neither_rate, codec win rates, bitrate tiers, device/comparison counts)
+    status: completed
   - id: snapshot-aggregation
     content: Implement snapshot aggregation logic (compute from answers, TTL check, insert on expiry)
+    status: completed
   - id: json-matrices
     content: Add JSON columns to snapshots (codec_matchup_matrix, bitrate_gap_confidence, codec_equivalence_ratios)
+    status: completed
   - id: bradley-terry
     content: Implement Bradley-Terry model (JS) for PQ score derivation from pairwise comparisons
+    status: completed
   - id: pq-json-columns
     content: Add PQ-related JSON columns (codec_pq_scores, transparency_thresholds, diminishing_returns_points)
+    status: completed
   - id: flac-vs-lossy
     content: Add flac_vs_lossy_win_rates JSON column and aggregation logic
+    status: completed
   - id: genre-metadata
     content: Expand source_files genre metadata and add more unique genres to sourceset (prerequisite for genre visualizations)
+    status: completed
   - id: genre-pq-json
     content: Add codec_pq_scores_by_genre JSON column (requires genre metadata)
+    status: completed
   - id: quality-vs-content
     content: Implement quality vs content preference (cross_genre_quality_tradeoff, quality_vs_content_by_gap) — do NOT enable on homepage yet
+    status: completed
   - id: homepage-phase1
     content: Homepage visuals phase 1 — create components for overall stats, codec bar chart, bitrate tier chart, device distribution, headline matchups
+    status: completed
   - id: homepage-phase2
     content: Homepage visuals phase 2 — create components for PQ line chart, heatmap, equivalence chart, FLAC vs lossy chart, scatter/stacked bar for neither
+    status: completed
   - id: homepage-genre
     content: Enable genre visualizations — create components for confidence band, spaghetti plot, genre heatmap (when genre metadata is ready)
+    status: completed
   - id: tests
     content: Write or update tests for the work done. Mark complete only after tests pass.
+    status: completed
   - id: rules-skills
     content: Capture any new project knowledge as rules or skills. See Rules and Skills for triggers.
+    status: completed
   - id: documentation
     content: Update relevant documentation if the change affects documented behavior, commands, or architecture.
+    status: completed
   - id: review-close
     content: Review work for gaps, bugs, performance, conventions. Verify tests pass, app builds, rules/skills captured, docs updated.
+    status: completed
 isProject: false
 ---
 

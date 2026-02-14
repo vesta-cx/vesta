@@ -147,6 +147,8 @@
 		"svelte"
 	],
 	"dependencies": {
+		"@fontsource-variable/archivo": "^5.1.0",
+		"@fontsource/geist-sans": "^5.1.0",
 		"d3": "^7.9.0"
 	}
 }

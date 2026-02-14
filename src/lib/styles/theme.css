@@ -1,3 +1,6 @@
+@import '@fontsource-variable/archivo';
+@import '@fontsource/geist-sans';
+
 @custom-variant dark (&:is(.dark *));
 
 @custom-variant theme-dark {
@@ -11,6 +14,8 @@
 }
 
 @theme inline {
+	--font-heading: 'Archivo', ui-sans-serif, system-ui, sans-serif;
+	--font-sans: 'Geist Sans', ui-sans-serif, system-ui, sans-serif;
 	--radius-sm: calc(var(--radius) - 4px);
 	--radius-md: calc(var(--radius) - 2px);
 	--radius-lg: var(--radius);
@@ -53,7 +58,10 @@
 		@apply border-border outline-ring/50;
 	}
 	body {
-		@apply bg-background text-foreground;
+		@apply bg-background text-foreground font-sans;
+	}
+	h1, h2, h3, h4, h5, h6 {
+		@apply font-heading;
 	}
 	/* Interactive elements: pointer cursor by default (disabled:cursor-not-allowed overrides when applied) */
 	button,

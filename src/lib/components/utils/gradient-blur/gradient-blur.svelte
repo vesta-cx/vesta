@@ -44,7 +44,7 @@
 
 </script>
 
-<div class="absolute -inset-4 {className}" {...restProps}>
+<div class="pointer-events-none absolute -inset-4 {className}" {...restProps}>
 	{#each blurValues as blurValue, i (i)}
 		<div
 			class="

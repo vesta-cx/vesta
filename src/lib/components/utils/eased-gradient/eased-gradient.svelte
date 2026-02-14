@@ -114,7 +114,7 @@
 	const gradientCSS = $derived.by(() => generateEasedGradientCSS(gradient, easeFunction, detail));
 </script>
 
-<div class={className} style="background-image: {gradientCSS};" {...restProps}></div>
+<div class="pointer-events-none {className ?? ''}" style="background-image: {gradientCSS};" {...restProps}></div>
 
 <style lang="scss">
 	div {

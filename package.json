@@ -1,5 +1,5 @@
 {
-  "name": "canvas-ac",
+  "name": "vesta-cx",
   "private": true,
   "scripts": {
     "build": "turbo run build",

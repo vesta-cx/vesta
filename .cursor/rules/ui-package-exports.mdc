@@ -15,7 +15,7 @@ Deep imports only trace the specific subtree, avoiding the transitive dependency
 
 ```ts
 // Layout components (no bits-ui dependency)
-import { Header, HeaderLogo } from '@vesta-cx/ui/components/layout/header';
+import { Header, HeaderLogo, HeaderActions } from '@vesta-cx/ui/components/layout/header';
 import { Main } from '@vesta-cx/ui/components/layout/main';
 import { Section, SectionContent, SectionBackground } from '@vesta-cx/ui/components/layout/section';
 

@@ -10,9 +10,9 @@
 	path = packages/utils
 	url = https://github.com/vesta-cx/utils.git
 
-[submodule "apps/quality-survey"]
-	path = apps/quality-survey
-	url = https://github.com/vesta-cx/quality-survey.git
+[submodule "apps/sona"]
+	path = apps/sona
+	url = https://github.com/vesta-cx/sona.git
 
 [submodule "apps/euterpe"]
 	path = apps/euterpe

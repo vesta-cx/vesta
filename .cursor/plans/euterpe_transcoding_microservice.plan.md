@@ -1,27 +1,37 @@
 ---
 name: Euterpe Transcoding Microservice
-overview: "Build euterpe as a standalone Node HTTP service: accepts audio uploads from quality-survey Worker, transcodes via ffmpeg, uploads to R2, writes to D1, and notifies completion via webhook so QS can update the upload-progress toast."
+overview: ""
 todos:
   - id: scaffold
     content: Scaffold euterpe Node app (package.json, tsconfig, src structure)
+    status: pending
   - id: auth
     content: API key middleware (Authorization/X-API-Key, constant-time validation)
+    status: pending
   - id: gen-key-script
-    content: CLI scripts: gen-key (generate + append), revoke-key (add to .euterpe-revoked-keys)
+    content: "CLI scripts: gen-key (generate + append), revoke-key (add to .euterpe-revoked-keys)"
+    status: pending
   - id: transcode
     content: Implement transcode module with ffmpeg child_process
+    status: pending
   - id: r2
     content: R2 upload module via @aws-sdk/client-s3
+    status: pending
   - id: d1
     content: D1 write module (REST API or proxy Worker)
+    status: pending
   - id: api
     content: POST /transcode handler with async job + webhook support
+    status: pending
   - id: qs-integration
-    content: QS admin: raw FLAC upload flow, polling, toast states
+    content: "QS admin: raw FLAC upload flow, polling, toast states"
+    status: pending
   - id: tests
     content: Unit tests for transcode + API
+    status: pending
   - id: rules-docs
     content: Rules & docs for euterpe + async upload pattern
+    status: pending
 isProject: false
 ---
 
@@ -68,6 +78,8 @@ sequenceDiagram
     Note over QSBrowser: Toast: "Done!" then dismiss
 ```
 
+
+
 **Webhook role:** Euterpe calls the webhook when done so QS can react (e.g. invalidate caches, trigger notifications). The client learns about completion via polling D1 — the job status is written by euterpe. If QS and euterpe share the same D1, the webhook is optional for the "client knows when done" path, but useful for server-side side effects and decoupling (e.g. if job table lives elsewhere).
 
 ## API Key Authentication
@@ -85,12 +97,15 @@ sequenceDiagram
 
 **POST /transcode** (multipart/form-data, requires API key)
 
-| Field | Type | Description |
-|-------|------|-------------|
-| `file` | File | Source audio (FLAC, WAV, etc.) |
-| `config` | JSON string | See below |
+
+| Field    | Type        | Description                    |
+| -------- | ----------- | ------------------------------ |
+| `file`   | File        | Source audio (FLAC, WAV, etc.) |
+| `config` | JSON string | See below                      |
+
 
 **Config JSON:**
+
 ```json
 {
   "targets": [{ "codec": "flac", "bitrate": 0 }, { "codec": "opus", "bitrate": 128 }],
@@ -102,11 +117,13 @@ sequenceDiagram
 ```
 
 **Response: 202 Accepted**
+
 ```json
 { "jobId": "uuid", "status": "processing" }
 ```
 
 **Webhook payload** (euterpe → QS when done):
+
 ```json
 {
   "jobId": "uuid",
@@ -116,6 +133,7 @@ sequenceDiagram
   "error": null
 }
 ```
+
 On failure: `status: "failed"`, `error: "message"`.
 
 ## QS Admin Integration
@@ -123,9 +141,9 @@ On failure: `status: "failed"`, `error: "message"`.
 1. **New upload mode:** "Upload raw FLAC" (alternative to pre-transcoded directory).
 2. **Form:** File input (single FLAC) + metadata fields. Submit → QS Worker streams/buffers file, POSTs to euterpe with `webhookUrl` = `new URL('/api/webhooks/euterpe-complete', request.url).href` (or derived from env).
 3. **Toast:** Extend upload-progress store:
-   - `uploading` (0–100): uploading to euterpe
-   - `transcoding` (jobId): euterpe accepted, show "Transcoding…" + poll
-   - `complete`: job done, show "Done!" then dismiss
+  - `uploading` (0–100): uploading to euterpe
+  - `transcoding` (jobId): euterpe accepted, show "Transcoding…" + poll
+  - `complete`: job done, show "Done!" then dismiss
 4. **Polling:** `GET /api/transcode-status?jobId=x` queries `transcode_jobs` in D1. Euterpe writes to that table when complete.
 5. **Webhook handler:** `POST /api/webhooks/euterpe-complete` — verify payload (optional: HMAC), update any QS-specific state. Main completion state is already in D1.
 
@@ -133,14 +151,16 @@ On failure: `status: "failed"`, `error: "message"`.
 
 **transcode_jobs** (in quality-survey D1, used by both):
 
-| Column | Type | Description |
-|--------|------|-------------|
-| id | text PK | jobId (UUID) |
-| status | text | pending, processing, complete, failed |
-| source_file_id | text | FK when complete |
-| error | text | when failed |
-| created_at | integer | timestamp |
-| updated_at | integer | timestamp |
+
+| Column         | Type    | Description                           |
+| -------------- | ------- | ------------------------------------- |
+| id             | text PK | jobId (UUID)                          |
+| status         | text    | pending, processing, complete, failed |
+| source_file_id | text    | FK when complete                      |
+| error          | text    | when failed                           |
+| created_at     | integer | timestamp                             |
+| updated_at     | integer | timestamp                             |
+
 
 Euterpe creates the row (status=pending) before returning 202, updates to complete/failed when done. QS polls this table.
 
@@ -164,3 +184,4 @@ apps/euterpe/
 │   ├── db/d1-http.ts
 │   └── routes/transcode.ts
 ```
+

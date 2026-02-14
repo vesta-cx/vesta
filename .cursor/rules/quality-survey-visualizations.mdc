@@ -1,0 +1,32 @@
+---
+description: Audio survey result visualizations and snapshot schema
+globs: ["apps/quality-survey/**"]
+alwaysApply: false
+---
+
+# Quality Survey Visualizations
+
+## Component Architecture
+
+Each visualization is its own Svelte component (e.g. `CodecWinRateBarChart.svelte`, `PqLineChart.svelte`, `CodecMatchupHeatmap.svelte`). Do not inline chart markup in page layouts. Components accept data as props and handle their own rendering.
+
+## Snapshot Data Flow
+
+- **result_snapshots** table stores pre-aggregated scalar columns and JSON blobs.
+- Scalar columns: `totalResponses`, `totalSessions`, `neitherRate`, `avgResponseTimeMs`, codec win rates, bitrate tiers, device/tier counts, headline matchups.
+- JSON columns: `codecMatchupMatrix`, `bitrateGapConfidence`, `codecEquivalenceRatios`, `codecPqScores`, `transparencyThresholds`, `diminishingReturnsPoints`, `flacVsLossyWinRates`, `codecPqScoresByGenre`, `crossGenreQualityTradeoff`, `qualityVsContentByGap`.
+- Page prefers snapshot data; falls back to `insights` when scalars are missing (legacy).
+
+## Bradley-Terry Model
+
+- `computeBradleyTerry` in `src/lib/server/bradley-terry.ts` derives strength parameters from pairwise comparisons.
+- Used for overall PQ scores and genre-segmented `codecPqScoresByGenre`.
+- Strengths are normalized to sum to `items.length`.
+
+## Quality vs Content
+
+- `crossGenreQualityTradeoff` and `qualityVsContentByGap` are aggregated and stored but **not displayed** on the homepage yet. Wait until genre metadata is richer.
+
+## Heatmap Value Convention
+
+The shared `@vesta-cx/ui` Heatmap expects `value` in 0–1. For PQ (0–100), pass `value / 100` and use `label` for display (e.g. `"82.5%"`).

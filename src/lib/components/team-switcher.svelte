@@ -10,7 +10,10 @@
 	let { teams }: { teams: { name: string; logo: any; plan: string }[] } = $props();
 	const sidebar = useSidebar();
 
-	let activeTeam = $state(teams[0]);
+	const defaultTeam = $derived(teams[0]);
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any
+	let selectedTeam = $state<{ name: string; logo: any; plan: string } | null>(null);
+	const activeTeam = $derived(selectedTeam ?? defaultTeam);
 </script>
 
 <Sidebar.Menu>
@@ -46,7 +49,7 @@
 			>
 				<DropdownMenu.Label class="text-muted-foreground text-xs">Teams</DropdownMenu.Label>
 				{#each teams as team, index (team.name)}
-					<DropdownMenu.Item onSelect={() => (activeTeam = team)} class="gap-2 p-2">
+					<DropdownMenu.Item onSelect={() => (selectedTeam = team)} class="gap-2 p-2">
 						<div class="flex size-6 items-center justify-center rounded-md border">
 							<team.logo class="size-3.5 shrink-0" />
 						</div>

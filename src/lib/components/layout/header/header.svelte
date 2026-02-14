@@ -52,7 +52,7 @@
 						heroVisible = heroIntersectionRatio < 0.9;
 						// console.log('[Header] IO (fallback):', { intersectionRatio: entry.intersectionRatio, heroIntersectionRatio, heroVisible });
 					},
-					{ threshold: Array.from({ length: 1000 }, (_, i) => i / 1000) }
+					{ threshold: Array.from({ length: 50 }, (_, i) => i / 50) }
 				);
 			} else {
 				observer = new IntersectionObserver(
@@ -73,13 +73,13 @@
 		}
 	});
 
-	const slots = setSlotContext<'logo' | 'nav'>('header');
+	const slots = setSlotContext<'logo' | 'nav' | 'actions'>('header');
 </script>
 
 <header
 	id="header"
 	data-hero-visible={heroVisible}
-	class="fixed top-0 flex w-full items-center justify-center {className}"
+	class="fixed top-0 left-0 right-0 z-10 flex w-full items-center justify-center [transform:translateZ(0)] [backface-visibility:hidden] [-webkit-backface-visibility:hidden] {className}"
 	{...restProps}
 >
 	<GradientBlur
@@ -105,7 +105,7 @@
 	<div
 		class="
 			relative z-10 container
-			flex flex-row
+			flex flex-row items-center
 			justify-between gap-6 overflow-clip
 			rounded-none p-4
 			text-card-foreground transition-[background-color,color,border-width,border-color,box-shadow,margin,padding,width,height,border-radius] duration-300
@@ -122,7 +122,12 @@
 			{@render slots.logo?.()}
 		{/if}
 		{#if slots.nav}
-			{@render slots.nav?.()}
+			<div class="flex flex-1 justify-center min-w-0">{@render slots.nav?.()}</div>
+		{/if}
+		{#if slots.actions}
+			<div class="flex items-center gap-2 shrink-0" data-slot="header-actions">
+				{@render slots.actions?.()}
+			</div>
 		{/if}
 		<div class="absolute right-0 bottom-0 left-0 h-px bg-border"></div>
 		<div
@@ -184,6 +189,7 @@
 			[data-section='header-scroll-progress'] {
 				animation: scroll-progress linear;
 				animation-timeline: scroll();
+				transition: right 0.2s ease-out;
 			}
 
 			:global {

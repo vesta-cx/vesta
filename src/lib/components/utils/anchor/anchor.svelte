@@ -40,18 +40,18 @@
 	{href}
 	target={resolvedTarget}
 	rel={resolvedRel}
-	class={cn('group inline-flex items-center gap-1', className)}
+	class={cn('group inline', className)}
 	{...restProps}
 >
 	{@render children()}
 	{#if showIcon}
 		{#if isExternal}
 			<ArrowUpRightIcon
-				class="size-[1em] shrink-0 opacity-50 transition-opacity group-hover:opacity-100"
+				class="ml-0.5 inline-block size-[1em] shrink-0 align-baseline opacity-50 transition-opacity group-hover:opacity-100"
 			/>
 		{:else}
 			<ArrowRightIcon
-				class="size-[1em] shrink-0 translate-x-0 translate-y-[5%] opacity-50 transition-[opacity,translate] group-hover:translate-x-0.5 group-hover:opacity-100"
+				class="ml-0.5 inline-block size-[1em] shrink-0 align-baseline translate-x-0 translate-y-[5%] opacity-50 transition-[opacity,translate] group-hover:translate-x-0.5 group-hover:opacity-100"
 			/>
 		{/if}
 	{/if}

@@ -55,4 +55,15 @@
 	body {
 		@apply bg-background text-foreground;
 	}
+	/* Interactive elements: pointer cursor by default (disabled:cursor-not-allowed overrides when applied) */
+	button,
+	[role='button'],
+	a[href],
+	input[type='submit'],
+	input[type='button'],
+	input[type='reset'],
+	[role='tab'],
+	summary {
+		cursor: pointer;
+	}
 }

@@ -10,6 +10,7 @@ alwaysApply: true
 Linting is done with **ESLint** (flat config in `eslint.config.js`):
 
 - **Markdown** (`.md`, `.mdc`): **@eslint/markdown** with `markdown/recommended`. Use `language: "markdown/commonmark"` so files are parsed as markdown, not JS. Rules off: `markdown/no-missing-label-refs` (callouts and task lists are not link refs), `markdown/no-space-in-emphasis` (callouts like `> [!globs]` trigger false positives).
+- **SVX** (`.svx`): Treated as markdown via `files.associations`. Markdownlint (VSCode extension) applies. `MD033/no-inline-html` is disabled for `*.svx` via `apps/sona/src/routes/(app)/legal/.markdownlintrc` — SVX requires `<script>`, `<svelte:head>`, and Svelte components.
 - **TypeScript** (`scripts/**/*.ts`): **typescript-eslint** recommended. Unused vars/args prefixed with `_` are ignored (`argsIgnorePattern`, `varsIgnorePattern`, `caughtErrorsIgnorePattern`).
 
 Run `pnpm lint`. Ignores: `node_modules`, `dist`, `apps/docs`, `.cursor`, `**/__tests__/fixtures`, backup dirs, `*.plan.md`.

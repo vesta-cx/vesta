@@ -1,0 +1,31 @@
+{
+	"name": "euterpe",
+	"private": true,
+	"version": "0.0.1",
+	"type": "module",
+	"scripts": {
+		"dev": "tsx watch src/index.ts",
+		"start": "node dist/index.js",
+		"build": "tsc",
+		"gen-key": "tsx scripts/generate-api-key.ts",
+		"revoke-key": "tsx scripts/revoke-key.ts",
+		"db:generate": "drizzle-kit generate",
+		"db:migrate": "drizzle-kit migrate",
+		"db:push": "drizzle-kit push"
+	},
+	"dependencies": {
+		"@hono/node-server": "^1.19.0",
+		"@vesta-cx/storage": "workspace:*",
+		"@libsql/client": "^0.17.0",
+		"drizzle-orm": "^0.45.1",
+		"hono": "^4.6.0",
+		"postgres": "^3.4.5"
+	},
+	"devDependencies": {
+		"@types/node": "^24.10.0",
+		"config": "workspace:*",
+		"drizzle-kit": "^0.31.8",
+		"tsx": "^4.19.0",
+		"typescript": "^5.9.3"
+	}
+}

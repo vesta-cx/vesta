@@ -1,0 +1,31 @@
+# Dependencies
+node_modules
+**/node_modules
+
+# Git
+.git
+**/.git
+
+# Build outputs
+dist
+**/dist
+.turbo
+**/.turbo
+
+# Test & coverage
+coverage
+**/coverage
+**/__tests__
+**/__tests__/fixtures
+
+# Env and secrets
+.env
+.env.*
+*.pem
+
+# Logs
+*.log
+
+# Misc
+.DS_Store
+apps/old-stuff

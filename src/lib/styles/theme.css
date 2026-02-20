@@ -1,7 +1,16 @@
 @import '@fontsource-variable/archivo';
 @import '@fontsource/geist-sans';
 
-@custom-variant dark (&:is(.dark *));
+@custom-variant dark {
+	&:where([data-theme='dark'], [data-theme='dark'] *) {
+		@slot;
+	}
+	@media (prefers-color-scheme: dark) {
+		&:where([data-theme='auto'], [data-theme='auto'] *) {
+			@slot;
+		}
+	}
+}
 
 @custom-variant theme-dark {
 	&:where([data-theme='dark'], [data-theme='dark'] *) {

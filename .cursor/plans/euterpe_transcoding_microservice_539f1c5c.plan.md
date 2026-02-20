@@ -1,67 +1,107 @@
 ---
 name: Euterpe Transcoding Microservice
-overview: Build euterpe as a standalone Node/Bun HTTP service that accepts audio uploads, transcodes to requested codecs/bitrates using ffmpeg, tags outputs with metadata, uploads to R2 via S3 API, and inserts records into D1 via REST API.
-todos: []
+overview: ""
+todos:
+  - id: storage-pkg
+    content: Extract StorageProvider to packages/storage; R2 (Workers), R2 (S3 API) impls
+    status: completed
+  - id: scaffold
+    content: Scaffold euterpe Node app (Hono, package.json, tsconfig, src structure)
+    status: completed
+  - id: container
+    content: Dockerfile (Node + ffmpeg) + K8s manifests (Deployment, Service, ConfigMap, Secret)
+    status: completed
+  - id: auth
+    content: API key middleware (Authorization/X-API-Key, constant-time validation)
+    status: completed
+  - id: gen-key-script
+    content: "CLI scripts: gen-key (generate + append), revoke-key (add to .euterpe-revoked-keys)"
+    status: completed
+  - id: transcode
+    content: Implement transcode module with ffmpeg child_process
+    status: completed
+  - id: storage
+    content: Use shared StorageProvider; R2 impl via S3 API for Node (extract from sona first)
+    status: pending
+  - id: d1
+    content: D1 write module (REST API or proxy Worker)
+    status: pending
+  - id: api
+    content: POST /transcode handler with async job + webhook support
+    status: completed
+  - id: qs-integration
+    content: "QS admin: raw FLAC upload flow, polling, toast states"
+    status: completed
+  - id: tests
+    content: Unit tests for transcode + API
+    status: completed
+  - id: rules-docs
+    content: Rules & docs for euterpe + async upload pattern
+    status: completed
 isProject: false
 ---
 
-# Euterpe Transcoding Microservice Plan
+# Euterpe Transcoding Microservice (Updated)
 
-## Architecture
+## Client = Quality-Survey Worker
+
+The **client** in the flow is the quality-survey SvelteKit app running as a Cloudflare Worker. When an admin user:
+
+1. Opens the sources admin page
+2. Selects a FLAC file and fills metadata (title, artist, license URL, etc.)
+3. Hits "Upload"
+
+…the QS Worker receives the form, then POSTs the file + config to euterpe (with `Authorization: Bearer <api_key>`). Euterpe validates the API key and returns immediately (202 Accepted) with a job ID. QS returns that to the client. The client shows "Transcoding…" in the upload-progress toast and polls for completion. When euterpe finishes, it calls a webhook URL provided by QS so the next poll (or a refresh) finds the job complete.
+
+## Async Flow with Webhook
 
 ```mermaid
-flowchart TB
-    subgraph client [Client]
-        Req[POST multipart: file + JSON config]
+sequenceDiagram
+    participant User
+    participant QSBrowser as QS Browser
+    participant QSWorker as QS Worker
+    participant Euterpe as Euterpe Service
+
+    User->>QSBrowser: Select FLAC, fill metadata, hit Upload
+    QSBrowser->>QSWorker: POST form (file + metadata)
+    QSWorker->>Euterpe: POST /transcode (file, config, webhookUrl)
+    Euterpe->>QSWorker: 202 { jobId }
+    QSWorker->>QSBrowser: 200 { jobId }
+    Note over QSBrowser: Toast: "Transcoding… 0%"
+
+    loop Poll every 2–3s
+        QSBrowser->>QSWorker: GET /api/transcode-status?jobId=x
+        QSWorker->>QSBrowser: { status: "processing" }
     end
 
-    subgraph euterpe [Euterpe Node Service]
-        API[HTTP API]
-        Parse[Parse request: file, targets, metadata]
-        FFmpeg[ffmpeg child_process per codec]
-        R2Client[R2 via S3 API]
-        D1Client[D1 REST API]
-    end
+    Note over Euterpe: ffmpeg transcodes, uploads R2, writes D1
+    Euterpe->>Euterpe: Update job status=complete in D1
+    Euterpe->>QSWorker: POST webhookUrl { jobId, status, sourceFileId, ... }
+    QSWorker->>QSWorker: (optional: update KV, invalidate cache)
 
-    subgraph cloudflare [Cloudflare]
-        R2[(R2 Bucket)]
-        D1[(D1 Database)]
-    end
-
-    Req --> API
-    API --> Parse
-    Parse --> FFmpeg
-    FFmpeg -->|transcoded blobs| R2Client
-    FFmpeg -->|duration, etc| Parse
-    R2Client --> R2
-    Parse --> D1Client
-    D1Client --> D1
+    QSBrowser->>QSWorker: GET /api/transcode-status?jobId=x
+    QSWorker->>QSBrowser: { status: "complete", sourceFileId, ... }
+    Note over QSBrowser: Toast: "Done!" then dismiss
 ```
 
 
 
-## Key Design Decisions
-
-1. **Runtime**: Node.js (or Bun) — long-running HTTP server, ffmpeg via `child_process.spawn`
-2. **R2 access**: `@aws-sdk/client-s3` with R2 S3-compatible endpoint (requires R2 API tokens)
-3. **D1 access**: Cloudflare D1 REST API or Hyperdrive (if available); alternatively, share schema with quality-survey and use a D1 HTTP proxy Worker
-4. **Schema**: Euterpe will write to the same `source_files` + `candidate_files` tables as quality-survey; output filenames follow `{basename}_{codec}_{bitrate}.{ext}`
-5. **API keys**: All requests require a valid API key; reject 401 if missing or invalid. Prevents unauthorized use of transcoding on your hardware.
+**Webhook role:** Euterpe calls the webhook when done so QS can react (e.g. invalidate caches, trigger notifications). The client learns about completion via polling D1 — the job status is written by euterpe. If QS and euterpe share the same D1, the webhook is optional for the "client knows when done" path, but useful for server-side side effects and decoupling (e.g. if job table lives elsewhere).
 
 ## API Key Authentication
 
 - **Header**: `Authorization: Bearer <api_key>` or `X-API-Key: <api_key>`
-- **Validation**: On every request to protected routes, check that the key matches a configured value. Optional: reject keys not starting with `eut_` (helps catch wrong-key mistakes). Use `crypto.timingSafeEqual()` for constant-time comparison.
-- **Storage**: (1) Env `EUTERPE_API_KEY` or `EUTERPE_API_KEYS`. (2) Local file `.euterpe-api-keys`. Auth: valid if (in env or file) AND not in `.euterpe-revoked-keys`. Revoked list only for env-only keys. Add both key files to `.gitignore`.
-- **QS Worker**: Store the key in `PRIVATE_EUTERPE_API_KEY` (or similar) in quality-survey `.dev.vars` / secrets. QS includes it when POSTing to euterpe.
-- **401 response**: `{ "error": "Unauthorized" }` when key is missing or invalid.
-- **Key prefix**: `eut_` (e.g. `eut_a1b2c3d4...`) — identifies euterpe keys; avoids confusion with WorkOS `sk_`, GitHub `gh_pat_`, etc.
-- **Key generation**: CLI `pnpm run gen-key` — generates `eut_` + base64url random, prints, appends to `.euterpe-api-keys`.
-- **Revocation**: CLI `pnpm run revoke-key <key>` — If key is in `.euterpe-api-keys`, remove it. Else (env-only key), add to `.euterpe-revoked-keys` since we can't delete from env. Revoked list only for keys we can't remove at source.
+- **Validation**: Reject if key is in `.euterpe-revoked-keys`. Else, valid if in (env or file). Use `crypto.timingSafeEqual()`. Optional: reject keys not starting with `eut_`.
+- **Storage**: (1) Env `EUTERPE_API_KEY` or `EUTERPE_API_KEYS` (comma-separated). (2) Local file (default `.euterpe-api-keys`, or `EUTERPE_KEYS_FILE`), one key per line. Auth validates against union of both. Enables multiple tokens without huge env strings.
+- **QS Worker**: Stores key in `PRIVATE_EUTERPE_API_KEY`; includes it when POSTing to euterpe.
+- **401**: `{ "error": "Unauthorized" }` when key is missing or invalid.
+- **Key prefix**: `eut_` (e.g. `eut_a1b2c3d4...`) — identifies euterpe keys, avoids confusion with other services (WorkOS `sk_`, GitHub `gh_pat_`, etc.).
+- **Key generation**: CLI `pnpm run gen-key` — generates `eut_` + base64url random, prints to stdout, and appends to `.euterpe-api-keys`. Creates file if missing. Add to `.gitignore`.
+- **Revocation**: CLI `pnpm run revoke-key <key>` — (1) If key is in `.euterpe-api-keys`, remove it. (2) If key is not in the file (env-only, e.g. QS Worker secrets), add to `.euterpe-revoked-keys` since we can't delete from env. No growing revoked list for file keys — just delete. Revoked list only for keys we can't remove at source.
 
-## Request/Response Contract
+## Request Contract (Updated)
 
-**POST /transcode** (multipart/form-data)
+**POST /transcode** (multipart/form-data, requires API key)
 
 
 | Field    | Type        | Description                    |
@@ -74,97 +114,85 @@ flowchart TB
 
 ```json
 {
-  "targets": [{ "codec": "flac", "bitrate": 0 }, { "codec": "opus", "bitrate": 128 }, ...],
-  "metadata": {
-    "title": "...",
-    "artist": "...",
-    "licenseUrl": "...",
-    "genre": "...",
-    "streamUrl": "..."
-  },
+  "targets": [{ "codec": "flac", "bitrate": 0 }, { "codec": "opus", "bitrate": 128 }],
+  "metadata": { "title": "...", "artist": "...", "licenseUrl": "...", "genre": "...", "streamUrl": "..." },
+  "webhookUrl": "https://quality-survey.example.com/api/webhooks/euterpe-complete",
   "r2Bucket": "vesta-quality-survey-audio",
   "d1DatabaseId": "<uuid>"
 }
 ```
 
-**Response:** `201` with created `sourceFile` and `candidates` (IDs, R2 keys). Or `202` + job ID if we add async/queue later.
+**Response: 202 Accepted**
 
-## Implementation Plan
+```json
+{ "jobId": "uuid", "status": "processing" }
+```
 
-### 1. Scaffold euterpe app
+**Webhook payload** (euterpe → QS when done):
 
-- Create `apps/euterpe/` structure:
-  - `package.json` — Node/Bun, deps: `@aws-sdk/client-s3`, `drizzle-orm`, `express` or `hono` (or native `http`)
-  - `tsconfig.json` — strict TypeScript
-  - `src/index.ts` — HTTP server entry
-- Add to `pnpm-workspace.yaml` and `turbo.json` if not already covered
+```json
+{
+  "jobId": "uuid",
+  "status": "complete",
+  "sourceFileId": "uuid",
+  "candidateIds": ["uuid", "uuid"],
+  "error": null
+}
+```
 
-### 2. Transcoding module
+On failure: `status: "failed"`, `error: "message"`.
 
-- **File**: [apps/euterpe/src/transcode.ts](apps/euterpe/src/transcode.ts)
-- Use `child_process.spawn('ffmpeg', [...])` per codec; write to temp files or in-memory streams
-- Reuse ffmpeg flags from [tools/scripts/audio/generate-permutations.sh](tools/scripts/audio/generate-permutations.sh) and [.cursor/rules/ffmpeg-audio-encoding.mdc](.cursor/rules/ffmpeg-audio-encoding.mdc):
-  - FLAC: `-c:a flac`
-  - Opus: `-c:a libopus -b:a {k}k`, extension `.ogg`
-  - MP3: `-c:a libmp3lame -b:a {k}k -id3v2_version 3`
-  - AAC: `-c:a aac -b:a {k}k -movflags +faststart`
-- Apply metadata: `-map_metadata 0 -metadata title="..." -metadata artist="..."`
-- Extract duration via `ffprobe` (or parse ffmpeg stderr) for DB
+## QS Admin Integration
 
-### 3. R2 upload module
+1. **New upload mode:** "Upload raw FLAC" (alternative to pre-transcoded directory).
+2. **Form:** File input (single FLAC) + metadata fields. Submit → QS Worker streams/buffers file, POSTs to euterpe with `webhookUrl` = `new URL('/api/webhooks/euterpe-complete', request.url).href` (or derived from env).
+3. **Toast:** Extend upload-progress store:
+  - `uploading` (0–100): uploading to euterpe
+  - `transcoding` (jobId): euterpe accepted, show "Transcoding…" + poll
+  - `complete`: job done, show "Done!" then dismiss
+4. **Polling:** `GET /api/transcode-status?jobId=x` queries `transcode_jobs` in D1. Euterpe writes to that table when complete.
+5. **Webhook handler:** `POST /api/webhooks/euterpe-complete` — verify payload (optional: HMAC), update any QS-specific state. Main completion state is already in D1.
 
-- **File**: [apps/euterpe/src/storage/r2.ts](apps/euterpe/src/storage/r2.ts)
-- Use `@aws-sdk/client-s3` with R2 endpoint:
-  - `https://<ACCOUNT_ID>.r2.cloudflarestorage.com`
-- Env vars: `R2_ACCOUNT_ID`, `R2_ACCESS_KEY_ID`, `R2_SECRET_ACCESS_KEY`
-- Key structure: `sources/{sourceId}/{basename}_{codec}_{bitrate}.{ext}` and `candidates/{sourceId}/{basename}_{codec}_{bitrate}.{ext}` — aligned with quality-survey
+## Schema Addition
 
-### 4. D1 write module
+**transcode_jobs** (in quality-survey D1, used by both):
 
-- **File**: [apps/euterpe/src/db/d1-http.ts](apps/euterpe/src/db/d1-http.ts)
-- Use [D1 HTTP API](https://developers.cloudflare.com/d1/api/) to run SQL:
-  - `POST /accounts/{account_id}/d1/database/{database_id}/query`
-  - Env: `CLOUDFLARE_ACCOUNT_ID`, `CLOUDFLARE_API_TOKEN`, `D1_DATABASE_ID`
-- SQL: `INSERT INTO source_files (...) VALUES (...)` and `INSERT INTO candidate_files (...)`
-- Reuse schema types from quality-survey (extract to `packages/utils` or copy minimal types)
 
-**Alternative**: If D1 REST is cumbersome, add a thin Worker in quality-survey that exposes a `POST /api/euterpe/insert` accepting JSON and executing D1 inserts. Euterpe would `fetch()` that endpoint.
+| Column         | Type    | Description                           |
+| -------------- | ------- | ------------------------------------- |
+| id             | text PK | jobId (UUID)                          |
+| status         | text    | pending, processing, complete, failed |
+| source_file_id | text    | FK when complete                      |
+| error          | text    | when failed                           |
+| created_at     | integer | timestamp                             |
+| updated_at     | integer | timestamp                             |
 
-### 5. API route handler
 
-- **File**: [apps/euterpe/src/routes/transcode.ts](apps/euterpe/src/routes/transcode.ts)
-- Parse multipart: `file` + `config`
-- Validate: codecs in `['flac','opus','mp3','aac']`, metadata required (title, licenseUrl)
-- Generate `sourceId` (UUID), `basename` from filename
-- Call transcode → upload each output to R2 → insert source + candidates into D1
-- Return 201 with created IDs and keys
+Euterpe creates the row (status=pending) before returning 202, updates to complete/failed when done. QS polls this table.
 
-### 6. API key scripts
+## Stack & Deployment
 
-- **generate-api-key.ts**: Generates `eut_` + base64url random, prints, appends to `.euterpe-api-keys`.
-- **revoke-key.ts**: If key in `.euterpe-api-keys`, remove it. Else add to `.euterpe-revoked-keys` (env-only keys we can't delete).
-- Auth: valid if (in env or file) AND not in revoked.
-- `.gitignore`: `.euterpe-api-keys`, `.euterpe-revoked-keys`
+- **Framework**: Hono (not Express) — preferred patterns, lightweight.
+- **Runtime**: Node.js; ffmpeg via `child_process` (must be installed in container).
+- **Container**: Docker image with Node + ffmpeg. For K8s, keys typically come from Secrets (env) rather than local files.
+- **K8s**: Deployment, Service, ConfigMap, Secret. Deploy to home cluster. In-cluster: use env from Secret for API keys; key files are for local/dev.
+- **Stateless**: No persistent in-process state. Job status in D1; temp files cleaned per request. Safe to run multiple replicas behind a load balancer.
 
-### 7. API key middleware
+## Storage Abstraction
 
-- **File**: [apps/euterpe/src/middleware/auth.ts](apps/euterpe/src/middleware/auth.ts)
-- Extract key from `Authorization: Bearer ...` or `X-API-Key`
-- Load valid keys: env + `.euterpe-api-keys`. Load revoked: `.euterpe-revoked-keys`. Reject if revoked, else validate with constant-time comparison.
-- Use `crypto.timingSafeEqual()` for comparison
-- Apply before route handlers
+Storage is abstracted in sona ([apps/sona/src/lib/server/storage/](apps/sona/src/lib/server/storage/)):
 
-### 8. Config and env
+- **Interface**: `StorageProvider` with `put`, `get`, `delete`, `list`, `getSignedUrl`
+- **Current impl**: `R2StorageProvider` (Workers `R2Bucket` binding)
+- **Target**: Uploadthing — automatic tiering between high/low frequency data (S3/R2) for cost optimization; uses its own API, not S3-compatible. So we need the abstraction.
 
-- **File**: [apps/euterpe/.env.example](apps/euterpe/.env.example)
-- Document: `EUTERPE_API_KEY` or `EUTERPE_API_KEYS`, `R2_*`, `CLOUDFLARE_*`, `D1_DATABASE_ID`, `PORT`
-- Optional: `config` in request can override bucket/DB for multi-tenant
+Planned providers:
 
-### 9. Quality-survey integration (optional, later)
+1. **R2StorageProvider** (Workers) — sona today
+2. **R2S3StorageProvider** (Node, S3 API) — euterpe
+3. **UploadthingStorageProvider** — future; replaces or runs alongside R2 for cost-optimized tiering
 
-- Add optional "Upload raw FLAC → transcode via euterpe" flow in admin/sources
-- quality-survey would `fetch(EUTERPE_URL + '/transcode', { method: 'POST', body: formData, headers: { 'Authorization': 'Bearer ' + env.PRIVATE_EUTERPE_API_KEY } })`
-- Store `PRIVATE_EUTERPE_API_KEY` in QS secrets
+Extract interface + types to `packages/storage`. Sona and euterpe use it. Euterpe instantiates `R2S3StorageProvider` for now.
 
 ## File Layout
 
@@ -173,35 +201,24 @@ apps/euterpe/
 ├── package.json
 ├── tsconfig.json
 ├── .env.example
-├── .euterpe-api-keys         # valid keys, gitignored
-├── .euterpe-revoked-keys     # revoked env-only keys, gitignored
+├── Dockerfile
+├── k8s/
+│   ├── deployment.yaml
+│   ├── service.yaml
+│   ├── configmap.yaml
+│   └── secret.yaml.example
+├── .euterpe-api-keys         # valid keys, one per line, gitignored
+├── .euterpe-revoked-keys     # revoked env-only keys (can't delete at source), gitignored
 ├── scripts/
-│   ├── generate-api-key.ts
-│   └── revoke-key.ts
+│   ├── generate-api-key.ts   # pnpm run gen-key
+│   └── revoke-key.ts         # pnpm run revoke-key <key>
 ├── src/
-│   ├── index.ts          # HTTP server
-│   ├── transcode.ts      # ffmpeg spawn + metadata
-│   ├── middleware/
-│   │   └── auth.ts       # API key validation
+│   ├── index.ts
+│   ├── transcode.ts
+│   ├── middleware/auth.ts   # API key validation
 │   ├── storage/
-│   │   └── r2.ts         # S3 client for R2
-│   ├── db/
-│   │   └── d1-http.ts    # D1 REST or proxy
-│   └── routes/
-│       └── transcode.ts  # POST /transcode handler
+│   │   └── index.ts   # factory: R2S3StorageProvider from @vesta-cx/storage
+│   ├── db/d1-http.ts
+│   └── routes/transcode.ts
 ```
-
-## Schema Alignment
-
-Euterpe must produce DB rows compatible with quality-survey:
-
-- `source_files`: `id`, `basename`, `r2Key`, `uploadedAt`, `licenseUrl`, `title`, `artist`, `genre`, `streamUrl`, `duration`
-- `candidate_files`: `id`, `r2Key`, `codec`, `bitrate`, `sourceFileId`
-
-R2 keys: `sources/{sourceId}/{basename}_flac_0.flac`, `candidates/{sourceId}/{basename}_opus_128.ogg`, etc.
-
-## Open Questions
-
-1. **D1 from outside Workers**: Prefer D1 REST API directly, or a small proxy Worker in quality-survey?
-2. **Async jobs**: For large files, return 202 + job ID and process in background? (v1 can stay synchronous)
 

@@ -9,6 +9,7 @@ alwaysApply: false
 
 - **AAC/M4A**: Always pass `-movflags +faststart`. The MP4/M4A muxer writes the `moov` atom at the end; if encoding fails midway the file is 0 bytes. `+faststart` makes finalization more robust and also improves streaming.
 - **Metadata**: Use `-map_metadata 0` to explicitly copy tags from the first input. ffmpeg does this by default but some muxers/encoders can drop tags silently.
+- **Strip artwork**: `generate-permutations.sh` uses `-map_metadata -1` and re-adds only artist/title/album via `-metadata` to avoid duplicating embedded artwork across many candidate files. Use `-map 0:a` to exclude any attached picture stream.
 - **Bandcamp Various Artists**: When ARTIST is "Various Artists", Bandcamp often puts the real artist in the filename (`... - NNN artistname - title`). Parse artist from the filename and pass `-metadata artist="..."` after `-map_metadata 0` to override the output. Use `fix-various-artists-metadata.sh` to fix already-transcoded files in-place (stream copy, no re-encode).
 - **MP3 tags**: Add `-id3v2_version 3` to ensure ID3v2 tags are written (some players ignore ID3v1-only files).
 - **Never suppress stderr** with `2>/dev/null` during development. Redirect to a log file instead (`2>>"$LOG"`). ffmpeg errors are the only way to diagnose 0-byte or corrupt output files.

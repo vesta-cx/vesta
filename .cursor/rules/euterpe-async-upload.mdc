@@ -1,0 +1,48 @@
+---
+description: Euterpe transcoding microservice and async upload flow (QS/sona)
+globs:
+  - apps/euterpe/**
+  - apps/sona/src/routes/(app)/admin/sources/**
+  - apps/sona/src/routes/api/transcode-status/**
+  - apps/sona/src/routes/api/webhooks/euterpe-complete/**
+  - apps/sona/src/lib/stores/upload-progress.ts
+alwaysApply: false
+---
+
+# Euterpe Async Upload Flow
+
+**Euterpe** is a standalone Node.js microservice (Hono + ffmpeg) that transcodes audio uploads. **sona** (or any client) is the caller.
+
+## Flow
+
+1. Admin uploads raw FLAC via sona "Upload raw FLAC" → form POSTs to `uploadRawFlac` action
+2. Server POSTs file + config to euterpe `POST /transcode` with `Authorization: Bearer <api_key>`
+3. Euterpe returns `202 { jobId }`, writes job state to its own DB, processes in background
+4. Client polls `GET /api/transcode-status?jobId=x` (sona proxies to euterpe `GET /transcode/status`)
+5. Euterpe calls webhook `POST /api/webhooks/euterpe-complete` with full `source` and `candidates` payload; client persists to its own DB
+
+## Env (sona)
+
+- `EUTERPE_URL` — euterpe base URL (e.g. `http://localhost:3000`)
+- `PRIVATE_EUTERPE_API_KEY` — `eut_`-prefixed key
+
+## Env (euterpe)
+
+- `EUTERPE_API_KEY` or `EUTERPE_API_KEYS` or `.euterpe-api-keys` file
+- `DATABASE_PATH` — SQLite file for job status (default `./data/euterpe.sqlite`)
+- Storage is **client-driven**: each request includes `storage` config in the JSON body
+
+## Env (sona, for euterpe uploads)
+
+- `PRIVATE_R2_ACCOUNT_ID`, `PRIVATE_R2_ACCESS_KEY_ID`, `PRIVATE_R2_SECRET_ACCESS_KEY`, `PRIVATE_R2_BUCKET` — R2 S3 API credentials passed to euterpe in each transcode request
+
+## Config (euterpe)
+
+- Euterpe needs only `filename` and `uploadPrefix` (path in bucket). **Metadata is client-owned** — euterpe does not accept or echo metadata.
+- sona stores metadata in `pending_euterpe_jobs` (jobId → title, artist, licenseUrl, etc.) at submit; webhook looks up by jobId and persists.
+
+## Storage
+
+- **Client-driven**: each transcode request includes `storage: { type, bucket, credentials }`. Supported: `r2` (accountId), `s3` (endpoint).
+- `@vesta-cx/storage` — euterpe instantiates `R2S3StorageProvider` or `S3StorageProvider` from client config
+- sona passes its R2 credentials; future vesta app could pass different storage

@@ -15,14 +15,14 @@
 	},
 	"dependencies": {
 		"@hono/node-server": "^1.19.0",
-		"@vesta-cx/storage": "workspace:*",
 		"@libsql/client": "^0.17.0",
+		"@vesta-cx/storage": "workspace:*",
 		"drizzle-orm": "^0.45.1",
-		"hono": "^4.6.0",
+		"hono": "^4.12.1",
 		"postgres": "^3.4.5"
 	},
 	"devDependencies": {
-		"@types/node": "^24.10.0",
+		"@types/node": "^25.3.0",
 		"config": "workspace:*",
 		"drizzle-kit": "^0.31.8",
 		"tsx": "^4.19.0",

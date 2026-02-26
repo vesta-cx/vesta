@@ -1,0 +1,19 @@
+# Chromecast fetches HLS manifest and segments — CORS required for adaptive streaming
+/*
+  Access-Control-Allow-Origin: *
+
+# HLS MIME types required for Safari/iOS native playback
+/opus/playlist.m3u8
+/flac/playlist.m3u8
+/aac/playlist.m3u8
+/mp3/playlist.m3u8
+  Content-Type: application/vnd.apple.mpegurl
+
+/*.m4s
+  Content-Type: video/iso.segment
+
+/*.ts
+  Content-Type: video/MP2T
+
+/flac/full.flac
+  Content-Type: audio/flac

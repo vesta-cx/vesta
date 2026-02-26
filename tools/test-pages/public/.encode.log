@@ -1,0 +1,298 @@
+ffmpeg version 8.0.1 Copyright (c) 2000-2025 the FFmpeg developers
+  built with Apple clang version 17.0.0 (clang-1700.4.4.1)
+  configuration: --prefix=/opt/homebrew/Cellar/ffmpeg/8.0.1 --enable-shared --enable-pthreads --enable-version3 --cc=clang --host-cflags= --host-ldflags= --enable-ffplay --enable-gnutls --enable-gpl --enable-libaom --enable-libaribb24 --enable-libbluray --enable-libdav1d --enable-libharfbuzz --enable-libjxl --enable-libmp3lame --enable-libopus --enable-librav1e --enable-librist --enable-librubberband --enable-libsnappy --enable-libsrt --enable-libssh --enable-libsvtav1 --enable-libtesseract --enable-libtheora --enable-libvidstab --enable-libvmaf --enable-libvorbis --enable-libvpx --enable-libwebp --enable-libx264 --enable-libx265 --enable-libxml2 --enable-libxvid --enable-lzma --enable-libfontconfig --enable-libfreetype --enable-frei0r --enable-libass --enable-libopencore-amrnb --enable-libopencore-amrwb --enable-libopenjpeg --enable-libspeex --enable-libsoxr --enable-libzmq --enable-libzimg --disable-libjack --disable-indev=jack --enable-videotoolbox --enable-audiotoolbox --enable-neon
+  libavutil      60.  8.100 / 60.  8.100
+  libavcodec     62. 11.100 / 62. 11.100
+  libavformat    62.  3.100 / 62.  3.100
+  libavdevice    62.  1.100 / 62.  1.100
+  libavfilter    11.  4.100 / 11.  4.100
+  libswscale      9.  1.100 /  9.  1.100
+  libswresample   6.  1.100 /  6.  1.100
+[aist#0:0/pcm_s16le @ 0xb3d048180] Guessed Channel Layout: stereo
+Input #0, wav, from '/Users/mia/Nextcloud/Music/Projects/Patch/breaks to drink s̶͎̼̄͊p̵̯͑͛r̴̡͘͜ǐ̴̫t̵̳̎͝ḛ̵̜̽ to Project/breaks to drink s̶͎̼̄͊p̵̯͑͛r̴̡͘͜ǐ̴̫t̵̳̎͝ḛ̵̜̽ to (deliverable)/48k16b/breaks to drink s̶͎̼̄͊p̵̯͑͛r̴̡͘͜ǐ̴̫t̵̳̎͝ḛ̵̜̽ to.wav':
+  Duration: 00:04:48.54, bitrate: 1536 kb/s
+  Stream #0:0: Audio: pcm_s16le ([1][0][0][0] / 0x0001), 48000 Hz, stereo, s16, 1536 kb/s
+Stream mapping:
+  Stream #0:0 -> #0:0 (pcm_s16le (native) -> opus (libopus))
+Press [q] to stop, [?] for help
+[hls @ 0xb3cc28280] Opening 'tools/test-pages/public/opus/init.mp4' for writing
+Output #0, hls, to 'tools/test-pages/public/opus/playlist.m3u8':
+  Metadata:
+    encoder         : Lavf62.3.100
+  Stream #0:0: Audio: opus, 48000 Hz, stereo, s16, 128 kb/s
+    Metadata:
+      encoder         : Lavc62.11.100 libopus
+[hls @ 0xb3cc28280] Opening 'tools/test-pages/public/opus/seg0.m4s' for writing
+[hls @ 0xb3cc28280] Opening 'tools/test-pages/public/opus/seg1.m4s' for writing
+[hls @ 0xb3cc28280] Opening 'tools/test-pages/public/opus/seg2.m4s' for writing
+[hls @ 0xb3cc28280] Opening 'tools/test-pages/public/opus/seg3.m4s' for writing
+[hls @ 0xb3cc28280] Opening 'tools/test-pages/public/opus/seg4.m4s' for writing
+[hls @ 0xb3cc28280] Opening 'tools/test-pages/public/opus/seg5.m4s' for writing
+[hls @ 0xb3cc28280] Opening 'tools/test-pages/public/opus/seg6.m4s' for writing
+[hls @ 0xb3cc28280] Opening 'tools/test-pages/public/opus/seg7.m4s' for writing
+[hls @ 0xb3cc28280] Opening 'tools/test-pages/public/opus/seg8.m4s' for writing
+[hls @ 0xb3cc28280] Opening 'tools/test-pages/public/opus/seg9.m4s' for writing
+[hls @ 0xb3cc28280] Opening 'tools/test-pages/public/opus/seg10.m4s' for writing
+[hls @ 0xb3cc28280] Opening 'tools/test-pages/public/opus/seg11.m4s' for writing
+[hls @ 0xb3cc28280] Opening 'tools/test-pages/public/opus/seg12.m4s' for writing
+[hls @ 0xb3cc28280] Opening 'tools/test-pages/public/opus/seg13.m4s' for writing
+[hls @ 0xb3cc28280] Opening 'tools/test-pages/public/opus/seg14.m4s' for writing
+[hls @ 0xb3cc28280] Opening 'tools/test-pages/public/opus/seg15.m4s' for writing
+[out#0/hls @ 0xb3d084180] video:0KiB audio:1447KiB subtitle:0KiB other streams:0KiB global headers:0KiB muxing overhead: unknown
+size=N/A time=00:01:30.00 bitrate=N/A speed= 188x elapsed=0:00:00.47    
+ffmpeg version 8.0.1 Copyright (c) 2000-2025 the FFmpeg developers
+  built with Apple clang version 17.0.0 (clang-1700.4.4.1)
+  configuration: --prefix=/opt/homebrew/Cellar/ffmpeg/8.0.1 --enable-shared --enable-pthreads --enable-version3 --cc=clang --host-cflags= --host-ldflags= --enable-ffplay --enable-gnutls --enable-gpl --enable-libaom --enable-libaribb24 --enable-libbluray --enable-libdav1d --enable-libharfbuzz --enable-libjxl --enable-libmp3lame --enable-libopus --enable-librav1e --enable-librist --enable-librubberband --enable-libsnappy --enable-libsrt --enable-libssh --enable-libsvtav1 --enable-libtesseract --enable-libtheora --enable-libvidstab --enable-libvmaf --enable-libvorbis --enable-libvpx --enable-libwebp --enable-libx264 --enable-libx265 --enable-libxml2 --enable-libxvid --enable-lzma --enable-libfontconfig --enable-libfreetype --enable-frei0r --enable-libass --enable-libopencore-amrnb --enable-libopencore-amrwb --enable-libopenjpeg --enable-libspeex --enable-libsoxr --enable-libzmq --enable-libzimg --disable-libjack --disable-indev=jack --enable-videotoolbox --enable-audiotoolbox --enable-neon
+  libavutil      60.  8.100 / 60.  8.100
+  libavcodec     62. 11.100 / 62. 11.100
+  libavformat    62.  3.100 / 62.  3.100
+  libavdevice    62.  1.100 / 62.  1.100
+  libavfilter    11.  4.100 / 11.  4.100
+  libswscale      9.  1.100 /  9.  1.100
+  libswresample   6.  1.100 /  6.  1.100
+[aist#0:0/pcm_s16le @ 0x855050180] Guessed Channel Layout: stereo
+Input #0, wav, from '/Users/mia/Nextcloud/Music/Projects/Patch/breaks to drink s̶͎̼̄͊p̵̯͑͛r̴̡͘͜ǐ̴̫t̵̳̎͝ḛ̵̜̽ to Project/breaks to drink s̶͎̼̄͊p̵̯͑͛r̴̡͘͜ǐ̴̫t̵̳̎͝ḛ̵̜̽ to (deliverable)/48k16b/breaks to drink s̶͎̼̄͊p̵̯͑͛r̴̡͘͜ǐ̴̫t̵̳̎͝ḛ̵̜̽ to.wav':
+  Duration: 00:04:48.54, bitrate: 1536 kb/s
+  Stream #0:0: Audio: pcm_s16le ([1][0][0][0] / 0x0001), 48000 Hz, stereo, s16, 1536 kb/s
+Stream mapping:
+  Stream #0:0 -> #0:0 (pcm_s16le (native) -> flac (native))
+Press [q] to stop, [?] for help
+[hls @ 0x854c24280] Opening 'tools/test-pages/public/flac/init.mp4' for writing
+Output #0, hls, to 'tools/test-pages/public/flac/playlist.m3u8':
+  Metadata:
+    encoder         : Lavf62.3.100
+  Stream #0:0: Audio: flac, 48000 Hz, stereo, s16, 128 kb/s
+    Metadata:
+      encoder         : Lavc62.11.100 flac
+[hls @ 0x854c24280] Opening 'tools/test-pages/public/flac/seg0.m4s' for writing
+[hls @ 0x854c24280] Opening 'tools/test-pages/public/flac/seg1.m4s' for writing
+[hls @ 0x854c24280] Opening 'tools/test-pages/public/flac/seg2.m4s' for writing
+[hls @ 0x854c24280] Opening 'tools/test-pages/public/flac/seg3.m4s' for writing
+[hls @ 0x854c24280] Opening 'tools/test-pages/public/flac/seg4.m4s' for writing
+[hls @ 0x854c24280] Opening 'tools/test-pages/public/flac/seg5.m4s' for writing
+[hls @ 0x854c24280] Opening 'tools/test-pages/public/flac/seg6.m4s' for writing
+[hls @ 0x854c24280] Opening 'tools/test-pages/public/flac/seg7.m4s' for writing
+[hls @ 0x854c24280] Opening 'tools/test-pages/public/flac/seg8.m4s' for writing
+[hls @ 0x854c24280] Opening 'tools/test-pages/public/flac/seg9.m4s' for writing
+[hls @ 0x854c24280] Opening 'tools/test-pages/public/flac/seg10.m4s' for writing
+[hls @ 0x854c24280] Opening 'tools/test-pages/public/flac/seg11.m4s' for writing
+[hls @ 0x854c24280] Opening 'tools/test-pages/public/flac/seg12.m4s' for writing
+[hls @ 0x854c24280] Opening 'tools/test-pages/public/flac/seg13.m4s' for writing
+[hls @ 0x854c24280] Stream 0 packet with pts 4320000 has duration 0. The segment duration may not be precise.
+[hls @ 0x854c24280] Opening 'tools/test-pages/public/flac/seg14.m4s' for writing
+[hls @ 0x854c24280] Opening 'tools/test-pages/public/flac/seg15.m4s' for writing
+[out#0/hls @ 0x85502ccc0] video:0KiB audio:8259KiB subtitle:0KiB other streams:0KiB global headers:0KiB muxing overhead: unknown
+size=N/A time=00:01:30.00 bitrate=N/A speed= 755x elapsed=0:00:00.11    
+ffmpeg version 8.0.1 Copyright (c) 2000-2025 the FFmpeg developers
+  built with Apple clang version 17.0.0 (clang-1700.4.4.1)
+  configuration: --prefix=/opt/homebrew/Cellar/ffmpeg/8.0.1 --enable-shared --enable-pthreads --enable-version3 --cc=clang --host-cflags= --host-ldflags= --enable-ffplay --enable-gnutls --enable-gpl --enable-libaom --enable-libaribb24 --enable-libbluray --enable-libdav1d --enable-libharfbuzz --enable-libjxl --enable-libmp3lame --enable-libopus --enable-librav1e --enable-librist --enable-librubberband --enable-libsnappy --enable-libsrt --enable-libssh --enable-libsvtav1 --enable-libtesseract --enable-libtheora --enable-libvidstab --enable-libvmaf --enable-libvorbis --enable-libvpx --enable-libwebp --enable-libx264 --enable-libx265 --enable-libxml2 --enable-libxvid --enable-lzma --enable-libfontconfig --enable-libfreetype --enable-frei0r --enable-libass --enable-libopencore-amrnb --enable-libopencore-amrwb --enable-libopenjpeg --enable-libspeex --enable-libsoxr --enable-libzmq --enable-libzimg --disable-libjack --disable-indev=jack --enable-videotoolbox --enable-audiotoolbox --enable-neon
+  libavutil      60.  8.100 / 60.  8.100
+  libavcodec     62. 11.100 / 62. 11.100
+  libavformat    62.  3.100 / 62.  3.100
+  libavdevice    62.  1.100 / 62.  1.100
+  libavfilter    11.  4.100 / 11.  4.100
+  libswscale      9.  1.100 /  9.  1.100
+  libswresample   6.  1.100 /  6.  1.100
+[aist#0:0/pcm_s16le @ 0xbcd010180] Guessed Channel Layout: stereo
+Input #0, wav, from '/Users/mia/Nextcloud/Music/Projects/Patch/breaks to drink s̶͎̼̄͊p̵̯͑͛r̴̡͘͜ǐ̴̫t̵̳̎͝ḛ̵̜̽ to Project/breaks to drink s̶͎̼̄͊p̵̯͑͛r̴̡͘͜ǐ̴̫t̵̳̎͝ḛ̵̜̽ to (deliverable)/48k16b/breaks to drink s̶͎̼̄͊p̵̯͑͛r̴̡͘͜ǐ̴̫t̵̳̎͝ḛ̵̜̽ to.wav':
+  Duration: 00:04:48.54, bitrate: 1536 kb/s
+  Stream #0:0: Audio: pcm_s16le ([1][0][0][0] / 0x0001), 48000 Hz, stereo, s16, 1536 kb/s
+Stream mapping:
+  Stream #0:0 -> #0:0 (pcm_s16le (native) -> aac (native))
+Press [q] to stop, [?] for help
+[hls @ 0xbccc64280] Opening 'tools/test-pages/public/aac/init.mp4' for writing
+Output #0, hls, to 'tools/test-pages/public/aac/playlist.m3u8':
+  Metadata:
+    encoder         : Lavf62.3.100
+  Stream #0:0: Audio: aac (LC), 48000 Hz, stereo, fltp, 128 kb/s
+    Metadata:
+      encoder         : Lavc62.11.100 aac
+[hls @ 0xbccc64280] Opening 'tools/test-pages/public/aac/seg0.m4s' for writing
+[hls @ 0xbccc64280] Opening 'tools/test-pages/public/aac/seg1.m4s' for writing
+[hls @ 0xbccc64280] Opening 'tools/test-pages/public/aac/seg2.m4s' for writing
+[hls @ 0xbccc64280] Opening 'tools/test-pages/public/aac/seg3.m4s' for writing
+[hls @ 0xbccc64280] Opening 'tools/test-pages/public/aac/seg4.m4s' for writing
+[hls @ 0xbccc64280] Opening 'tools/test-pages/public/aac/seg5.m4s' for writing
+[hls @ 0xbccc64280] Opening 'tools/test-pages/public/aac/seg6.m4s' for writing
+size=N/A time=00:00:43.13 bitrate=N/A speed=85.8x elapsed=0:00:00.50    [hls @ 0xbccc64280] Opening 'tools/test-pages/public/aac/seg7.m4s' for writing
+[hls @ 0xbccc64280] Opening 'tools/test-pages/public/aac/seg8.m4s' for writing
+[hls @ 0xbccc64280] Opening 'tools/test-pages/public/aac/seg9.m4s' for writing
+[hls @ 0xbccc64280] Opening 'tools/test-pages/public/aac/seg10.m4s' for writing
+[hls @ 0xbccc64280] Opening 'tools/test-pages/public/aac/seg11.m4s' for writing
+[hls @ 0xbccc64280] Opening 'tools/test-pages/public/aac/seg12.m4s' for writing
+[hls @ 0xbccc64280] Opening 'tools/test-pages/public/aac/seg13.m4s' for writing
+[hls @ 0xbccc64280] Opening 'tools/test-pages/public/aac/seg14.m4s' for writing
+[hls @ 0xbccc64280] Opening 'tools/test-pages/public/aac/seg15.m4s' for writing
+[out#0/hls @ 0xbcd04c180] video:0KiB audio:1444KiB subtitle:0KiB other streams:0KiB global headers:0KiB muxing overhead: unknown
+size=N/A time=00:01:30.00 bitrate=N/A speed= 101x elapsed=0:00:00.88    
+[aac @ 0xbcd048a80] Qavg: 497.420
+ffmpeg version 8.0.1 Copyright (c) 2000-2025 the FFmpeg developers
+  built with Apple clang version 17.0.0 (clang-1700.4.4.1)
+  configuration: --prefix=/opt/homebrew/Cellar/ffmpeg/8.0.1 --enable-shared --enable-pthreads --enable-version3 --cc=clang --host-cflags= --host-ldflags= --enable-ffplay --enable-gnutls --enable-gpl --enable-libaom --enable-libaribb24 --enable-libbluray --enable-libdav1d --enable-libharfbuzz --enable-libjxl --enable-libmp3lame --enable-libopus --enable-librav1e --enable-librist --enable-librubberband --enable-libsnappy --enable-libsrt --enable-libssh --enable-libsvtav1 --enable-libtesseract --enable-libtheora --enable-libvidstab --enable-libvmaf --enable-libvorbis --enable-libvpx --enable-libwebp --enable-libx264 --enable-libx265 --enable-libxml2 --enable-libxvid --enable-lzma --enable-libfontconfig --enable-libfreetype --enable-frei0r --enable-libass --enable-libopencore-amrnb --enable-libopencore-amrwb --enable-libopenjpeg --enable-libspeex --enable-libsoxr --enable-libzmq --enable-libzimg --disable-libjack --disable-indev=jack --enable-videotoolbox --enable-audiotoolbox --enable-neon
+  libavutil      60.  8.100 / 60.  8.100
+  libavcodec     62. 11.100 / 62. 11.100
+  libavformat    62.  3.100 / 62.  3.100
+  libavdevice    62.  1.100 / 62.  1.100
+  libavfilter    11.  4.100 / 11.  4.100
+  libswscale      9.  1.100 /  9.  1.100
+  libswresample   6.  1.100 /  6.  1.100
+[aist#0:0/pcm_s16le @ 0x7b5030180] Guessed Channel Layout: stereo
+Input #0, wav, from '/Users/mia/Nextcloud/Music/Projects/Patch/breaks to drink s̶͎̼̄͊p̵̯͑͛r̴̡͘͜ǐ̴̫t̵̳̎͝ḛ̵̜̽ to Project/breaks to drink s̶͎̼̄͊p̵̯͑͛r̴̡͘͜ǐ̴̫t̵̳̎͝ḛ̵̜̽ to (deliverable)/48k16b/breaks to drink s̶͎̼̄͊p̵̯͑͛r̴̡͘͜ǐ̴̫t̵̳̎͝ḛ̵̜̽ to.wav':
+  Duration: 00:04:48.54, bitrate: 1536 kb/s
+  Stream #0:0: Audio: pcm_s16le ([1][0][0][0] / 0x0001), 48000 Hz, stereo, s16, 1536 kb/s
+Stream mapping:
+  Stream #0:0 -> #0:0 (pcm_s16le (native) -> mp3 (libmp3lame))
+Press [q] to stop, [?] for help
+Output #0, hls, to 'tools/test-pages/public/mp3/playlist.m3u8':
+  Metadata:
+    encoder         : Lavf62.3.100
+  Stream #0:0: Audio: mp3, 48000 Hz, stereo, s16p, 128 kb/s
+    Metadata:
+      encoder         : Lavc62.11.100 libmp3lame
+[hls @ 0x7b4c44280] Opening 'tools/test-pages/public/mp3/seg0.ts' for writing
+[hls @ 0x7b4c44280] Opening 'tools/test-pages/public/mp3/seg1.ts' for writing
+[hls @ 0x7b4c44280] Opening 'tools/test-pages/public/mp3/seg2.ts' for writing
+[hls @ 0x7b4c44280] Opening 'tools/test-pages/public/mp3/seg3.ts' for writing
+[hls @ 0x7b4c44280] Opening 'tools/test-pages/public/mp3/seg4.ts' for writing
+[hls @ 0x7b4c44280] Opening 'tools/test-pages/public/mp3/seg5.ts' for writing
+[hls @ 0x7b4c44280] Opening 'tools/test-pages/public/mp3/seg6.ts' for writing
+[hls @ 0x7b4c44280] Opening 'tools/test-pages/public/mp3/seg7.ts' for writing
+[hls @ 0x7b4c44280] Opening 'tools/test-pages/public/mp3/seg8.ts' for writing
+[hls @ 0x7b4c44280] Opening 'tools/test-pages/public/mp3/seg9.ts' for writing
+size=N/A time=00:01:01.92 bitrate=N/A speed= 124x elapsed=0:00:00.50    [hls @ 0x7b4c44280] Opening 'tools/test-pages/public/mp3/seg10.ts' for writing
+[hls @ 0x7b4c44280] Opening 'tools/test-pages/public/mp3/seg11.ts' for writing
+[hls @ 0x7b4c44280] Opening 'tools/test-pages/public/mp3/seg12.ts' for writing
+size=N/A time=00:01:22.94 bitrate=N/A speed=82.4x elapsed=0:00:01.00    [hls @ 0x7b4c44280] Opening 'tools/test-pages/public/mp3/seg13.ts' for writing
+[hls @ 0x7b4c44280] Opening 'tools/test-pages/public/mp3/seg14.ts' for writing
+[hls @ 0x7b4c44280] Opening 'tools/test-pages/public/mp3/seg15.ts' for writing
+[out#0/hls @ 0x7b50006c0] video:0KiB audio:1407KiB subtitle:0KiB other streams:0KiB global headers:0KiB muxing overhead: unknown
+size=N/A time=00:01:30.00 bitrate=N/A speed=80.7x elapsed=0:00:01.11    
+ffmpeg version 8.0.1 Copyright (c) 2000-2025 the FFmpeg developers
+  built with Apple clang version 17.0.0 (clang-1700.4.4.1)
+  configuration: --prefix=/opt/homebrew/Cellar/ffmpeg/8.0.1 --enable-shared --enable-pthreads --enable-version3 --cc=clang --host-cflags= --host-ldflags= --enable-ffplay --enable-gnutls --enable-gpl --enable-libaom --enable-libaribb24 --enable-libbluray --enable-libdav1d --enable-libharfbuzz --enable-libjxl --enable-libmp3lame --enable-libopus --enable-librav1e --enable-librist --enable-librubberband --enable-libsnappy --enable-libsrt --enable-libssh --enable-libsvtav1 --enable-libtesseract --enable-libtheora --enable-libvidstab --enable-libvmaf --enable-libvorbis --enable-libvpx --enable-libwebp --enable-libx264 --enable-libx265 --enable-libxml2 --enable-libxvid --enable-lzma --enable-libfontconfig --enable-libfreetype --enable-frei0r --enable-libass --enable-libopencore-amrnb --enable-libopencore-amrwb --enable-libopenjpeg --enable-libspeex --enable-libsoxr --enable-libzmq --enable-libzimg --disable-libjack --disable-indev=jack --enable-videotoolbox --enable-audiotoolbox --enable-neon
+  libavutil      60.  8.100 / 60.  8.100
+  libavcodec     62. 11.100 / 62. 11.100
+  libavformat    62.  3.100 / 62.  3.100
+  libavdevice    62.  1.100 / 62.  1.100
+  libavfilter    11.  4.100 / 11.  4.100
+  libswscale      9.  1.100 /  9.  1.100
+  libswresample   6.  1.100 /  6.  1.100
+[aist#0:0/pcm_s16le @ 0x9f6c40180] Guessed Channel Layout: stereo
+Input #0, wav, from '/Users/mia/Nextcloud/Music/Projects/Patch/breaks to drink s̶͎̼̄͊p̵̯͑͛r̴̡͘͜ǐ̴̫t̵̳̎͝ḛ̵̜̽ to Project/breaks to drink s̶͎̼̄͊p̵̯͑͛r̴̡͘͜ǐ̴̫t̵̳̎͝ḛ̵̜̽ to (deliverable)/48k16b/breaks to drink s̶͎̼̄͊p̵̯͑͛r̴̡͘͜ǐ̴̫t̵̳̎͝ḛ̵̜̽ to.wav':
+  Duration: 00:04:48.54, bitrate: 1536 kb/s
+  Stream #0:0: Audio: pcm_s16le ([1][0][0][0] / 0x0001), 48000 Hz, stereo, s16, 1536 kb/s
+Stream mapping:
+  Stream #0:0 -> #0:0 (pcm_s16le (native) -> opus (libopus))
+Press [q] to stop, [?] for help
+Output #0, mp4, to 'tools/test-pages/public/opus/full.mp4':
+  Metadata:
+    encoder         : Lavf62.3.100
+  Stream #0:0: Audio: opus (Opus / 0x7375704F), 48000 Hz, stereo, s16, 128 kb/s
+    Metadata:
+      encoder         : Lavc62.11.100 libopus
+size=    1280KiB time=00:01:22.29 bitrate= 127.4kbits/s speed= 163x elapsed=0:00:00.50    [mp4 @ 0x9f702c280] Starting second pass: moving the moov atom to the beginning of the file
+[out#0/mp4 @ 0x9f7034180] video:0KiB audio:1447KiB subtitle:0KiB other streams:0KiB global headers:0KiB muxing overhead: 1.270139%
+size=    1465KiB time=00:01:30.00 bitrate= 133.4kbits/s speed= 162x elapsed=0:00:00.55    
+ffmpeg version 8.0.1 Copyright (c) 2000-2025 the FFmpeg developers
+  built with Apple clang version 17.0.0 (clang-1700.4.4.1)
+  configuration: --prefix=/opt/homebrew/Cellar/ffmpeg/8.0.1 --enable-shared --enable-pthreads --enable-version3 --cc=clang --host-cflags= --host-ldflags= --enable-ffplay --enable-gnutls --enable-gpl --enable-libaom --enable-libaribb24 --enable-libbluray --enable-libdav1d --enable-libharfbuzz --enable-libjxl --enable-libmp3lame --enable-libopus --enable-librav1e --enable-librist --enable-librubberband --enable-libsnappy --enable-libsrt --enable-libssh --enable-libsvtav1 --enable-libtesseract --enable-libtheora --enable-libvidstab --enable-libvmaf --enable-libvorbis --enable-libvpx --enable-libwebp --enable-libx264 --enable-libx265 --enable-libxml2 --enable-libxvid --enable-lzma --enable-libfontconfig --enable-libfreetype --enable-frei0r --enable-libass --enable-libopencore-amrnb --enable-libopencore-amrwb --enable-libopenjpeg --enable-libspeex --enable-libsoxr --enable-libzmq --enable-libzimg --disable-libjack --disable-indev=jack --enable-videotoolbox --enable-audiotoolbox --enable-neon
+  libavutil      60.  8.100 / 60.  8.100
+  libavcodec     62. 11.100 / 62. 11.100
+  libavformat    62.  3.100 / 62.  3.100
+  libavdevice    62.  1.100 / 62.  1.100
+  libavfilter    11.  4.100 / 11.  4.100
+  libswscale      9.  1.100 /  9.  1.100
+  libswresample   6.  1.100 /  6.  1.100
+[aist#0:0/pcm_s16le @ 0x979400180] Guessed Channel Layout: stereo
+Input #0, wav, from '/Users/mia/Nextcloud/Music/Projects/Patch/breaks to drink s̶͎̼̄͊p̵̯͑͛r̴̡͘͜ǐ̴̫t̵̳̎͝ḛ̵̜̽ to Project/breaks to drink s̶͎̼̄͊p̵̯͑͛r̴̡͘͜ǐ̴̫t̵̳̎͝ḛ̵̜̽ to (deliverable)/48k16b/breaks to drink s̶͎̼̄͊p̵̯͑͛r̴̡͘͜ǐ̴̫t̵̳̎͝ḛ̵̜̽ to.wav':
+  Duration: 00:04:48.54, bitrate: 1536 kb/s
+  Stream #0:0: Audio: pcm_s16le ([1][0][0][0] / 0x0001), 48000 Hz, stereo, s16, 1536 kb/s
+Stream mapping:
+  Stream #0:0 -> #0:0 (pcm_s16le (native) -> flac (native))
+Press [q] to stop, [?] for help
+Output #0, mp4, to 'tools/test-pages/public/flac/full.mp4':
+  Metadata:
+    encoder         : Lavf62.3.100
+  Stream #0:0: Audio: flac (fLaC / 0x43614C66), 48000 Hz, stereo, s16, 128 kb/s
+    Metadata:
+      encoder         : Lavc62.11.100 flac
+[mp4 @ 0x978808280] Starting second pass: moving the moov atom to the beginning of the file
+[out#0/mp4 @ 0x97943c180] video:0KiB audio:8259KiB subtitle:0KiB other streams:0KiB global headers:0KiB muxing overhead: 0.054957%
+size=    8264KiB time=00:01:30.00 bitrate= 752.2kbits/s speed= 581x elapsed=0:00:00.15    
+ffmpeg version 8.0.1 Copyright (c) 2000-2025 the FFmpeg developers
+  built with Apple clang version 17.0.0 (clang-1700.4.4.1)
+  configuration: --prefix=/opt/homebrew/Cellar/ffmpeg/8.0.1 --enable-shared --enable-pthreads --enable-version3 --cc=clang --host-cflags= --host-ldflags= --enable-ffplay --enable-gnutls --enable-gpl --enable-libaom --enable-libaribb24 --enable-libbluray --enable-libdav1d --enable-libharfbuzz --enable-libjxl --enable-libmp3lame --enable-libopus --enable-librav1e --enable-librist --enable-librubberband --enable-libsnappy --enable-libsrt --enable-libssh --enable-libsvtav1 --enable-libtesseract --enable-libtheora --enable-libvidstab --enable-libvmaf --enable-libvorbis --enable-libvpx --enable-libwebp --enable-libx264 --enable-libx265 --enable-libxml2 --enable-libxvid --enable-lzma --enable-libfontconfig --enable-libfreetype --enable-frei0r --enable-libass --enable-libopencore-amrnb --enable-libopencore-amrwb --enable-libopenjpeg --enable-libspeex --enable-libsoxr --enable-libzmq --enable-libzimg --disable-libjack --disable-indev=jack --enable-videotoolbox --enable-audiotoolbox --enable-neon
+  libavutil      60.  8.100 / 60.  8.100
+  libavcodec     62. 11.100 / 62. 11.100
+  libavformat    62.  3.100 / 62.  3.100
+  libavdevice    62.  1.100 / 62.  1.100
+  libavfilter    11.  4.100 / 11.  4.100
+  libswscale      9.  1.100 /  9.  1.100
+  libswresample   6.  1.100 /  6.  1.100
+[aist#0:0/pcm_s16le @ 0x73a80c180] Guessed Channel Layout: stereo
+Input #0, wav, from '/Users/mia/Nextcloud/Music/Projects/Patch/breaks to drink s̶͎̼̄͊p̵̯͑͛r̴̡͘͜ǐ̴̫t̵̳̎͝ḛ̵̜̽ to Project/breaks to drink s̶͎̼̄͊p̵̯͑͛r̴̡͘͜ǐ̴̫t̵̳̎͝ḛ̵̜̽ to (deliverable)/48k16b/breaks to drink s̶͎̼̄͊p̵̯͑͛r̴̡͘͜ǐ̴̫t̵̳̎͝ḛ̵̜̽ to.wav':
+  Duration: 00:04:48.54, bitrate: 1536 kb/s
+  Stream #0:0: Audio: pcm_s16le ([1][0][0][0] / 0x0001), 48000 Hz, stereo, s16, 1536 kb/s
+Stream mapping:
+  Stream #0:0 -> #0:0 (pcm_s16le (native) -> aac (native))
+Press [q] to stop, [?] for help
+Output #0, mp4, to 'tools/test-pages/public/aac/full.mp4':
+  Metadata:
+    encoder         : Lavf62.3.100
+  Stream #0:0: Audio: aac (LC) (mp4a / 0x6134706D), 48000 Hz, stereo, fltp, 128 kb/s
+    Metadata:
+      encoder         : Lavc62.11.100 aac
+size=     512KiB time=00:00:36.86 bitrate= 113.8kbits/s speed=  73x elapsed=0:00:00.50    [mp4 @ 0x73b414280] Starting second pass: moving the moov atom to the beginning of the file
+[out#0/mp4 @ 0x73b018e40] video:0KiB audio:1444KiB subtitle:0KiB other streams:0KiB global headers:0KiB muxing overhead: 1.198253%
+size=    1462KiB time=00:01:30.00 bitrate= 133.0kbits/s speed=  94x elapsed=0:00:00.95    
+[aac @ 0x73ac38a80] Qavg: 497.420
+ffmpeg version 8.0.1 Copyright (c) 2000-2025 the FFmpeg developers
+  built with Apple clang version 17.0.0 (clang-1700.4.4.1)
+  configuration: --prefix=/opt/homebrew/Cellar/ffmpeg/8.0.1 --enable-shared --enable-pthreads --enable-version3 --cc=clang --host-cflags= --host-ldflags= --enable-ffplay --enable-gnutls --enable-gpl --enable-libaom --enable-libaribb24 --enable-libbluray --enable-libdav1d --enable-libharfbuzz --enable-libjxl --enable-libmp3lame --enable-libopus --enable-librav1e --enable-librist --enable-librubberband --enable-libsnappy --enable-libsrt --enable-libssh --enable-libsvtav1 --enable-libtesseract --enable-libtheora --enable-libvidstab --enable-libvmaf --enable-libvorbis --enable-libvpx --enable-libwebp --enable-libx264 --enable-libx265 --enable-libxml2 --enable-libxvid --enable-lzma --enable-libfontconfig --enable-libfreetype --enable-frei0r --enable-libass --enable-libopencore-amrnb --enable-libopencore-amrwb --enable-libopenjpeg --enable-libspeex --enable-libsoxr --enable-libzmq --enable-libzimg --disable-libjack --disable-indev=jack --enable-videotoolbox --enable-audiotoolbox --enable-neon
+  libavutil      60.  8.100 / 60.  8.100
+  libavcodec     62. 11.100 / 62. 11.100
+  libavformat    62.  3.100 / 62.  3.100
+  libavdevice    62.  1.100 / 62.  1.100
+  libavfilter    11.  4.100 / 11.  4.100
+  libswscale      9.  1.100 /  9.  1.100
+  libswresample   6.  1.100 /  6.  1.100
+[aist#0:0/pcm_s16le @ 0xb0b030180] Guessed Channel Layout: stereo
+Input #0, wav, from '/Users/mia/Nextcloud/Music/Projects/Patch/breaks to drink s̶͎̼̄͊p̵̯͑͛r̴̡͘͜ǐ̴̫t̵̳̎͝ḛ̵̜̽ to Project/breaks to drink s̶͎̼̄͊p̵̯͑͛r̴̡͘͜ǐ̴̫t̵̳̎͝ḛ̵̜̽ to (deliverable)/48k16b/breaks to drink s̶͎̼̄͊p̵̯͑͛r̴̡͘͜ǐ̴̫t̵̳̎͝ḛ̵̜̽ to.wav':
+  Duration: 00:04:48.54, bitrate: 1536 kb/s
+  Stream #0:0: Audio: pcm_s16le ([1][0][0][0] / 0x0001), 48000 Hz, stereo, s16, 1536 kb/s
+Stream mapping:
+  Stream #0:0 -> #0:0 (pcm_s16le (native) -> flac (native))
+Press [q] to stop, [?] for help
+Output #0, flac, to 'tools/test-pages/public/flac/full.flac':
+  Metadata:
+    encoder         : Lavf62.3.100
+  Stream #0:0: Audio: flac, 48000 Hz, stereo, s16, 128 kb/s
+    Metadata:
+      encoder         : Lavc62.11.100 flac
+[out#0/flac @ 0xb0b06c180] video:0KiB audio:8259KiB subtitle:0KiB other streams:0KiB global headers:0KiB muxing overhead: 0.097971%
+size=    8267KiB time=00:01:30.00 bitrate= 752.5kbits/s speed= 746x elapsed=0:00:00.12    
+ffmpeg version 8.0.1 Copyright (c) 2000-2025 the FFmpeg developers
+  built with Apple clang version 17.0.0 (clang-1700.4.4.1)
+  configuration: --prefix=/opt/homebrew/Cellar/ffmpeg/8.0.1 --enable-shared --enable-pthreads --enable-version3 --cc=clang --host-cflags= --host-ldflags= --enable-ffplay --enable-gnutls --enable-gpl --enable-libaom --enable-libaribb24 --enable-libbluray --enable-libdav1d --enable-libharfbuzz --enable-libjxl --enable-libmp3lame --enable-libopus --enable-librav1e --enable-librist --enable-librubberband --enable-libsnappy --enable-libsrt --enable-libssh --enable-libsvtav1 --enable-libtesseract --enable-libtheora --enable-libvidstab --enable-libvmaf --enable-libvorbis --enable-libvpx --enable-libwebp --enable-libx264 --enable-libx265 --enable-libxml2 --enable-libxvid --enable-lzma --enable-libfontconfig --enable-libfreetype --enable-frei0r --enable-libass --enable-libopencore-amrnb --enable-libopencore-amrwb --enable-libopenjpeg --enable-libspeex --enable-libsoxr --enable-libzmq --enable-libzimg --disable-libjack --disable-indev=jack --enable-videotoolbox --enable-audiotoolbox --enable-neon
+  libavutil      60.  8.100 / 60.  8.100
+  libavcodec     62. 11.100 / 62. 11.100
+  libavformat    62.  3.100 / 62.  3.100
+  libavdevice    62.  1.100 / 62.  1.100
+  libavfilter    11.  4.100 / 11.  4.100
+  libswscale      9.  1.100 /  9.  1.100
+  libswresample   6.  1.100 /  6.  1.100
+[aist#0:0/pcm_s16le @ 0xaed02c180] Guessed Channel Layout: stereo
+Input #0, wav, from '/Users/mia/Nextcloud/Music/Projects/Patch/breaks to drink s̶͎̼̄͊p̵̯͑͛r̴̡͘͜ǐ̴̫t̵̳̎͝ḛ̵̜̽ to Project/breaks to drink s̶͎̼̄͊p̵̯͑͛r̴̡͘͜ǐ̴̫t̵̳̎͝ḛ̵̜̽ to (deliverable)/48k16b/breaks to drink s̶͎̼̄͊p̵̯͑͛r̴̡͘͜ǐ̴̫t̵̳̎͝ḛ̵̜̽ to.wav':
+  Duration: 00:04:48.54, bitrate: 1536 kb/s
+  Stream #0:0: Audio: pcm_s16le ([1][0][0][0] / 0x0001), 48000 Hz, stereo, s16, 1536 kb/s
+Stream mapping:
+  Stream #0:0 -> #0:0 (pcm_s16le (native) -> mp3 (libmp3lame))
+Press [q] to stop, [?] for help
+Output #0, mp3, to 'tools/test-pages/public/mp3/full.mp3':
+  Metadata:
+    TSSE            : Lavf62.3.100
+  Stream #0:0: Audio: mp3, 48000 Hz, stereo, s16p, 128 kb/s
+    Metadata:
+      encoder         : Lavc62.11.100 libmp3lame
+size=     768KiB time=00:01:01.05 bitrate= 103.0kbits/s speed= 121x elapsed=0:00:00.50    [out#0/mp3 @ 0xaed068180] video:0KiB audio:1407KiB subtitle:0KiB other streams:0KiB global headers:0KiB muxing overhead: 0.029714%
+size=    1407KiB time=00:01:30.00 bitrate= 128.1kbits/s speed= 100x elapsed=0:00:00.89    

@@ -55,6 +55,6 @@ Copy patterns from sona; don't rebuild from scratch. If you find a gap, note it 
 
 ## See Also
 
-- [[./phase-1-roadmap.md]] — Feature scope and pricing tiers
+- [[./phase-1-roadmap.md|Milestone 1 Roadmap (Blogging + Smart Links)]] — Feature scope and pricing tiers
 - [[../../../README.md]] — vesta vision and architecture
-- [[../../../apps/erato/index.md]] — Data model docs
+- [[../../../apps/erato/index.md|Erato]] — Data model docs

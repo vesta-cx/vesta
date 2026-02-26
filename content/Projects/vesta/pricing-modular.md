@@ -183,7 +183,7 @@ The curve is controlled by two parameters:
 
 ## See Also
 
-- [[./feature-catalog.md]] — Complete feature list with COO, base prices, and tier assignments
-- [[./feature-access-gating.md]] — Feature registry and access control
-- [[./phase-1-roadmap.md]] — Phase 1 features and feature tiers
-- [[../../../apps/erato/index.md]] — Data model (may need to extend for subscriptions)
+- [[./feature-catalog.md|Feature Catalog & Pricing Transparency]] — Complete feature list with COO, base prices, and tier assignments
+- [[./feature-access-gating.md|Feature Access & Gating]] — Feature registry and access control
+- [[./phase-1-roadmap.md|Milestone 1 Roadmap (Blogging + Smart Links)]] — Phase 1 features and feature tiers
+- [[../../../apps/erato/index.md|Erato]] — Data model (may need to extend for subscriptions)

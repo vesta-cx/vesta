@@ -205,6 +205,6 @@ This is more compact but less readable; use if JWT size becomes a bottleneck.
 
 ## See Also
 
-- [[./feature-catalog.md]] — Complete feature list and pricing
-- [[./pricing-modular.md]] — Individual feature pricing and tier presets
-- [[./development-checklist.md]] — Feature gating checklist for PRs
+- [[./feature-catalog.md|Feature Catalog & Pricing Transparency]] — Complete feature list and pricing
+- [[./pricing-modular.md|Modular Pricing & Weighted Discount Curve]] — Individual feature pricing and tier presets
+- [[./development-checklist.md|Development Checklist (Phase 1)]] — Feature gating checklist for PRs

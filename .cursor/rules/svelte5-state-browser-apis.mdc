@@ -1,7 +1,7 @@
 ---
 description: Gotcha when using Svelte 5 $state with browser API objects
-globs:
-  - "**/*.svelte"
+globs: **/*.svelte
+alwaysApply: false
 ---
 
 # Svelte 5: never use $state for browser API objects

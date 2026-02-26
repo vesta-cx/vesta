@@ -1,10 +1,6 @@
 ---
 description: Tailwind v4 CSS-first config in pnpm monorepos consuming @vesta-cx/ui
-globs:
-  - "**/layout.css"
-  - "**/app.css"
-  - "**/app.html"
-alwaysApply: false
+globs: **/layout.css, **/app.css, **/app.html
 ---
 
 # Tailwind v4 monorepo setup

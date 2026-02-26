@@ -71,6 +71,18 @@ transcodeRoutes.post('/', async (c) => {
 	if (storageConfig.type === 's3' && !storageConfig.endpoint) {
 		return c.json({ error: 'S3 storage requires endpoint' }, 400);
 	}
+	if (config.naming?.pattern != null && typeof config.naming.pattern !== 'string') {
+		return c.json({ error: 'naming.pattern must be a string' }, 400);
+	}
+	if (config.chunks?.segmentDurationMs != null) {
+		const ms = config.chunks.segmentDurationMs;
+		if (typeof ms !== 'number' || ms < 1000 || ms > 60_000) {
+			return c.json(
+				{ error: 'chunks.segmentDurationMs must be between 1000 and 60000 ms' },
+				400
+			);
+		}
+	}
 
 	const jobId = randomUUID();
 	const tmpDir = os.tmpdir();

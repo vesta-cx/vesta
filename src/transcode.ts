@@ -9,9 +9,25 @@ export type Codec = 'flac' | 'opus' | 'mp3' | 'aac';
 export interface TranscodeTarget {
 	codec: Codec;
 	bitrate: number;
+	/** If true and codec supports it, also produce HLS (aac, mp3) or DASH (opus) segments alongside the whole file. */
+	chunks?: boolean;
 }
 
 import type { StorageConfig } from './storage/factory.js';
+
+/** Controls output file and path naming conventions. */
+export interface TranscodeNaming {
+	/** Filename pattern for candidates. Placeholders: {basename}, {codec}, {bitrate}, {ext}. Default: "{basename}_{codec}_{bitrate}.{ext}" */
+	pattern?: string;
+	/** Include sourceId in candidate path. When true (default): candidates/{sourceId}/{filename}; when false: candidates/{filename}. */
+	includeSourceIdInPath?: boolean;
+}
+
+/** Chunked (HLS/DASH) output configuration. */
+export interface TranscodeChunks {
+	/** Segment duration in milliseconds. Default: 6000 (6 sec). */
+	segmentDurationMs?: number;
+}
 
 export interface TranscodeConfig {
 	targets: TranscodeTarget[];
@@ -19,6 +35,10 @@ export interface TranscodeConfig {
 	filename: string;
 	/** Path prefix in bucket (e.g. "sources", "audio/2025", or ""). */
 	uploadPrefix: string;
+	/** Naming conventions for output paths and filenames. */
+	naming?: TranscodeNaming;
+	/** Chunked output settings. Use TranscodeTarget.chunks to enable per-target. */
+	chunks?: TranscodeChunks;
 	webhookUrl?: string;
 	/** Client-provided source file ID. If set, used as source.id in webhook; otherwise generated. */
 	sourceFileId?: string;
@@ -33,12 +53,24 @@ export interface WebhookSource {
 	duration: number;
 }
 
+/** Chunk metadata when TranscodeTarget.chunks is true. */
+export interface WebhookCandidateChunks {
+	/** R2 key prefix for segments (e.g. "candidates/abc/track_aac_128_hls/"). Segments: {prefix}0.m4s, {prefix}1.m4s, ... */
+	r2KeyHls: string;
+	/** Nominal segment duration in ms (from config.chunks.segmentDurationMs). */
+	segmentDurationMs: number;
+	/** Actual duration of each segment in ms. Last segment may be shorter. */
+	segmentDurations: number[];
+}
+
 export interface WebhookCandidate {
 	id: string;
 	r2Key: string;
 	codec: Codec;
 	bitrate: number;
 	sourceFileId: string;
+	/** Present when chunks were produced. Includes duration per chunk. */
+	chunks?: WebhookCandidateChunks;
 }
 
 export interface TranscodeResult {
@@ -190,12 +222,17 @@ export const transcode = async (
 		}
 		const candidateId = randomUUID();
 		const ext = CODEC_EXTS[t.codec];
-		const candidateR2Key = joinPrefix(
-			uploadPrefix,
-			'candidates',
-			sourceId,
-			`${sanitized}_${t.codec}_${t.bitrate}.${ext}`
-		);
+		const pattern = config.naming?.pattern ?? '{basename}_{codec}_{bitrate}.{ext}';
+		const candidateFilename = pattern
+			.replace('{basename}', sanitized)
+			.replace('{codec}', t.codec)
+			.replace('{bitrate}', String(t.bitrate))
+			.replace('{ext}', ext);
+		const includeSourceId = config.naming?.includeSourceIdInPath !== false;
+		const candidatePathParts = includeSourceId
+			? ['candidates', sourceId, candidateFilename]
+			: ['candidates', candidateFilename];
+		const candidateR2Key = joinPrefix(uploadPrefix, ...candidatePathParts);
 		const tmpPath = path.join(path.dirname(inputPath), `cand_${candidateId}.${ext}`);
 		try {
 			await runFfmpeg(inputPath, tmpPath, t.codec, t.bitrate);

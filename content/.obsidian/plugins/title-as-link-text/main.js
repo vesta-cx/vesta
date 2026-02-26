@@ -37,7 +37,9 @@ var DEFAULT_SETTINGS = {
   debounceDelay: 1e3,
   similarityThreshold: 0.65,
   useFrontmatterTitle: true,
+  frontmatterTitleProperty: "title",
   useFirstHeading: true,
+  useAliases: true,
   autoUpdate: true
 };
 var LinkUpdater = class {
@@ -200,13 +202,13 @@ var LinkUpdater = class {
     return notesWithBacklinks;
   }
   getPageTitle(cache, filePath) {
-    const frontMatterTitle = this.settings.useFrontmatterTitle && cache.frontmatter && cache.frontmatter.title;
+    const frontMatterTitle = this.settings.useFrontmatterTitle && cache.frontmatter && cache.frontmatter[this.settings.frontmatterTitleProperty];
     const firstHeading = this.settings.useFirstHeading && cache.headings && cache.headings.length > 0 && cache.headings[0].heading;
     const title = frontMatterTitle || firstHeading || basename(filePath).replace(".md", "");
     return this.stripLinkElements(title);
   }
   getAliases(cache) {
-    if (!cache.frontmatter || !cache.frontmatter.aliases) {
+    if (!this.settings.useAliases || !cache.frontmatter || !cache.frontmatter.aliases) {
       return [];
     }
     const aliases = cache.frontmatter.aliases;
@@ -218,6 +220,11 @@ var LinkUpdater = class {
     return [];
   }
   findMostSimilarAlias(text, aliases) {
+    for (const alias of aliases) {
+      if (alias.toLowerCase() === text.toLowerCase()) {
+        return alias;
+      }
+    }
     for (const alias of aliases) {
       if (alias.toLowerCase().includes(text.toLowerCase()) || text.toLowerCase().includes(alias.toLowerCase())) {
         return alias;
@@ -351,8 +358,18 @@ var TitleAsLinkTextSettingTab = class extends import_obsidian.PluginSettingTab {
       this.plugin.settings.useFrontmatterTitle = value;
       await this.plugin.saveSettings();
     }));
+    new import_obsidian.Setting(containerEl).setName("Frontmatter property").setDesc("The frontmatter property to use for getting the title").addText((text) => text.setPlaceholder("title").setValue(this.plugin.settings.frontmatterTitleProperty).onChange(async (value) => {
+      if (value.trim()) {
+        this.plugin.settings.frontmatterTitleProperty = value.trim();
+        await this.plugin.saveSettings();
+      }
+    }));
     new import_obsidian.Setting(containerEl).setName("Title from first heading").setDesc("Use the first heading in the note as the link text").addToggle((toggle) => toggle.setValue(this.plugin.settings.useFirstHeading).onChange(async (value) => {
       this.plugin.settings.useFirstHeading = value;
+      await this.plugin.saveSettings();
+    }));
+    new import_obsidian.Setting(containerEl).setName("Use aliases").setDesc("Match link text against frontmatter aliases. When disabled, only the title will be used.").addToggle((toggle) => toggle.setValue(this.plugin.settings.useAliases).onChange(async (value) => {
+      this.plugin.settings.useAliases = value;
       await this.plugin.saveSettings();
     }));
     new import_obsidian.Setting(containerEl).setName("Advanced").setHeading();
@@ -369,6 +386,11 @@ var TitleAsLinkTextSettingTab = class extends import_obsidian.PluginSettingTab {
         this.plugin.settings.similarityThreshold = threshold;
         await this.plugin.saveSettings();
       }
+    }));
+    new import_obsidian.Setting(containerEl).setName("Reset to defaults").setDesc("Reset all settings to their default values").addButton((button) => button.setButtonText("Reset").setWarning().onClick(async () => {
+      this.plugin.settings = Object.assign({}, DEFAULT_SETTINGS);
+      await this.plugin.saveSettings();
+      this.display();
     }));
   }
 };

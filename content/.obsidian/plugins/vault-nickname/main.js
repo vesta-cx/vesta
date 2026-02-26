@@ -167,10 +167,13 @@ var VaultNicknamePlugin = class extends import_obsidian.Plugin {
       const vault = vaults[vaultKey];
       const vaultPath = (0, import_obsidian.normalizePath)(vault.path);
       let vaultName = vaultPath.substring(vaultPath.lastIndexOf("/") + 1);
-      const vaultPluginSettingsFilePath = (0, import_obsidian.normalizePath)([
+      let vaultPluginSettingsFilePath = (0, import_obsidian.normalizePath)([
         vault.path,
         VAULT_LOCAL_SHARED_SETTINGS_FILE_PATH
       ].join(PATH_SEPARATOR));
+      if (import_obsidian.Platform.isLinux && !vaultPluginSettingsFilePath.startsWith(PATH_SEPARATOR)) {
+        vaultPluginSettingsFilePath = PATH_SEPARATOR + vaultPluginSettingsFilePath;
+      }
       if (this.filePathExistsSync(vaultPluginSettingsFilePath)) {
         const vaultPluginSettingsJson = this.readUtf8FileSync(vaultPluginSettingsFilePath);
         if (vaultPluginSettingsJson) {

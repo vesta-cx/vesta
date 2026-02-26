@@ -108,24 +108,23 @@ updated_at           timestamp
 
 **Lookup pattern:** UI fetches presets by name to populate form defaults. No data model constraint.
 
-### Free Tier Incentive
+### Free Feature Budget
 
-Free users can subscribe to **any combination of premium features if total price is under threshold (€2-3)**:
+All free users get a **feature budget** (default €2–3? TBD). They can pick any combination of features that fits within their budget. If total price ≤ threshold, they subscribe free; if over, they pay the difference.
 
-```sql
--- After discount calculation, if custom_price_cents < threshold (e.g., 300 cents = €3):
-IF custom_price_cents < FREE_THRESHOLD_CENTS THEN
-  -- Grant access to all selected features free
-  custom_price_cents = 0
-  tier_preset = 'free-incentive' (or null, mark as promotional)
-END IF
-```
+**UI flow:**
+1. User selects features (no disabled states — all features available)
+2. UI shows remaining budget in real-time as they add/remove
+3. Submit button reflects their choice:
+   - Within budget: "Subscribe Free"
+   - Over budget: "Subscribe & Pay €X"
 
 **Implementation:**
-- Calculate discount curve as usual
-- If final price is under threshold, zero out the charge
-- Track in `subscription_discounts` table that this was a promotional offer
-- Great UX: users explore premium, get pleasantly surprised with free access
+- Calculate feature combo total with discount curve
+- If total ≤ FREE_THRESHOLD (e.g., 300 cents = €3), set `custom_price_cents = 0`
+- Set `discount_type = 'free-incentive'` on `user_subscriptions`
+- On Stripe side, apply coupon for the exact discount needed (so total becomes €0 or the overage amount)
+- Great UX: transparent budget, clear pricing, users feel in control
 
 ## Subscriptions & Payment Processing
 
@@ -189,22 +188,9 @@ updated_at           timestamp
 2. Webhook sets `is_active = false` in `user_subscriptions`
 3. Feature access revoked on next JWT refresh
 
-### Subscription Discounts Table
+### Discount Tracking
 
-Track all discounts applied (analytics & audit trail):
-
-```
-subscription_discounts:
-id                   UUID primary key
-user_id              string FK → users.workos_user_id
-discount_type        string ('volume' | 'promo' | 'free-incentive')
-discount_pct         decimal (0-100)
-reason               text (e.g., "Selected 4 features, volume discount applied")
-applied_at           timestamp
-created_at           timestamp
-```
-
-**Purpose:** Understand discount distribution, audit why users got discounts, test new discount strategies.
+Discounts are tracked directly on the `user_subscriptions` row via `discount_pct` and `discount_type` fields (`'volume'`, `'promo'`, or `'free-incentive'`). The freemium threshold is a static application-level constant — no separate table needed. Stripe webhook events and the subscription lifecycle provide the audit trail.
 
 ## Feature Access Queries
 

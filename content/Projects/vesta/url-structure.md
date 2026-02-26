@@ -33,19 +33,19 @@ vesta uses a clean, predictable URL hierarchy centered around workspaces and a c
 
 ### Public Workspaces & Resources
 
-| Path | Purpose |
-|------|---------|
-| `/[workspace]` | Workspace profile | Public-facing workspace homepage (shows default feed/collection) |
-| `/[workspace]/[resource-slug]` | View resource | Post, song, album, or other resource type |
+| Path                               | Purpose              |
+| ---------------------------------- | -------------------- | ---------------------------------------------------------------------------------------------- |
+| `/[workspace]`                     | Workspace profile    | Public-facing workspace homepage (shows default feed/collection)                               |
+| `/[workspace]/[resource-slug]`     | View resource        | Post, song, album, or other resource type                                                      |
 | `/[workspace]/c/[collection-slug]` | Workspace collection | Specific collection owned by this workspace (shareable link, e.g., artist roster, discography) |
-| `/[workspace]/following` | Following list | Alias for `/[workspace]/c/following` |
-| `/[workspace]/followers` | Followers list | Alias for `/[workspace]/c/followers` |
+| `/[workspace]/following`           | Following list       | Alias for `/[workspace]/c/following`                                                           |
+| `/[workspace]/followers`           | Followers list       | Alias for `/[workspace]/c/followers`                                                           |
 
 ### Collections (Centralized)
 
-| Path | Purpose |
-|------|---------|
-| `/collections/[slug]` | View collection | Any collection, regardless of owner |
+| Path                       | Purpose                 |
+| -------------------------- | ----------------------- | ------------------------------------------------- |
+| `/collections/[slug]`      | View collection         | Any collection, regardless of owner               |
 | `/[workspace]/collections` | Workspace's collections | List/index of collections owned by this workspace |
 
 **Note:** Built-in collections (`following`, `followers`, etc.) are accessible via shorthand aliases (`/[workspace]/following`, `/[workspace]/followers`) for convenience, but the canonical paths are `/[workspace]/c/[collection-slug]`.
@@ -58,12 +58,12 @@ vesta uses a clean, predictable URL hierarchy centered around workspaces and a c
 
 ### Discovery & Exploration
 
-| Path | Purpose |
-|------|---------|
-| `/discover` | Personalized discovery | For logged-in users; algorithmic/personalized feed |
-| `/explore` | Public browsing | For all users; curated/trending content |
-| `/search` | Global search | Search workspaces, resources, users, collections |
-| `/notifications` | Notifications | User's notification feed (authenticated only) |
+| Path             | Purpose                |
+| ---------------- | ---------------------- | -------------------------------------------------- |
+| `/discover`      | Personalized discovery | For logged-in users; algorithmic/personalized feed |
+| `/explore`       | Public browsing        | For all users; curated/trending content            |
+| `/search`        | Global search          | Search workspaces, resources, users, collections   |
+| `/notifications` | Notifications          | User's notification feed (authenticated only)      |
 
 ### System Routes
 
@@ -86,56 +86,67 @@ auth, api, about, help, legal, admin, me, settings, dashboard, discover, explore
 ## URL Hierarchy Examples
 
 **Workspace profile (public):**
+
 ```
 vesta.cx/daybreak
 ```
 
 **Resource within workspace:**
+
 ```
 vesta.cx/daybreak/new-release-2026
 ```
 
 **Workspace's collection (e.g., artist discography, label roster):**
+
 ```
 vesta.cx/daybreak/c/all-singles
 ```
 
 **Workspace followers:**
+
 ```
 vesta.cx/daybreak/c/followers
 ```
 
 **Search:**
+
 ```
 vesta.cx/search?q=lo-fi
 ```
 
 **Notifications:**
+
 ```
 vesta.cx/notifications
 ```
 
 **Centralized collection:**
+
 ```
 vesta.cx/collections/lo-fi-beats
 ```
 
 **User profile:**
+
 ```
 vesta.cx/user/alex
 ```
 
 **Creator dashboard:**
+
 ```
 vesta.cx/dashboard
 ```
 
 **User account settings:**
+
 ```
 vesta.cx/settings
 ```
 
 **API endpoint:**
+
 ```
 vesta.cx/api/v1/resources
 vesta.cx/api/v1/engagements

@@ -25,3 +25,11 @@
 [submodule "apps/docs"]
 	path = apps/docs
 	url = https://github.com/vesta-cx/docs.git
+
+[submodule "apps/web"]
+	path = apps/web
+	url = https://github.com/vesta-cx/web.git
+
+[submodule "packages/db"]
+	path = packages/db
+	url = https://github.com/vesta-cx/db.git

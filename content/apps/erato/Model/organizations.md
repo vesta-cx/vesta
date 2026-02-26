@@ -57,7 +57,7 @@ Users can also belong to specific organizations (labels, collectives, teams):
 
 ## Workspace Ownership
 
-Organizations can own [[./workspaces.md]] (just like users can):
+Organizations can own [[./workspaces.md|Workspaces]] (just like users can):
 
 ```sql
 -- Get all workspaces owned by an organization
@@ -119,6 +119,6 @@ const workspaces = await db.query.workspaces.findMany({
 
 ## See Also
 
-- [[./users.md]] — User schema and multi-org architecture
-- [[./workspaces.md]] — How workspaces reference organizations
+- [[./users.md|Users & Organizations (WorkOS-Managed)]] — User schema and multi-org architecture
+- [[./workspaces.md|Workspaces]] — How workspaces reference organizations
 - [[./Permissions.md]] — Permission model (subjects include org members)

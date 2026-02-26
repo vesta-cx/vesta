@@ -129,7 +129,7 @@ This makes all three queryable two ways:
 - **Engagement table:** "Did user X follow workspace Y?" → `SELECT * FROM engagements WHERE action = 'follow' AND subject_id = X AND object_id = Y`
 - **Collections table:** "What is user X following?" → Query user's "following" collection
 
-See [[./collections.md]] for collection implementation.
+See [[./collections.md|Collections]] for collection implementation.
 
 ## Query Examples
 
@@ -154,5 +154,5 @@ ORDER BY created_at DESC;
 
 ## See Also
 
-- [[./collections.md]] — Collections for reposts, follows, bookmarks, and custom curation
+- [[./collections.md|Collections]] — Collections for reposts, follows, bookmarks, and custom curation
 - [[./Permissions.md]] — Similar subject-action-object model for access control

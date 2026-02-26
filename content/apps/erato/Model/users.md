@@ -71,7 +71,7 @@ Custom attributes can be set on WorkOS Profiles (via Dashboard or API) for vesta
 
 **Store in our DB (vesta-specific):**
 
-- Workspace associations (see [[./workspaces.md]])
+- Workspace associations (see [[./workspaces.md|Workspaces]])
 - Subscription tier & billing info
 - Profile theme/customization (colors, fonts)
 - Preferences (notification settings, privacy)
@@ -94,7 +94,7 @@ Organizations are managed by WorkOS for enterprise/team use. Fields include:
 | `created_at` | timestamp | WorkOS | When org was created      |
 | `updated_at` | timestamp | WorkOS | Last updated              |
 
-Organizations can be the owner of [[./workspaces.md]] (e.g., a record label with multiple artist workspaces).
+Organizations can be the owner of [[./workspaces.md|Workspaces]] (e.g., a record label with multiple artist workspaces).
 
 ### Organizational Architecture (Multi-App Context)
 
@@ -172,7 +172,7 @@ Use this to:
 
 ## See Also
 
-- [[./workspaces.md]] — How workspaces reference WorkOS users/orgs
+- [[./workspaces.md|Workspaces]] — How workspaces reference WorkOS users/orgs
 - [[./Permissions.md]] — Permission model (subjects include WorkOS users/orgs)
 
 ## Future: Sharing Attributes Across Apps (Migration Path)

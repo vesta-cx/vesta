@@ -152,9 +152,9 @@ A song can appear on multiple albums (compilations, reissues, etc.).
 
 ## See Also
 
-- [[./resource_types/posts.md]] — Post type (Phase 1)
+- [[./resource_types/posts.md|Post Resource Type]] — Post type (Phase 1)
 - [[./resource_types/songs.md]] — Song type (Phase 2+)
 - [[./resource_types/albums.md]] — Album type (Phase 2+)
-- [[./teams.md]] — Permissions subjects
+- [[./teams.md|Teams]] — Permissions subjects
 - [[./Permissions.md]] — Access control
-- [[./workspaces.md]] — Workspaces (artist profiles that author resources)
+- [[./workspaces.md|Workspaces]] — Workspaces (artist profiles that author resources)

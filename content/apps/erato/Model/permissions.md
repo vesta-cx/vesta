@@ -1,7 +1,7 @@
 ---
 title: Permissions
 authors:
-description: Permission model for subjects, objects, and actions
+description: Permission model for subjects, objects, and actions with extensible action registry
 created: 2025-10-13T14:46:10+02:00
 modified: 2025-10-13T16:21:43+02:00
 license:
@@ -10,37 +10,62 @@ license_url:
 
 Permissions define which subjects can perform which actions on which objects. This is the core authorization model.
 
-## Fields
+## Schema
 
-| Field          | Type      | Description                                        |
-| -------------- | --------- | -------------------------------------------------- |
-| `id`           | UUID      | Identifier for the permission                      |
-| `subject_type` | Enum      | Type of subject (user, organization, team)         |
-| `subject_id`   | UUID      | ID of the subject                                  |
-| `object_type`  | Enum      | Type of object (workspace, resource, organization) |
-| `object_id`    | UUID      | ID of the object                                   |
-| `action`       | Enum      | Action permitted (read, write, delete, admin)      |
-| `created_at`   | Timestamp | When the permission was created                    |
+### Permission Actions Table
+
+Central registry of all possible actions (extensible):
+
+```
+permission_actions:
+slug                 string primary key (e.g., "read", "write", "delete", "admin")
+name                 string (display name: "Read")
+description          text (what does this action allow?)
+category             string ('content' | 'resource' | 'workspace' | 'admin')
+created_at           timestamp
+updated_at           timestamp
+```
+
+**Examples:**
+
+```
+read       | View/read     | User can view the object (posts, profiles, analytics)  | content
+write      | Edit          | User can create/edit/update the object                | resource
+delete     | Delete        | User can delete the object                             | workspace
+admin      | Admin         | Full control including sharing/permissions             | admin
+```
+
+**Design principle:**
+- Actions are extensible: add new actions without code changes
+- Each action is documented with category for filtering
+- Same pattern as features table (slug as PK)
+
+### Permissions Table
+
+```
+permissions:
+id                   UUID primary key
+subject_type         string ('user' | 'team' | 'organization')
+subject_id           string (WorkOS user/org ID or UUID)
+object_type          string ('workspace' | 'resource' | 'organization')
+object_id            UUID
+action               string FK → permission_actions.slug
+value                string ('allow' | 'deny' | 'unset')
+created_at           timestamp
+updated_at           timestamp
+```
 
 ## Subjects
 
 - **User** — Individual user account (highest precedence)
 - **Team** — Group of users; permissions inherited by all members (medium precedence)
 - **Organization** — Organization-level permissions inherited by members (low precedence)
-- **Global subjects** — `guest` (unauthenticated), `user` (any logged-in user), `follower`, `subscriber`
 
 ## Objects
 
 - **Workspace** — Artist or label profile
 - **Resource** — Creative work (song, album, post)
 - **Organization** — Organization-level resource
-
-## Actions
-
-- **read** — View the object
-- **write** — Edit/update the object
-- **delete** — Delete the object
-- **admin** — Full control including sharing/permission management
 
 ## Permission Values
 
@@ -68,7 +93,7 @@ When determining if a user can perform an action:
 
 ## Permission Merger (Core Implementation)
 
-**This is business logic required immediately by vesta app.** The permission merger must be implemented in `packages/db` as a reusable query function/repository, not deferred to erato API.
+**This is business logic required immediately by vesta app.** The permission merger must be implemented in `packages/utils` as a reusable query function, not deferred to erato API.
 
 Both vesta and erato (when built) will call this function to:
 1. Load all relevant permissions (user, team, org)
@@ -93,7 +118,7 @@ async function canUserDoAction(userId, objectId, action) {
   if (userAllow) return true; // User explicitly allowed
   
   // 2. Check team-level permissions (user is member of these teams)
-  const userTeams = await db.teams.members.findMany({
+  const userTeams = await db.teamUsers.findMany({
     where: { user_id: userId }
   });
   
@@ -130,3 +155,9 @@ async function canUserDoAction(userId, objectId, action) {
   return false;
 }
 ```
+
+## See Also
+
+- [[./features-subscriptions.md|Features & Subscriptions]] — Feature access and pricing (separate from permissions)
+- [[./teams.md|Teams]] — Team membership for permission inheritance
+- [[./users.md|Users & Organizations (WorkOS-Managed)]] — User identity and organization context

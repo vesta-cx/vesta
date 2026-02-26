@@ -37,7 +37,7 @@ Workspaces are owned by a **user** or **organization**, not directly by WorkOS o
 
 - Multiple workspaces per user (e.g., "Taylor Swift" and "Production Co")
 - Organizational ownership (label owns official workspace)
-- Team-based management (see [[./teams.md]])
+- Team-based management (see [[./teams.md|Teams]])
 
 ## Workspace Authors
 
@@ -61,4 +61,4 @@ See [[./Permissions.md]] for the permission model.
 
 - [[./Resource.md]] — Resources owned/authored by workspaces
 - [[./Permissions.md]] — Workspace access control
-- [[./teams.md]] — Team-based workspace management
+- [[./teams.md|Teams]] — Team-based workspace management

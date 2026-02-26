@@ -123,4 +123,4 @@ A team belongs to a single organization (`teams.organization_id`). Users must be
 ## See Also
 
 - [[./Permissions.md]] — Full permission model with precedence rules
-- [[./organizations.md]] — Organizations contain teams
+- [[./organizations.md|Organizations (WorkOS-Managed)]] — Organizations contain teams

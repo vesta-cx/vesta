@@ -55,15 +55,24 @@ Erato may become a dedicated HTTP service once:
 
 ### Users & Auth
 
-- **users** — WorkOS-synced user identities. See [Users & Organizations](./Model/users.md).
+- **users** — WorkOS-synced user identities. See [Users & Organizations (WorkOS-Managed)](./Model/users.md).
 
 ### Organizations
 
-- **organizations** — WorkOS org entities synced to Vesta. See [Organizations](./Model/organizations.md).
+- **organizations** — WorkOS org entities synced to Vesta. See [Organizations (WorkOS-Managed)](./Model/organizations.md).
 
 ### Teams
 
 - **teams** — Groups for shared permissions within an organization. See [Teams](./Model/teams.md).
+
+### Features & Subscriptions
+
+- **features** — Feature metadata registry with pricing. See [Features & Subscriptions](./Model/features-subscriptions.md).
+- **user_features** — Per-user feature entitlements with individual limits.
+- **feature_pricing** — Pricing reference for discount curve (no tiers).
+- **feature_presets** — UI-only preset bundles (free, basic, pro, enterprise).
+- **user_subscriptions** — Subscription metadata and Stripe integration.
+- **subscription_discounts** — Discount audit trail and analytics.
 
 ### Workspaces (Publishing Entities)
 
@@ -76,12 +85,13 @@ Erato may become a dedicated HTTP service once:
 - **songs** — Individual tracks (Phase 2+).
 - **albums** — Collections of songs (Phase 2+).
 - **album_songs** — Junction table for many-to-many song-album relationships (Phase 2+).
-- **resource_urls** — Smart links attached to resources (DSPs, pre-orders). See [Resource URLs](./Model/resource_urls.md).
+- **resource_urls** — Smart links attached to resources (DSPs, pre-orders). See [Resource URLs (Smart Links)](./Model/resource_urls.md).
 - **resource_authors** — Unified authors table (users and workspaces can author resources).
 
 ### Authorization
 
-- **permissions** — Subject-Object-Action matrix with precedence merging. See [Permissions](./Model/Permissions.md).
+- **permission_actions** — Extensible registry of all actions. See [Permissions](./Model/Permissions.md).
+- **permissions** — Subject-Object-Action matrix with allow/deny/unset values and precedence merging. See [Permissions](./Model/Permissions.md).
 
 ### Interactions
 

@@ -1,3 +1,8 @@
+---
+name: optimize-agent-rules
+description: Audit and improve rules, skills, and subagents by keeping tribal knowledge and removing noise. Apply refactoring patterns (Vague→Specific, Negative→Positive, Imprecise→Precise) to tighten guidance.
+---
+
 # Optimize Agent Rules (Rules, Skills, Subagents)
 
 ## Purpose

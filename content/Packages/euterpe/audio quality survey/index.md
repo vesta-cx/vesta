@@ -1,27 +1,46 @@
 ---
-title:
+title: Sona — Audio Quality Survey
 authors:
-description:
+description: Online survey to gauge codec and bitrate perception across genres
 created: 2025-10-30T23:21:32+01:00
 modified: 2025-10-31T00:06:35+01:00
 license:
 license_url:
 ---
 
-online "survey" to gauge how people hear the difference between different codecs and bitrates to figure out in a data-driven manner which codecs and bitrates to use for vesta's streaming quality options.
+Sona is an A|B survey application to gather data-driven insights on audio codec and bitrate perception. Users compare audio samples across different codecs, bitrates, and genres to determine Vesta's optimal streaming quality options.
 
-Personal & Global results. Until vesta launches wit proper auth, personal results are only stored client-side (in browser).
+## Survey Scope
 
-- different genres
-- gapless vs with gap
+- **Codecs tested** — FLAC (lossless), Opus, MP3, AAC, and other candidates
+- **Bitrate tiers** — Multiple bitrate options per codec
+- **Genres** — Different music genres (to control for perception variation)
+- **Playback conditions** — Gapless vs. gap-separated playback
 
-random selections?  
-how many questions? all permutations or set amount? or minimum of x but possibility to keep going?
+## Results
 
-A|B "would you rather"-esque interface  
-keybinds
+- **Personal results** — Stored client-side (browser localStorage) until Vesta authentication is available
+- **Global results** — Aggregated survey data across all participants
+- **Analytics** — Codec win rates, bitrate thresholds, genre-specific perception
 
-- left & right arrow to pick answer
-- up & down arrow for volume control
-- j, k, l for seek back, play/pause, seek forward
-- space for commit answer
+## User Interface
+
+### A|B Comparison
+
+- **"Would you rather" format** — Users select their preference between two audio samples
+- **Multiple rounds** — Random permutations or configurable count
+
+### Keyboard Controls
+
+| Key | Action |
+| --- | --- |
+| Left/Right Arrow | Select left/right answer |
+| Up/Down Arrow | Volume control |
+| J | Seek back (–10s) |
+| K | Play/pause |
+| L | Seek forward (+10s) |
+| Space | Commit answer and move to next |
+
+## Data Model
+
+Results are aggregated using the **Bradley-Terry model** for pairwise comparisons. See [sources](./sources%20used%20in%20researching%20for%20this%20app.md).

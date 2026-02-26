@@ -3,7 +3,7 @@ title:
 authors:
 description:
 created: 2025-12-15T16:24:32+01:00
-modified: 2025-12-15T16:25:42+01:00
+modified: 2026-02-14T01:05:17+01:00
 license:
 license_url:
 ---
@@ -16,7 +16,7 @@ _Exported on 12/15/2025 at 16:24:01 GMT+1 from Cursor (2.2.20)_
 
 **User**
 
-I'm working on a survey application that collects data on people's preference between different codecs and bitrates. It will look like a sort of "would you rather" interface where people pick between two options. 
+I'm working on a survey application that collects data on people's preference between different codecs and bitrates. It will look like a sort of "would you rather" interface where people pick between two options.
 
 I need to work out a db model on cloudflare d1 (sqlite) with drizzle ORM.
 
@@ -38,96 +38,116 @@ Here's a proposed schema design:
 
 ```typescript
 // src/lib/server/db/schema.ts
-import { integer, sqliteTable, text, index } from 'drizzle-orm/sqlite-core';
+import { integer, sqliteTable, text, index } from 'drizzle-orm/sqlite-core'
 
 // ═══════════════════════════════════════════════════════════════════════════
 // LISTENING DEVICES
 // ═══════════════════════════════════════════════════════════════════════════
 export const listeningDevices = sqliteTable('listening_devices', {
-  id: text('id').primaryKey().$defaultFn(() => crypto.randomUUID()),
-  // 'headphones' | 'earbuds' | 'speakers' | 'car' | 'other'
-  category: text('category', { 
-    enum: ['headphones', 'earbuds', 'speakers', 'car', 'other'] 
-  }).notNull(),
-  brand: text('brand').notNull(),
-  model: text('model').notNull(),
-  // Optional: price tier for analysis
-  priceTier: text('price_tier', { 
-    enum: ['budget', 'mid', 'premium', 'flagship'] 
-  }),
-  isApproved: integer('is_approved', { mode: 'boolean' }).notNull().default(false),
-  createdAt: integer('created_at', { mode: 'timestamp' })
-    .notNull()
-    .$defaultFn(() => new Date()),
-});
+    id: text('id')
+        .primaryKey()
+        .$defaultFn(() => crypto.randomUUID()),
+    // 'headphones' | 'earbuds' | 'speakers' | 'car' | 'other'
+    category: text('category', {
+        enum: ['headphones', 'earbuds', 'speakers', 'car', 'other'],
+    }).notNull(),
+    brand: text('brand').notNull(),
+    model: text('model').notNull(),
+    // Optional: price tier for analysis
+    priceTier: text('price_tier', {
+        enum: ['budget', 'mid', 'premium', 'flagship'],
+    }),
+    isApproved: integer('is_approved', { mode: 'boolean' })
+        .notNull()
+        .default(false),
+    createdAt: integer('created_at', { mode: 'timestamp' })
+        .notNull()
+        .$defaultFn(() => new Date()),
+})
 
 // ═══════════════════════════════════════════════════════════════════════════
 // SURVEY RESPONSES (Individual picks)
 // ═══════════════════════════════════════════════════════════════════════════
-export const surveyResponses = sqliteTable('survey_responses', {
-  id: text('id').primaryKey().$defaultFn(() => crypto.randomUUID()),
-  
-  // Session tracking (anonymous, but groups responses)
-  sessionId: text('session_id').notNull(),
-  
-  // What device was used
-  deviceId: text('device_id')
-    .references(() => listeningDevices.id)
-    .notNull(),
-  
-  // Song identifier (could be R2 key, or a song table FK if you add one)
-  songId: text('song_id').notNull(),
-  
-  // Option A
-  codecA: text('codec_a', { enum: ['mp3', 'aac', 'opus', 'flac', 'wav'] }).notNull(),
-  bitrateA: integer('bitrate_a'), // null for lossless
-  
-  // Option B
-  codecB: text('codec_b', { enum: ['mp3', 'aac', 'opus', 'flac', 'wav'] }).notNull(),
-  bitrateB: integer('bitrate_b'), // null for lossless
-  
-  // User's choice: 'a' | 'b' | 'neither' (couldn't tell)
-  selected: text('selected', { enum: ['a', 'b', 'neither'] }).notNull(),
-  
-  // How confident they were (optional, nice for analysis)
-  confidence: integer('confidence'), // 1-5 scale
-  
-  // Time spent deciding (ms) - useful for analysis
-  responseTimeMs: integer('response_time_ms'),
-  
-  createdAt: integer('created_at', { mode: 'timestamp' })
-    .notNull()
-    .$defaultFn(() => new Date()),
-}, (table) => [
-  // Index for common queries
-  index('idx_responses_codec_a').on(table.codecA),
-  index('idx_responses_codec_b').on(table.codecB),
-  index('idx_responses_created').on(table.createdAt),
-]);
+export const surveyResponses = sqliteTable(
+    'survey_responses',
+    {
+        id: text('id')
+            .primaryKey()
+            .$defaultFn(() => crypto.randomUUID()),
+
+        // Session tracking (anonymous, but groups responses)
+        sessionId: text('session_id').notNull(),
+
+        // What device was used
+        deviceId: text('device_id')
+            .references(() => listeningDevices.id)
+            .notNull(),
+
+        // Song identifier (could be R2 key, or a song table FK if you add one)
+        songId: text('song_id').notNull(),
+
+        // Option A
+        codecA: text('codec_a', {
+            enum: ['mp3', 'aac', 'opus', 'flac', 'wav'],
+        }).notNull(),
+        bitrateA: integer('bitrate_a'), // null for lossless
+
+        // Option B
+        codecB: text('codec_b', {
+            enum: ['mp3', 'aac', 'opus', 'flac', 'wav'],
+        }).notNull(),
+        bitrateB: integer('bitrate_b'), // null for lossless
+
+        // User's choice: 'a' | 'b' | 'neither' (couldn't tell)
+        selected: text('selected', { enum: ['a', 'b', 'neither'] }).notNull(),
+
+        // How confident they were (optional, nice for analysis)
+        confidence: integer('confidence'), // 1-5 scale
+
+        // Time spent deciding (ms) - useful for analysis
+        responseTimeMs: integer('response_time_ms'),
+
+        createdAt: integer('created_at', { mode: 'timestamp' })
+            .notNull()
+            .$defaultFn(() => new Date()),
+    },
+    (table) => [
+        // Index for common queries
+        index('idx_responses_codec_a').on(table.codecA),
+        index('idx_responses_codec_b').on(table.codecB),
+        index('idx_responses_created').on(table.createdAt),
+    ]
+)
 
 // ═══════════════════════════════════════════════════════════════════════════
 // RESULTS SNAPSHOT CACHE
 // ═══════════════════════════════════════════════════════════════════════════
-export const resultsSnapshots = sqliteTable('results_snapshots', {
-  id: text('id').primaryKey().$defaultFn(() => crypto.randomUUID()),
-  
-  // When this snapshot was computed
-  createdAt: integer('created_at', { mode: 'timestamp' })
-    .notNull()
-    .$defaultFn(() => new Date()),
-  
-  // When this snapshot expires (createdAt + TTL)
-  expiresAt: integer('expires_at', { mode: 'timestamp' }).notNull(),
-  
-  // Total responses included in this snapshot
-  totalResponses: integer('total_responses').notNull(),
-  
-  // Aggregated data as JSON - flexible for future additions
-  // Structure: { codecStats, bitrateStats, deviceStats, matchups, ... }
-  data: text('data', { mode: 'json' }).$type<ResultsSnapshotData>().notNull(),
-}, (table) => [
-  index('idx_snapshots_expires').on(table.expiresAt),
-]);
+export const resultsSnapshots = sqliteTable(
+    'results_snapshots',
+    {
+        id: text('id')
+            .primaryKey()
+            .$defaultFn(() => crypto.randomUUID()),
+
+        // When this snapshot was computed
+        createdAt: integer('created_at', { mode: 'timestamp' })
+            .notNull()
+            .$defaultFn(() => new Date()),
+
+        // When this snapshot expires (createdAt + TTL)
+        expiresAt: integer('expires_at', { mode: 'timestamp' }).notNull(),
+
+        // Total responses included in this snapshot
+        totalResponses: integer('total_responses').notNull(),
+
+        // Aggregated data as JSON - flexible for future additions
+        // Structure: { codecStats, bitrateStats, deviceStats, matchups, ... }
+        data: text('data', { mode: 'json' })
+            .$type<ResultsSnapshotData>()
+            .notNull(),
+    },
+    (table) => [index('idx_snapshots_expires').on(table.expiresAt)]
+)
 
 // ═══════════════════════════════════════════════════════════════════════════
 // TYPES
@@ -135,34 +155,43 @@ export const resultsSnapshots = sqliteTable('results_snapshots', {
 
 // Type for the JSON data in resultsSnapshots
 export interface ResultsSnapshotData {
-  // Win rate per codec (as percentage)
-  codecWinRates: Record<string, { wins: number; total: number; rate: number }>;
-  
-  // Win rate per bitrate
-  bitrateWinRates: Record<number, { wins: number; total: number; rate: number }>;
-  
-  // Head-to-head matchups: "mp3_128 vs opus_96" -> winner stats
-  matchups: Record<string, { 
-    optionA: { codec: string; bitrate: number | null };
-    optionB: { codec: string; bitrate: number | null };
-    winsA: number;
-    winsB: number;
-    ties: number;
-  }>;
-  
-  // Stats by device category
-  deviceCategoryStats: Record<string, {
-    responses: number;
-    // Could add codec preferences per device type
-  }>;
-  
-  // Response distribution
-  responseDistribution: {
-    total: number;
-    withConfidence: number;
-    avgConfidence: number;
-    avgResponseTimeMs: number;
-  };
+    // Win rate per codec (as percentage)
+    codecWinRates: Record<string, { wins: number; total: number; rate: number }>
+
+    // Win rate per bitrate
+    bitrateWinRates: Record<
+        number,
+        { wins: number; total: number; rate: number }
+    >
+
+    // Head-to-head matchups: "mp3_128 vs opus_96" -> winner stats
+    matchups: Record<
+        string,
+        {
+            optionA: { codec: string; bitrate: number | null }
+            optionB: { codec: string; bitrate: number | null }
+            winsA: number
+            winsB: number
+            ties: number
+        }
+    >
+
+    // Stats by device category
+    deviceCategoryStats: Record<
+        string,
+        {
+            responses: number
+            // Could add codec preferences per device type
+        }
+    >
+
+    // Response distribution
+    responseDistribution: {
+        total: number
+        withConfidence: number
+        avgConfidence: number
+        avgResponseTimeMs: number
+    }
 }
 ```
 
@@ -191,25 +220,25 @@ export interface ResultsSnapshotData {
 ```typescript
 // Check for valid snapshot
 const validSnapshot = await db.query.resultsSnapshots.findFirst({
-  where: gt(resultsSnapshots.expiresAt, new Date()),
-  orderBy: desc(resultsSnapshots.createdAt),
-});
+    where: gt(resultsSnapshots.expiresAt, new Date()),
+    orderBy: desc(resultsSnapshots.createdAt),
+})
 
 if (validSnapshot) {
-  return validSnapshot.data;
+    return validSnapshot.data
 }
 
 // No valid cache - compute fresh snapshot
-const freshData = await computeAggregatedStats();
-const TTL_MINUTES = 15;
+const freshData = await computeAggregatedStats()
+const TTL_MINUTES = 15
 
 await db.insert(resultsSnapshots).values({
-  expiresAt: new Date(Date.now() + TTL_MINUTES * 60 * 1000),
-  totalResponses: freshData.responseDistribution.total,
-  data: freshData,
-});
+    expiresAt: new Date(Date.now() + TTL_MINUTES * 60 * 1000),
+    totalResponses: freshData.responseDistribution.total,
+    data: freshData,
+})
 
-return freshData;
+return freshData
 ```
 
 ### Questions to Consider
@@ -222,96 +251,116 @@ Want me to refine any part of this schema, or help with the aggregation query fo
 
 ```typescript
 // src/lib/server/db/schema.ts
-import { integer, sqliteTable, text, index } from 'drizzle-orm/sqlite-core';
+import { integer, sqliteTable, text, index } from 'drizzle-orm/sqlite-core'
 
 // ═══════════════════════════════════════════════════════════════════════════
 // LISTENING DEVICES
 // ═══════════════════════════════════════════════════════════════════════════
 export const listeningDevices = sqliteTable('listening_devices', {
-  id: text('id').primaryKey().$defaultFn(() => crypto.randomUUID()),
-  // 'headphones' | 'earbuds' | 'speakers' | 'car' | 'other'
-  category: text('category', { 
-    enum: ['headphones', 'earbuds', 'speakers', 'car', 'other'] 
-  }).notNull(),
-  brand: text('brand').notNull(),
-  model: text('model').notNull(),
-  // Optional: price tier for analysis
-  priceTier: text('price_tier', { 
-    enum: ['budget', 'mid', 'premium', 'flagship'] 
-  }),
-  isApproved: integer('is_approved', { mode: 'boolean' }).notNull().default(false),
-  createdAt: integer('created_at', { mode: 'timestamp' })
-    .notNull()
-    .$defaultFn(() => new Date()),
-});
+    id: text('id')
+        .primaryKey()
+        .$defaultFn(() => crypto.randomUUID()),
+    // 'headphones' | 'earbuds' | 'speakers' | 'car' | 'other'
+    category: text('category', {
+        enum: ['headphones', 'earbuds', 'speakers', 'car', 'other'],
+    }).notNull(),
+    brand: text('brand').notNull(),
+    model: text('model').notNull(),
+    // Optional: price tier for analysis
+    priceTier: text('price_tier', {
+        enum: ['budget', 'mid', 'premium', 'flagship'],
+    }),
+    isApproved: integer('is_approved', { mode: 'boolean' })
+        .notNull()
+        .default(false),
+    createdAt: integer('created_at', { mode: 'timestamp' })
+        .notNull()
+        .$defaultFn(() => new Date()),
+})
 
 // ═══════════════════════════════════════════════════════════════════════════
 // SURVEY RESPONSES (Individual picks)
 // ═══════════════════════════════════════════════════════════════════════════
-export const surveyResponses = sqliteTable('survey_responses', {
-  id: text('id').primaryKey().$defaultFn(() => crypto.randomUUID()),
-  
-  // Session tracking (anonymous, but groups responses)
-  sessionId: text('session_id').notNull(),
-  
-  // What device was used
-  deviceId: text('device_id')
-    .references(() => listeningDevices.id)
-    .notNull(),
-  
-  // Song identifier (could be R2 key, or a song table FK if you add one)
-  songId: text('song_id').notNull(),
-  
-  // Option A
-  codecA: text('codec_a', { enum: ['mp3', 'aac', 'opus', 'flac', 'wav'] }).notNull(),
-  bitrateA: integer('bitrate_a'), // null for lossless
-  
-  // Option B
-  codecB: text('codec_b', { enum: ['mp3', 'aac', 'opus', 'flac', 'wav'] }).notNull(),
-  bitrateB: integer('bitrate_b'), // null for lossless
-  
-  // User's choice: 'a' | 'b' | 'neither' (couldn't tell)
-  selected: text('selected', { enum: ['a', 'b', 'neither'] }).notNull(),
-  
-  // How confident they were (optional, nice for analysis)
-  confidence: integer('confidence'), // 1-5 scale
-  
-  // Time spent deciding (ms) - useful for analysis
-  responseTimeMs: integer('response_time_ms'),
-  
-  createdAt: integer('created_at', { mode: 'timestamp' })
-    .notNull()
-    .$defaultFn(() => new Date()),
-}, (table) => [
-  // Index for common queries
-  index('idx_responses_codec_a').on(table.codecA),
-  index('idx_responses_codec_b').on(table.codecB),
-  index('idx_responses_created').on(table.createdAt),
-]);
+export const surveyResponses = sqliteTable(
+    'survey_responses',
+    {
+        id: text('id')
+            .primaryKey()
+            .$defaultFn(() => crypto.randomUUID()),
+
+        // Session tracking (anonymous, but groups responses)
+        sessionId: text('session_id').notNull(),
+
+        // What device was used
+        deviceId: text('device_id')
+            .references(() => listeningDevices.id)
+            .notNull(),
+
+        // Song identifier (could be R2 key, or a song table FK if you add one)
+        songId: text('song_id').notNull(),
+
+        // Option A
+        codecA: text('codec_a', {
+            enum: ['mp3', 'aac', 'opus', 'flac', 'wav'],
+        }).notNull(),
+        bitrateA: integer('bitrate_a'), // null for lossless
+
+        // Option B
+        codecB: text('codec_b', {
+            enum: ['mp3', 'aac', 'opus', 'flac', 'wav'],
+        }).notNull(),
+        bitrateB: integer('bitrate_b'), // null for lossless
+
+        // User's choice: 'a' | 'b' | 'neither' (couldn't tell)
+        selected: text('selected', { enum: ['a', 'b', 'neither'] }).notNull(),
+
+        // How confident they were (optional, nice for analysis)
+        confidence: integer('confidence'), // 1-5 scale
+
+        // Time spent deciding (ms) - useful for analysis
+        responseTimeMs: integer('response_time_ms'),
+
+        createdAt: integer('created_at', { mode: 'timestamp' })
+            .notNull()
+            .$defaultFn(() => new Date()),
+    },
+    (table) => [
+        // Index for common queries
+        index('idx_responses_codec_a').on(table.codecA),
+        index('idx_responses_codec_b').on(table.codecB),
+        index('idx_responses_created').on(table.createdAt),
+    ]
+)
 
 // ═══════════════════════════════════════════════════════════════════════════
 // RESULTS SNAPSHOT CACHE
 // ═══════════════════════════════════════════════════════════════════════════
-export const resultsSnapshots = sqliteTable('results_snapshots', {
-  id: text('id').primaryKey().$defaultFn(() => crypto.randomUUID()),
-  
-  // When this snapshot was computed
-  createdAt: integer('created_at', { mode: 'timestamp' })
-    .notNull()
-    .$defaultFn(() => new Date()),
-  
-  // When this snapshot expires (createdAt + TTL)
-  expiresAt: integer('expires_at', { mode: 'timestamp' }).notNull(),
-  
-  // Total responses included in this snapshot
-  totalResponses: integer('total_responses').notNull(),
-  
-  // Aggregated data as JSON - flexible for future additions
-  // Structure: { codecStats, bitrateStats, deviceStats, matchups, ... }
-  data: text('data', { mode: 'json' }).$type<ResultsSnapshotData>().notNull(),
-}, (table) => [
-  index('idx_snapshots_expires').on(table.expiresAt),
-]);
+export const resultsSnapshots = sqliteTable(
+    'results_snapshots',
+    {
+        id: text('id')
+            .primaryKey()
+            .$defaultFn(() => crypto.randomUUID()),
+
+        // When this snapshot was computed
+        createdAt: integer('created_at', { mode: 'timestamp' })
+            .notNull()
+            .$defaultFn(() => new Date()),
+
+        // When this snapshot expires (createdAt + TTL)
+        expiresAt: integer('expires_at', { mode: 'timestamp' }).notNull(),
+
+        // Total responses included in this snapshot
+        totalResponses: integer('total_responses').notNull(),
+
+        // Aggregated data as JSON - flexible for future additions
+        // Structure: { codecStats, bitrateStats, deviceStats, matchups, ... }
+        data: text('data', { mode: 'json' })
+            .$type<ResultsSnapshotData>()
+            .notNull(),
+    },
+    (table) => [index('idx_snapshots_expires').on(table.expiresAt)]
+)
 
 // ═══════════════════════════════════════════════════════════════════════════
 // TYPES
@@ -319,59 +368,68 @@ export const resultsSnapshots = sqliteTable('results_snapshots', {
 
 // Type for the JSON data in resultsSnapshots
 export interface ResultsSnapshotData {
-  // Win rate per codec (as percentage)
-  codecWinRates: Record<string, { wins: number; total: number; rate: number }>;
-  
-  // Win rate per bitrate
-  bitrateWinRates: Record<number, { wins: number; total: number; rate: number }>;
-  
-  // Head-to-head matchups: "mp3_128 vs opus_96" -> winner stats
-  matchups: Record<string, { 
-    optionA: { codec: string; bitrate: number | null };
-    optionB: { codec: string; bitrate: number | null };
-    winsA: number;
-    winsB: number;
-    ties: number;
-  }>;
-  
-  // Stats by device category
-  deviceCategoryStats: Record<string, {
-    responses: number;
-    // Could add codec preferences per device type
-  }>;
-  
-  // Response distribution
-  responseDistribution: {
-    total: number;
-    withConfidence: number;
-    avgConfidence: number;
-    avgResponseTimeMs: number;
-  };
+    // Win rate per codec (as percentage)
+    codecWinRates: Record<string, { wins: number; total: number; rate: number }>
+
+    // Win rate per bitrate
+    bitrateWinRates: Record<
+        number,
+        { wins: number; total: number; rate: number }
+    >
+
+    // Head-to-head matchups: "mp3_128 vs opus_96" -> winner stats
+    matchups: Record<
+        string,
+        {
+            optionA: { codec: string; bitrate: number | null }
+            optionB: { codec: string; bitrate: number | null }
+            winsA: number
+            winsB: number
+            ties: number
+        }
+    >
+
+    // Stats by device category
+    deviceCategoryStats: Record<
+        string,
+        {
+            responses: number
+            // Could add codec preferences per device type
+        }
+    >
+
+    // Response distribution
+    responseDistribution: {
+        total: number
+        withConfidence: number
+        avgConfidence: number
+        avgResponseTimeMs: number
+    }
 }
 ```
 
 ```typescript
 // Check for valid snapshot
 const validSnapshot = await db.query.resultsSnapshots.findFirst({
-  where: gt(resultsSnapshots.expiresAt, new Date()),
-  orderBy: desc(resultsSnapshots.createdAt),
-});
+    where: gt(resultsSnapshots.expiresAt, new Date()),
+    orderBy: desc(resultsSnapshots.createdAt),
+})
 
 if (validSnapshot) {
-  return validSnapshot.data;
+    return validSnapshot.data
 }
 
 // No valid cache - compute fresh snapshot
-const freshData = await computeAggregatedStats();
-const TTL_MINUTES = 15;
+const freshData = await computeAggregatedStats()
+const TTL_MINUTES = 15
 
 await db.insert(resultsSnapshots).values({
-  expiresAt: new Date(Date.now() + TTL_MINUTES * 60 * 1000),
-  totalResponses: freshData.responseDistribution.total,
-  data: freshData,
-});
+    expiresAt: new Date(Date.now() + TTL_MINUTES * 60 * 1000),
+    totalResponses: freshData.responseDistribution.total,
+    data: freshData,
+})
 
-return freshData;
+return freshData
 ```
 
 ---
@@ -381,12 +439,12 @@ return freshData;
 can you help me understand how i would reference to a composite key with a foreign key?
 
 say i have a  
-    - [ ] codec_config table with codec+bitrate permutations  
-        - [ ] id*  
-        - [ ] codec* (enum: flac | opus | aac | mp3)  
-        - [ ] bitrate* (int, 0 for lossless)  
-        - [ ] enabled* (whether to use this permutation in testing)  
-        - [ ] PK(`codec`,`bitrate`) (composite key)
+ - [ ] codec_config table with codec+bitrate permutations  
+ - [ ] id*  
+ - [ ] codec* (enum: flac | opus | aac | mp3)  
+ - [ ] bitrate* (int, 0 for lossless)  
+ - [ ] enabled* (whether to use this permutation in testing)  
+ - [ ] PK(`codec`,`bitrate`) (composite key)
 
 and in my candidate_files_ table i want to reference the codec_configs table using the composite key of codec+bitrate.
 
@@ -401,59 +459,76 @@ Great question! In Drizzle ORM, composite primary keys and composite foreign key
 Here's how you'd set this up:
 
 ```typescript
-import { 
-  integer, 
-  sqliteTable, 
-  text, 
-  primaryKey,
-  foreignKey 
-} from 'drizzle-orm/sqlite-core';
+import {
+    integer,
+    sqliteTable,
+    text,
+    primaryKey,
+    foreignKey,
+} from 'drizzle-orm/sqlite-core'
 
 // ═══════════════════════════════════════════════════════════════════════════
 // CODEC CONFIGS - with composite PK
 // ═══════════════════════════════════════════════════════════════════════════
-export const codecConfigs = sqliteTable('codec_configs', {
-  id: text('id').notNull().$defaultFn(() => crypto.randomUUID()),
-  codec: text('codec', { enum: ['flac', 'opus', 'aac', 'mp3'] }).notNull(),
-  bitrate: integer('bitrate').notNull(), // 0 for lossless
-  enabled: integer('enabled', { mode: 'boolean' }).notNull().default(true),
-}, (table) => [
-  // Composite primary key
-  primaryKey({ columns: [table.codec, table.bitrate] }),
-]);
+export const codecConfigs = sqliteTable(
+    'codec_configs',
+    {
+        id: text('id')
+            .notNull()
+            .$defaultFn(() => crypto.randomUUID()),
+        codec: text('codec', {
+            enum: ['flac', 'opus', 'aac', 'mp3'],
+        }).notNull(),
+        bitrate: integer('bitrate').notNull(), // 0 for lossless
+        enabled: integer('enabled', { mode: 'boolean' })
+            .notNull()
+            .default(true),
+    },
+    (table) => [
+        // Composite primary key
+        primaryKey({ columns: [table.codec, table.bitrate] }),
+    ]
+)
 
 // ═══════════════════════════════════════════════════════════════════════════
 // CANDIDATE FILES - with composite FK
 // ═══════════════════════════════════════════════════════════════════════════
-export const candidateFiles = sqliteTable('candidate_files', {
-  id: text('id').primaryKey().$defaultFn(() => crypto.randomUUID()),
-  r2Key: text('r2_key').notNull().unique(),
-  
-  // These columns will form the FK
-  codec: text('codec', { enum: ['flac', 'opus', 'aac', 'mp3'] }).notNull(),
-  bitrate: integer('bitrate').notNull(),
-  
-  // ... other columns
-  sourceFileId: text('source_file_id').notNull(),
-  createdAt: integer('created_at', { mode: 'timestamp' })
-    .notNull()
-    .$defaultFn(() => new Date()),
-}, (table) => [
-  // Composite foreign key referencing codecConfigs
-  foreignKey({
-    columns: [table.codec, table.bitrate],
-    foreignColumns: [codecConfigs.codec, codecConfigs.bitrate],
-  }).onDelete('restrict'), // or 'cascade', 'set null', etc.
-]);
+export const candidateFiles = sqliteTable(
+    'candidate_files',
+    {
+        id: text('id')
+            .primaryKey()
+            .$defaultFn(() => crypto.randomUUID()),
+        r2Key: text('r2_key').notNull().unique(),
+
+        // These columns will form the FK
+        codec: text('codec', {
+            enum: ['flac', 'opus', 'aac', 'mp3'],
+        }).notNull(),
+        bitrate: integer('bitrate').notNull(),
+
+        // ... other columns
+        sourceFileId: text('source_file_id').notNull(),
+        createdAt: integer('created_at', { mode: 'timestamp' })
+            .notNull()
+            .$defaultFn(() => new Date()),
+    },
+    (table) => [
+        // Composite foreign key referencing codecConfigs
+        foreignKey({
+            columns: [table.codec, table.bitrate],
+            foreignColumns: [codecConfigs.codec, codecConfigs.bitrate],
+        }).onDelete('restrict'), // or 'cascade', 'set null', etc.
+    ]
+)
 ```
 
 ### Key Points
 
 1. **`primaryKey()`** - Takes an object with `columns` array containing the table column references
 2. **`foreignKey()`** - Takes an object with:
-   - `columns`: array of local columns (in order)
-   - `foreignColumns`: array of referenced columns (same order!)
-   
+    - `columns`: array of local columns (in order)
+    - `foreignColumns`: array of referenced columns (same order!)
 3. **Column order matters** - The columns in both arrays must align: `[codec, bitrate]` → `[codec, bitrate]`
 4. **`.onDelete()` / `.onUpdate()`** - Chain these for referential actions
 
@@ -462,21 +537,31 @@ export const candidateFiles = sqliteTable('candidate_files', {
 If you want to keep `id` as the primary key but still enforce uniqueness on `codec+bitrate`:
 
 ```typescript
-import { unique } from 'drizzle-orm/sqlite-core';
+import { unique } from 'drizzle-orm/sqlite-core'
 
-export const codecConfigs = sqliteTable('codec_configs', {
-  id: text('id').primaryKey().$defaultFn(() => crypto.randomUUID()),
-  codec: text('codec', { enum: ['flac', 'opus', 'aac', 'mp3'] }).notNull(),
-  bitrate: integer('bitrate').notNull(),
-  enabled: integer('enabled', { mode: 'boolean' }).notNull().default(true),
-}, (table) => [
-  // Unique constraint instead of composite PK
-  unique().on(table.codec, table.bitrate),
-]);
+export const codecConfigs = sqliteTable(
+    'codec_configs',
+    {
+        id: text('id')
+            .primaryKey()
+            .$defaultFn(() => crypto.randomUUID()),
+        codec: text('codec', {
+            enum: ['flac', 'opus', 'aac', 'mp3'],
+        }).notNull(),
+        bitrate: integer('bitrate').notNull(),
+        enabled: integer('enabled', { mode: 'boolean' })
+            .notNull()
+            .default(true),
+    },
+    (table) => [
+        // Unique constraint instead of composite PK
+        unique().on(table.codec, table.bitrate),
+    ]
+)
 
 // Then in candidateFiles, you could either:
 // 1. Use the composite FK (same as above)
-// 2. Or just reference the UUID: 
+// 2. Or just reference the UUID:
 //    codecConfigId: text('codec_config_id').references(() => codecConfigs.id)
 ```
 
@@ -485,68 +570,96 @@ The second approach (UUID PK + unique constraint) is often simpler for foreign k
 Which approach fits your use case better?
 
 ```typescript
-import { 
-  integer, 
-  sqliteTable, 
-  text, 
-  primaryKey,
-  foreignKey 
-} from 'drizzle-orm/sqlite-core';
+import {
+    integer,
+    sqliteTable,
+    text,
+    primaryKey,
+    foreignKey,
+} from 'drizzle-orm/sqlite-core'
 
 // ═══════════════════════════════════════════════════════════════════════════
 // CODEC CONFIGS - with composite PK
 // ═══════════════════════════════════════════════════════════════════════════
-export const codecConfigs = sqliteTable('codec_configs', {
-  id: text('id').notNull().$defaultFn(() => crypto.randomUUID()),
-  codec: text('codec', { enum: ['flac', 'opus', 'aac', 'mp3'] }).notNull(),
-  bitrate: integer('bitrate').notNull(), // 0 for lossless
-  enabled: integer('enabled', { mode: 'boolean' }).notNull().default(true),
-}, (table) => [
-  // Composite primary key
-  primaryKey({ columns: [table.codec, table.bitrate] }),
-]);
+export const codecConfigs = sqliteTable(
+    'codec_configs',
+    {
+        id: text('id')
+            .notNull()
+            .$defaultFn(() => crypto.randomUUID()),
+        codec: text('codec', {
+            enum: ['flac', 'opus', 'aac', 'mp3'],
+        }).notNull(),
+        bitrate: integer('bitrate').notNull(), // 0 for lossless
+        enabled: integer('enabled', { mode: 'boolean' })
+            .notNull()
+            .default(true),
+    },
+    (table) => [
+        // Composite primary key
+        primaryKey({ columns: [table.codec, table.bitrate] }),
+    ]
+)
 
 // ═══════════════════════════════════════════════════════════════════════════
 // CANDIDATE FILES - with composite FK
 // ═══════════════════════════════════════════════════════════════════════════
-export const candidateFiles = sqliteTable('candidate_files', {
-  id: text('id').primaryKey().$defaultFn(() => crypto.randomUUID()),
-  r2Key: text('r2_key').notNull().unique(),
-  
-  // These columns will form the FK
-  codec: text('codec', { enum: ['flac', 'opus', 'aac', 'mp3'] }).notNull(),
-  bitrate: integer('bitrate').notNull(),
-  
-  // ... other columns
-  sourceFileId: text('source_file_id').notNull(),
-  createdAt: integer('created_at', { mode: 'timestamp' })
-    .notNull()
-    .$defaultFn(() => new Date()),
-}, (table) => [
-  // Composite foreign key referencing codecConfigs
-  foreignKey({
-    columns: [table.codec, table.bitrate],
-    foreignColumns: [codecConfigs.codec, codecConfigs.bitrate],
-  }).onDelete('restrict'), // or 'cascade', 'set null', etc.
-]);
+export const candidateFiles = sqliteTable(
+    'candidate_files',
+    {
+        id: text('id')
+            .primaryKey()
+            .$defaultFn(() => crypto.randomUUID()),
+        r2Key: text('r2_key').notNull().unique(),
+
+        // These columns will form the FK
+        codec: text('codec', {
+            enum: ['flac', 'opus', 'aac', 'mp3'],
+        }).notNull(),
+        bitrate: integer('bitrate').notNull(),
+
+        // ... other columns
+        sourceFileId: text('source_file_id').notNull(),
+        createdAt: integer('created_at', { mode: 'timestamp' })
+            .notNull()
+            .$defaultFn(() => new Date()),
+    },
+    (table) => [
+        // Composite foreign key referencing codecConfigs
+        foreignKey({
+            columns: [table.codec, table.bitrate],
+            foreignColumns: [codecConfigs.codec, codecConfigs.bitrate],
+        }).onDelete('restrict'), // or 'cascade', 'set null', etc.
+    ]
+)
 ```
 
 ```typescript
-import { unique } from 'drizzle-orm/sqlite-core';
+import { unique } from 'drizzle-orm/sqlite-core'
 
-export const codecConfigs = sqliteTable('codec_configs', {
-  id: text('id').primaryKey().$defaultFn(() => crypto.randomUUID()),
-  codec: text('codec', { enum: ['flac', 'opus', 'aac', 'mp3'] }).notNull(),
-  bitrate: integer('bitrate').notNull(),
-  enabled: integer('enabled', { mode: 'boolean' }).notNull().default(true),
-}, (table) => [
-  // Unique constraint instead of composite PK
-  unique().on(table.codec, table.bitrate),
-]);
+export const codecConfigs = sqliteTable(
+    'codec_configs',
+    {
+        id: text('id')
+            .primaryKey()
+            .$defaultFn(() => crypto.randomUUID()),
+        codec: text('codec', {
+            enum: ['flac', 'opus', 'aac', 'mp3'],
+        }).notNull(),
+        bitrate: integer('bitrate').notNull(),
+        enabled: integer('enabled', { mode: 'boolean' })
+            .notNull()
+            .default(true),
+    },
+    (table) => [
+        // Unique constraint instead of composite PK
+        unique().on(table.codec, table.bitrate),
+    ]
+)
 
 // Then in candidateFiles, you could either:
 // 1. Use the composite FK (same as above)
-// 2. Or just reference the UUID: 
+// 2. Or just reference the UUID:
 //    codecConfigId: text('codec_config_id').references(() => codecConfigs.id)
 ```
 
@@ -575,12 +688,12 @@ Yes, exactly right! With a composite FK, you store the individual columns separa
 
 The tradeoff vs. a single UUID FK:
 
-| Composite FK | UUID FK |
-|--------------|---------|
-| 2+ columns in referencing table | 1 column |
+| Composite FK                         | UUID FK                        |
+| ------------------------------------ | ------------------------------ |
+| 2+ columns in referencing table      | 1 column                       |
 | No join needed to know codec/bitrate | Need join to get codec/bitrate |
-| Natural, readable data | Opaque ID |
-| Slightly wider rows | Slightly narrower |
+| Natural, readable data               | Opaque ID                      |
+| Slightly wider rows                  | Slightly narrower              |
 
 Since you'll probably want to display/filter by codec and bitrate often anyway, having them directly on `candidate_files` is likely convenient—you get the FK integrity _and_ the data without a join.
 
@@ -608,19 +721,26 @@ with a composite key like this i wont necessarily need an ID column on the codec
 Correct! If `(codec, bitrate)` is your primary key, you don't need a separate `id` column at all. The composite key _is_ the unique identifier.
 
 ```typescript
-export const codecConfigs = sqliteTable('codec_configs', {
-  // No id column needed!
-  codec: text('codec', { enum: ['flac', 'opus', 'aac', 'mp3'] }).notNull(),
-  bitrate: integer('bitrate').notNull(), // 0 for lossless
-  enabled: integer('enabled', { mode: 'boolean' }).notNull().default(true),
-}, (table) => [
-  primaryKey({ columns: [table.codec, table.bitrate] }),
-]);
+export const codecConfigs = sqliteTable(
+    'codec_configs',
+    {
+        // No id column needed!
+        codec: text('codec', {
+            enum: ['flac', 'opus', 'aac', 'mp3'],
+        }).notNull(),
+        bitrate: integer('bitrate').notNull(), // 0 for lossless
+        enabled: integer('enabled', { mode: 'boolean' })
+            .notNull()
+            .default(true),
+    },
+    (table) => [primaryKey({ columns: [table.codec, table.bitrate] })]
+)
 ```
 
 This is cleaner for a config/lookup table like this—there's no reason to generate UUIDs when the natural key already uniquely identifies each row.
 
 **When you might still want an ID:**
+
 - If you anticipate needing single-column FK references elsewhere
 - If you want a stable identifier that survives if codec names ever change
 - If you're building APIs where opaque IDs are preferred
@@ -628,14 +748,20 @@ This is cleaner for a config/lookup table like this—there's no reason to gener
 But for a finite permutation table (`mp3@128`, `opus@96`, etc.) that won't change often, the composite PK is the simpler, more normalized approach.
 
 ```typescript
-export const codecConfigs = sqliteTable('codec_configs', {
-  // No id column needed!
-  codec: text('codec', { enum: ['flac', 'opus', 'aac', 'mp3'] }).notNull(),
-  bitrate: integer('bitrate').notNull(), // 0 for lossless
-  enabled: integer('enabled', { mode: 'boolean' }).notNull().default(true),
-}, (table) => [
-  primaryKey({ columns: [table.codec, table.bitrate] }),
-]);
+export const codecConfigs = sqliteTable(
+    'codec_configs',
+    {
+        // No id column needed!
+        codec: text('codec', {
+            enum: ['flac', 'opus', 'aac', 'mp3'],
+        }).notNull(),
+        bitrate: integer('bitrate').notNull(), // 0 for lossless
+        enabled: integer('enabled', { mode: 'boolean' })
+            .notNull()
+            .default(true),
+    },
+    (table) => [primaryKey({ columns: [table.codec, table.bitrate] })]
+)
 ```
 
 ---
@@ -660,33 +786,35 @@ You can absolutely **copy** those values into the answers table for read optimiz
 
 ```typescript
 export const surveyAnswers = sqliteTable('survey_answers', {
-  id: text('id').primaryKey().$defaultFn(() => crypto.randomUUID()),
-  
-  // FK to specific device
-  deviceId: text('device_id')
-    .references(() => listeningDevices.id)
-    .notNull(),
-  
-  // Denormalized for fast reads (no join needed)
-  deviceCategory: text('device_category', { 
-    enum: ['headphones', 'earbuds', 'speakers', 'car', 'other'] 
-  }).notNull(),
-  devicePriceTier: text('device_price_tier', { 
-    enum: ['budget', 'mid', 'premium', 'flagship'] 
-  }),
-  
-  // ... rest of answer fields
-});
+    id: text('id')
+        .primaryKey()
+        .$defaultFn(() => crypto.randomUUID()),
+
+    // FK to specific device
+    deviceId: text('device_id')
+        .references(() => listeningDevices.id)
+        .notNull(),
+
+    // Denormalized for fast reads (no join needed)
+    deviceCategory: text('device_category', {
+        enum: ['headphones', 'earbuds', 'speakers', 'car', 'other'],
+    }).notNull(),
+    devicePriceTier: text('device_price_tier', {
+        enum: ['budget', 'mid', 'premium', 'flagship'],
+    }),
+
+    // ... rest of answer fields
+})
 ```
 
 ### Tradeoffs
 
-| Denormalized | Normalized (FK only) |
-|--------------|---------------------|
-| ✅ No join for analytics | ❌ Need join to get category/tier |
-| ✅ Faster GROUP BY queries | ✅ Single source of truth |
-| ⚠️ Data can drift if device changes | ✅ Always current |
-| ⚠️ Slightly wider rows | ✅ Smaller rows |
+| Denormalized                        | Normalized (FK only)              |
+| ----------------------------------- | --------------------------------- |
+| ✅ No join for analytics            | ❌ Need join to get category/tier |
+| ✅ Faster GROUP BY queries          | ✅ Single source of truth         |
+| ⚠️ Data can drift if device changes | ✅ Always current                 |
+| ⚠️ Slightly wider rows              | ✅ Smaller rows                   |
 
 ### My Take
 
@@ -701,52 +829,54 @@ Just populate the denormalized columns at insert time:
 ```typescript
 // When recording an answer
 const device = await db.query.listeningDevices.findFirst({
-  where: eq(listeningDevices.id, selectedDeviceId)
-});
+    where: eq(listeningDevices.id, selectedDeviceId),
+})
 
 await db.insert(surveyAnswers).values({
-  deviceId: device.id,
-  deviceCategory: device.category,      // snapshot
-  devicePriceTier: device.priceTier,    // snapshot
-  // ...
-});
+    deviceId: device.id,
+    deviceCategory: device.category, // snapshot
+    devicePriceTier: device.priceTier, // snapshot
+    // ...
+})
 ```
 
 This is a practical optimization, not a composite key—but achieves the same read benefit you're after.
 
 ```typescript
 export const surveyAnswers = sqliteTable('survey_answers', {
-  id: text('id').primaryKey().$defaultFn(() => crypto.randomUUID()),
-  
-  // FK to specific device
-  deviceId: text('device_id')
-    .references(() => listeningDevices.id)
-    .notNull(),
-  
-  // Denormalized for fast reads (no join needed)
-  deviceCategory: text('device_category', { 
-    enum: ['headphones', 'earbuds', 'speakers', 'car', 'other'] 
-  }).notNull(),
-  devicePriceTier: text('device_price_tier', { 
-    enum: ['budget', 'mid', 'premium', 'flagship'] 
-  }),
-  
-  // ... rest of answer fields
-});
+    id: text('id')
+        .primaryKey()
+        .$defaultFn(() => crypto.randomUUID()),
+
+    // FK to specific device
+    deviceId: text('device_id')
+        .references(() => listeningDevices.id)
+        .notNull(),
+
+    // Denormalized for fast reads (no join needed)
+    deviceCategory: text('device_category', {
+        enum: ['headphones', 'earbuds', 'speakers', 'car', 'other'],
+    }).notNull(),
+    devicePriceTier: text('device_price_tier', {
+        enum: ['budget', 'mid', 'premium', 'flagship'],
+    }),
+
+    // ... rest of answer fields
+})
 ```
 
 ```typescript
 // When recording an answer
 const device = await db.query.listeningDevices.findFirst({
-  where: eq(listeningDevices.id, selectedDeviceId)
-});
+    where: eq(listeningDevices.id, selectedDeviceId),
+})
 
 await db.insert(surveyAnswers).values({
-  deviceId: device.id,
-  deviceCategory: device.category,      // snapshot
-  devicePriceTier: device.priceTier,    // snapshot
-  // ...
-});
+    deviceId: device.id,
+    deviceCategory: device.category, // snapshot
+    devicePriceTier: device.priceTier, // snapshot
+    // ...
+})
 ```
 
 ---
@@ -767,7 +897,7 @@ If `survey_answers` only has `device_id`, but you want to show stats by `categor
 
 ```sql
 -- You must JOIN to get category from the other table
-SELECT 
+SELECT
   d.category,
   COUNT(*) as total_answers
 FROM survey_answers a
@@ -779,13 +909,16 @@ Drizzle equivalent:
 
 ```typescript
 const stats = await db
-  .select({
-    category: listeningDevices.category,
-    count: count(),
-  })
-  .from(surveyAnswers)
-  .innerJoin(listeningDevices, eq(surveyAnswers.deviceId, listeningDevices.id))
-  .groupBy(listeningDevices.category);
+    .select({
+        category: listeningDevices.category,
+        count: count(),
+    })
+    .from(surveyAnswers)
+    .innerJoin(
+        listeningDevices,
+        eq(surveyAnswers.deviceId, listeningDevices.id)
+    )
+    .groupBy(listeningDevices.category)
 ```
 
 **Two tables touched** → more row reads on D1.
@@ -798,7 +931,7 @@ If `survey_answers` has `device_category` directly:
 
 ```sql
 -- Everything you need is in one table
-SELECT 
+SELECT
   device_category,
   COUNT(*) as total_answers
 FROM survey_answers
@@ -809,12 +942,12 @@ Drizzle equivalent:
 
 ```typescript
 const stats = await db
-  .select({
-    category: surveyAnswers.deviceCategory,
-    count: count(),
-  })
-  .from(surveyAnswers)
-  .groupBy(surveyAnswers.deviceCategory);
+    .select({
+        category: surveyAnswers.deviceCategory,
+        count: count(),
+    })
+    .from(surveyAnswers)
+    .groupBy(surveyAnswers.deviceCategory)
 ```
 
 **One table** → fewer row reads, simpler query.
@@ -852,7 +985,7 @@ For your analytics dashboard that groups by device type, the denormalized versio
 
 ```sql
 -- You must JOIN to get category from the other table
-SELECT 
+SELECT
   d.category,
   COUNT(*) as total_answers
 FROM survey_answers a
@@ -862,18 +995,21 @@ GROUP BY d.category
 
 ```typescript
 const stats = await db
-  .select({
-    category: listeningDevices.category,
-    count: count(),
-  })
-  .from(surveyAnswers)
-  .innerJoin(listeningDevices, eq(surveyAnswers.deviceId, listeningDevices.id))
-  .groupBy(listeningDevices.category);
+    .select({
+        category: listeningDevices.category,
+        count: count(),
+    })
+    .from(surveyAnswers)
+    .innerJoin(
+        listeningDevices,
+        eq(surveyAnswers.deviceId, listeningDevices.id)
+    )
+    .groupBy(listeningDevices.category)
 ```
 
 ```sql
 -- Everything you need is in one table
-SELECT 
+SELECT
   device_category,
   COUNT(*) as total_answers
 FROM survey_answers
@@ -882,12 +1018,12 @@ GROUP BY device_category
 
 ```typescript
 const stats = await db
-  .select({
-    category: surveyAnswers.deviceCategory,
-    count: count(),
-  })
-  .from(surveyAnswers)
-  .groupBy(surveyAnswers.deviceCategory);
+    .select({
+        category: surveyAnswers.deviceCategory,
+        count: count(),
+    })
+    .from(surveyAnswers)
+    .groupBy(surveyAnswers.deviceCategory)
 ```
 
 ```plaintext
@@ -931,18 +1067,21 @@ And you're right: `listening_devices` will be a small table (maybe dozens of row
 
 ```typescript
 export const surveyAnswers = sqliteTable('survey_answers', {
-  id: text('id').primaryKey().$defaultFn(() => crypto.randomUUID()),
-  
-  // Just the FK - join when you need category/tier
-  deviceId: text('device_id')
-    .references(() => listeningDevices.id)
-    .notNull(),
-  
-  // ... other fields
-});
+    id: text('id')
+        .primaryKey()
+        .$defaultFn(() => crypto.randomUUID()),
+
+    // Just the FK - join when you need category/tier
+    deviceId: text('device_id')
+        .references(() => listeningDevices.id)
+        .notNull(),
+
+    // ... other fields
+})
 ```
 
 **Benefits of staying normalized:**
+
 - Single source of truth for device info
 - If you update a device's category, queries reflect it immediately
 - Simpler schema, less redundancy
@@ -952,15 +1091,17 @@ Denormalization is worth it when you're joining against _large_ tables or need t
 
 ```typescript
 export const surveyAnswers = sqliteTable('survey_answers', {
-  id: text('id').primaryKey().$defaultFn(() => crypto.randomUUID()),
-  
-  // Just the FK - join when you need category/tier
-  deviceId: text('device_id')
-    .references(() => listeningDevices.id)
-    .notNull(),
-  
-  // ... other fields
-});
+    id: text('id')
+        .primaryKey()
+        .$defaultFn(() => crypto.randomUUID()),
+
+    // Just the FK - join when you need category/tier
+    deviceId: text('device_id')
+        .references(() => listeningDevices.id)
+        .notNull(),
+
+    // ... other fields
+})
 ```
 
 ---
@@ -976,42 +1117,45 @@ then i can use JOINs on answers -> candidate_files -> source_files as well, to j
 Yes! You can chain multiple JOINs in a single query. For your case where each answer has **two candidates** (A and B), you'd join the same table twice with different aliases:
 
 ```typescript
-import { eq } from 'drizzle-orm';
-import { alias } from 'drizzle-orm/sqlite-core';
+import { eq } from 'drizzle-orm'
+import { alias } from 'drizzle-orm/sqlite-core'
 
 // Create aliases for the "same table joined twice" pattern
-const candidateA = alias(candidateFiles, 'candidate_a');
-const candidateB = alias(candidateFiles, 'candidate_b');
-const sourceA = alias(sourceFiles, 'source_a');
-const sourceB = alias(sourceFiles, 'source_b');
+const candidateA = alias(candidateFiles, 'candidate_a')
+const candidateB = alias(candidateFiles, 'candidate_b')
+const sourceA = alias(sourceFiles, 'source_a')
+const sourceB = alias(sourceFiles, 'source_b')
 
 const results = await db
-  .select({
-    answerId: surveyAnswers.id,
-    selected: surveyAnswers.selected,
-    
-    // Option A details
-    codecA: candidateA.codec,
-    bitrateA: candidateA.bitrate,
-    songA: sourceA.title,
-    
-    // Option B details
-    codecB: candidateB.codec,
-    bitrateB: candidateB.bitrate,
-    songB: sourceB.title,
-    
-    // Device info
-    deviceCategory: listeningDevices.category,
-  })
-  .from(surveyAnswers)
-  // Join candidate A → source A
-  .innerJoin(candidateA, eq(surveyAnswers.candidateAId, candidateA.id))
-  .innerJoin(sourceA, eq(candidateA.sourceFileId, sourceA.id))
-  // Join candidate B → source B
-  .innerJoin(candidateB, eq(surveyAnswers.candidateBId, candidateB.id))
-  .innerJoin(sourceB, eq(candidateB.sourceFileId, sourceB.id))
-  // Join device
-  .innerJoin(listeningDevices, eq(surveyAnswers.deviceId, listeningDevices.id));
+    .select({
+        answerId: surveyAnswers.id,
+        selected: surveyAnswers.selected,
+
+        // Option A details
+        codecA: candidateA.codec,
+        bitrateA: candidateA.bitrate,
+        songA: sourceA.title,
+
+        // Option B details
+        codecB: candidateB.codec,
+        bitrateB: candidateB.bitrate,
+        songB: sourceB.title,
+
+        // Device info
+        deviceCategory: listeningDevices.category,
+    })
+    .from(surveyAnswers)
+    // Join candidate A → source A
+    .innerJoin(candidateA, eq(surveyAnswers.candidateAId, candidateA.id))
+    .innerJoin(sourceA, eq(candidateA.sourceFileId, sourceA.id))
+    // Join candidate B → source B
+    .innerJoin(candidateB, eq(surveyAnswers.candidateBId, candidateB.id))
+    .innerJoin(sourceB, eq(candidateB.sourceFileId, sourceB.id))
+    // Join device
+    .innerJoin(
+        listeningDevices,
+        eq(surveyAnswers.deviceId, listeningDevices.id)
+    )
 ```
 
 ### What This Produces (Conceptually)
@@ -1035,63 +1179,68 @@ Your `survey_answers` table would need FKs to both candidates:
 
 ```typescript
 export const surveyAnswers = sqliteTable('survey_answers', {
-  id: text('id').primaryKey().$defaultFn(() => crypto.randomUUID()),
-  
-  candidateAId: text('candidate_a_id')
-    .references(() => candidateFiles.id)
-    .notNull(),
-  candidateBId: text('candidate_b_id')
-    .references(() => candidateFiles.id)
-    .notNull(),
-  
-  selected: text('selected', { enum: ['a', 'b', 'neither'] }).notNull(),
-  deviceId: text('device_id')
-    .references(() => listeningDevices.id)
-    .notNull(),
-    
-  // ...
-});
+    id: text('id')
+        .primaryKey()
+        .$defaultFn(() => crypto.randomUUID()),
+
+    candidateAId: text('candidate_a_id')
+        .references(() => candidateFiles.id)
+        .notNull(),
+    candidateBId: text('candidate_b_id')
+        .references(() => candidateFiles.id)
+        .notNull(),
+
+    selected: text('selected', { enum: ['a', 'b', 'neither'] }).notNull(),
+    deviceId: text('device_id')
+        .references(() => listeningDevices.id)
+        .notNull(),
+
+    // ...
+})
 ```
 
 This is the normalized, relational approach—and it's exactly what SQL is built for.
 
 ```typescript
-import { eq } from 'drizzle-orm';
-import { alias } from 'drizzle-orm/sqlite-core';
+import { eq } from 'drizzle-orm'
+import { alias } from 'drizzle-orm/sqlite-core'
 
 // Create aliases for the "same table joined twice" pattern
-const candidateA = alias(candidateFiles, 'candidate_a');
-const candidateB = alias(candidateFiles, 'candidate_b');
-const sourceA = alias(sourceFiles, 'source_a');
-const sourceB = alias(sourceFiles, 'source_b');
+const candidateA = alias(candidateFiles, 'candidate_a')
+const candidateB = alias(candidateFiles, 'candidate_b')
+const sourceA = alias(sourceFiles, 'source_a')
+const sourceB = alias(sourceFiles, 'source_b')
 
 const results = await db
-  .select({
-    answerId: surveyAnswers.id,
-    selected: surveyAnswers.selected,
-    
-    // Option A details
-    codecA: candidateA.codec,
-    bitrateA: candidateA.bitrate,
-    songA: sourceA.title,
-    
-    // Option B details
-    codecB: candidateB.codec,
-    bitrateB: candidateB.bitrate,
-    songB: sourceB.title,
-    
-    // Device info
-    deviceCategory: listeningDevices.category,
-  })
-  .from(surveyAnswers)
-  // Join candidate A → source A
-  .innerJoin(candidateA, eq(surveyAnswers.candidateAId, candidateA.id))
-  .innerJoin(sourceA, eq(candidateA.sourceFileId, sourceA.id))
-  // Join candidate B → source B
-  .innerJoin(candidateB, eq(surveyAnswers.candidateBId, candidateB.id))
-  .innerJoin(sourceB, eq(candidateB.sourceFileId, sourceB.id))
-  // Join device
-  .innerJoin(listeningDevices, eq(surveyAnswers.deviceId, listeningDevices.id));
+    .select({
+        answerId: surveyAnswers.id,
+        selected: surveyAnswers.selected,
+
+        // Option A details
+        codecA: candidateA.codec,
+        bitrateA: candidateA.bitrate,
+        songA: sourceA.title,
+
+        // Option B details
+        codecB: candidateB.codec,
+        bitrateB: candidateB.bitrate,
+        songB: sourceB.title,
+
+        // Device info
+        deviceCategory: listeningDevices.category,
+    })
+    .from(surveyAnswers)
+    // Join candidate A → source A
+    .innerJoin(candidateA, eq(surveyAnswers.candidateAId, candidateA.id))
+    .innerJoin(sourceA, eq(candidateA.sourceFileId, sourceA.id))
+    // Join candidate B → source B
+    .innerJoin(candidateB, eq(surveyAnswers.candidateBId, candidateB.id))
+    .innerJoin(sourceB, eq(candidateB.sourceFileId, sourceB.id))
+    // Join device
+    .innerJoin(
+        listeningDevices,
+        eq(surveyAnswers.deviceId, listeningDevices.id)
+    )
 ```
 
 ```plaintext
@@ -1107,22 +1256,24 @@ const results = await db
 
 ```typescript
 export const surveyAnswers = sqliteTable('survey_answers', {
-  id: text('id').primaryKey().$defaultFn(() => crypto.randomUUID()),
-  
-  candidateAId: text('candidate_a_id')
-    .references(() => candidateFiles.id)
-    .notNull(),
-  candidateBId: text('candidate_b_id')
-    .references(() => candidateFiles.id)
-    .notNull(),
-  
-  selected: text('selected', { enum: ['a', 'b', 'neither'] }).notNull(),
-  deviceId: text('device_id')
-    .references(() => listeningDevices.id)
-    .notNull(),
-    
-  // ...
-});
+    id: text('id')
+        .primaryKey()
+        .$defaultFn(() => crypto.randomUUID()),
+
+    candidateAId: text('candidate_a_id')
+        .references(() => candidateFiles.id)
+        .notNull(),
+    candidateBId: text('candidate_b_id')
+        .references(() => candidateFiles.id)
+        .notNull(),
+
+    selected: text('selected', { enum: ['a', 'b', 'neither'] }).notNull(),
+    deviceId: text('device_id')
+        .references(() => listeningDevices.id)
+        .notNull(),
+
+    // ...
+})
 ```
 
 ---
@@ -1203,6 +1354,7 @@ WHERE selectedCandidate.codec = 'opus' AND otherCandidate.codec = 'mp3'
 ### Verdict
 
 Stick with **A/B + selected**. It's:
+
 - Symmetric (both candidates treated equally)
 - Handles "neither" cleanly
 - Preserves presentation order for bias analysis
@@ -1263,58 +1415,58 @@ selected: text('selected', { enum: ['a', 'b', 'neither'] }).notNull(),
 
 Alright I think this should be a pretty complete "mock schema" for the different tables i will need for this project. any thoughts / feedback / suggestions?
 
-   - [ ] admin dashboard uses workos for auth  
-    - [ ] listening_devices table containing hardware options
-        - [ ] PK id*
-        - [ ] created_at*
-        - [ ] modified_at*
-        - [ ] approved_at (device is only listed globally if approved_at is non-null)
-        - [ ] approved_by (admin_id)
-        - [ ] device_type* (enum: speaker(s) | headphones)
-        - [ ] connection_type* (enum: wired | bluetooth | wifi | ir)
-        - [ ] brand*
-        - [ ] model*
-        - [ ] price_tier* (enum: budget | mid | premium | flagship)  
-    - [ ] source_files table with original, lossless uploads
-        - [ ] PK id*
-        - [ ] r2_key (path)*
-        - [ ] uploaded_at*
-        - [ ] license_url* (link to generic license terms, or proof of license to me or uploader AND me that covers usage in the manner of this research project)
-        - [ ] approved_at (audio is only included if approved_at is non-null)
-        - [ ] approved_by (admin_id)
-        - [ ] title*
-        - [ ] stream_url
-        - [ ] artist
-        - [ ] artist_url
-        - [ ] genre  
-    - [ ] candidate_files table with entries for every (configured) permutation of codec+bitrate for any source_file
-        - [ ] PK id*
-        - [ ] r2_key (path)*
-        - [ ] codec* (enum: flac | opus | aac | mp3)
-        - [ ] bitrate (integer, null for lossless)
-        - [ ] source_file_id (FK source_files)
-        - [ ] FK(`codec`,`bitrate`) from quality_options  
-    - [ ] quality_options table with codec+bitrate permutations
-        - [ ] codec* (enum: flac | opus | aac | mp3)
-        - [ ] bitrate* (integer, 0 for lossless)
-        - [ ] enabled* (whether to use this permutation in testing)
-        - [ ] PK(`codec`,`bitrate`) (composite key)  
-    - [ ] ephemeral_stream_urls table acting as a lookup table to resolve candidate files and codec permutations upon submission
-        - [ ] PK token* to permit streaming of the candidate_file
-        - [ ] candidate_file_id* (FK candidate_files)
-        - [ ] expires_at* datetime after which this stream url is no longer valid. ensures that if the entry was never resolved (an answer never submitted), that the audio file cannot be downloaded from this stream link after a certain datetime. if the stream url is requested after the expires_at datetime, the row is deleted.  
-    - [ ] answers table
-        - [ ] PK id*
-        - [ ] created_at*
-        - [ ] device_id* (FK listening_devices)
-        - [ ] candidate_a_id*
-        - [ ] candidate_b_id*
-        - [ ] selected (enum: a | b | neither)*
-        - [ ] comparison_type (enum: same_gapless | same_gap | different_gapless | different_gap)*
-        - [ ] response_time (integer, time spent deciding in ms)  
-    - [ ] result_snapshots table
-        - [ ] PK created_at*
-        - [ ] assorted insight columns, may be expanded on in future with migrations or something...
+- [ ] admin dashboard uses workos for auth
+- [ ] listening_devices table containing hardware options
+    - [ ] PK id\*
+    - [ ] created_at\*
+    - [ ] modified_at\*
+    - [ ] approved_at (device is only listed globally if approved_at is non-null)
+    - [ ] approved_by (admin_id)
+    - [ ] device_type\* (enum: speaker(s) | headphones)
+    - [ ] connection_type\* (enum: wired | bluetooth | wifi | ir)
+    - [ ] brand\*
+    - [ ] model\*
+    - [ ] price_tier\* (enum: budget | mid | premium | flagship)
+- [ ] source_files table with original, lossless uploads
+    - [ ] PK id\*
+    - [ ] r2_key (path)\*
+    - [ ] uploaded_at\*
+    - [ ] license_url\* (link to generic license terms, or proof of license to me or uploader AND me that covers usage in the manner of this research project)
+    - [ ] approved_at (audio is only included if approved_at is non-null)
+    - [ ] approved_by (admin_id)
+    - [ ] title\*
+    - [ ] stream_url
+    - [ ] artist
+    - [ ] artist_url
+    - [ ] genre
+- [ ] candidate_files table with entries for every (configured) permutation of codec+bitrate for any source_file
+    - [ ] PK id\*
+    - [ ] r2_key (path)\*
+    - [ ] codec\* (enum: flac | opus | aac | mp3)
+    - [ ] bitrate (integer, null for lossless)
+    - [ ] source_file_id (FK source_files)
+    - [ ] FK(`codec`,`bitrate`) from quality_options
+- [ ] quality_options table with codec+bitrate permutations
+    - [ ] codec\* (enum: flac | opus | aac | mp3)
+    - [ ] bitrate\* (integer, 0 for lossless)
+    - [ ] enabled\* (whether to use this permutation in testing)
+    - [ ] PK(`codec`,`bitrate`) (composite key)
+- [ ] ephemeral_stream_urls table acting as a lookup table to resolve candidate files and codec permutations upon submission
+    - [ ] PK token\* to permit streaming of the candidate_file
+    - [ ] candidate_file_id\* (FK candidate_files)
+    - [ ] expires_at\* datetime after which this stream url is no longer valid. ensures that if the entry was never resolved (an answer never submitted), that the audio file cannot be downloaded from this stream link after a certain datetime. if the stream url is requested after the expires_at datetime, the row is deleted.
+- [ ] answers table
+    - [ ] PK id\*
+    - [ ] created_at\*
+    - [ ] device_id\* (FK listening_devices)
+    - [ ] candidate_a_id\*
+    - [ ] candidate_b_id\*
+    - [ ] selected (enum: a | b | neither)\*
+    - [ ] comparison_type (enum: same_gapless | same_gap | different_gapless | different_gap)\*
+    - [ ] response_time (integer, time spent deciding in ms)
+- [ ] result_snapshots table
+    - [ ] PK created_at\*
+    - [ ] assorted insight columns, may be expanded on in future with migrations or something...
 
 ---
 
@@ -1330,6 +1482,7 @@ quality_options.bitrate    → "0 for lossless"
 ```
 
 The composite FK will fail if these don't match. Pick one:
+
 - **Recommendation**: Use `0` for both. It keeps bitrate `NOT NULL` and the FK works cleanly.
 
 ---
@@ -1389,13 +1542,13 @@ Groups answers from the same user session (anonymous but useful for analysis lik
 
 ### Summary Checklist
 
-| Item | Status |
-|------|--------|
-| Bitrate null/0 consistency | ⚠️ Fix |
-| `expires_at` on snapshots | ⚠️ Add |
-| `resolved_at` on ephemeral urls | 💡 Consider |
-| `session_id` on answers | 💡 Consider |
-| Everything else | ✅ Looks good |
+| Item                            | Status        |
+| ------------------------------- | ------------- |
+| Bitrate null/0 consistency      | ⚠️ Fix        |
+| `expires_at` on snapshots       | ⚠️ Add        |
+| `resolved_at` on ephemeral urls | 💡 Consider   |
+| `session_id` on answers         | 💡 Consider   |
+| Everything else                 | ✅ Looks good |
 
 Want me to draft the full Drizzle schema with these adjustments?
 
@@ -1588,21 +1741,21 @@ Great question! Let me think backwards from what you'd want to display on the ho
 #### 5. Device Distribution (for participation breakdown)
 
 ```javascript
-- device_headphones_count
-- device_speakers_count
-- tier_budget_count
-- tier_mid_count
-- tier_premium_count
-- tier_flagship_count
+;-device_headphones_count -
+    device_speakers_count -
+    tier_budget_count -
+    tier_mid_count -
+    tier_premium_count -
+    tier_flagship_count
 ```
 
 #### 6. Comparison Type Distribution (gap analysis)
 
 ```javascript
-- comparison_same_gapless_count
-- comparison_same_gap_count
-- comparison_different_gapless_count
-- comparison_different_gap_count
+;-comparison_same_gapless_count -
+    comparison_same_gap_count -
+    comparison_different_gapless_count -
+    comparison_different_gap_count
 ```
 
 ---
@@ -1613,29 +1766,29 @@ Great question! Let me think backwards from what you'd want to display on the ho
 - [ ] result_snapshots table
     - [ ] PK created_at*
     - [ ] expires_at*
-    
+
     // Overall
     - [ ] total_responses*
     - [ ] total_sessions*
     - [ ] neither_rate* (decimal)
     - [ ] avg_response_time_ms
-    
+
     // Codec win rates
     - [ ] flac_win_rate, flac_comparisons
     - [ ] opus_win_rate, opus_comparisons
     - [ ] aac_win_rate, aac_comparisons
     - [ ] mp3_win_rate, mp3_comparisons
-    
+
     // Bitrate tier win rates
     - [ ] bitrate_lossless_win_rate
     - [ ] bitrate_high_win_rate
     - [ ] bitrate_mid_win_rate
     - [ ] bitrate_low_win_rate
-    
+
     // Headline matchups
     - [ ] lossless_vs_lossy_lossless_wins, lossless_vs_lossy_total
     - [ ] opus_vs_mp3_opus_wins, opus_vs_mp3_total
-    
+
     // Device breakdown
     - [ ] device_headphones_count, device_speakers_count
     - [ ] tier_budget_count, tier_mid_count, tier_premium_count, tier_flagship_count
@@ -1706,29 +1859,29 @@ Does this cover the insights you'd want to show, or are there specific compariso
 - [ ] result_snapshots table
     - [ ] PK created_at*
     - [ ] expires_at*
-    
+
     // Overall
     - [ ] total_responses*
     - [ ] total_sessions*
     - [ ] neither_rate* (decimal)
     - [ ] avg_response_time_ms
-    
+
     // Codec win rates
     - [ ] flac_win_rate, flac_comparisons
     - [ ] opus_win_rate, opus_comparisons
     - [ ] aac_win_rate, aac_comparisons
     - [ ] mp3_win_rate, mp3_comparisons
-    
+
     // Bitrate tier win rates
     - [ ] bitrate_lossless_win_rate
     - [ ] bitrate_high_win_rate
     - [ ] bitrate_mid_win_rate
     - [ ] bitrate_low_win_rate
-    
+
     // Headline matchups
     - [ ] lossless_vs_lossy_lossless_wins, lossless_vs_lossy_total
     - [ ] opus_vs_mp3_opus_wins, opus_vs_mp3_total
-    
+
     // Device breakdown
     - [ ] device_headphones_count, device_speakers_count
     - [ ] tier_budget_count, tier_mid_count, tier_premium_count, tier_flagship_count
@@ -1769,7 +1922,7 @@ Bitrate  128  │ 72% │ 58% │ 41% │ 30% │  ← Opus competitive
               ├─────┼─────┼─────┼─────┤
          256  │ 94% │ 89% │ 78% │ 68% │  ← Opus dominant
               └─────┴─────┴─────┴─────┘
-              
+
 Cell color: Green (opus wins) → Yellow (50/50) → Red (mp3 wins)
 ```
 
@@ -1795,6 +1948,7 @@ Display as a simple equivalence chart or line graph showing the "codec efficienc
 ### 3. Close Bitrate → More "Neither" → **Scatter or Confidence Chart**
 
 **Option A: Scatter Plot**
+
 - X-axis: Bitrate difference (absolute value)
 - Y-axis: "Neither" rate
 - Shows correlation: closer bitrates → more uncertainty
@@ -1874,7 +2028,7 @@ Bitrate  128  │ 72% │ 58% │ 41% │ 30% │  ← Opus competitive
               ├─────┼─────┼─────┼─────┤
          256  │ 94% │ 89% │ 78% │ 68% │  ← Opus dominant
               └─────┴─────┴─────┴─────┘
-              
+
 Cell color: Green (opus wins) → Yellow (50/50) → Red (mp3 wins)
 ```
 
@@ -1942,19 +2096,19 @@ Got it—explicit columns for simple metrics, JSON for complex matrices. Best of
 - [ ] result_snapshots table
     - [ ] PK created_at*
     - [ ] expires_at*
-    
+
     // Simple scalar metrics (explicit columns)
     - [ ] total_responses*
     - [ ] total_sessions*
     - [ ] neither_rate*
     - [ ] avg_response_time_ms
-    
+
     // Codec win rates (explicit)
     - [ ] flac_win_rate, opus_win_rate, aac_win_rate, mp3_win_rate
-    
+
     // Device breakdown (explicit)
     - [ ] device_headphones_count, device_speakers_count
-    
+
     // Complex matrices (JSON columns)
     - [ ] codec_matchup_matrix (JSON: heatmap data for all codec/bitrate pairs)
     - [ ] bitrate_gap_confidence (JSON: neither rate by bitrate difference)
@@ -1975,7 +2129,7 @@ Got it—explicit columns for simple metrics, JSON for complex matrices. Best of
   "aac_vs_mp3": { /* ... */ }
 }
 
-// bitrate_gap_confidence  
+// bitrate_gap_confidence
 {
   "0_32": { "neither_rate": 0.42, "sample_size": 150 },
   "33_64": { "neither_rate": 0.28, "sample_size": 220 },
@@ -1997,19 +2151,19 @@ Clean separation: scalars stay queryable/indexable, matrices stay structured and
 - [ ] result_snapshots table
     - [ ] PK created_at*
     - [ ] expires_at*
-    
+
     // Simple scalar metrics (explicit columns)
     - [ ] total_responses*
     - [ ] total_sessions*
     - [ ] neither_rate*
     - [ ] avg_response_time_ms
-    
+
     // Codec win rates (explicit)
     - [ ] flac_win_rate, opus_win_rate, aac_win_rate, mp3_win_rate
-    
+
     // Device breakdown (explicit)
     - [ ] device_headphones_count, device_speakers_count
-    
+
     // Complex matrices (JSON columns)
     - [ ] codec_matchup_matrix (JSON: heatmap data for all codec/bitrate pairs)
     - [ ] bitrate_gap_confidence (JSON: neither rate by bitrate difference)
@@ -2028,7 +2182,7 @@ Clean separation: scalars stay queryable/indexable, matrices stay structured and
   "aac_vs_mp3": { /* ... */ }
 }
 
-// bitrate_gap_confidence  
+// bitrate_gap_confidence
 {
   "0_32": { "neither_rate": 0.42, "sample_size": 150 },
   "33_64": { "neither_rate": 0.28, "sample_size": 220 },
@@ -2070,7 +2224,7 @@ PQ Score
      │    ╱    ╱               ╱────╱
  60% │───╱────╱          ╱────╱
      └───┬────┬────┬────┬────┬────┬────
-        64   96  128  160  192  256  320  
+        64   96  128  160  192  256  320
                    Bitrate (kbps)
 ```
 
@@ -2085,7 +2239,7 @@ PQ Score
 100% │─────────────────────────────────── FLAC (reference)
      │                              ╭───── OPUS
  95% │                         ╭───╯
-     │                    ╭───╯    ╭────── AAC  
+     │                    ╭───╯    ╭────── AAC
  90% │               ╭───╯   ╭───╯
      │          ╭───╯   ╭───╯
  85% │     ╭───╯   ╭───╯         ╭──────── MP3
@@ -2095,11 +2249,12 @@ PQ Score
  75% │ ╱     ╭───╯
      │╱ ╭───╯
  70% ├──┴─────┬────┬────┬────┬────┬────┬────
-        64   96  128  160  192  256  320  
+        64   96  128  160  192  256  320
                    Bitrate (kbps)
 ```
 
 **What this shows:**
+
 - Draw horizontal line at any PQ → see equivalent configs (opus@128 ≈ aac@160 ≈ mp3@220)
 - Where curves flatten → diminishing returns
 - Where curves approach 100% → transparency threshold (indistinguishable from lossless)
@@ -2147,12 +2302,12 @@ I'd recommend **Elo or Bradley-Terry**, because:
 ```javascript
 - [ ] codec_pq_scores (JSON)
     // { "opus_64": 72.5, "opus_128": 88.2, "mp3_128": 79.1, ... }
-    
+
 - [ ] transparency_thresholds (JSON)
     // { "opus": 192, "aac": 256, "mp3": 320 }
     // bitrate where PQ score crosses 95% (or your chosen threshold)
-    
-- [ ] diminishing_returns_points (JSON)  
+
+- [ ] diminishing_returns_points (JSON)
     // { "opus": 160, "aac": 192, "mp3": 256 }
     // bitrate where PQ curve slope drops below threshold
 ```
@@ -2161,12 +2316,12 @@ I'd recommend **Elo or Bradley-Terry**, because:
 
 ### Summary
 
-| Goal | Visualization | Derived Metric |
-|------|--------------|----------------|
+| Goal                          | Visualization                         | Derived Metric                     |
+| ----------------------------- | ------------------------------------- | ---------------------------------- |
 | Diminishing returns per codec | Line chart, find where slope flattens | Bitrate where Δ PQ < 2% per 32kbps |
-| Cross-codec equivalence | Horizontal line intersections | PQ score equality |
-| Transparency threshold | Where line approaches 100% | Bitrate where PQ > 95% |
-| Optimal streaming bitrate | Sweet spot on curve | Best PQ/bitrate ratio |
+| Cross-codec equivalence       | Horizontal line intersections         | PQ score equality                  |
+| Transparency threshold        | Where line approaches 100%            | Bitrate where PQ > 95%             |
+| Optimal streaming bitrate     | Sweet spot on curve                   | Best PQ/bitrate ratio              |
 
 Does the Elo/Bradley-Terry approach make sense for deriving your PQ scores? I can help think through the implementation if you want.
 
@@ -2175,7 +2330,7 @@ PQ Score
 100% │─────────────────────────────────── FLAC (reference)
      │                              ╭───── OPUS
  95% │                         ╭───╯
-     │                    ╭───╯    ╭────── AAC  
+     │                    ╭───╯    ╭────── AAC
  90% │               ╭───╯   ╭───╯
      │          ╭───╯   ╭───╯
  85% │     ╭───╯   ╭───╯         ╭──────── MP3
@@ -2185,19 +2340,19 @@ PQ Score
  75% │ ╱     ╭───╯
      │╱ ╭───╯
  70% ├──┴─────┬────┬────┬────┬────┬────┬────
-        64   96  128  160  192  256  320  
+        64   96  128  160  192  256  320
                    Bitrate (kbps)
 ```
 
 ```plaintext
 - [ ] codec_pq_scores (JSON)
     // { "opus_64": 72.5, "opus_128": 88.2, "mp3_128": 79.1, ... }
-    
+
 - [ ] transparency_thresholds (JSON)
     // { "opus": 192, "aac": 256, "mp3": 320 }
     // bitrate where PQ score crosses 95% (or your chosen threshold)
-    
-- [ ] diminishing_returns_points (JSON)  
+
+- [ ] diminishing_returns_points (JSON)
     // { "opus": 160, "aac": 192, "mp3": 256 }
     // bitrate where PQ curve slope drops below threshold
 ```
@@ -2220,12 +2375,12 @@ Bradley-Terry is straightforward to implement—it's iterative maximum likelihoo
 
 ### CPU Time Considerations
 
-| Worker Type | CPU Limit | Notes |
-|-------------|-----------|-------|
-| Bundled (free) | 10ms | Too tight for large datasets |
-| Bundled (paid) | 50ms | Might work for smaller snapshots |
-| **Unbound** | 30 seconds | Plenty for Bradley-Terry |
-| **Queues + Workflows** | 15 min wall clock | For truly large datasets |
+| Worker Type            | CPU Limit         | Notes                            |
+| ---------------------- | ----------------- | -------------------------------- |
+| Bundled (free)         | 10ms              | Too tight for large datasets     |
+| Bundled (paid)         | 50ms              | Might work for smaller snapshots |
+| **Unbound**            | 30 seconds        | Plenty for Bradley-Terry         |
+| **Queues + Workflows** | 15 min wall clock | For truly large datasets         |
 
 **Recommendation**: Use [Cloudflare Queues](https://developers.cloudflare.com/queues/) with an Unbound worker. Snapshot creation gets queued, runs async, no user-facing latency concerns.
 
@@ -2316,15 +2471,16 @@ All data:
 
 ### For Your Use Case
 
-| Aspect | Elo | Bradley-Terry |
-|--------|-----|---------------|
-| Data type | Ongoing stream | Fixed dataset (snapshot) |
-| Order sensitivity | Yes | No |
-| Confidence intervals | No | Yes |
-| Research credibility | Lower | Higher |
-| Implementation | ~20 lines | ~50-100 lines |
+| Aspect               | Elo            | Bradley-Terry            |
+| -------------------- | -------------- | ------------------------ |
+| Data type            | Ongoing stream | Fixed dataset (snapshot) |
+| Order sensitivity    | Yes            | No                       |
+| Confidence intervals | No             | Yes                      |
+| Research credibility | Lower          | Higher                   |
+| Implementation       | ~20 lines      | ~50-100 lines            |
 
 **Bradley-Terry is the right choice** because:
+
 1. You're analyzing a fixed batch of survey answers
 2. The order users answered shouldn't affect quality scores
 3. You want statistically defensible results for research
@@ -2366,20 +2522,20 @@ This is actually where your research gets interesting:
 ### What "Lossy Beats Lossless" Might Reveal
 
 1. **Codec coloration as a feature**
-   - MP3 adds subtle harmonic distortion some perceive as "warmth"
-   - Some codecs slightly boost presence frequencies → sounds "clearer" on consumer gear
+    - MP3 adds subtle harmonic distortion some perceive as "warmth"
+    - Some codecs slightly boost presence frequencies → sounds "clearer" on consumer gear
 
 2. **Loudness bias**
-   - If encoding slightly affects perceived loudness, louder sounds "better"
-   - (You'd want to normalize levels during transcoding to control for this)
+    - If encoding slightly affects perceived loudness, louder sounds "better"
+    - (You'd want to normalize levels during transcoding to control for this)
 
 3. **Expectation effects**
-   - Users may guess which is "supposed to" sound better
-   - Blind testing helps, but bias persists
+    - Users may guess which is "supposed to" sound better
+    - Blind testing helps, but bias persists
 
 4. **Gear-dependent transparency**
-   - Budget earbuds might not reveal lossless advantages
-   - Flagship gear users may pick lossless more reliably
+    - Budget earbuds might not reveal lossless advantages
+    - Flagship gear users may pick lossless more reliably
 
 ### What This Looks Like in Your Data
 
@@ -2398,6 +2554,7 @@ FLAC isn't at 100%—it's just the highest. The gap between flac and opus@256 be
 ### Bonus Analysis: Segment by Device
 
 You could compute separate Bradley-Terry scores for:
+
 - Budget vs flagship tier
 - Headphones vs speakers
 
@@ -2455,7 +2612,7 @@ One line per genre, same codec:
 ```javascript
          OPUS
      ━━━━━━━ Classical (most revealing)
-     ─────── Electronic  
+     ─────── Electronic
      ─ ─ ─ ─ Jazz
      ······· Hip-Hop (most forgiving)
 ```
@@ -2474,12 +2631,12 @@ AAC@128                    78%        88%      81%    90%
 
 ### What This Might Reveal
 
-| Genre | Expected codec sensitivity |
-|-------|---------------------------|
-| Classical | High—dynamic range, silence exposes artifacts |
-| Jazz | High—cymbals/brushes reveal treble compression |
-| Electronic | Lower—heavy production masks artifacts |
-| Hip-Hop | Lower—bass-heavy, loudness masks detail loss |
+| Genre      | Expected codec sensitivity                     |
+| ---------- | ---------------------------------------------- |
+| Classical  | High—dynamic range, silence exposes artifacts  |
+| Jazz       | High—cymbals/brushes reveal treble compression |
+| Electronic | Lower—heavy production masks artifacts         |
+| Hip-Hop    | Lower—bass-heavy, loudness masks detail loss   |
 
 You might find: "Opus@128 is indistinguishable from lossless for electronic, but classical listeners need opus@192 to reach the same confidence."
 
@@ -2512,7 +2669,7 @@ PQ Score
 ```plaintext
          OPUS
      ━━━━━━━ Classical (most revealing)
-     ─────── Electronic  
+     ─────── Electronic
      ─ ─ ─ ─ Jazz
      ······· Hip-Hop (most forgiving)
 ```
@@ -2534,7 +2691,7 @@ AAC@128                    78%        88%      81%    90%
 
 **User**
 
-to visualize flac possibly losing against lossy codecs, maybe there should be an inverse lossless score for flac_opus, flac_mp3 and flac_aac to plot on the graph at different bitrates? 
+to visualize flac possibly losing against lossy codecs, maybe there should be an inverse lossless score for flac_opus, flac_mp3 and flac_aac to plot on the graph at different bitrates?
 
 ---
 
@@ -2564,15 +2721,16 @@ FLAC Win Rate (vs each codec)
 
 ### What This Shows
 
-| Zone | Meaning |
-|------|---------|
-| Above 50% | FLAC wins more often—lossy is distinguishable |
-| At 50% | Coin flip—**transparency threshold** |
+| Zone      | Meaning                                          |
+| --------- | ------------------------------------------------ |
+| Above 50% | FLAC wins more often—lossy is distinguishable    |
+| At 50%    | Coin flip—**transparency threshold**             |
 | Below 50% | Lossy wins more often—codec coloration preferred |
 
 ### The Insight You're After
 
 Where each line crosses 50%:
+
 - **MP3**: ~320 kbps (needs high bitrate to match FLAC)
 - **AAC**: ~256 kbps
 - **Opus**: ~192 kbps (most efficient)
@@ -2647,12 +2805,12 @@ The third case is the most interesting: "I'd rather listen to music I don't like
 
 ### Potential Insights
 
-| Finding | Meaning |
-|---------|---------|
-| Content preference usually wins | Quality matters less than catalog |
-| Quality wins at large gaps | Below X kbps, even favorite genres sound bad |
-| Genre-dependent tolerance | Electronic fans tolerate more compression than classical fans |
-| Quality wins for audiophile gear | Flagship users prioritize quality over content |
+| Finding                          | Meaning                                                       |
+| -------------------------------- | ------------------------------------------------------------- |
+| Content preference usually wins  | Quality matters less than catalog                             |
+| Quality wins at large gaps       | Below X kbps, even favorite genres sound bad                  |
+| Genre-dependent tolerance        | Electronic fans tolerate more compression than classical fans |
+| Quality wins for audiophile gear | Flagship users prioritize quality over content                |
 
 ### How to Analyze
 
@@ -2761,10 +2919,10 @@ Exactly right. Your `comparison_type` field is the filter:
 
 ### Two Separate Analyses, Same Dataset
 
-| Analysis | Filter | Output |
-|----------|--------|--------|
-| Codec PQ scores | `WHERE comparison_type IN ('same_gapless', 'same_gap')` | PQ curves, transparency thresholds |
-| Content vs quality | `WHERE comparison_type IN ('different_gapless', 'different_gap')` | Tradeoff ratio by bitrate gap |
+| Analysis           | Filter                                                            | Output                             |
+| ------------------ | ----------------------------------------------------------------- | ---------------------------------- |
+| Codec PQ scores    | `WHERE comparison_type IN ('same_gapless', 'same_gap')`           | PQ curves, transparency thresholds |
+| Content vs quality | `WHERE comparison_type IN ('different_gapless', 'different_gap')` | Tradeoff ratio by bitrate gap      |
 
 No data discarded—just segmented for the right question.
 
@@ -2903,11 +3061,11 @@ Now you're connecting the research to a real product application—smart.
 
 ### Benefits
 
-| Aspect | Fixed Bitrate | Dynamic Per-Genre |
-|--------|---------------|-------------------|
-| Storage | Baseline | **20-40% savings** |
-| Bandwidth | Baseline | **Lower for tolerant genres** |
-| Quality | Over-encoded for some, under for others | **Perceptually optimal everywhere** |
+| Aspect    | Fixed Bitrate                           | Dynamic Per-Genre                   |
+| --------- | --------------------------------------- | ----------------------------------- |
+| Storage   | Baseline                                | **20-40% savings**                  |
+| Bandwidth | Baseline                                | **Lower for tolerant genres**       |
+| Quality   | Over-encoded for some, under for others | **Perceptually optimal everywhere** |
 
 ### Even Smarter: Per-Song Analysis
 
@@ -2995,6 +3153,7 @@ No data loss, no schema redesign. Just additive.
 ### For Now
 
 Genre gets you:
+
 - Publishable research findings
 - Directionally useful encoding recommendations
 - A working product to iterate on

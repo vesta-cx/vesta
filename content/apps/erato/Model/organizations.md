@@ -11,15 +11,16 @@ Organizations are managed by WorkOS. Vesta does not store its own organizations 
 
 When querying or creating an organization via WorkOS, you receive an **Organization** object with these fields:
 
-| Field | Type | Source | Vesta Use |
-|-------|------|--------|-----------|
-| `id` | string | WorkOS | Unique organization ID (e.g., `org_01EHWNCE74X7JSDV0X3SZ3KJNY`); use as `workos_org_id` |
-| `name` | string | WorkOS | Organization display name (e.g., "Glassnote Records", "vesta") |
-| `created_at` | timestamp | WorkOS | When organization was created (ISO 8601) |
-| `updated_at` | timestamp | WorkOS | Last updated (ISO 8601) |
-| `object` | string | WorkOS | Always `"organization"` (resource type identifier) |
+| Field        | Type      | Source | Vesta Use                                                                               |
+| ------------ | --------- | ------ | --------------------------------------------------------------------------------------- |
+| `id`         | string    | WorkOS | Unique organization ID (e.g., `org_01EHWNCE74X7JSDV0X3SZ3KJNY`); use as `workos_org_id` |
+| `name`       | string    | WorkOS | Organization display name (e.g., "Glassnote Records", "vesta")                          |
+| `created_at` | timestamp | WorkOS | When organization was created (ISO 8601)                                                |
+| `updated_at` | timestamp | WorkOS | Last updated (ISO 8601)                                                                 |
+| `object`     | string    | WorkOS | Always `"organization"` (resource type identifier)                                      |
 
 **Example Organization:**
+
 ```json
 {
   "object": "organization",
@@ -36,11 +37,11 @@ When querying or creating an organization via WorkOS, you receive an **Organizat
 
 Every vesta instance has a **global organization** for all users who don't belong to a specific org:
 
-| App | Global Org ID | Purpose |
-|-----|---|---|
-| vesta | `org_vesta_*` | Default org for all vesta users |
+| App     | Global Org ID   | Purpose                           |
+| ------- | --------------- | --------------------------------- |
+| vesta   | `org_vesta_*`   | Default org for all vesta users   |
 | textile | `org_textile_*` | Default org for all textile users |
-| mia.cx | `org_miacx_*` | Default org for all mia.cx users |
+| mia.cx  | `org_miacx_*`   | Default org for all mia.cx users  |
 
 All users in vesta belong to the "vesta" global org by default (see [[./users.md#organizational-architecture]]).
 
@@ -48,11 +49,11 @@ All users in vesta belong to the "vesta" global org by default (see [[./users.md
 
 Users can also belong to specific organizations (labels, collectives, teams):
 
-| Example | Purpose |
-|---------|---------|
+| Example             | Purpose                                          |
+| ------------------- | ------------------------------------------------ |
 | "Glassnote Records" | Record label; can own multiple artist workspaces |
-| "Indie Collective" | Group of independent artists collaborating |
-| "Production Team" | Internal team within a label |
+| "Indie Collective"  | Group of independent artists collaborating       |
+| "Production Team"   | Internal team within a label                     |
 
 ## Workspace Ownership
 
@@ -73,6 +74,7 @@ SELECT * FROM workspaces WHERE owner_type = 'organization' AND owner_id = 'org_g
 Users are members of organizations and can have roles assigned by WorkOS:
 
 **Organization roles (managed in WorkOS Dashboard):**
+
 - `admin` — Full control over organization and its members
 - `member` — Standard member (read/write access to organization resources)
 - `viewer` — Read-only access
@@ -84,6 +86,7 @@ Roles affect permissions on resources and workspaces owned by the organization (
 Similar to [[./users.md#no-custom-attributes-on-workos]], vesta-specific org data is stored in vesta DB, not in WorkOS custom attributes.
 
 **Store in vesta DB:**
+
 - Organization settings (branding, preferences)
 - Subscription/billing info
 - Analytics and metrics
@@ -102,7 +105,7 @@ const session = {
   organization_id: profile.organization_id, // Never null; at least the app's global org
   email: profile.email,
   // ... other user fields
-};
+}
 ```
 
 When loading vesta resources, use `organization_id` to scope queries:
@@ -110,9 +113,8 @@ When loading vesta resources, use `organization_id` to scope queries:
 ```typescript
 // Load all workspaces for this user's org
 const workspaces = await db.query.workspaces.findMany({
-  where: (workspaces, { eq }) => 
-    eq(workspaces.owner_id, session.organization_id),
-});
+  where: (workspaces, { eq }) => eq(workspaces.owner_id, session.organization_id),
+})
 ```
 
 ## See Also

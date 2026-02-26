@@ -21,3 +21,7 @@
 [submodule "apps/sona"]
 	path = apps/sona
 	url = https://github.com/vesta-cx/sona.git
+
+[submodule "apps/docs"]
+	path = apps/docs
+	url = https://github.com/vesta-cx/docs.git

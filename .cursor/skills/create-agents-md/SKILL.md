@@ -88,19 +88,12 @@ Use this structure, dropping sections that don't apply:
 
 ## Writing Guidelines
 
-- **Positive directives over negatives.** "Use OKLCH" is better than "Don't use hex." Include the negative only as a clarifier after the positive (e.g., "Use OKLCH. Not hex, not HSL.").
-- **Concrete examples.** `oklch(0.141 0.005 285.823)` beats "use OKLCH format." `[data-theme='dark']` beats "use data attributes for theming."
-- **One line per convention in list sections.** Bold the keyword, follow with a dash and the rule. Keep it scannable.
-- **Tables for structured preferences.** Technology choices work well as tables with Preference | Detail columns.
-- **Reference Links as a table.** Direct URLs the agent should fetch rather than web searching. Only include tools/frameworks actually used in the project.
+- **Positive directives over negatives.** "Use OKLCH" > "Don't use hex." (Negative language makes models fixate on the forbidden action.)
+- **Concrete examples beat abstractions.** `oklch(0.141 0.005 285.823)` > "use OKLCH format." `[data-theme='dark']` > "use data attributes."
+- **One convention per line in lists.** Bold the keyword, dash-separated rule. Scannable format.
+- **Reference Links as a table.** Direct doc URLs agents should fetch instead of web searching.
 
-## Anti-Patterns
-
-- **Don't pad with implicit knowledge.** If every pnpm monorepo does it, skip it.
-- **Don't invent conventions.** If the codebase has no consistent error handling pattern, don't create one in the rules file. Flag it as a gap and let the user decide.
-- **Don't duplicate tooling.** Prettier enforces formatting. ESLint enforces lint rules. AGENTS.md covers what those tools can't.
-- **Don't over-constrain.** "Aim to" is better than "ALWAYS" when flexibility matters. Reserve strict language for things that genuinely break if violated.
-- **Don't bloat.** Every line competes for context window space. If a rule doesn't change agent behavior, cut it.
+For project-specific guidance: call out what agents would likely misinterpret (e.g., color spaces, state management patterns, environment variable prefixes).
 
 ## Process
 

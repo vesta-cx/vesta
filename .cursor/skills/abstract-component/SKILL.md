@@ -20,16 +20,16 @@ A file path (Svelte, Vue, React, etc.) to analyze. The user provides the path or
 
 When in doubt: if the abstraction would benefit another app in the monorepo, put it in the UI package.
 
-## Patterns to Look For
+## Patterns to Extract
+
+Look for repeated markup or complex structures that would simplify the original file:
 
 1. **Repeated markup** — Same structure used 2+ times; extract to a component with slots/props
 2. **Form sections** — Label + input + helper text blocks that follow a pattern
-3. **Card/panel layouts** — Bordered containers with header, body, actions
-4. **Button/action groups** — Repeated button rows with similar styling
-5. **List items** — Complex list-item markup (e.g. expandable rows with nested forms)
-6. **Dialog/modal scaffolding** — Title, content, footer with confirm/cancel
-7. **Loading/empty states** — Skeleton or placeholder blocks
-8. **Toast/notification patterns** — Custom toast layouts
+3. **Layout scaffolding** — Card/panel borders, dialogs, modal structures with header/body/footer
+4. **List items** — Expandable rows, complex nested forms
+
+Avoid extracting single-use markup.
 
 ## Workflow
 
@@ -58,19 +58,17 @@ When in doubt: if the abstraction would benefit another app in the monorepo, put
 - No regressions in behavior or styling
 - Imports resolve correctly
 
-## Naming
+## Naming Convention
 
-- **Component file**: `kebab-case.svelte` (e.g. `upload-progress-toast.svelte`)
-- **Component name**: PascalCase (e.g. `UploadProgressToast`)
-- **Folder**: Match the component when it has siblings (e.g. `audio-player/` with `audio-player.svelte`)
+- **File**: `kebab-case.svelte` (e.g., `upload-progress-toast.svelte`)
+- **Component**: PascalCase export (e.g., `export { default as UploadProgressToast }`)
+- **Folder**: Use when component has siblings or related files (e.g., `audio-player/audio-player.svelte`)
+
+These follow the monorepo's file-naming conventions.
 
 ## Quick Checklist
 
-- [ ] No app-specific routes or domain types in UI package components
-- [ ] Props and slots are minimal and clear
-- [ ] Original file uses the new component(s)
-- [ ] Exports added to index files if the package uses barrels
-
-## Additional Resources
-
-- For detailed patterns and monorepo structure, see [reference.md](reference.md)
+- [ ] Placement: UI package (reusable) vs app-specific
+- [ ] Props/slots are minimal and clear
+- [ ] Original file compiles and renders correctly
+- [ ] Exports added to index files (if the package uses barrels)

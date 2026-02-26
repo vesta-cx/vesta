@@ -26,6 +26,11 @@
             "types": "./dist/cookies/index.d.ts",
             "require": "./dist/cookies/index.js",
             "import": "./dist/cookies/index.js"
+        },
+        "./cors": {
+            "types": "./dist/cors/index.d.ts",
+            "require": "./dist/cors/index.js",
+            "import": "./dist/cors/index.js"
         }
     },
     "peerDependencies": {

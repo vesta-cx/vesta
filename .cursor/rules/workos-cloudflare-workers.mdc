@@ -1,34 +1,14 @@
 ---
 description: WorkOS AuthKit integration pattern for Cloudflare Workers
-globs:
-  - "**/auth/**"
-  - "**/hooks.server.*"
+globs: **/auth/**, **/hooks.server.*
+alwaysApply: false
 ---
 
 # WorkOS on Cloudflare Workers
 
 The official `@workos/authkit-sveltekit` SDK does not work on Cloudflare Workers (relies on `process.env` and Node.js crypto). Use the **WorkOS REST API** via `@vesta-cx/utils/auth`.
 
-## Shared Auth Package (`@vesta-cx/utils/auth`)
-
-All auth logic lives in `packages/utils/src/auth/`. Apps import from `@vesta-cx/utils/auth`:
-
-- **`createAuthHandle(config)`** — SvelteKit `Handle` factory. Hydrates `event.locals.session` on every request, enforces auth on `protectedPaths`. Compose via `sequence()`.
-- **`createSession`, `getSession`, `clearSession`** — iron-webcrypto sealed cookie management.
-- **`getAuthorizationUrl`, `authenticateWithCode`** — WorkOS User Management REST API helpers.
-- **Types**: `AuthSession`, `AuthResult`, `AuthHandleConfig`, `AuthEnv`.
-
-## Per-App Setup
-
-1. Add `@vesta-cx/utils` as a workspace dependency.
-2. In `hooks.server.ts`: `createAuthHandle({ protectedPaths: ['/admin'] })`, compose with `sequence()`.
-3. In `app.d.ts`: type `App.Locals` with `session: AuthSession | null`.
-4. Auth routes (`/auth/login`, `/auth/callback`, `/auth/logout`) stay in each app — import helpers from the shared package.
-5. Protected layouts read `locals.session` (already hydrated by the handle).
-
-## Env Vars (same across all apps)
-
-`PRIVATE_WORKOS_CLIENT_ID`, `PRIVATE_WORKOS_API_KEY`, `PRIVATE_WORKOS_ORG_ID`, `PRIVATE_WORKOS_COOKIE_PASSWORD`
+All auth logic lives in `packages/utils/src/auth/`. Apps import from `@vesta-cx/utils/auth`.
 
 ## Cloudflare Adapter Typing Gotcha
 

@@ -1,8 +1,6 @@
 ---
 description: ffmpeg audio encoding gotchas for generate-permutations.sh
-globs:
-  - tools/scripts/audio/**
-alwaysApply: false
+globs: tools/scripts/audio/**
 ---
 
 # ffmpeg audio encoding

@@ -11,7 +11,7 @@ Vesta is a pnpm + Turborepo monorepo targeting Cloudflare infrastructure.
 
 - `apps/sona` — Survey application (quality-survey) to gather data about quality perception
 - `apps/euterpe` — Microservice that transcodes audio uploads; called by sona "Upload raw FLAC"
-- `apps/erato` — Empty placeholder
+- `apps/erato` — Empty placeholder for Vesta data model
 
 ## Packages
 
@@ -20,8 +20,8 @@ Vesta is a pnpm + Turborepo monorepo targeting Cloudflare infrastructure.
 - `packages/utils` — Color utilities, easing functions, number/type helpers (Vitest tested)
 - `packages/storage` — `StorageProvider` abstraction; `R2StorageProvider` (Workers), `R2S3StorageProvider` (Node)
 
-## Conventions
+## Project-Specific Conventions
 
-- shadcn-svelte component registry: `packages/ui/components.json` (base color: zinc, alias `@` → components)
-- All SvelteKit apps use `@sveltejs/adapter-cloudflare`
-- Styles in `packages/ui` use SCSS for design tokens; apps consume via Tailwind
+- **Styles:** `packages/ui` uses SCSS for design tokens; apps consume via Tailwind.
+- **Cloudflare:** All SvelteKit apps use `@sveltejs/adapter-cloudflare`.
+- **Environment variables:** Use `PRIVATE_` prefix for server-only vars.

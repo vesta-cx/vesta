@@ -1,8 +1,6 @@
 ---
 description: Import pattern for @vesta-cx/ui in consuming apps
-globs:
-  - "apps/*/src/**/*.svelte"
-alwaysApply: false
+globs: apps/*/src/**/*.svelte
 ---
 
 # UI package imports
@@ -11,16 +9,9 @@ alwaysApply: false
 
 The root barrel re-exports all shadcn components, which transitively pull in bits-ui and svelte-toolbelt. These use `.svelte` and `.svelte.js` files with runes that break Vite's SSR module evaluation (`Unknown file extension ".svelte"`, `rune_outside_svelte`).
 
-Deep imports only trace the specific subtree, avoiding the transitive dependency chain:
-
 ```ts
-// Layout components (no bits-ui dependency)
-import { Header, HeaderLogo, HeaderActions } from '@vesta-cx/ui/components/layout/header';
-import { Main } from '@vesta-cx/ui/components/layout/main';
-import { Section, SectionContent, SectionBackground } from '@vesta-cx/ui/components/layout/section';
-
-// UI components (dynamic import for code-splitting)
-{#await import('@vesta-cx/ui/components/ui/heatmap') then { Heatmap }}
+import { Header } from '@vesta-cx/ui/components/layout/header';
+import { Section } from '@vesta-cx/ui/components/layout/section';
 ```
 
-The `package.json` exports map `./components/layout/*` and `./components/ui/*` to `*/index.js` files. The generic `./components/*` pattern is a fallback for flat files only.
+The `package.json` exports map `./components/layout/*` and `./components/ui/*` to `*/index.js` files.

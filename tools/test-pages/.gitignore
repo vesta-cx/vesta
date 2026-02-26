@@ -1,0 +1,6 @@
+node_modules/
+dist/
+public/opus/
+public/flac/
+public/aac/
+public/mp3/

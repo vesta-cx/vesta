@@ -1,15 +1,19 @@
 /** @format */
 
-import { and, eq, inArray, or } from "drizzle-orm";
+import { and, eq, exists, or } from "drizzle-orm";
 import { Hono } from "hono";
 import {
 	parseListQuery,
 	listResponse,
 	type ListQueryConfig,
 } from "@mia-cx/drizzle-query-factory";
-import { hasScope, isAuthenticated } from "../../auth/helpers";
+import { hasScope, requireAuth } from "../../auth/helpers";
 import { getDB } from "../../db";
-import { permissions, resources } from "../../db/schema";
+import {
+	RESOURCE_PERMISSION_ACTIONS,
+	permissions,
+	resources,
+} from "../../db/schema";
 import { forbidden } from "../../lib/errors";
 import type { AppEnv } from "../../env";
 import type { RouteMetadata } from "../../registry";
@@ -33,64 +37,74 @@ const queryConfig: ListQueryConfig = {
 const route = new Hono<AppEnv>();
 
 route.get("/resources", async (c) => {
-	const auth = c.get("auth");
+	const auth = requireAuth(c.get("auth"));
 	const db = getDB(c.env.DB);
 	const query = parseListQuery(
 		new URL(c.req.url).searchParams,
 		queryConfig,
 	);
 
-	if (isAuthenticated(auth) && auth.scopes.includes("admin")) {
+	if (hasScope(auth, "admin")) {
 		const { rows, total } = await paginatedQuery(db, query);
 		return c.json(
 			listResponse(rows, total, query.limit, query.offset),
 		);
 	}
 
-	if (isAuthenticated(auth)) {
-		if (!hasScope(auth, "resources:read")) {
-			return forbidden(c);
-		}
+	if (!hasScope(auth, "resources:read")) {
+		return forbidden(c);
+	}
 
-		const authWhere = or(
-			eq(resources.status, "LISTED"),
-			inArray(
-				resources.id,
+	const ownerWhere =
+		auth.subjectType === "user" || auth.subjectType === "organization" ?
+			and(
+				eq(resources.ownerType, auth.subjectType),
+				eq(resources.ownerId, auth.subjectId),
+			)
+		:	undefined;
+
+	const permissionSubjectType =
+		auth.subjectType === "user" || auth.subjectType === "organization" ?
+			auth.subjectType
+		:	undefined;
+	const explicitAllowWhere =
+		permissionSubjectType ?
+			exists(
 				db
-					.select({ id: permissions.objectId })
+					.select({ id: permissions.id })
 					.from(permissions)
 					.where(
 						and(
 							eq(
-								permissions.subjectId,
-								auth.subjectId,
+								permissions.subjectType,
+								permissionSubjectType,
 							),
+							eq(permissions.subjectId, auth.subjectId),
+							eq(permissions.objectType, "resource"),
+							eq(permissions.objectId, resources.id),
 							eq(
-								permissions.objectType,
-								"resource",
+								permissions.action,
+								RESOURCE_PERMISSION_ACTIONS[0],
 							),
-							eq(
-								permissions.value,
-								"allow",
-							),
+							eq(permissions.value, "allow"),
 						),
 					),
-			),
-		);
+			)
+		:	sql`0`;
 
-		const { rows, total } = await paginatedQuery(
-			db,
-			query,
-			authWhere,
-		);
-		return c.json(
-			listResponse(rows, total, query.limit, query.offset),
-		);
-	}
+	const authWhere =
+		ownerWhere ?
+			or(
+				eq(resources.status, "LISTED"),
+				explicitAllowWhere,
+				ownerWhere,
+			)
+		:	or(eq(resources.status, "LISTED"), explicitAllowWhere);
 
-	const authWhere = eq(resources.status, "LISTED");
 	const { rows, total } = await paginatedQuery(db, query, authWhere);
-	return c.json(listResponse(rows, total, query.limit, query.offset));
+	return c.json(
+		listResponse(rows, total, query.limit, query.offset),
+	);
 });
 
 export default {
@@ -98,7 +112,7 @@ export default {
 	method: "GET" as RouteMetadata["method"],
 	path: "/resources",
 	description: "List resources",
-	auth_required: false,
+	auth_required: true,
 	scopes: ["resources:read"],
 };
 

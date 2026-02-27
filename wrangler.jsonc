@@ -13,15 +13,15 @@
         "enabled": true
     },
     "compatibility_flags": ["nodejs_compat"],
-    "routes": [
-        {
-            "pattern": "erato.vesta.cx",
-            "zone_name": "vesta.cx",
-            "custom_domain": true
-        }
-    ],
     "env": {
         "prod": {
+            "routes": [
+                {
+                    "pattern": "erato.vesta.cx",
+                    "zone_name": "vesta.cx",
+                    "custom_domain": true
+                }
+            ],
             "d1_databases": [
                 {
                     "binding": "DB",

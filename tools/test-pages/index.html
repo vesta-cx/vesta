@@ -1,85 +1,262 @@
-<!DOCTYPE html>
+<!-- @format -->
+
+<!doctype html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>fMP4 HLS Codec Test</title>
-  <style>
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    body { font-family: system-ui, -apple-system, sans-serif; padding: 1.5rem; max-width: 40rem; margin: 0 auto; color: #1a1a1a; background: #fafafa; }
-    h1 { font-size: 1.25rem; margin-bottom: 0.25rem; }
-    .subtitle { font-size: 0.875rem; color: #666; margin-bottom: 1.5rem; }
-    .codec-card { border: 1px solid #ddd; border-radius: 0.5rem; padding: 1rem; margin-bottom: 1rem; background: #fff; }
-    .codec-card h2 { font-size: 1rem; margin-bottom: 0.5rem; display: flex; align-items: center; gap: 0.5rem; }
-    .badge { font-size: 0.7rem; padding: 0.15rem 0.4rem; border-radius: 0.25rem; font-weight: 600; text-transform: uppercase; }
-    .badge-control { background: #d1fae5; color: #065f46; }
-    .badge-test { background: #dbeafe; color: #1e40af; }
-    .controls { display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap; }
-    button { padding: 0.4rem 0.75rem; border: 1px solid #ccc; border-radius: 0.25rem; background: #fff; cursor: pointer; font-size: 0.875rem; }
-    button:hover:not(:disabled) { background: #f0f0f0; }
-    button:disabled { opacity: 0.5; cursor: not-allowed; }
-    .airplay-btn, .cast-btn { padding: 0.4rem; display: inline-flex; align-items: center; justify-content: center; }
-    .airplay-btn svg, .cast-btn svg { display: block; }
-    .status { font-size: 0.8rem; color: #666; min-height: 1.2rem; margin-top: 0.5rem; }
-    .status.error { color: #dc2626; }
-    .status.success { color: #16a34a; }
-    .cast-url-row { margin-bottom: 1rem; }
-    .cast-url-row label { display: block; font-size: 0.8rem; color: #666; margin-bottom: 0.25rem; }
-    .cast-url-row .muted { font-weight: normal; opacity: 0.8; }
-    .cast-url-row input { width: 100%; max-width: 24rem; padding: 0.4rem 0.5rem; font-size: 0.875rem; border: 1px solid #ccc; border-radius: 0.25rem; }
-    #log { margin-top: 1.5rem; background: #111; color: #0f0; font-family: 'SF Mono', 'Menlo', monospace; font-size: 0.75rem; padding: 0.75rem; border-radius: 0.5rem; max-height: 20rem; overflow-y: auto; white-space: pre-wrap; word-break: break-all; }
-    .log-entry { margin-bottom: 0.15rem; }
-    .log-error { color: #f87171; }
-    .log-warn { color: #fbbf24; }
-    .log-info { color: #60a5fa; }
-    audio { width: 100%; margin-top: 0.5rem; }
-    .cast-progress { display: flex; align-items: center; gap: 0.5rem; margin-top: 0.5rem; }
-    .cast-progress input[type="range"] { flex: 1; }
-    .cast-time { font-size: 0.8rem; color: #666; min-width: 5rem; }
-  </style>
-</head>
-<body>
-  <h1>fMP4 HLS Codec Compatibility Test</h1>
-  <p class="subtitle">Test Opus / FLAC / AAC (fMP4 HLS) and MP3 on Safari, iOS, AirPlay, and Cast</p>
+        <head>
+                <meta charset="UTF-8" />
+                <meta
+                        name="viewport"
+                        content="width=device-width, initial-scale=1.0" />
+                <title>fMP4 HLS Codec Test</title>
+                <style>
+                        *,
+                        *::before,
+                        *::after {
+                                box-sizing: border-box;
+                                margin: 0;
+                                padding: 0;
+                        }
+                        body {
+                                font-family:
+                                        system-ui,
+                                        -apple-system,
+                                        sans-serif;
+                                padding: 1.5rem;
+                                max-width: 40rem;
+                                margin: 0 auto;
+                                color: #1a1a1a;
+                                background: #fafafa;
+                        }
+                        h1 {
+                                font-size: 1.25rem;
+                                margin-bottom: 0.25rem;
+                        }
+                        .subtitle {
+                                font-size: 0.875rem;
+                                color: #666;
+                                margin-bottom: 1.5rem;
+                        }
+                        .codec-card {
+                                border: 1px solid #ddd;
+                                border-radius: 0.5rem;
+                                padding: 1rem;
+                                margin-bottom: 1rem;
+                                background: #fff;
+                        }
+                        .codec-card h2 {
+                                font-size: 1rem;
+                                margin-bottom: 0.5rem;
+                                display: flex;
+                                align-items: center;
+                                gap: 0.5rem;
+                        }
+                        .badge {
+                                font-size: 0.7rem;
+                                padding: 0.15rem 0.4rem;
+                                border-radius: 0.25rem;
+                                font-weight: 600;
+                                text-transform: uppercase;
+                        }
+                        .badge-control {
+                                background: #d1fae5;
+                                color: #065f46;
+                        }
+                        .badge-test {
+                                background: #dbeafe;
+                                color: #1e40af;
+                        }
+                        .controls {
+                                display: flex;
+                                gap: 0.5rem;
+                                align-items: center;
+                                flex-wrap: wrap;
+                        }
+                        button {
+                                padding: 0.4rem 0.75rem;
+                                border: 1px solid #ccc;
+                                border-radius: 0.25rem;
+                                background: #fff;
+                                cursor: pointer;
+                                font-size: 0.875rem;
+                        }
+                        button:hover:not(:disabled) {
+                                background: #f0f0f0;
+                        }
+                        button:disabled {
+                                opacity: 0.5;
+                                cursor: not-allowed;
+                        }
+                        .airplay-btn,
+                        .cast-btn {
+                                padding: 0.4rem;
+                                display: inline-flex;
+                                align-items: center;
+                                justify-content: center;
+                        }
+                        .airplay-btn svg,
+                        .cast-btn svg {
+                                display: block;
+                        }
+                        .status {
+                                font-size: 0.8rem;
+                                color: #666;
+                                min-height: 1.2rem;
+                                margin-top: 0.5rem;
+                        }
+                        .status.error {
+                                color: #dc2626;
+                        }
+                        .status.success {
+                                color: #16a34a;
+                        }
+                        .cast-url-row {
+                                margin-bottom: 1rem;
+                        }
+                        .cast-url-row label {
+                                display: block;
+                                font-size: 0.8rem;
+                                color: #666;
+                                margin-bottom: 0.25rem;
+                        }
+                        .cast-url-row .muted {
+                                font-weight: normal;
+                                opacity: 0.8;
+                        }
+                        .cast-url-row input {
+                                width: 100%;
+                                max-width: 24rem;
+                                padding: 0.4rem 0.5rem;
+                                font-size: 0.875rem;
+                                border: 1px solid #ccc;
+                                border-radius: 0.25rem;
+                        }
+                        #log {
+                                margin-top: 1.5rem;
+                                background: #111;
+                                color: #0f0;
+                                font-family: "SF Mono", "Menlo", monospace;
+                                font-size: 0.75rem;
+                                padding: 0.75rem;
+                                border-radius: 0.5rem;
+                                max-height: 20rem;
+                                overflow-y: auto;
+                                white-space: pre-wrap;
+                                word-break: break-all;
+                        }
+                        .log-entry {
+                                margin-bottom: 0.15rem;
+                        }
+                        .log-error {
+                                color: #f87171;
+                        }
+                        .log-warn {
+                                color: #fbbf24;
+                        }
+                        .log-info {
+                                color: #60a5fa;
+                        }
+                        audio {
+                                width: 100%;
+                                margin-top: 0.5rem;
+                        }
+                        .cast-progress {
+                                display: flex;
+                                align-items: center;
+                                gap: 0.5rem;
+                                margin-top: 0.5rem;
+                        }
+                        .cast-progress input[type="range"] {
+                                flex: 1;
+                        }
+                        .cast-time {
+                                font-size: 0.8rem;
+                                color: #666;
+                                min-width: 5rem;
+                        }
+                </style>
+        </head>
+        <body>
+                <h1>fMP4 HLS Codec Compatibility Test</h1>
+                <p class="subtitle">Test Opus / FLAC / AAC (fMP4 HLS) and MP3 on Safari, iOS, AirPlay, and Cast</p>
 
-  <div id="cast-url-row" class="cast-url-row">
-    <label for="cast-base-url">Cast base URL <span class="muted">(receiver fetches from here — use deployed URL or LAN IP)</span></label>
-    <input id="cast-base-url" type="url" placeholder="" />
-    <label for="cast-format" style="margin-top: 0.5rem; display: block;">Cast format</label>
-    <select id="cast-format" style="padding: 0.4rem 0.5rem; font-size: 0.875rem; border: 1px solid #ccc; border-radius: 0.25rem;">
-      <option value="full">Full file (MP4/MP3)</option>
-      <option value="hls">HLS (segments)</option>
-    </select>
-    <label for="flac-container" style="margin-top: 0.5rem; display: block;">FLAC for Cast <span class="muted">(test codec vs container)</span></label>
-    <select id="flac-container" style="padding: 0.4rem 0.5rem; font-size: 0.875rem; border: 1px solid #ccc; border-radius: 0.25rem;">
-      <option value="mp4">MP4 (FLAC-in-MP4)</option>
-      <option value="flac">raw (.flac)</option>
-    </select>
-  </div>
+                <div
+                        id="cast-url-row"
+                        class="cast-url-row">
+                        <label for="cast-base-url"
+                                >Cast base URL
+                                <span class="muted"
+                                        >(receiver fetches from here — use deployed URL or LAN IP)</span
+                                ></label
+                        >
+                        <input
+                                id="cast-base-url"
+                                type="url"
+                                placeholder="" />
+                        <label
+                                for="cast-format"
+                                style="margin-top: 0.5rem; display: block"
+                                >Cast format</label
+                        >
+                        <select
+                                id="cast-format"
+                                style="
+                                        padding: 0.4rem 0.5rem;
+                                        font-size: 0.875rem;
+                                        border: 1px solid #ccc;
+                                        border-radius: 0.25rem;
+                                ">
+                                <option value="full">Full file (MP4/MP3)</option>
+                                <option value="hls">HLS (segments)</option>
+                        </select>
+                        <label
+                                for="flac-container"
+                                style="margin-top: 0.5rem; display: block"
+                                >FLAC for Cast <span class="muted">(test codec vs container)</span></label
+                        >
+                        <select
+                                id="flac-container"
+                                style="
+                                        padding: 0.4rem 0.5rem;
+                                        font-size: 0.875rem;
+                                        border: 1px solid #ccc;
+                                        border-radius: 0.25rem;
+                                ">
+                                <option value="mp4">MP4 (FLAC-in-MP4)</option>
+                                <option value="flac">raw (.flac)</option>
+                        </select>
+                </div>
 
-  <div id="cards"></div>
-  <div id="log"></div>
+                <div id="cards"></div>
+                <div id="log"></div>
 
-  <script>
-    window['__onGCastApiAvailable'] = function(isAvailable) {
-      window.__castApiAvailable = isAvailable;
-      window.dispatchEvent(new CustomEvent('castready', { detail: { available: isAvailable } }));
-    };
-  </script>
-  <script src="https://www.gstatic.com/cv/js/sender/v1/cast_sender.js?loadCastFramework=1"></script>
-  <script type="module" src="/src/main.ts"></script>
-  <script>
-    // Fallback: Cast SDK may run before our module, or callback may not fire — poll for cast object
-    (function checkCast(n) {
-      if (n > 30) return;
-      if (window.__castInitTried) return;
-      if (window.cast && window.cast.framework && window.cast.framework.CastContext) {
-        window.__castInitTried = true;
-        window.dispatchEvent(new CustomEvent('castready', { detail: { available: true } }));
-      } else {
-        setTimeout(function() { checkCast(n + 1); }, 100);
-      }
-    })(0);
-  </script>
-</body>
+                <script>
+                        window["__onGCastApiAvailable"] = function (isAvailable) {
+                                window.__castApiAvailable = isAvailable;
+                                window.dispatchEvent(
+                                        new CustomEvent("castready", { detail: { available: isAvailable } }),
+                                );
+                        };
+                </script>
+                <script src="https://www.gstatic.com/cv/js/sender/v1/cast_sender.js?loadCastFramework=1"></script>
+                <script
+                        type="module"
+                        src="/src/main.ts"></script>
+                <script>
+                        // Fallback: Cast SDK may run before our module, or callback may not fire — poll for cast object
+                        (function checkCast(n) {
+                                if (n > 30) return;
+                                if (window.__castInitTried) return;
+                                if (window.cast && window.cast.framework && window.cast.framework.CastContext) {
+                                        window.__castInitTried = true;
+                                        window.dispatchEvent(
+                                                new CustomEvent("castready", { detail: { available: true } }),
+                                        );
+                                } else {
+                                        setTimeout(function () {
+                                                checkCast(n + 1);
+                                        }, 100);
+                                }
+                        })(0);
+                </script>
+        </body>
 </html>

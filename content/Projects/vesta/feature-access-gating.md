@@ -40,7 +40,8 @@ updated_at           timestamp
 ```
 
 **Key fields:**
-- `cost_tier` — Pre-assigned tier for tier presets (see [[#Pricing Tiers & Presets]])
+
+- `cost_tier` — Pre-assigned tier for tier presets (see [Pricing Tiers & Presets](#pricing-tiers--presets))
 - `cost_of_operation` — Actual hosting/infra cost; used to calculate discount curve floor
 - `base_price_cents` — Full price (retail); discount curve asymptotes toward cost_of_operation
 - `is_alpha` / `alpha_user_ids` — Gradual rollout control
@@ -73,20 +74,20 @@ To check if a user can access a feature:
 async function canUserAccessFeature(userId, featureSlug) {
   // 1. Get user's active subscription
   const subscription = await db.userSubscriptions.findUnique({
-    where: { user_id: userId }
-  });
-  
-  if (!subscription) return false; // No subscription = no access
-  
+    where: { user_id: userId },
+  })
+
+  if (!subscription) return false // No subscription = no access
+
   // 2. Look up feature
   const feature = await db.features.findUnique({
-    where: { slug: featureSlug }
-  });
-  
-  if (!feature) return false; // Feature doesn't exist
-  
+    where: { slug: featureSlug },
+  })
+
+  if (!feature) return false // Feature doesn't exist
+
   // 3. Check if user has feature in active_features
-  return subscription.active_features.includes(feature.id);
+  return subscription.active_features.includes(feature.id)
 }
 ```
 
@@ -96,15 +97,15 @@ For gradual rollout:
 
 ```typescript
 async function shouldUserSeeFeature(userId, featureSlug) {
-  const feature = await db.features.findUnique({ where: { slug: featureSlug } });
-  
+  const feature = await db.features.findUnique({ where: { slug: featureSlug } })
+
   // If feature is in alpha, only show to whitelisted users
   if (feature.is_alpha) {
-    return feature.alpha_user_ids.includes(userId);
+    return feature.alpha_user_ids.includes(userId)
   }
-  
+
   // Otherwise, check entitlement
-  return canUserAccessFeature(userId, featureSlug);
+  return canUserAccessFeature(userId, featureSlug)
 }
 ```
 
@@ -146,12 +147,12 @@ Include `active_features` as an array of feature slugs:
 
 ```typescript
 // Frontend: Instant check (no server call)
-const hasFeature = (token) => token.active_features.includes('custom-domains');
+const hasFeature = (token) => token.active_features.includes("custom-domains")
 
 if (hasFeature(userToken)) {
-  showCustomDomainUI();
+  showCustomDomainUI()
 } else {
-  showUpgradePrompt();
+  showUpgradePrompt()
 }
 ```
 
@@ -163,9 +164,9 @@ if (hasFeature(userToken)) {
 
 ```typescript
 // Backend: POST /api/domains (critical payment operation)
-const verified = await canUserAccessFeature(userId, 'custom-domains');
+const verified = await canUserAccessFeature(userId, "custom-domains")
 if (!verified) {
-  return res.status(403).json({ error: 'Feature not in your subscription' });
+  return res.status(403).json({ error: "Feature not in your subscription" })
 }
 // Proceed with domain creation
 ```
@@ -187,16 +188,16 @@ If you have 50+ features, use a bitmask instead of array to reduce JWT size:
 ```typescript
 // Bitmask example: 32-bit integer can represent 32 features
 const FEATURES = {
-  'custom-domains': 0,
-  'advanced-analytics': 1,
-  'ad-integrations': 2,
+  "custom-domains": 0,
+  "advanced-analytics": 1,
+  "ad-integrations": 2,
   // ... etc
-};
+}
 
-const featureMask = 0b0000000000000000000000000000011; // Features 0 and 1 enabled
+const featureMask = 0b0000000000000000000000000000011 // Features 0 and 1 enabled
 
 // Check if feature enabled
-const hasFeature = (mask, featureIndex) => (mask & (1 << featureIndex)) !== 0;
+const hasFeature = (mask, featureIndex) => (mask & (1 << featureIndex)) !== 0
 hasFeature(featureMask, 0) // true
 hasFeature(featureMask, 2) // false
 ```
@@ -205,6 +206,6 @@ This is more compact but less readable; use if JWT size becomes a bottleneck.
 
 ## See Also
 
-- [[./feature-catalog.md|Feature Catalog & Pricing Transparency]] — Complete feature list and pricing
-- [[./pricing-modular.md|Modular Pricing & Weighted Discount Curve]] — Individual feature pricing and tier presets
-- [[./development-checklist.md|Development Checklist (Phase 1)]] — Feature gating checklist for PRs
+- [Feature Catalog & Pricing Transparency](./feature-catalog.md) — Complete feature list and pricing
+- [Modular Pricing & Weighted Discount Curve](./pricing-modular.md) — Individual feature pricing and tier presets
+- [Development Checklist (Phase 1)](./development-checklist.md) — Feature gating checklist for PRs

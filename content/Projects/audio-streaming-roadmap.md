@@ -52,7 +52,7 @@ When casting, grey out the quality button. Tooltip: "Quality selection is disabl
 ### AirPlay: Audio vs Video
 
 - **Audio:** The receiver acts as an output device (like a wireless speaker). The sender decodes and streams audio to it — it's output routing, not URL-based casting. User selects the AirPlay device via `webkitShowPlaybackTargetPicker`; audio from that element routes to it. The sender's audio output is used for the stream.
-- **Video:** The receiver fetches the media URL and plays it itself. The sender hands off playback — it does not stream decoded video. The sender's audio output stays free (e.g. for other apps or system sounds). MSE is not AirPlay-compatible (it requires a playable URL); provide HLS as fallback source for video. 
+- **Video:** The receiver fetches the media URL and plays it itself. The sender hands off playback — it does not stream decoded video. The sender's audio output stays free (e.g. for other apps or system sounds). MSE is not AirPlay-compatible (it requires a playable URL); provide HLS as fallback source for video.
 
 ---
 
@@ -75,11 +75,11 @@ Before committing to AAC fallback, run an empirical test on Apple devices:
 
 **Test matrix:**
 
-| Scenario | What we're checking |
-| -------- | ------------------- |
-| iPhone Safari, in-browser | Does fMP4 Opus play at all? |
-| iPhone Safari → AirPlay to Apple TV | Does AirPlay work with this stream? |
-| Apple TV (receiver) | Does it play when receiving via AirPlay? |
+| Scenario                            | What we're checking                      |
+| ----------------------------------- | ---------------------------------------- |
+| iPhone Safari, in-browser           | Does fMP4 Opus play at all?              |
+| iPhone Safari → AirPlay to Apple TV | Does AirPlay work with this stream?      |
+| Apple TV (receiver)                 | Does it play when receiving via AirPlay? |
 
 **If it works:** Can use Opus with AAC fallback only for confirmed failures. **If it fails:** Stick with AAC for Safari; Opus for Chrome/Firefox only. Document results and update codec strategy.
 

@@ -52,19 +52,20 @@ description: vesta Milestone 1 scope, feature tiers, and out-of-scope items
 
 Assign every feature a tier **before coding**. This drives pricing and which features are trial vs. paid.
 
-Consult [[./feature-catalog.md|Feature Catalog & Pricing Transparency]] for the complete list of features with pricing and COO details.
+Consult [Feature Catalog & Pricing Transparency](./feature-catalog.md) for the complete list of features with pricing and COO details.
 
-| Tier | Features | Trial? | Notes |
-|------|----------|--------|-------|
-| **Free** | Profiles, posts, smart links, basic collections, user engagement (like/comment/repost/follow) | Yes, always | Always-available tier; attracts users |
-| **Basic** | Custom domain, basic analytics (views, traffic source) | No, paid-only | Entry paid tier; modest operational cost |
-| **Pro** | Advanced analytics (geography, device, conversion funnel), ad integrations | No, paid-only | For serious creators; higher compute cost |
-| **Enterprise** | Team accounts, high storage/bandwidth SLA, priority support | No, paid-only | For labels/collectives; sales-driven |
+| Tier           | Features                                                                                      | Trial?        | Notes                                     |
+| -------------- | --------------------------------------------------------------------------------------------- | ------------- | ----------------------------------------- |
+| **Free**       | Profiles, posts, smart links, basic collections, user engagement (like/comment/repost/follow) | Yes, always   | Always-available tier; attracts users     |
+| **Basic**      | Custom domain, basic analytics (views, traffic source)                                        | No, paid-only | Entry paid tier; modest operational cost  |
+| **Pro**        | Advanced analytics (geography, device, conversion funnel), ad integrations                    | No, paid-only | For serious creators; higher compute cost |
+| **Enterprise** | Team accounts, high storage/bandwidth SLA, priority support                                   | No, paid-only | For labels/collectives; sales-driven      |
 
 **When adding a feature:**
+
 1. Assign a tier
 2. Document feature gating in code (e.g., `if (user.tier === 'pro') { showAdvancedAnalytics() }`)
-3. Link to [[./feature-catalog.md|Feature Catalog & Pricing Transparency]] in PRs
+3. Link to [Feature Catalog & Pricing Transparency](./feature-catalog.md) in PRs
 
 ## Decision Log
 
@@ -92,9 +93,9 @@ The vesta design system must support extensive customization (colors, fonts, lay
 
 ## See Also
 
-- [[./feature-catalog.md|Feature Catalog & Pricing Transparency]] — Complete feature list with pricing
-- [[./feature-access-gating.md|Feature Access & Gating]] — Feature gating and access control
-- [[./pricing-modular.md|Modular Pricing & Weighted Discount Curve]] — Modular pricing model and discount curve
-- [[./development-checklist.md|Development Checklist (Phase 1)]] — PR guidelines for Milestone 1 development
-- [[/../../apps/vesta/index.md]] — vesta app docs
-- [[/../../apps/erato/index.md]] — Erato data layer docs
+- [Feature Catalog & Pricing Transparency](./feature-catalog.md) — Complete feature list with pricing
+- [Feature Access & Gating](./feature-access-gating.md) — Feature gating and access control
+- [Modular Pricing & Weighted Discount Curve](./pricing-modular.md) — Modular pricing model and discount curve
+- [Development Checklist (Phase 1)](./development-checklist.md) — PR guidelines for Milestone 1 development
+- [vesta app docs](../../apps/vesta/index.md) — vesta app docs
+- [Erato data layer docs](../../apps/erato/index.md) — Erato data layer docs

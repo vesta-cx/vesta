@@ -14,133 +14,82 @@ description: Shared database schemas, Drizzle ORM configuration, and migration u
 - **Database-agnostic** — supports D1 (SQLite), PostgreSQL, MySQL; migration path for future scaling
 - **Shared types** — exported as `@vesta-cx/db` for consuming apps
 
-## Structure
+## Actual Schema Source Files
 
-```
-packages/db/
-├── src/
-│   ├── schema/
-│   │   ├── creators.ts          # Creator profiles, labels
-│   │   ├── posts.ts             # Posts, updates
-│   │   ├── smart-links.ts       # Smart link configs
-│   │   ├── engagement.ts        # Likes, comments, reposts
-│   │   ├── collections.ts       # Collections (curated lists)
-│   │   ├── subscriptions.ts     # User follows, subscriptions
-│   │   ├── pricing.ts           # Plans, tiers
-│   │   └── index.ts             # Export all schemas
-│   ├── queries/
-│   │   ├── creators.ts          # Creator queries (repository pattern)
-│   │   ├── posts.ts             # Post queries
-│   │   ├── smart-links.ts       # Smart link queries
-│   │   └── index.ts             # Export all query builders
-│   ├── migrations/
-│   │   ├── 0001_initial.sql
-│   │   ├── 0002_add_posts.sql
-│   │   └── ...
-│   ├── client.ts                # Drizzle client factory
-│   ├── index.ts                 # Main export
-│   └── types.ts                 # TypeScript types for DB entities
-├── drizzle.config.ts            # Drizzle config (migrations, dialect)
-├── package.json
-└── README.md
-```
+All schemas are defined in `packages/db/src/schema/*.ts` and re-exported by `packages/db/src/schema/index.ts`.
 
-## Usage in Apps
+- `users.ts` — WorkOS user identities
+- `workspaces.ts` — Publishing entities (owner, visibility, profile metadata)
+- `resources.ts` — Base resources + `resource_authors`
+- `posts.ts` — Post-type extension table
+- `resource-urls.ts` — Smart links attached to resources
+- `permissions.ts` — Permission actions + permission matrix
+- `teams.ts` — Teams and team-user membership
+- `engagements.ts` — Interactions, comments, mentions
+- `collections.ts` — Curated lists, items, visibility/filtering
+- `features.ts` — Features, pricing, presets, `user_features`, `user_subscriptions`
 
-### Define Schema
+## Schema Docs (Canonical)
+
+Detailed model docs live under:
+
+- [packages/db model index](./model/index.md)
+- [Identity](./model/identity/users.md)
+- [Access](./model/access/permissions.md)
+- [Resources](./model/resources/resource.md)
+- [Collections](./model/collections/collections.md)
+- [Features](./model/features/features.md)
+- [Subscriptions](./model/subscriptions/subscriptions.md)
+
+## How to Consume `@vesta-cx/db`
+
+`@vesta-cx/db` exports schema definitions only. Consuming apps create their own Drizzle client.
+
+### 1) Re-export shared schema in app code
 
 ```typescript
-// packages/db/src/schema/creators.ts
-import { sqliteTable, text, timestamp, integer } from 'drizzle-orm/sqlite-core';
-
-export const creators = sqliteTable('creators', {
-  id: text('id').primaryKey(),
-  name: text('name').notNull(),
-  slug: text('slug').unique().notNull(),
-  bio: text('bio'),
-  email: text('email').unique().notNull(),
-  workosOrgId: text('workos_org_id').unique(),
-  createdAt: timestamp('created_at').defaultNow(),
-  updatedAt: timestamp('updated_at').defaultNow(),
-});
-
-export type Creator = typeof creators.$inferSelect;
-export type NewCreator = typeof creators.$inferInsert;
+// apps/<app>/src/lib/server/db/schema.ts
+export * from "@vesta-cx/db"
 ```
 
-### Query via Repository Pattern
+### 2) Create app-local db factory
 
 ```typescript
-// packages/db/src/queries/creators.ts
-import { db } from '../client';
-import { creators } from '../schema';
-import { eq } from 'drizzle-orm';
+// apps/<app>/src/lib/server/db/index.ts
+import { drizzle } from "drizzle-orm/d1"
+import * as schema from "./schema"
 
-export const creatorsQueries = {
-  async findById(id: string) {
-    return db.query.creators.findFirst({
-      where: eq(creators.id, id),
-    });
-  },
-
-  async findBySlug(slug: string) {
-    return db.query.creators.findFirst({
-      where: eq(creators.slug, slug),
-    });
-  },
-
-  async create(data: NewCreator) {
-    const [created] = await db.insert(creators).values(data).returning();
-    return created;
-  },
-
-  async update(id: string, data: Partial<Creator>) {
-    const [updated] = await db
-      .update(creators)
-      .set(data)
-      .where(eq(creators.id, id))
-      .returning();
-    return updated;
-  },
-};
+export const getDb = (platform: App.Platform) => drizzle(platform.env.DB, { schema })
 ```
 
-### Use in Apps
+### 3) Query with typed schema
 
 ```typescript
-// apps/vesta/src/routes/dashboard/+page.server.ts
-import { creatorsQueries } from '@vesta-cx/db';
+// apps/<app>/src/routes/api/workspaces/+server.ts
+import { getDb } from "$lib/server/db"
 
-export async function load({ locals, platform }) {
-  const creatorId = locals.userId;
-  const creator = await creatorsQueries.findById(creatorId);
-  return { creator };
+export const GET = async ({ platform }) => {
+  const db = getDb(platform)
+  const workspaces = await db.query.workspaces.findMany()
+  return new Response(JSON.stringify(workspaces))
 }
 ```
 
-## Drizzle Client Setup
+### 4) Configure drizzle for the app
 
 ```typescript
-// packages/db/src/client.ts
-import { drizzle } from 'drizzle-orm/d1';
-import * as schema from './schema';
-
-export function getDb(d1: D1Database) {
-  return drizzle(d1, { schema });
-}
+// apps/<app>/drizzle.config.ts
+export default defineConfig({
+  schema: "./src/lib/server/db/schema.ts",
+  out: "./drizzle",
+  dialect: "sqlite",
+})
 ```
 
-In apps, instantiate the client:
+### 5) After schema changes
 
-```typescript
-// apps/vesta/src/routes/api/creators/+server.ts
-import { getDb } from '@vesta-cx/db';
-
-export async function GET({ platform }) {
-  const db = getDb(platform.env.DB);
-  const creators = await db.query.creators.findMany();
-  return new Response(JSON.stringify(creators));
-}
+```bash
+pnpm --filter @vesta-cx/db build
 ```
 
 ## Migrations
@@ -182,13 +131,13 @@ When scaling beyond D1:
 ```typescript
 // drizzle.config.ts
 export default {
-  schema: './src/schema',
-  out: './src/migrations',
-  driver: 'mysql2',  // Change from 'better-sqlite' to 'mysql2' for PlanetScale
+  schema: "./src/schema",
+  out: "./src/migrations",
+  driver: "mysql2", // Change from 'better-sqlite' to 'mysql2' for PlanetScale
   dbCredentials: {
     connectionString: process.env.DATABASE_URL,
   },
-};
+}
 ```
 
 ### 2. Set Up New Database
@@ -207,9 +156,21 @@ pscale connect vesta main
 # Generate migrations for new dialect (if needed)
 pnpm --filter @vesta-cx/db generate
 
-# Apply to new database
-pnpm --filter @vesta-cx/db db:migrate:planetscale
+# Apply from a consumer app (the app owns runtime DB credentials/bindings)
+pnpm --filter <consumer-app> db:migrate:planetscale
 ```
+
+Example consumer-app script:
+
+```json
+{
+  "scripts": {
+    "db:migrate:planetscale": "drizzle-kit migrate --config ./drizzle.config.ts"
+  }
+}
+```
+
+`packages/db` owns schema and generated migrations. The consuming app executes migration application because it owns environment-specific connection details and deployment context.
 
 ### 4. Data Migration (if needed)
 
@@ -278,7 +239,7 @@ npm install @vesta-cx/db
 
 ## See Also
 
-- [[../erato]] — Data layer API (consumes this package)
-- [[../Apps/vesta]] — Main app (consumes this package)
-- [[../utils]] — Shared auth, storage helpers
+- [erato](../../apps/erato/index.md) — Data layer API app (consumes this package)
+- [vesta](../../apps/vesta/index.md) — Main app (consumes this package)
+- [utils](../utils) — Shared auth, storage helpers
 - [Drizzle ORM Docs](https://orm.drizzle.team/)

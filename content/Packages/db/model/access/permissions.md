@@ -36,6 +36,7 @@ admin      | Admin         | Full control including sharing/permissions         
 ```
 
 **Design principle:**
+
 - Actions are extensible: add new actions without code changes
 - Each action is documented with category for filtering
 - Same pattern as features table (slug as PK)
@@ -87,6 +88,7 @@ When determining if a user can perform an action:
 ```
 
 **Why this order?**
+
 - User-level overrides beat team-level (fine-grained control)
 - Deny beats allow at each level (safer default)
 - Prevents permission drift (adding/removing users from teams doesn't require permission table updates)
@@ -96,6 +98,7 @@ When determining if a user can perform an action:
 **This is business logic required immediately by vesta app.** The permission merger must be implemented in `packages/utils` as a reusable query function, not deferred to erato API.
 
 Both vesta and erato (when built) will call this function to:
+
 1. Load all relevant permissions (user, team, org)
 2. Merge according to precedence rules
 3. Return the computed permission value for each action
@@ -108,56 +111,69 @@ The merger logic is stable and independent of API transport (REST, GraphQL, etc.
 async function canUserDoAction(userId, objectId, action) {
   // 1. Check user-level permissions
   const userDeny = await db.permissions.findFirst({
-    where: { subject_type: 'user', subject_id: userId, object_id: objectId, action, value: 'deny' }
-  });
-  if (userDeny) return false; // User explicitly denied
-  
+    where: { subject_type: "user", subject_id: userId, object_id: objectId, action, value: "deny" },
+  })
+  if (userDeny) return false // User explicitly denied
+
   const userAllow = await db.permissions.findFirst({
-    where: { subject_type: 'user', subject_id: userId, object_id: objectId, action, value: 'allow' }
-  });
-  if (userAllow) return true; // User explicitly allowed
-  
+    where: {
+      subject_type: "user",
+      subject_id: userId,
+      object_id: objectId,
+      action,
+      value: "allow",
+    },
+  })
+  if (userAllow) return true // User explicitly allowed
+
   // 2. Check team-level permissions (user is member of these teams)
   const userTeams = await db.teamUsers.findMany({
-    where: { user_id: userId }
-  });
-  
+    where: { user_id: userId },
+  })
+
   const teamDeny = await db.permissions.findFirst({
-    where: { 
-      subject_type: 'team', 
-      subject_id: { in: userTeams.map(t => t.team_id) }, 
-      object_id: objectId, 
-      action, 
-      value: 'deny' 
-    }
-  });
-  if (teamDeny) return false; // Any team explicitly denied
-  
+    where: {
+      subject_type: "team",
+      subject_id: { in: userTeams.map((t) => t.team_id) },
+      object_id: objectId,
+      action,
+      value: "deny",
+    },
+  })
+  if (teamDeny) return false // Any team explicitly denied
+
   const teamAllow = await db.permissions.findFirst({
-    where: { 
-      subject_type: 'team', 
-      subject_id: { in: userTeams.map(t => t.team_id) }, 
-      object_id: objectId, 
-      action, 
-      value: 'allow' 
-    }
-  });
-  if (teamAllow) return true; // Any team explicitly allowed
-  
+    where: {
+      subject_type: "team",
+      subject_id: { in: userTeams.map((t) => t.team_id) },
+      object_id: objectId,
+      action,
+      value: "allow",
+    },
+  })
+  if (teamAllow) return true // Any team explicitly allowed
+
   // 3. Check organization-level (if applicable)
-  const org = await getUserOrganization(userId);
+  const org = await getUserOrganization(userId)
   const orgAllow = await db.permissions.findFirst({
-    where: { subject_type: 'organization', subject_id: org.id, object_id: objectId, action, value: 'allow' }
-  });
-  if (orgAllow) return true;
-  
+    where: {
+      subject_type: "organization",
+      subject_id: org.id,
+      object_id: objectId,
+      action,
+      value: "allow",
+    },
+  })
+  if (orgAllow) return true
+
   // 4. Default: deny
-  return false;
+  return false
 }
 ```
 
 ## See Also
 
-- [[./features-subscriptions.md|Features & Subscriptions]] — Feature access and pricing (separate from permissions)
-- [[./teams.md|Teams]] — Team membership for permission inheritance
-- [[./users.md|Users & Organizations (WorkOS-Managed)]] — User identity and organization context
+- [Features](../features/features.md) — Feature access and operational gating
+- [Subscriptions](../subscriptions/subscriptions.md) — Billing-backed entitlement lifecycle
+- [Teams](../identity/teams.md) — Team membership for permission inheritance
+- [Users & Organizations (WorkOS-Managed)](../identity/users.md) — User identity and organization context

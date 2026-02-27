@@ -5,6 +5,7 @@ import {
 	permissions,
 	permissionActions,
 	SUBJECT_TYPES,
+	STATIC_SUBJECT_IDS,
 	OBJECT_TYPES,
 	PERMISSION_VALUES,
 	PERMISSION_CATEGORIES,
@@ -46,6 +47,20 @@ export const createPermissionSchema = z.object({
 	objectId: z.string().min(1),
 	action: z.string().min(1),
 	value: z.enum(PERMISSION_VALUES).optional(),
+}).superRefine((value, ctx) => {
+	if (
+		value.subjectType === "static" &&
+		!(STATIC_SUBJECT_IDS as readonly string[]).includes(
+			value.subjectId,
+		)
+	) {
+		ctx.addIssue({
+			code: z.ZodIssueCode.custom,
+			path: ["subjectId"],
+			message:
+				"Invalid static subject id. Use guest, user, follower, or subscriber.",
+		});
+	}
 });
 
 export const updatePermissionSchema = z.object({

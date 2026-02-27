@@ -6,5 +6,4 @@ export { default as create } from "./create";
 export { default as update } from "./update";
 export { default as remove } from "./delete";
 export * as items from "./items/index";
-export * as visibility from "./visibility/index";
 export * as filters from "./filters/index";

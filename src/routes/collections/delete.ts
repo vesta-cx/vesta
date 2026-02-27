@@ -2,7 +2,7 @@
 
 import { eq } from "drizzle-orm";
 import { Hono } from "hono";
-import { isAuthenticated, requireScope } from "../../auth/helpers";
+import { requireAuth, requireScope, hasScope } from "../../auth/helpers";
 import { getDB } from "../../db";
 import { collections } from "../../db/schema";
 import { forbidden, notFound } from "../../lib/errors";
@@ -13,10 +13,8 @@ import type { RouteMetadata } from "../../registry";
 const route = new Hono<AppEnv>();
 
 route.delete("/collections/:id", async (c) => {
-	const auth = c.get("auth");
-	if (!isAuthenticated(auth)) {
-		return c.json({ error: "Unauthorized" }, 401);
-	}
+	const auth = requireAuth(c.get("auth"));
+
 	requireScope(auth, "collections:write");
 
 	const id = c.req.param("id");
@@ -29,7 +27,7 @@ route.delete("/collections/:id", async (c) => {
 		.limit(1);
 	if (!existing) return notFound(c, "Collection");
 
-	const isAdmin = auth.scopes.includes("admin");
+	const isAdmin = hasScope(auth, "admin");
 	const isOwner = await isCollectionOwner(db, existing, auth.subjectId);
 	if (!isAdmin && !isOwner) return forbidden(c);
 

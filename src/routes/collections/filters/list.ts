@@ -7,7 +7,7 @@ import {
 	listResponse,
 	type ListQueryConfig,
 } from "@mia-cx/drizzle-query-factory";
-import { requireAuth, requireScope } from "../../../auth/helpers";
+import { requireAuth, requireScope, hasScope } from "../../../auth/helpers";
 import { getDB } from "../../../db";
 import { collections, collectionItemFilters } from "../../../db/schema";
 import { forbidden, notFound } from "../../../lib/errors";
@@ -37,9 +37,8 @@ const collectionFilterListConfig: ListQueryConfig = {
 };
 
 route.get("/collections/:collectionId/filters", async (c) => {
-	const auth = c.get("auth");
+	const auth = requireAuth(c.get("auth"));
 	requireScope(auth, "collections:read");
-	const apiAuth = requireAuth(auth);
 
 	const db = getDB(c.env.DB);
 	const collectionId = c.req.param("collectionId");
@@ -55,12 +54,8 @@ route.get("/collections/:collectionId/filters", async (c) => {
 		.limit(1);
 	if (!existing) return notFound(c, "Collection");
 
-	const isAdmin = apiAuth.scopes.includes("admin");
-	const isOwner = await isCollectionOwner(
-		db,
-		existing,
-		apiAuth.subjectId,
-	);
+	const isAdmin = hasScope(auth, "admin");
+	const isOwner = await isCollectionOwner(db, existing, auth.subjectId);
 	if (!isAdmin && !isOwner) return forbidden(c);
 
 	const authWhere = eq(collectionItemFilters.collectionId, collectionId);

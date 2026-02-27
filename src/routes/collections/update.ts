@@ -3,7 +3,7 @@
 import { eq } from "drizzle-orm";
 import { Hono } from "hono";
 import { itemResponse } from "@mia-cx/drizzle-query-factory";
-import { requireAuth, requireScope } from "../../auth/helpers";
+import { requireAuth, requireScope, hasScope } from "../../auth/helpers";
 import { getDB } from "../../db";
 import { collections } from "../../db/schema";
 import { conflict, forbidden, notFound } from "../../lib/errors";
@@ -18,9 +18,8 @@ import type { RouteMetadata } from "../../registry";
 const route = new Hono<AppEnv>();
 
 route.put("/collections/:id", async (c) => {
-	const auth = c.get("auth");
+	const auth = requireAuth(c.get("auth"));
 	requireScope(auth, "collections:write");
-	const apiAuth = requireAuth(auth);
 
 	const id = c.req.param("id");
 	const parsed = await parseBody(c, updateCollectionSchema);
@@ -34,18 +33,14 @@ route.put("/collections/:id", async (c) => {
 		.limit(1);
 	if (!existing) return notFound(c, "Collection");
 
-	const isAdmin = apiAuth.scopes.includes("admin");
-	const isOwner = await isCollectionOwner(
-		db,
-		existing,
-		apiAuth.subjectId,
-	);
+	const isAdmin = hasScope(auth, "admin");
+	const isOwner = await isCollectionOwner(db, existing, auth.subjectId);
 	if (!isAdmin && !isOwner) return forbidden(c);
 
 	try {
 		const [row] = await db
 			.update(collections)
-			.set({ ...parsed, updatedAt: new Date() })
+			.set({ ...(parsed as any), updatedAt: new Date() })
 			.where(eq(collections.id, id))
 			.returning();
 		return row ?

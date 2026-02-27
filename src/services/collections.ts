@@ -2,22 +2,19 @@
 
 import { eq } from "drizzle-orm";
 import type { ListQueryConfig } from "@mia-cx/drizzle-query-factory";
-import type { Database } from "../db";
 import {
-	COLLECTION_OWNER_TYPES,
-	COLLECTION_TYPES,
-	COLLECTION_VISIBILITY,
-	collections,
-	workspaces,
-} from "../db/schema";
-import { z } from "../lib/validation";
+	collectionCreateSchema,
+	collectionUpdateSchema,
+} from "@vesta-cx/db/entity-schemas";
+import type { Database } from "../db";
+import { collections, workspaces } from "../db/schema";
 
 export const collectionListConfig: ListQueryConfig = {
 	filters: {
 		owner_id: { column: collections.ownerId },
 		owner_type: { column: collections.ownerType },
 		type: { column: collections.type },
-		visibility: { column: collections.visibility },
+		status: { column: collections.status },
 	},
 	sortable: {
 		created_at: collections.createdAt,
@@ -27,23 +24,11 @@ export const collectionListConfig: ListQueryConfig = {
 	defaultSort: { key: "created_at", dir: "desc" },
 };
 
-export const createCollectionSchema = z.object({
-	ownerType: z.enum(COLLECTION_OWNER_TYPES),
-	ownerId: z.string().min(1),
-	name: z.string().min(1),
-	description: z.string().nullable().optional(),
-	type: z.enum(COLLECTION_TYPES).optional(),
-	visibility: z.enum(COLLECTION_VISIBILITY).optional(),
-});
+export const createCollectionSchema = collectionCreateSchema;
 
-export const updateCollectionSchema = z.object({
-	name: z.string().min(1).optional(),
-	description: z.string().nullable().optional(),
-	type: z.enum(COLLECTION_TYPES).optional(),
-	visibility: z.enum(COLLECTION_VISIBILITY).optional(),
-});
+export const updateCollectionSchema = collectionUpdateSchema;
 
-export const publicCollectionWhere = () => eq(collections.visibility, "public");
+export const listedCollectionWhere = () => eq(collections.status, "LISTED");
 
 export const isCollectionOwner = async (
 	db: Database,

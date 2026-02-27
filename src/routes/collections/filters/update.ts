@@ -2,7 +2,7 @@
 
 import { eq } from "drizzle-orm";
 import { Hono } from "hono";
-import { requireAuth, requireScope } from "../../../auth/helpers";
+import { requireAuth, requireScope, hasScope } from "../../../auth/helpers";
 import { getDB } from "../../../db";
 import {
 	COLLECTION_ITEM_TYPES,
@@ -28,9 +28,8 @@ const updateFiltersSchema = z.array(filterItemSchema);
 const route = new Hono<AppEnv>();
 
 route.put("/collections/:collectionId/filters", async (c) => {
-	const auth = c.get("auth");
+	const auth = requireAuth(c.get("auth"));
 	requireScope(auth, "collections:write");
-	const apiAuth = requireAuth(auth);
 
 	const parsed = await parseBody(c, updateFiltersSchema);
 	if (isResponse(parsed)) return parsed;
@@ -45,12 +44,8 @@ route.put("/collections/:collectionId/filters", async (c) => {
 		.limit(1);
 	if (!existing) return notFound(c, "Collection");
 
-	const isAdmin = apiAuth.scopes.includes("admin");
-	const isOwner = await isCollectionOwner(
-		db,
-		existing,
-		apiAuth.subjectId,
-	);
+	const isAdmin = hasScope(auth, "admin");
+	const isOwner = await isCollectionOwner(db, existing, auth.subjectId);
 	if (!isAdmin && !isOwner) return forbidden(c);
 
 	await db

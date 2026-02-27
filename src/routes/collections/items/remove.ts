@@ -2,7 +2,7 @@
 
 import { and, eq } from "drizzle-orm";
 import { Hono } from "hono";
-import { requireAuth, requireScope } from "../../../auth/helpers";
+import { requireAuth, requireScope, hasScope } from "../../../auth/helpers";
 import { getDB } from "../../../db";
 import { collections, collectionItems } from "../../../db/schema";
 import { forbidden, notFound } from "../../../lib/errors";
@@ -15,9 +15,8 @@ const route = new Hono<AppEnv>();
 route.delete(
 	"/collections/:collectionId/items/:itemType/:itemId",
 	async (c) => {
-		const auth = c.get("auth");
+		const auth = requireAuth(c.get("auth"));
 		requireScope(auth, "collections:write");
-		const apiAuth = requireAuth(auth);
 
 		const db = getDB(c.env.DB);
 		const collectionId = c.req.param("collectionId");
@@ -31,11 +30,11 @@ route.delete(
 			.limit(1);
 		if (!existing) return notFound(c, "Collection");
 
-		const isAdmin = apiAuth.scopes.includes("admin");
+		const isAdmin = hasScope(auth, "admin");
 		const isOwner = await isCollectionOwner(
 			db,
 			existing,
-			apiAuth.subjectId,
+			auth.subjectId,
 		);
 		if (!isAdmin && !isOwner) return forbidden(c);
 

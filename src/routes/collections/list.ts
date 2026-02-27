@@ -1,44 +1,96 @@
 /** @format */
 
 import type { SQL } from "drizzle-orm";
-import { and, sql } from "drizzle-orm";
+import { and, eq, exists, or, sql } from "drizzle-orm";
 import { Hono } from "hono";
 import { parseListQuery, listResponse } from "@mia-cx/drizzle-query-factory";
-import { hasScope, isAuthenticated } from "../../auth/helpers";
+import { hasScope, requireAuth } from "../../auth/helpers";
 import { getDB } from "../../db";
-import { collections } from "../../db/schema";
-import { forbidden } from "../../lib/errors";
 import {
-	collectionListConfig,
-	publicCollectionWhere,
-} from "../../services/collections";
+	COLLECTION_PERMISSION_ACTIONS,
+	collections,
+	permissions,
+} from "../../db/schema";
+import { forbidden } from "../../lib/errors";
+import { collectionListConfig } from "../../services/collections";
 import type { AppEnv } from "../../env";
 import type { RouteMetadata } from "../../registry";
 
 const route = new Hono<AppEnv>();
 
 route.get("/collections", async (c) => {
-	const auth = c.get("auth");
+	const auth = requireAuth(c.get("auth"));
 	const db = getDB(c.env.DB);
 	const query = parseListQuery(
 		new URL(c.req.url).searchParams,
 		collectionListConfig,
 	);
 
-	let authWhere: SQL | undefined = publicCollectionWhere();
-	if (isAuthenticated(auth)) {
-		if (
-			!hasScope(auth, "collections:read") &&
-			!auth.scopes.includes("admin")
-		) {
-			return forbidden(c);
-		}
-		if (
-			hasScope(auth, "collections:read") ||
-			auth.scopes.includes("admin")
-		) {
-			authWhere = undefined;
-		}
+	if (
+		!hasScope(auth, "collections:read") &&
+		!hasScope(auth, "admin")
+	) {
+		return forbidden(c);
+	}
+
+	let authWhere: SQL | undefined;
+
+	if (!hasScope(auth, "admin")) {
+		const ownerWhere =
+			auth.subjectType === "user" || auth.subjectType === "workspace" ?
+				and(
+					eq(collections.ownerType, auth.subjectType),
+					eq(collections.ownerId, auth.subjectId),
+				)
+			:	undefined;
+
+		const permissionSubjectType =
+			auth.subjectType === "user" ||
+			auth.subjectType === "organization" ?
+				auth.subjectType
+			:	undefined;
+		const explicitAllowWhere =
+			permissionSubjectType ?
+				exists(
+					db
+						.select({ id: permissions.id })
+						.from(permissions)
+						.where(
+							and(
+								eq(
+									permissions.subjectType,
+									permissionSubjectType,
+								),
+								eq(
+									permissions.subjectId,
+									auth.subjectId,
+								),
+								eq(
+									permissions.objectType,
+									"collection",
+								),
+								eq(
+									permissions.objectId,
+									collections.id,
+								),
+								eq(
+									permissions.action,
+									COLLECTION_PERMISSION_ACTIONS[0],
+								),
+								eq(permissions.value, "allow"),
+							),
+						),
+				)
+			:	sql`0`;
+
+		authWhere =
+			ownerWhere ?
+				or(
+					eq(collections.status, "LISTED"),
+					explicitAllowWhere,
+					ownerWhere,
+				)
+			:	or(eq(collections.status, "LISTED"), explicitAllowWhere);
 	}
 
 	const finalWhere =
@@ -78,6 +130,6 @@ export default {
 	method: "GET" as RouteMetadata["method"],
 	path: "/collections",
 	description: "List collections",
-	auth_required: false,
+	auth_required: true,
 	scopes: ["collections:read"],
 };

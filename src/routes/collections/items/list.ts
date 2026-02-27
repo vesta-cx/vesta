@@ -6,7 +6,7 @@ import {
 	runListQuery,
 	type ListQueryConfig,
 } from "@mia-cx/drizzle-query-factory";
-import { requireScope } from "../../../auth/helpers";
+import { requireAuth, requireScope } from "../../../auth/helpers";
 import { getDB } from "../../../db";
 import { collections, collectionItems } from "../../../db/schema";
 import { notFound } from "../../../lib/errors";
@@ -32,7 +32,8 @@ const collectionItemListConfig: ListQueryConfig = {
 };
 
 route.get("/collections/:collectionId/items", async (c) => {
-	const auth = c.get("auth");
+	const auth = requireAuth(c.get("auth"));
+
 	requireScope(auth, "collections:read");
 
 	const db = getDB(c.env.DB);

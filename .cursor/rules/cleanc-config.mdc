@@ -1,0 +1,79 @@
+---
+description: "cleanc config discovery and per-command cleanup directories. Supports .cleancrc*, cleanc.config.*, and package.json cleanc key. Apply when configuring or using cleanc for workspace cleanup."
+alwaysApply: false
+globs: packages/cleanc/**/*.*, **/package.json, **/.cleancrc*
+---
+
+# cleanc package configuration
+
+Cleanc manages build output and cache directory cleanup across the monorepo with Prettier-style config discovery and per-command directory lists.
+
+## Config Discovery
+
+Cleanc searches for config in this order (first found wins):
+
+1. **RC files** (any extension): `.cleancrc`, `.cleancrc.json`, `.cleancrc.yaml`, `.cleancrc.yml`, `.cleancrc.cjs`, `.cleancrc.mjs`, `.cleancrc.js`
+2. **Config files**: `cleanc.config.cjs`, `cleanc.config.mjs`, `cleanc.config.js`
+3. **package.json** → key `cleanc`
+
+No merging with parent configs; one config per package.
+
+## Config Shape
+
+Each config defines optional arrays of directories (relative to cwd) for each command:
+
+```json
+{
+  "clean": [".turbo", ".wrangler", ".svelte-kit", "dist"],
+  "installClean": [".turbo", ".wrangler", ".svelte-kit", "dist", "node_modules"],
+  "buildClean": [".turbo", ".wrangler", ".svelte-kit", "dist"],
+  "devClean": [".turbo", ".wrangler", ".svelte-kit", "dist"]
+}
+```
+
+### Defaults
+
+If a key is missing, cleanc uses:
+
+- `clean`: `['.turbo', '.wrangler', '.svelte-kit', 'dist']`
+- `installClean`: same as `clean` + `'node_modules'`
+- `buildClean`: same as `clean`
+- `devClean`: same as `clean`
+
+## CLI Usage
+
+```bash
+cleanc [command] [--dirs=dir1,dir2] [--cwd=path]
+
+# Commands
+cleanc clean              # Delete dirs in config.clean
+cleanc install:clean      # Delete dirs in config.installClean, then pnpm i
+cleanc build:clean        # Delete dirs in config.buildClean, then build
+cleanc dev:clean          # Delete dirs in config.devClean, then dev
+cleanc init               # Initialize cleanc in a project
+
+# Options
+--dirs=dir1,dir2          # Override config dirs for this run
+--cwd=/path               # Use alternative working directory
+```
+
+## Package Scripts
+
+All workspaces define:
+
+```json
+"scripts": {
+  "clean": "cleanc clean",
+  "install:clean": "cleanc install:clean && pnpm i",
+  "build:clean": "cleanc build:clean && pnpm run build",
+  "dev:clean": "cleanc dev:clean && pnpm run dev"
+}
+```
+
+## Backward Compatibility
+
+Cleanc supports existing `vesta:clean.dirs` or `cleanDirs` in package.json as fallback for the `clean` list (migrated to `cleanc` key when config is created or updated).
+
+## Path Safety
+
+Cleanc validates all directory paths to prevent path traversal (`../../../`). Resolved paths must stay within `cwd`.

@@ -1,0 +1,45 @@
+---
+title: Vesta Development Guidance
+description: Tribal knowledge for vesta: architectural patterns, mandatory reuse, and key decisions
+alwaysApply: true
+---
+
+# Vesta Development Guidance
+
+**Before coding:** Check [[apps/docs/content/Projects/vesta/Phase-1-Roadmap.md]] for scope and tiers. See [[apps/docs/content/Projects/vesta/Development-Checklist.md]] for PR guidelines.
+
+## Mandatory Packages (Do Not Reinvent)
+
+All vesta apps must use these shared packages. No local component libraries or utility duplication.
+
+- **`@vesta-cx/ui`** — shadcn-svelte, Bits-UI, design tokens. Import and extend; do not rebuild.
+- **`@vesta-cx/utils`** — Auth (WorkOS), storage (R2), types. Extend with vesta-specific logic as patterns emerge.
+- **`@vesta-cx/config`** — ESLint, Prettier, TypeScript, lint-staged.
+
+**Rebuild:** `pnpm --filter @vesta-cx/ui build` or `pnpm --filter @vesta-cx/utils build` after changes.
+
+## Reference App: `apps/sona`
+
+Before implementing a pattern, check if sona already shows it:
+
+- D1 database setup + migrations (Drizzle ORM)
+- R2 storage and file uploads
+- WorkOS authentication + session management
+- Cloudflare Workers routing
+- Cron jobs / scheduled tasks
+
+**Copy patterns from sona. Do not rebuild from scratch.**
+
+## Key Architectural Decisions
+
+1. **SvelteKit + Cloudflare Workers** — Zero cold starts, global perf, no ops.
+2. **REST (Phase 1)** — GraphQL deferred to Phase 3+ when Erato becomes separate service or targets managed DB.
+3. **Monolithic app for now** — `apps/vesta` handles profiles, posts, links, feeds, admin. Separate only if scaling demands differ.
+4. **Direct D1 bindings** — Apps query D1 via `packages/db` (Drizzle ORM). Erato as separate HTTP service comes Phase 3+.
+5. **Creator identity is core** — Design system must support extensive customization (colors, fonts, layout). Never hard-code appearance.
+
+## Server-Only Environment Variables
+
+Use `PRIVATE_` prefix for secrets and server-only vars (in `svelte.config.js`, `env.privatePrefix: 'PRIVATE_'`).
+
+Example: `PRIVATE_DATABASE_URL`, `PRIVATE_WORKOS_KEY`.

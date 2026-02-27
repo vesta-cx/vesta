@@ -1,0 +1,56 @@
+---
+description: Erato API key auth — KV format, scope semantics, two-layer auth, admin bypass
+globs:
+  - "apps/erato/src/auth/**"
+  - "apps/erato/src/routes/**"
+alwaysApply: false
+---
+
+# Erato Auth
+
+## KV key format
+
+API keys are stored in Cloudflare KV as `ak:<sha256-hex-of-raw-key>`. The value is JSON-serialized `ApiKeyMeta` (`userId`, `scopes`, `createdAt`, `expiresAt`). Never store raw keys. No D1 for key storage.
+
+## Scope semantics
+
+Scopes are org-level grants: `resources:read`, `resources:write`, `workspaces:read`, `workspaces:write`, `admin`.
+
+- `read` scopes → GET requests.
+- `write` scopes → POST / PUT / PATCH / DELETE requests.
+- `admin` bypasses ALL scope and D1 permission checks. Reserved for internal Vesta apps.
+
+Use `scopeForMethod(method)` to map HTTP method → `"read"` | `"write"`.
+
+## Two-layer authorization
+
+1. **Layer 1 — scope (fast):** Middleware validates the API key; route handler checks scope via `requireScope()` or `hasScope()`.
+2. **Layer 2 — D1 permissions (row-level):** Query uses `auth.userId` as subject in the `permissions` table to determine per-resource access.
+
+Admin keys skip layer 2 entirely.
+
+## Auth context
+
+Middleware sets `c.get("auth")` as `AuthContext`:
+- `{ type: "guest" }` — no API key provided. Can only read LISTED (public) resources.
+- `{ type: "apikey", userId, scopes }` — valid key. Access governed by scopes + D1 permissions.
+
+## Guest access on public-read routes
+
+Guests (no Bearer token) are allowed on read routes but see only LISTED resources. For public-read endpoints, branch on `isAuthenticated()` first instead of calling `requireScope()` — calling `requireScope` on a guest throws 403. Pattern:
+
+```ts
+if (isAuthenticated(auth)) {
+  if (!hasScope(auth, "resources:read")) return c.json({ error: "Forbidden" }, 403);
+  // two-layer query...
+}
+// guest: LISTED only
+```
+
+## AppEnv and imports
+
+`AppEnv` lives in `src/env.ts` (not `src/index.ts`) to avoid circular imports. Route handlers, registry, and other modules import from `../env` or `./env`.
+
+## Bearer token format
+
+`Authorization: Bearer <raw-api-key>`. No key or non-Bearer header → guest. Invalid/expired key → 401 with `{ error: "Unauthorized" }`.

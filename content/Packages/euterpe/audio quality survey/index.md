@@ -32,14 +32,14 @@ Sona is an A|B survey application to gather data-driven insights on audio codec 
 
 ### Keyboard Controls
 
-| Key | Action |
-| --- | --- |
-| Left/Right Arrow | Select left/right answer |
-| Up/Down Arrow | Volume control |
-| J | Seek back (–10s) |
-| K | Play/pause |
-| L | Seek forward (+10s) |
-| Space | Commit answer and move to next |
+| Key              | Action                         |
+| ---------------- | ------------------------------ |
+| Left/Right Arrow | Select left/right answer       |
+| Up/Down Arrow    | Volume control                 |
+| J                | Seek back (–10s)               |
+| K                | Play/pause                     |
+| L                | Seek forward (+10s)            |
+| Space            | Commit answer and move to next |
 
 ## Data Model
 

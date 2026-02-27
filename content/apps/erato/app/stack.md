@@ -11,11 +11,27 @@ license_url:
 ## Technology Stack
 
 **Application Layer:**
-- Erato backend service
+
+- SvelteKit service app (`apps/erato`)
+- REST API handlers (`+server.ts` routes)
 
 **ORM:**
-- Drizzle ORM — Type-safe SQL builder for TypeScript. See [Drizzle + D1 Schema Conventions](../drizzle-d1-schema.md).
+
+- Drizzle ORM — Type-safe SQL builder for TypeScript
+- Shared schema definitions from `@vesta-cx/db`
 
 **Database:**
+
 - D1 (Cloudflare SQLite)
-- Type-safe schema definitions via Drizzle
+- Type-safe schema definitions via Drizzle + shared schema package
+
+**Runtime/Hosting:**
+
+- Cloudflare Workers
+
+## Data Access Model
+
+- Phase 1-2: Direct D1 bindings are acceptable for app-level speed, while Erato API surface is formed.
+- Phase 2+: Consumers should use Erato as the primary HTTP data boundary.
+
+See [Erato Architecture & Data Access](./architecture.md) for full phase context and migration direction.

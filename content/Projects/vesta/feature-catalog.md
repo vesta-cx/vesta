@@ -101,4 +101,5 @@ These features have been modeled in the data layer and are ready for implementat
 - [Modular Pricing & Weighted Discount Curve](./pricing-modular.md) — Discount curve math and formulas
 - [Feature Access & Gating](./feature-access-gating.md) — Feature access control and JWT strategy
 - [Milestone 1 Roadmap (Blogging + Smart Links)](./milestones.md) — Milestone scope and scheduling
-- [Features & Subscriptions](../../apps/erato/Model/features-subscriptions.md) — Data model and schema
+- [Features](../../packages/db/model/features/features.md) — Feature registry and access model
+- [Subscriptions](../../packages/db/model/subscriptions/subscriptions.md) — Billing and subscription lifecycle

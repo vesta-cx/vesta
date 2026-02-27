@@ -11,7 +11,7 @@ This roadmap tracks improvements for the docs app itself (`apps/docs`), with pri
 
 - [ ] **Auto-link source paths to GitHub (priority 1).**
   - Build a small parser/transform that detects source-style references in markdown, such as:
-    - ``packages/utils/src/auth/handle.ts``
+    - `packages/utils/src/auth/handle.ts`
     - `@apps/docs/content/packages/utils/auth/handle.md:8`
   - Convert matched paths into GitHub blob links in deployed docs.
   - Line numbers should map to anchors (for example: `#L8`).

@@ -173,7 +173,7 @@ Use this to:
 ## See Also
 
 - [Workspaces](./workspaces.md) — How workspaces reference WorkOS users/orgs
-- [Permissions](./permissions.md) — Permission model (subjects include WorkOS users/orgs)
+- [Permissions](../access/permissions.md) — Permission model (subjects include WorkOS users/orgs)
 
 ## Future: Sharing Attributes Across Apps (Migration Path)
 

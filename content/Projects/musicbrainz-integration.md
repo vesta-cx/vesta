@@ -63,13 +63,13 @@ When Vesta artist is linked to MB artist, user can update that artist's metadata
 
 ## Technical Notes
 
-| Aspect | Approach |
-| ------ | -------- |
-| **OAuth** | Not used for edits. MB OAuth scopes are limited (tags, ratings, ISRCs, barcodes). No scope for artist/release metadata edits. |
-| **Release add** | POST form to `release/add` with seed params. See [Release Editor Seeding](https://wiki.musicbrainz.org/Development/Seeding/Release_Editor). |
-| **Release edit** | GET `release/<mbid>/edit` with query params, or POST if supported. |
-| **Artist edit** | GET `artist/<mbid>/edit` with query params (`edit-artist.disambiguation`, `edit-artist.url.0.text`, `rels.0.*`, etc.). See [Artist Editor Seeding](https://wiki.musicbrainz.org/Development/Seeding/Artist_Editor). |
-| **Attribution** | `edit_note` on every submission: "On behalf of &lt;artist&gt; — &lt;vesta release url&gt;" |
+| Aspect           | Approach                                                                                                                                                                                                            |
+| ---------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **OAuth**        | Not used for edits. MB OAuth scopes are limited (tags, ratings, ISRCs, barcodes). No scope for artist/release metadata edits.                                                                                       |
+| **Release add**  | POST form to `release/add` with seed params. See [Release Editor Seeding](https://wiki.musicbrainz.org/Development/Seeding/Release_Editor).                                                                         |
+| **Release edit** | GET `release/<mbid>/edit` with query params, or POST if supported.                                                                                                                                                  |
+| **Artist edit**  | GET `artist/<mbid>/edit` with query params (`edit-artist.disambiguation`, `edit-artist.url.0.text`, `rels.0.*`, etc.). See [Artist Editor Seeding](https://wiki.musicbrainz.org/Development/Seeding/Artist_Editor). |
+| **Attribution**  | `edit_note` on every submission: "On behalf of &lt;artist&gt; — &lt;vesta release url&gt;"                                                                                                                          |
 
 ---
 

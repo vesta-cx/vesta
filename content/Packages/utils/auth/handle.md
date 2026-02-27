@@ -53,12 +53,12 @@ The helper intentionally returns a raw redirect `Response` (instead of SvelteKit
 Typical usage in `hooks.server.ts`:
 
 ```ts
-import { createAuthHandle } from '@vesta-cx/utils/auth';
+import { createAuthHandle } from "@vesta-cx/utils/auth"
 
 const handleAuth = createAuthHandle({
-  protectedPaths: ['/admin'],
-  loginPath: '/auth/login'
-});
+  protectedPaths: ["/admin"],
+  loginPath: "/auth/login",
+})
 ```
 
 Then compose with other handles (`sequence()` or manual composition).

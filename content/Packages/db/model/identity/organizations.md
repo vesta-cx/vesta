@@ -79,7 +79,7 @@ Users are members of organizations and can have roles assigned by WorkOS:
 - `member` — Standard member (read/write access to organization resources)
 - `viewer` — Read-only access
 
-Roles affect permissions on resources and workspaces owned by the organization (via the [Permissions](./permissions.md) model).
+Roles affect permissions on resources and workspaces owned by the organization (via the [Permissions](../access/permissions.md) model).
 
 ## No Custom Attributes on WorkOS Organizations
 
@@ -121,4 +121,4 @@ const workspaces = await db.query.workspaces.findMany({
 
 - [Users & Organizations (WorkOS-Managed)](./users.md) — User schema and multi-org architecture
 - [Workspaces](./workspaces.md) — How workspaces reference organizations
-- [Permissions](./permissions.md) — Permission model (subjects include org members)
+- [Permissions](../access/permissions.md) — Permission model (subjects include org members)

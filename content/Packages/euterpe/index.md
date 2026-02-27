@@ -13,7 +13,7 @@ euterpe is the audio processing service for vesta.
 when a user uploads an audio file, euterpe makes sure it is processed to spec.
 
 - store multiple quality versions
-    - lossless (flac)
-    - high (opus )
-    - medium (opus )
-    - low (opus )
+  - lossless (flac)
+  - high (opus )
+  - medium (opus )
+  - low (opus )

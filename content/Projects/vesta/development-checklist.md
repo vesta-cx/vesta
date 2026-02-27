@@ -43,7 +43,7 @@ Copy patterns from sona; don't rebuild from scratch. If you find a gap, note it 
 
 ## Documentation
 
-- [ ] **If schema changed:** Updated docs in `apps/docs/content/apps/erato/Model/`.
+- [ ] **If schema changed:** Updated docs in `apps/docs/content/packages/db/model/`.
 - [ ] **If feature affects users:** Added user-facing docs or help text in the app.
 - [ ] **If new pattern emerges:** Consider documenting as a `.cursor/rules/` or `.cursor/skills/` file for future agents.
 

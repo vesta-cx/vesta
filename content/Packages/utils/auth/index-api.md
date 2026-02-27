@@ -40,6 +40,6 @@ import {
   createSession,
   getSession,
   clearSession,
-  getLogoutUrl
-} from '@vesta-cx/utils/auth';
+  getLogoutUrl,
+} from "@vesta-cx/utils/auth"
 ```

@@ -155,4 +155,4 @@ ORDER BY created_at DESC;
 ## See Also
 
 - [Collections](./collections.md) — Collections for reposts, follows, bookmarks, and custom curation
-- [Permissions](./permissions.md) — Similar subject-action-object model for access control
+- [Permissions](../access/permissions.md) — Similar subject-action-object model for access control

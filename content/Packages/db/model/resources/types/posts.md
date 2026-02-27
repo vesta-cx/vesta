@@ -19,12 +19,12 @@ featured_image       string (URL, optional)
 
 ## Fields
 
-| Field | Type | Purpose |
-|-------|------|---------|
-| `resource_id` | UUID | Links to base `resources` table |
-| `body` | text | Post content (markdown) |
-| `body_html` | text | Pre-rendered HTML (optional, for performance) |
-| `featured_image` | string | Hero image URL (optional) |
+| Field            | Type   | Purpose                                       |
+| ---------------- | ------ | --------------------------------------------- |
+| `resource_id`    | UUID   | Links to base `resources` table               |
+| `body`           | text   | Post content (markdown)                       |
+| `body_html`      | text   | Pre-rendered HTML (optional, for performance) |
+| `featured_image` | string | Hero image URL (optional)                     |
 
 ## Query Pattern
 
@@ -38,4 +38,4 @@ WHERE r.type = 'post' AND r.id = {resource_id};
 ## See Also
 
 - [Resource](../resource.md) — Base resource model
-- [Permissions](../permissions.md) — Who can view/edit posts
+- [Permissions](../../access/permissions.md) — Who can view/edit posts

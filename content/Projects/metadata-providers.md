@@ -14,14 +14,14 @@ tags:
 
 ## Overview
 
-| Provider | Status | Use case |
-| -------- | ------ | -------- |
-| **MusicBrainz** | Primary | Canonical IDs, release/artist sync. See [MusicBrainz Integration](./musicbrainz-integration.md). |
-| **Discogs** | Planned | Collectors, physical media, alternative release IDs. Complement to MusicBrainz. |
-| **Last.fm** | Planned | **Full scrobbling support.** Listen history, tags, discovery. |
-| **RYM / Sonemic** | No | No public API — skip. |
-| **Streaming platforms** | Later | If/when Vesta adds a distribution service. |
-| **Wikidata** | No | Less relevant to music; skip. |
+| Provider                | Status  | Use case                                                                                         |
+| ----------------------- | ------- | ------------------------------------------------------------------------------------------------ |
+| **MusicBrainz**         | Primary | Canonical IDs, release/artist sync. See [MusicBrainz Integration](./musicbrainz-integration.md). |
+| **Discogs**             | Planned | Collectors, physical media, alternative release IDs. Complement to MusicBrainz.                  |
+| **Last.fm**             | Planned | **Full scrobbling support.** Listen history, tags, discovery.                                    |
+| **RYM / Sonemic**       | No      | No public API — skip.                                                                            |
+| **Streaming platforms** | Later   | If/when Vesta adds a distribution service.                                                       |
+| **Wikidata**            | No      | Less relevant to music; skip.                                                                    |
 
 ## Last.fm
 

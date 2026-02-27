@@ -39,10 +39,12 @@ primary key          (resource_id, author_type, author_id)
 ```
 
 **Purpose:**
+
 - **Workspaces:** Collaborative posts, remix credits (multiple workspaces on one resource)
 - **Users:** User-created status updates (microblog posts, fan posts)
 
 **Query pattern:**
+
 ```sql
 SELECT r.*, ra.author_type, ra.author_id FROM resources r
 JOIN resource_authors ra ON r.id = ra.resource_id
@@ -64,6 +66,7 @@ featured_image       string (URL, optional)
 ### Phase 2+: Songs, Albums
 
 **To be added:**
+
 ```
 songs table:
 resource_id          UUID primary key, foreign key → resources.id
@@ -88,6 +91,7 @@ cover_art_url        string (optional)
 - **Minimal overhead:** 1:1 FK to base table, no junction tables
 
 When querying a resource with its type details:
+
 ```
 SELECT r.*, p.body, p.featured_image
 FROM resources r
@@ -120,7 +124,7 @@ primary key          (resource_id, workspace_id)
 **Permissions control access:**
 
 - Separate from status
-- See [Permissions](./permissions.md) for full model
+- See [Permissions](../access/permissions.md) for full model
 
 ## Types (Extensible)
 
@@ -131,6 +135,7 @@ Future: `'song'`, `'album'`, `'artwork'`, `'press-release'`, etc.
 Store in `type` field. Each type gets its own extension table (see above).
 
 **Status Type (User Microblog):**
+
 - Owned and authored by users
 - Body: `excerpt` field (max 300 chars, like Bluesky)
 - Media: Up to 4 images OR 1 video (stored separately, see Phase 1 note below)
@@ -152,9 +157,9 @@ A song can appear on multiple albums (compilations, reissues, etc.).
 
 ## See Also
 
-- [Post Resource Type](./resource_types/posts.md) — Post type (Phase 1)
-- [songs](./resource_types/songs.md) — Song type (Phase 2+)
-- [albums](./resource_types/albums.md) — Album type (Phase 2+)
-- [Teams](./teams.md) — Permissions subjects
-- [Permissions](./permissions.md) — Access control
-- [Workspaces](./workspaces.md) — Workspaces (artist profiles that author resources)
+- [Post Resource Type](./types/posts.md) — Post type (Phase 1)
+- [songs](./types/songs.md) — Song type (Phase 2+)
+- [albums](./types/albums.md) — Album type (Phase 2+)
+- [Teams](../identity/teams.md) — Permissions subjects
+- [Permissions](../access/permissions.md) — Access control
+- [Workspaces](../identity/workspaces.md) — Workspaces (artist profiles that author resources)

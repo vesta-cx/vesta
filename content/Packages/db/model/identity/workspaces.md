@@ -41,24 +41,25 @@ Workspaces are owned by a **user** or **organization**, not directly by WorkOS o
 
 ## Workspace Authors
 
-When a workspace publishes resources, it is an author. See [Resource](./resource.md#authors) for the unified `resource_authors` table.
+When a workspace publishes resources, it is an author. See [Resource](../resources/resource.md#authors) for the unified `resource_authors` table.
 
 ## Workspace Resources
 
-A workspace can own resources. See [Resource](./resource.md) for the resource model and ownership.
+A workspace can own resources. See [Resource](../resources/resource.md) for the resource model and ownership.
 
 ## Permissions
 
 Workspaces are permission **objects**. Users and teams can have permissions on workspaces:
+
 - `read` — View public profile
 - `write` — Edit workspace metadata, create resources
 - `delete` — Delete the workspace
 - `admin` — Full control including team management
 
-See [Permissions](./permissions.md) for the permission model.
+See [Permissions](../access/permissions.md) for the permission model.
 
 ## See Also
 
-- [Resource](./resource.md) — Resources owned/authored by workspaces
-- [Permissions](./permissions.md) — Workspace access control
+- [Resource](../resources/resource.md) — Resources owned/authored by workspaces
+- [Permissions](../access/permissions.md) — Workspace access control
 - [Teams](./teams.md) — Team-based workspace management

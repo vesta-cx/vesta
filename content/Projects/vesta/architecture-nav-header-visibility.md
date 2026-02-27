@@ -46,10 +46,10 @@ This keeps auth state centralized and reusable by the header visibility logic.
 Create `src/lib/stores/ui.ts`:
 
 ```ts
-import { writable } from 'svelte/store';
+import { writable } from "svelte/store"
 
-export const onUgcPage = writable(false);
-export const isLoggedIn = writable(false);
+export const onUgcPage = writable(false)
+export const isLoggedIn = writable(false)
 ```
 
 ## Header Component Integration
@@ -60,9 +60,9 @@ The header component receives `hideByDefault: boolean` and applies conditional C
 <script lang="ts">
   export let hideByDefault = false;
   let isScrolled = $state(false);
-  
+
   const shouldShow = hideByDefault ? isScrolled : true;
-  
+
   // scroll listener updates isScrolled
 </script>
 

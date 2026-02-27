@@ -20,17 +20,21 @@ vesta uses **feature-level pricing** with tier presets as shortcuts. A user can 
 Every feature has two prices:
 
 ### Base Price
+
 `base_price_cents` — The full, retail price of the feature. This is what a user pays if they buy only this feature (no discount).
 
 **Example:**
+
 - Custom domains: 500¢ ($5/month)
 - Advanced analytics: 2000¢ ($20/month)
 - Ad integrations: 1500¢ ($15/month)
 
 ### Cost of Operation
+
 `cost_of_operation` — The actual infrastructure + support cost to run the feature.
 
 **Example:**
+
 - Custom domains: 100¢ (SSL cert, DNS routing, small support overhead)
 - Advanced analytics: 800¢ (compute for aggregations, storage)
 - Ad integrations: 200¢ (third-party API calls, minimal overhead)
@@ -51,6 +55,7 @@ total_weight = sum(all_value_weights) = 1.0
 ```
 
 **Example:** User subscribes to 3 features:
+
 - Custom domains: base 500¢
 - Advanced analytics: base 2000¢
 - Ad integrations: base 1500¢
@@ -77,6 +82,7 @@ where:
 ```
 
 The formula ensures:
+
 - **Early features:** Smaller discounts (incentivizes staying on cheaper tier)
 - **Mid-range features:** Growing discounts (encourages adding features)
 - **Many features:** Discounts plateau (prevents unlimited discounting)
@@ -96,6 +102,7 @@ final_price = max(feature_price_after_discount, cost_of_operation)
 This ensures vesta never loses money on a feature, even with deep discounts.
 
 **Total monthly charge:**
+
 ```
 monthly_total = sum(final_price for each feature)
 ```
@@ -104,24 +111,24 @@ monthly_total = sum(final_price for each feature)
 
 **User adds 3 features:**
 
-| Feature | Base Price | Cost of Op | Weight | Discount 50%? | After Discount | Floor at Cost | Final |
-|---------|-----------|-----------|--------|---------------|----------------|--------------|-------|
-| Custom domains | 500¢ | 100¢ | 12.5% | 250¢ | 100¢ | 100¢ |
-| Advanced analytics | 2000¢ | 800¢ | 50% | 1000¢ | 1000¢ | 800¢ |
-| Ad integrations | 1500¢ | 200¢ | 37.5% | 750¢ | 750¢ | 200¢ |
-| **Total** | **4000¢** | **1100¢** | **100%** | **50% discount** | **1850¢** | **1100¢** |
+| Feature            | Base Price | Cost of Op | Weight   | Discount 50%?    | After Discount | Floor at Cost | Final |
+| ------------------ | ---------- | ---------- | -------- | ---------------- | -------------- | ------------- | ----- |
+| Custom domains     | 500¢       | 100¢       | 12.5%    | 250¢             | 100¢           | 100¢          |
+| Advanced analytics | 2000¢      | 800¢       | 50%      | 1000¢            | 1000¢          | 800¢          |
+| Ad integrations    | 1500¢      | 200¢       | 37.5%    | 750¢             | 750¢           | 200¢          |
+| **Total**          | **4000¢**  | **1100¢**  | **100%** | **50% discount** | **1850¢**      | **1100¢**     |
 
 **User pays:** $18.50/month (vs. $40/month at full price)
 
 Now user adds a 4th cheap feature:
 
-| Feature | Base Price | Cost of Op | Weight | Discount % | After Discount | Floor at Cost | Final |
-|---------|-----------|-----------|--------|------------|----------------|--------------|-------|
-| Custom domains | 500¢ | 100¢ | 7.7% | 55% | 225¢ | 100¢ |
-| Advanced analytics | 2000¢ | 800¢ | 30.8% | 55% | 900¢ | 800¢ |
-| Ad integrations | 1500¢ | 200¢ | 23.1% | 55% | 675¢ | 200¢ |
-| **New feature** | **750¢** | **50¢** | **11.5%** | **55% discount** | **337.5¢** | **50¢** |
-| **Total** | **6250¢** | **1150¢** | **100%** | **55% discount** | **2807.5¢** | **1150¢** |
+| Feature            | Base Price | Cost of Op | Weight    | Discount %       | After Discount | Floor at Cost | Final |
+| ------------------ | ---------- | ---------- | --------- | ---------------- | -------------- | ------------- | ----- |
+| Custom domains     | 500¢       | 100¢       | 7.7%      | 55%              | 225¢           | 100¢          |
+| Advanced analytics | 2000¢      | 800¢       | 30.8%     | 55%              | 900¢           | 800¢          |
+| Ad integrations    | 1500¢      | 200¢       | 23.1%     | 55%              | 675¢           | 200¢          |
+| **New feature**    | **750¢**   | **50¢**    | **11.5%** | **55% discount** | **337.5¢**     | **50¢**       |
+| **Total**          | **6250¢**  | **1150¢**  | **100%**  | **55% discount** | **2807.5¢**    | **1150¢**     |
 
 **User pays:** $11.50/month (vs. $62.50 at full price)
 
@@ -142,6 +149,7 @@ created_at   timestamp
 ```
 
 **Example Free tier:**
+
 - Creator profiles
 - Blogging engine
 - Smart links (basic)
@@ -149,12 +157,14 @@ created_at   timestamp
 - Collections (read-only)
 
 **Example Basic tier:**
+
 - Everything in Free +
 - Custom domains
 - Basic analytics
 - Advanced collections (write)
 
 **Example Pro tier:**
+
 - Everything in Basic +
 - Advanced analytics
 - Ad integrations
@@ -177,6 +187,7 @@ The curve is controlled by two parameters:
 - **`inflection_point`** (currently 0.3) — Controls curve shape. Lower = steeper early, flatter later. Higher = gradual throughout
 
 **Tuning strategy:**
+
 1. Monitor usage patterns (how many features do users typically add?)
 2. Monitor LTV (lifetime value) at different discount levels
 3. Adjust in 5% increments based on cohort behavior

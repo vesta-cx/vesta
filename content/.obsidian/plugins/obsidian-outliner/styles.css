@@ -39,11 +39,7 @@
   z-index: 1;
   cursor: pointer;
   background: transparent;
-  background-image: linear-gradient(
-    to right,
-    var(--text-faint) 1px,
-    transparent 1px
-  );
+  background-image: linear-gradient(to right, var(--text-faint) 1px, transparent 1px);
   background-position-x: 2px;
   background-repeat: no-repeat;
 }
@@ -52,8 +48,7 @@
   margin-top: 1.4em;
 }
 
-.markdown-source-view.mod-cm6.is-readable-line-width
-  .outliner-plugin-list-lines-content-container {
+.markdown-source-view.mod-cm6.is-readable-line-width .outliner-plugin-list-lines-content-container {
   max-width: 700px;
   margin: auto;
 }
@@ -94,9 +89,7 @@
 }
 
 body.outliner-plugin-dnd:not(.outliner-plugin-dragging) .cm-formatting-list,
-body.outliner-plugin-dnd:not(.outliner-plugin-dragging)
-  .cm-fold-indicator
-  .collapse-indicator {
+body.outliner-plugin-dnd:not(.outliner-plugin-dragging) .cm-fold-indicator .collapse-indicator {
   cursor: grab !important;
 }
 

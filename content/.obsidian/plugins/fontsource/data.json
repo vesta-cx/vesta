@@ -3,26 +3,9 @@
     {
       "id": "archivo",
       "family": "Archivo",
-      "subsets": [
-        "latin",
-        "latin-ext",
-        "vietnamese"
-      ],
-      "styles": [
-        "italic",
-        "normal"
-      ],
-      "weights": [
-        100,
-        200,
-        300,
-        400,
-        500,
-        600,
-        700,
-        800,
-        900
-      ],
+      "subsets": ["latin", "latin-ext", "vietnamese"],
+      "styles": ["italic", "normal"],
+      "weights": [100, 200, 300, 400, 500, 600, 700, 800, 900],
       "variable": {
         "ital": {
           "default": "0",
@@ -48,16 +31,9 @@
     {
       "id": "archivo-black",
       "family": "Archivo Black",
-      "subsets": [
-        "latin",
-        "latin-ext"
-      ],
-      "styles": [
-        "normal"
-      ],
-      "weights": [
-        400
-      ],
+      "subsets": ["latin", "latin-ext"],
+      "styles": ["normal"],
+      "weights": [400],
       "isActive": true
     },
     {
@@ -76,18 +52,8 @@
         "syriac",
         "vietnamese"
       ],
-      "styles": [
-        "italic",
-        "normal"
-      ],
-      "weights": [
-        300,
-        400,
-        500,
-        600,
-        700,
-        800
-      ],
+      "styles": ["italic", "normal"],
+      "weights": [300, 400, 500, 600, 700, 800],
       "variable": {
         "ital": {
           "default": "0",

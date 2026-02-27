@@ -14,8 +14,7 @@ const route = new Hono<AppEnv>();
 
 route.get("/teams/:id", async (c) => {
 	const id = c.req.param("id");
-	const auth = c.get("auth");
-	const apiAuth = requireAuth(auth);
+	const auth = requireAuth(c.get("auth"));
 	if (!hasScope(auth, "teams:read")) return forbidden(c);
 
 	const db = getDB(c.env.DB);
@@ -24,7 +23,7 @@ route.get("/teams/:id", async (c) => {
 	if (!row) return notFound(c, "Team");
 
 	const isAdmin = hasScope(auth, "admin");
-	const isOwner = row.ownerId === apiAuth.subjectId;
+	const isOwner = row.ownerId === auth.subjectId;
 	if (!isAdmin && !isOwner) return forbidden(c);
 
 	return c.json(itemResponse(row));

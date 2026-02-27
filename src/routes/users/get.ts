@@ -3,7 +3,7 @@
 import { eq } from "drizzle-orm";
 import { Hono } from "hono";
 import { itemResponse } from "@mia-cx/drizzle-query-factory";
-import { hasScope, isAuthenticated } from "../../auth/helpers";
+import { hasScope, requireAuth } from "../../auth/helpers";
 import { getDB } from "../../db";
 import { users } from "../../db/schema";
 import { forbidden, notFound } from "../../lib/errors";
@@ -15,10 +15,10 @@ const route = new Hono<AppEnv>();
 
 route.get("/users/:id", async (c) => {
 	const id = c.req.param("id");
-	const auth = c.get("auth");
+	const auth = requireAuth(c.get("auth"));
 	const db = getDB(c.env.DB);
 
-	if (isAuthenticated(auth) && auth.scopes.includes("admin")) {
+	if (hasScope(auth, "admin")) {
 		const [row] = await db
 			.select()
 			.from(users)
@@ -27,7 +27,7 @@ route.get("/users/:id", async (c) => {
 		return c.json(itemResponse(row));
 	}
 
-	if (isAuthenticated(auth)) {
+	{
 		if (!hasScope(auth, "users:read")) {
 			return forbidden(c);
 		}
@@ -52,6 +52,6 @@ export default {
 	method: "GET" as RouteMetadata["method"],
 	path: "/users/:id",
 	description: "Get user by ID",
-	auth_required: false,
+	auth_required: true,
 	scopes: ["users:read"],
 };

@@ -2,7 +2,7 @@
 
 import { Hono } from "hono";
 import { itemResponse } from "@mia-cx/drizzle-query-factory";
-import { requireScope } from "../../auth/helpers";
+import { requireAuth, requireScope } from "../../auth/helpers";
 import { getDB } from "../../db";
 import { workspaces } from "../../db/schema";
 import { conflict } from "../../lib/errors";
@@ -14,32 +14,30 @@ import type { RouteMetadata } from "../../registry";
 const route = new Hono<AppEnv>();
 
 route.post("/workspaces", async (c) => {
-	const auth = c.get("auth");
+	const auth = requireAuth(c.get("auth"));
+
 	requireScope(auth, "workspaces:write");
 
 	const parsed = await parseBody(c, createWorkspaceSchema);
 	if (isResponse(parsed)) return parsed;
+	const input = parsed as any;
 
 	const db = getDB(c.env.DB);
-
-	const visibility = parsed.visibility ?? "public";
-	const validVisibility =
-		visibility === "unlisted" ? "public" : visibility;
 
 	try {
 		const [row] = await db
 			.insert(workspaces)
 			.values({
-				name: parsed.name,
-				slug: parsed.slug,
-				description: parsed.description ?? null,
-				ownerType: parsed.ownerType as
+				name: input.name,
+				slug: input.slug,
+				description: input.description ?? null,
+				ownerType: input.ownerType as
 					| "user"
 					| "organization",
-				ownerId: parsed.ownerId,
-				avatarUrl: parsed.avatarUrl ?? null,
-				bannerUrl: parsed.bannerUrl ?? null,
-				visibility: validVisibility as
+				ownerId: input.ownerId,
+				avatarUrl: input.avatarUrl ?? null,
+				bannerUrl: input.bannerUrl ?? null,
+				visibility: (input.visibility ?? "public") as
 					| "public"
 					| "private",
 			})

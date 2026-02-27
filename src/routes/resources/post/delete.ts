@@ -2,7 +2,7 @@
 
 import { eq } from "drizzle-orm";
 import { Hono } from "hono";
-import { requireScope } from "../../../auth/helpers";
+import { requireAuth, requireScope } from "../../../auth/helpers";
 import { getDB } from "../../../db";
 import { posts } from "../../../db/schema";
 import { notFound } from "../../../lib/errors";
@@ -12,7 +12,8 @@ import type { RouteMetadata } from "../../../registry";
 const route = new Hono<AppEnv>();
 
 route.delete("/resources/:resourceId/post", async (c) => {
-	const auth = c.get("auth");
+	const auth = requireAuth(c.get("auth"));
+
 	requireScope(auth, "resources:write");
 
 	const db = getDB(c.env.DB);

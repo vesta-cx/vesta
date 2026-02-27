@@ -3,7 +3,7 @@
 import { eq } from "drizzle-orm";
 import { Hono } from "hono";
 import { itemResponse } from "@mia-cx/drizzle-query-factory";
-import { requireAuth } from "../../auth/helpers";
+import { requireAuth, hasScope } from "../../auth/helpers";
 import { getDB } from "../../db";
 import { users } from "../../db/schema";
 import { forbidden, notFound } from "../../lib/errors";
@@ -19,7 +19,7 @@ route.put("/users/:id", async (c) => {
 	const auth = requireAuth(c.get("auth"));
 
 	const isSelf = auth.subjectId === id;
-	const isAdmin = auth.scopes.includes("admin");
+	const isAdmin = hasScope(auth, "admin");
 
 	if (!isSelf && !isAdmin) {
 		return forbidden(c);

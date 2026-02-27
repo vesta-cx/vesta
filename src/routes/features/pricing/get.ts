@@ -3,7 +3,7 @@
 import { eq } from "drizzle-orm";
 import { Hono } from "hono";
 import { itemResponse } from "@mia-cx/drizzle-query-factory";
-import { hasScope, isAuthenticated } from "../../../auth/helpers";
+import { hasScope, requireAuth } from "../../../auth/helpers";
 import { getDB } from "../../../db";
 import { featurePricing, features } from "../../../db/schema";
 import { forbidden, notFound } from "../../../lib/errors";
@@ -13,8 +13,8 @@ import type { RouteMetadata } from "../../../registry";
 const route = new Hono<AppEnv>();
 
 route.get("/features/:slug/pricing", async (c) => {
-	const auth = c.get("auth");
-	if (isAuthenticated(auth) && !hasScope(auth, "features:read")) {
+	const auth = requireAuth(c.get("auth"));
+	if (!hasScope(auth, "features:read")) {
 		return forbidden(c);
 	}
 
@@ -53,6 +53,6 @@ export default {
 	method: "GET" as RouteMetadata["method"],
 	path: "/features/:slug/pricing",
 	description: "Get feature pricing",
-	auth_required: false,
+	auth_required: true,
 	scopes: ["features:read"],
 };

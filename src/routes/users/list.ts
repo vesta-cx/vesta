@@ -3,7 +3,7 @@
 import { sql } from "drizzle-orm";
 import { Hono } from "hono";
 import { parseListQuery, listResponse } from "@mia-cx/drizzle-query-factory";
-import { hasScope, isAuthenticated } from "../../auth/helpers";
+import { hasScope, requireAuth } from "../../auth/helpers";
 import { getDB } from "../../db";
 import { users } from "../../db/schema";
 import { forbidden } from "../../lib/errors";
@@ -14,14 +14,14 @@ import type { RouteMetadata } from "../../registry";
 const route = new Hono<AppEnv>();
 
 route.get("/users", async (c) => {
-	const auth = c.get("auth");
+	const auth = requireAuth(c.get("auth"));
 	const db = getDB(c.env.DB);
 	const query = parseListQuery(
 		new URL(c.req.url).searchParams,
 		userListConfig,
 	);
 
-	if (isAuthenticated(auth) && auth.scopes.includes("admin")) {
+	if (hasScope(auth, "admin")) {
 		const finalWhere = query.where;
 		const [rows, countResult] = await Promise.all([
 			db
@@ -42,7 +42,7 @@ route.get("/users", async (c) => {
 		);
 	}
 
-	if (isAuthenticated(auth)) {
+	{
 		if (!hasScope(auth, "users:read")) {
 			return forbidden(c);
 		}
@@ -89,6 +89,6 @@ export default {
 	method: "GET" as RouteMetadata["method"],
 	path: "/users",
 	description: "List users",
-	auth_required: false,
+	auth_required: true,
 	scopes: ["users:read"],
 };

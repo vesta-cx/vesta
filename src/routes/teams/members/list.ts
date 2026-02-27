@@ -28,8 +28,7 @@ const teamMemberListConfig: ListQueryConfig = {
 
 route.get("/teams/:teamId/members", async (c) => {
 	const teamId = c.req.param("teamId");
-	const auth = c.get("auth");
-	const apiAuth = requireAuth(auth);
+	const auth = requireAuth(c.get("auth"));
 	if (!hasScope(auth, "teams:read")) return forbidden(c);
 
 	const db = getDB(c.env.DB);
@@ -41,14 +40,14 @@ route.get("/teams/:teamId/members", async (c) => {
 	if (!team) return notFound(c, "Team");
 
 	const isAdmin = hasScope(auth, "admin");
-	const isOwner = team.ownerId === apiAuth.subjectId;
+	const isOwner = team.ownerId === auth.subjectId;
 	const [membership] = await db
 		.select()
 		.from(teamUsers)
 		.where(
 			and(
 				eq(teamUsers.teamId, teamId),
-				eq(teamUsers.userId, apiAuth.subjectId),
+				eq(teamUsers.userId, auth.subjectId),
 			),
 		);
 	const isMember = !!membership;

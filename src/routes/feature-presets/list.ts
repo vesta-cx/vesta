@@ -2,7 +2,7 @@
 
 import { Hono } from "hono";
 import { runListQuery } from "@mia-cx/drizzle-query-factory";
-import { hasScope, isAuthenticated } from "../../auth/helpers";
+import { hasScope, requireAuth } from "../../auth/helpers";
 import { getDB } from "../../db";
 import { featurePresets } from "../../db/schema";
 import { forbidden } from "../../lib/errors";
@@ -13,8 +13,8 @@ import type { RouteMetadata } from "../../registry";
 const route = new Hono<AppEnv>();
 
 route.get("/feature-presets", async (c) => {
-	const auth = c.get("auth");
-	if (isAuthenticated(auth) && !hasScope(auth, "features:read")) {
+	const auth = requireAuth(c.get("auth"));
+	if (!hasScope(auth, "features:read")) {
 		return forbidden(c);
 	}
 
@@ -33,6 +33,6 @@ export default {
 	method: "GET" as RouteMetadata["method"],
 	path: "/feature-presets",
 	description: "List feature presets",
-	auth_required: false,
+	auth_required: true,
 	scopes: ["features:read"],
 };

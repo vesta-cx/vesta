@@ -3,7 +3,7 @@
 import { and, eq } from "drizzle-orm";
 import { Hono } from "hono";
 import { itemResponse } from "@mia-cx/drizzle-query-factory";
-import { hasScope, isAuthenticated } from "../../auth/helpers";
+import { hasScope, requireAuth } from "../../auth/helpers";
 import { getDB } from "../../db";
 import { workspaces } from "../../db/schema";
 import { notFound } from "../../lib/errors";
@@ -15,18 +15,18 @@ const route = new Hono<AppEnv>();
 
 route.get("/workspaces/:id", async (c) => {
 	const id = c.req.param("id");
-	const auth = c.get("auth");
+	const auth = requireAuth(c.get("auth"));
 	const db = getDB(c.env.DB);
 
 	const idEq = eq(workspaces.id, id);
 
-	if (isAuthenticated(auth) && auth.scopes.includes("admin")) {
+	if (hasScope(auth, "admin")) {
 		const [row] = await db.select().from(workspaces).where(idEq);
 		if (!row) return notFound(c, "Workspace");
 		return c.json(itemResponse(row));
 	}
 
-	if (isAuthenticated(auth)) {
+	{
 		if (!hasScope(auth, "workspaces:read")) {
 			const [row] = await db
 				.select()
@@ -53,6 +53,6 @@ export default {
 	method: "GET" as RouteMetadata["method"],
 	path: "/workspaces/:id",
 	description: "Get workspace by id",
-	auth_required: false,
+	auth_required: true,
 	scopes: ["workspaces:read"],
 };

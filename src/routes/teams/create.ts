@@ -2,7 +2,7 @@
 
 import { Hono } from "hono";
 import { itemResponse } from "@mia-cx/drizzle-query-factory";
-import { requireScope } from "../../auth/helpers";
+import { requireAuth, requireScope } from "../../auth/helpers";
 import { getDB } from "../../db";
 import { teams } from "../../db/schema";
 import { parseBody, isResponse } from "../../lib/validation";
@@ -13,7 +13,8 @@ import type { RouteMetadata } from "../../registry";
 const route = new Hono<AppEnv>();
 
 route.post("/teams", async (c) => {
-	const auth = c.get("auth");
+	const auth = requireAuth(c.get("auth"));
+
 	requireScope(auth, "teams:write");
 
 	const parsed = await parseBody(c, createTeamSchema);

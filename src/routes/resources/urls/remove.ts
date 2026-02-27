@@ -2,9 +2,9 @@
 
 import { and, eq } from "drizzle-orm";
 import { Hono } from "hono";
-import { requireScope } from "../../../auth/helpers";
+import { requireAuth, requireScope } from "../../../auth/helpers";
 import { getDB } from "../../../db";
-import { resourceUrls } from "../../../db/schema";
+import { externalLinks } from "../../../db/schema";
 import { notFound } from "../../../lib/errors";
 import type { AppEnv } from "../../../env";
 import type { RouteMetadata } from "../../../registry";
@@ -12,7 +12,8 @@ import type { RouteMetadata } from "../../../registry";
 const route = new Hono<AppEnv>();
 
 route.delete("/resources/:resourceId/urls/:position", async (c) => {
-	const auth = c.get("auth");
+	const auth = requireAuth(c.get("auth"));
+
 	requireScope(auth, "resources:write");
 
 	const db = getDB(c.env.DB);
@@ -20,11 +21,12 @@ route.delete("/resources/:resourceId/urls/:position", async (c) => {
 	const position = parseInt(c.req.param("position"), 10);
 
 	const [row] = await db
-		.delete(resourceUrls)
+		.delete(externalLinks)
 		.where(
 			and(
-				eq(resourceUrls.resourceId, resourceId),
-				eq(resourceUrls.position, position),
+				eq(externalLinks.subjectType, "resource"),
+				eq(externalLinks.subjectId, resourceId),
+				eq(externalLinks.position, position),
 			),
 		)
 		.returning();

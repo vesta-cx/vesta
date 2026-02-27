@@ -2,7 +2,7 @@
 
 import { and, eq } from "drizzle-orm";
 import { Hono } from "hono";
-import { isAuthenticated, requireAuth } from "../../auth/helpers";
+import { isAuthenticated, requireAuth, hasScope } from "../../auth/helpers";
 import { getDB } from "../../db";
 import { resources } from "../../db/schema";
 import { forbidden, notFound } from "../../lib/errors";
@@ -16,7 +16,7 @@ route.delete("/resources/:id", async (c) => {
 	const id = c.req.param("id");
 	const db = getDB(c.env.DB);
 
-	const isAdmin = auth.scopes.includes("admin");
+	const isAdmin = hasScope(auth, "admin");
 	if (!isAdmin && !auth.scopes.includes("resources:write")) {
 		return forbidden(c);
 	}

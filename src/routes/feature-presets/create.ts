@@ -2,7 +2,7 @@
 
 import { Hono } from "hono";
 import { itemResponse } from "@mia-cx/drizzle-query-factory";
-import { requireAuth } from "../../auth/helpers";
+import { requireAuth, hasScope } from "../../auth/helpers";
 import { getDB } from "../../db";
 import { featurePresets } from "../../db/schema";
 import { conflict, forbidden } from "../../lib/errors";
@@ -14,9 +14,8 @@ import type { RouteMetadata } from "../../registry";
 const route = new Hono<AppEnv>();
 
 route.post("/feature-presets", async (c) => {
-	const auth = c.get("auth");
-	const apiAuth = requireAuth(auth);
-	if (!apiAuth.scopes.includes("admin")) return forbidden(c);
+	const auth = requireAuth(c.get("auth"));
+	if (!hasScope(auth, "admin")) return forbidden(c);
 
 	const parsed = await parseBody(c, createFeaturePresetSchema);
 	if (isResponse(parsed)) return parsed;
@@ -25,7 +24,7 @@ route.post("/feature-presets", async (c) => {
 	try {
 		const [row] = await db
 			.insert(featurePresets)
-			.values(parsed)
+			.values(parsed as any)
 			.returning();
 		return c.json(itemResponse(row!), 201);
 	} catch (err) {

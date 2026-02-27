@@ -13,8 +13,7 @@ const route = new Hono<AppEnv>();
 
 route.delete("/workspaces/:id", async (c) => {
 	const id = c.req.param("id");
-	const auth = c.get("auth");
-	const apiAuth = requireAuth(auth);
+	const auth = requireAuth(c.get("auth"));
 	requireScope(auth, "workspaces:write");
 
 	const db = getDB(c.env.DB);
@@ -26,7 +25,7 @@ route.delete("/workspaces/:id", async (c) => {
 	if (!existing) return notFound(c, "Workspace");
 
 	const isAdmin = hasScope(auth, "admin");
-	const isOwner = existing.ownerId === apiAuth.subjectId;
+	const isOwner = existing.ownerId === auth.subjectId;
 	if (!isAdmin && !isOwner) return forbidden(c);
 
 	await db.delete(workspaces).where(eq(workspaces.id, id));

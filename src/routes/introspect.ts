@@ -1,14 +1,14 @@
 /** @format */
 
 import { Hono } from "hono";
-import { requireScope } from "../auth/helpers";
+import { requireAuth, requireScope } from "../auth/helpers";
 import type { AppEnv } from "../env";
 import { routeRegistry, type RouteMetadata } from "../registry";
 
 const route = new Hono<AppEnv>();
 
 route.get("/introspect/routes", (c) => {
-	const auth = c.get("auth");
+	const auth = requireAuth(c.get("auth"));
 	requireScope(auth, "admin");
 	const origin =
 		c.req.header("x-forwarded-proto") ?

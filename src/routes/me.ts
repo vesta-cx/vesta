@@ -32,10 +32,9 @@ const mergeUserResponse = (
 const route = new Hono<AppEnv>();
 
 route.get("/me", async (c) => {
-	const auth = c.get("auth");
-	const apiAuth = requireAuth(auth);
+	const auth = requireAuth(c.get("auth"));
 
-	const { subjectType, subjectId } = apiAuth;
+	const { subjectType, subjectId } = auth;
 	const db = getDB(c.env.DB);
 
 	if (subjectType === "user") {

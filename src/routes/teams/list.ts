@@ -13,8 +13,7 @@ import type { RouteMetadata } from "../../registry";
 const route = new Hono<AppEnv>();
 
 route.get("/teams", async (c) => {
-	const auth = c.get("auth");
-	requireAuth(auth);
+	const auth = requireAuth(c.get("auth"));
 	if (!hasScope(auth, "teams:read")) return forbidden(c);
 
 	const envelope = await runListQuery({

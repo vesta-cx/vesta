@@ -1,45 +1,34 @@
 /** @format */
 
-import { eq } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 import { Hono } from "hono";
 import {
 	runListQuery,
-	type ListQueryConfig,
 } from "@mia-cx/drizzle-query-factory";
-import { hasScope, isAuthenticated } from "../../../auth/helpers";
+import { hasScope, requireAuth } from "../../../auth/helpers";
 import { getDB } from "../../../db";
-import { resourceUrls } from "../../../db/schema";
+import { externalLinks } from "../../../db/schema";
 import { forbidden } from "../../../lib/errors";
+import { externalLinkListConfig } from "../../links/shared";
 import type { AppEnv } from "../../../env";
 import type { RouteMetadata } from "../../../registry";
 
 const route = new Hono<AppEnv>();
 
-const resourceUrlListConfig: ListQueryConfig = {
-	filters: {
-		position: {
-			column: resourceUrls.position,
-			parse: (value) => Number(value),
-		},
-	},
-	sortable: { position: resourceUrls.position },
-	defaultSort: { key: "position", dir: "asc" },
-};
-
 route.get("/resources/:resourceId/urls", async (c) => {
-	const auth = c.get("auth");
-	if (isAuthenticated(auth) && !hasScope(auth, "resources:read")) {
+	const auth = requireAuth(c.get("auth"));
+	if (!hasScope(auth, "resources:read")) {
 		return forbidden(c);
 	}
 
 	const envelope = await runListQuery({
 		db: getDB(c.env.DB),
-		table: resourceUrls,
+		table: externalLinks,
 		input: new URL(c.req.url).searchParams,
-		config: resourceUrlListConfig,
-		baseWhere: eq(
-			resourceUrls.resourceId,
-			c.req.param("resourceId"),
+		config: externalLinkListConfig,
+		baseWhere: and(
+			eq(externalLinks.subjectType, "resource"),
+			eq(externalLinks.subjectId, c.req.param("resourceId")),
 		),
 		mode: "envelope",
 	});
@@ -51,6 +40,6 @@ export default {
 	method: "GET" as RouteMetadata["method"],
 	path: "/resources/:resourceId/urls",
 	description: "List resource URLs",
-	auth_required: false,
+	auth_required: true,
 	scopes: ["resources:read"],
 };

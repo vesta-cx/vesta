@@ -2,7 +2,7 @@
 
 import { Hono } from "hono";
 import { itemResponse } from "@mia-cx/drizzle-query-factory";
-import { requireScope } from "../../../auth/helpers";
+import { requireAuth, requireScope } from "../../../auth/helpers";
 import { getDB } from "../../../db";
 import { resourceAuthors } from "../../../db/schema";
 import { conflict } from "../../../lib/errors";
@@ -19,7 +19,8 @@ const addAuthorSchema = z.object({
 const route = new Hono<AppEnv>();
 
 route.post("/resources/:resourceId/authors", async (c) => {
-	const auth = c.get("auth");
+	const auth = requireAuth(c.get("auth"));
+
 	requireScope(auth, "resources:write");
 
 	const parsed = await parseBody(c, addAuthorSchema);
@@ -31,7 +32,7 @@ route.post("/resources/:resourceId/authors", async (c) => {
 	try {
 		const [row] = await db
 			.insert(resourceAuthors)
-			.values({ resourceId, ...parsed })
+			.values({ resourceId, ...parsed } as any)
 			.returning();
 		return c.json(itemResponse(row!), 201);
 	} catch (err) {

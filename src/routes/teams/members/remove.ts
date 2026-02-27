@@ -13,8 +13,7 @@ const route = new Hono<AppEnv>();
 
 route.delete("/teams/:teamId/members/:userId", async (c) => {
 	const { teamId, userId } = c.req.param();
-	const auth = c.get("auth");
-	const apiAuth = requireAuth(auth);
+	const auth = requireAuth(c.get("auth"));
 	requireScope(auth, "teams:write");
 
 	const db = getDB(c.env.DB);
@@ -26,7 +25,7 @@ route.delete("/teams/:teamId/members/:userId", async (c) => {
 	if (!team) return notFound(c, "Team");
 
 	const isAdmin = hasScope(auth, "admin");
-	const isOwner = team.ownerId === apiAuth.subjectId;
+	const isOwner = team.ownerId === auth.subjectId;
 	if (!isAdmin && !isOwner) return forbidden(c);
 
 	const [deleted] = await db

@@ -2,7 +2,7 @@
 
 import { eq } from "drizzle-orm";
 import { Hono } from "hono";
-import { requireAuth } from "../../auth/helpers";
+import { requireAuth, hasScope } from "../../auth/helpers";
 import { getDB } from "../../db";
 import { users } from "../../db/schema";
 import { forbidden, notFound } from "../../lib/errors";
@@ -13,7 +13,7 @@ const route = new Hono<AppEnv>();
 
 route.delete("/users/:id", async (c) => {
 	const auth = requireAuth(c.get("auth"));
-	if (!auth.scopes.includes("admin")) {
+	if (!hasScope(auth, "admin")) {
 		return forbidden(c, "Forbidden: admin scope required");
 	}
 

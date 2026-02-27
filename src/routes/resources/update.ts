@@ -3,7 +3,7 @@
 import { and, eq } from "drizzle-orm";
 import { Hono } from "hono";
 import { itemResponse } from "@mia-cx/drizzle-query-factory";
-import { isAuthenticated, requireScope } from "../../auth/helpers";
+import { requireAuth, requireScope, hasScope } from "../../auth/helpers";
 import { getDB } from "../../db";
 import { resources } from "../../db/schema";
 import { conflict, forbidden, notFound } from "../../lib/errors";
@@ -15,7 +15,8 @@ import type { RouteMetadata } from "../../registry";
 const route = new Hono<AppEnv>();
 
 route.put("/resources/:id", async (c) => {
-	const auth = c.get("auth");
+	const auth = requireAuth(c.get("auth"));
+
 	requireScope(auth, "resources:write");
 
 	const id = c.req.param("id");
@@ -24,7 +25,7 @@ route.put("/resources/:id", async (c) => {
 
 	const db = getDB(c.env.DB);
 
-	const isAdmin = isAuthenticated(auth) && auth.scopes.includes("admin");
+	const isAdmin = hasScope(auth, "admin");
 	const where =
 		isAdmin ?
 			eq(resources.id, id)
@@ -40,7 +41,7 @@ route.put("/resources/:id", async (c) => {
 	try {
 		const [row] = await db
 			.update(resources)
-			.set({ ...parsed, updatedAt: new Date() })
+			.set({ ...parsed, updatedAt: new Date() } as any)
 			.where(where)
 			.returning();
 		return row ?

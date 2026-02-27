@@ -1,7 +1,7 @@
 /** @format */
 
 import { Hono } from "hono";
-import { requireScope } from "../../auth/helpers";
+import { requireAuth, requireScope } from "../../auth/helpers";
 import { getDB } from "../../db";
 import { itemResponse } from "@mia-cx/drizzle-query-factory";
 import { workos } from "../../services/workos";
@@ -16,7 +16,8 @@ import type { RouteMetadata } from "../../registry";
 const route = new Hono<AppEnv>();
 
 route.get("/organizations/:id", async (c) => {
-	const auth = c.get("auth");
+	const auth = requireAuth(c.get("auth"));
+
 	requireScope(auth, "organizations:read");
 
 	const id = c.req.param("id");

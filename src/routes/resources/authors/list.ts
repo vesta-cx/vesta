@@ -6,7 +6,7 @@ import {
 	runListQuery,
 	type ListQueryConfig,
 } from "@mia-cx/drizzle-query-factory";
-import { hasScope, isAuthenticated } from "../../../auth/helpers";
+import { hasScope, requireAuth } from "../../../auth/helpers";
 import { getDB } from "../../../db";
 import { resourceAuthors } from "../../../db/schema";
 import { forbidden } from "../../../lib/errors";
@@ -28,8 +28,8 @@ const authorListConfig: ListQueryConfig = {
 };
 
 route.get("/resources/:resourceId/authors", async (c) => {
-	const auth = c.get("auth");
-	if (isAuthenticated(auth) && !hasScope(auth, "resources:read")) {
+	const auth = requireAuth(c.get("auth"));
+	if (!hasScope(auth, "resources:read")) {
 		return forbidden(c);
 	}
 
@@ -52,6 +52,6 @@ export default {
 	method: "GET" as RouteMetadata["method"],
 	path: "/resources/:resourceId/authors",
 	description: "List resource authors",
-	auth_required: false,
+	auth_required: true,
 	scopes: ["resources:read"],
 };

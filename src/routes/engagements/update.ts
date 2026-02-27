@@ -3,7 +3,7 @@
 import { eq } from "drizzle-orm";
 import { Hono } from "hono";
 import { itemResponse } from "@mia-cx/drizzle-query-factory";
-import { requireScope } from "../../auth/helpers";
+import { requireAuth, requireScope } from "../../auth/helpers";
 import { getDB } from "../../db";
 import {
 	engagementComments,
@@ -36,7 +36,8 @@ const route = new Hono<AppEnv>();
 
 route.put("/engagements/:id", async (c) => {
 	const id = c.req.param("id");
-	const auth = c.get("auth");
+	const auth = requireAuth(c.get("auth"));
+
 	requireScope(auth, "engagements:write");
 
 	const parsed = await parseBody(c, updateEngagementSchema);

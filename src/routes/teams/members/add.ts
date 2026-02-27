@@ -19,8 +19,7 @@ const route = new Hono<AppEnv>();
 
 route.post("/teams/:teamId/members", async (c) => {
 	const teamId = c.req.param("teamId");
-	const auth = c.get("auth");
-	const apiAuth = requireAuth(auth);
+	const auth = requireAuth(c.get("auth"));
 	requireScope(auth, "teams:write");
 
 	const parsed = await parseBody(c, addMemberSchema);
@@ -35,7 +34,7 @@ route.post("/teams/:teamId/members", async (c) => {
 	if (!team) return notFound(c, "Team");
 
 	const isAdmin = hasScope(auth, "admin");
-	const isOwner = team.ownerId === apiAuth.subjectId;
+	const isOwner = team.ownerId === auth.subjectId;
 	if (!isAdmin && !isOwner) return forbidden(c);
 
 	try {

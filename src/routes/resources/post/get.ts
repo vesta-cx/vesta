@@ -3,7 +3,7 @@
 import { eq } from "drizzle-orm";
 import { Hono } from "hono";
 import { itemResponse } from "@mia-cx/drizzle-query-factory";
-import { hasScope, isAuthenticated } from "../../../auth/helpers";
+import { hasScope, requireAuth } from "../../../auth/helpers";
 import { getDB } from "../../../db";
 import { posts } from "../../../db/schema";
 import { forbidden, notFound } from "../../../lib/errors";
@@ -13,8 +13,8 @@ import type { RouteMetadata } from "../../../registry";
 const route = new Hono<AppEnv>();
 
 route.get("/resources/:resourceId/post", async (c) => {
-	const auth = c.get("auth");
-	if (isAuthenticated(auth) && !hasScope(auth, "resources:read")) {
+	const auth = requireAuth(c.get("auth"));
+	if (!hasScope(auth, "resources:read")) {
 		return forbidden(c);
 	}
 
@@ -35,6 +35,6 @@ export default {
 	method: "GET" as RouteMetadata["method"],
 	path: "/resources/:resourceId/post",
 	description: "Get resource post",
-	auth_required: false,
+	auth_required: true,
 	scopes: ["resources:read"],
 };

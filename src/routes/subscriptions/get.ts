@@ -3,7 +3,7 @@
 import { eq } from "drizzle-orm";
 import { Hono } from "hono";
 import { itemResponse } from "@mia-cx/drizzle-query-factory";
-import { requireAuth, requireScope } from "../../auth/helpers";
+import { requireAuth, requireScope, hasScope } from "../../auth/helpers";
 import { getDB } from "../../db";
 import { userSubscriptions } from "../../db/schema";
 import { forbidden, notFound } from "../../lib/errors";
@@ -13,13 +13,12 @@ import type { RouteMetadata } from "../../registry";
 const route = new Hono<AppEnv>();
 
 route.get("/subscriptions/:userId", async (c) => {
-	const auth = c.get("auth");
-	const apiAuth = requireAuth(auth);
+	const auth = requireAuth(c.get("auth"));
 	requireScope(auth, "subscriptions:read");
 
 	const userId = c.req.param("userId");
-	const isAdmin = apiAuth.scopes.includes("admin");
-	if (!isAdmin && apiAuth.subjectId !== userId) return forbidden(c);
+	const isAdmin = hasScope(auth, "admin");
+	if (!isAdmin && auth.subjectId !== userId) return forbidden(c);
 
 	const db = getDB(c.env.DB);
 

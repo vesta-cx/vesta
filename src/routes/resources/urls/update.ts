@@ -3,27 +3,23 @@
 import { and, eq } from "drizzle-orm";
 import { Hono } from "hono";
 import { itemResponse } from "@mia-cx/drizzle-query-factory";
-import { requireScope } from "../../../auth/helpers";
+import { requireAuth, requireScope } from "../../../auth/helpers";
 import { getDB } from "../../../db";
-import { resourceUrls } from "../../../db/schema";
+import { externalLinks } from "../../../db/schema";
 import { notFound } from "../../../lib/errors";
-import { parseBody, isResponse, z } from "../../../lib/validation";
+import { parseBody, isResponse } from "../../../lib/validation";
+import { updateExternalLinkSchema } from "../../links/shared";
 import type { AppEnv } from "../../../env";
 import type { RouteMetadata } from "../../../registry";
-
-const updateUrlSchema = z.object({
-	name: z.string().min(1).optional(),
-	url: z.string().url().optional(),
-	icon: z.string().nullable().optional(),
-});
 
 const route = new Hono<AppEnv>();
 
 route.put("/resources/:resourceId/urls/:position", async (c) => {
-	const auth = c.get("auth");
+	const auth = requireAuth(c.get("auth"));
+
 	requireScope(auth, "resources:write");
 
-	const parsed = await parseBody(c, updateUrlSchema);
+	const parsed = await parseBody(c, updateExternalLinkSchema);
 	if (isResponse(parsed)) return parsed;
 
 	const db = getDB(c.env.DB);
@@ -31,12 +27,13 @@ route.put("/resources/:resourceId/urls/:position", async (c) => {
 	const position = parseInt(c.req.param("position"), 10);
 
 	const [row] = await db
-		.update(resourceUrls)
+		.update(externalLinks)
 		.set({ ...parsed, updatedAt: new Date() })
 		.where(
 			and(
-				eq(resourceUrls.resourceId, resourceId),
-				eq(resourceUrls.position, position),
+				eq(externalLinks.subjectType, "resource"),
+				eq(externalLinks.subjectId, resourceId),
+				eq(externalLinks.position, position),
 			),
 		)
 		.returning();

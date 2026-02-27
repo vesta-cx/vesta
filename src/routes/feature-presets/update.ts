@@ -3,7 +3,7 @@
 import { eq } from "drizzle-orm";
 import { Hono } from "hono";
 import { itemResponse } from "@mia-cx/drizzle-query-factory";
-import { requireAuth } from "../../auth/helpers";
+import { requireAuth, hasScope } from "../../auth/helpers";
 import { getDB } from "../../db";
 import { featurePresets } from "../../db/schema";
 import { conflict, forbidden, notFound } from "../../lib/errors";
@@ -15,9 +15,8 @@ import type { RouteMetadata } from "../../registry";
 const route = new Hono<AppEnv>();
 
 route.put("/feature-presets/:name", async (c) => {
-	const auth = c.get("auth");
-	const apiAuth = requireAuth(auth);
-	if (!apiAuth.scopes.includes("admin")) return forbidden(c);
+	const auth = requireAuth(c.get("auth"));
+	if (!hasScope(auth, "admin")) return forbidden(c);
 
 	const name = c.req.param("name");
 	const parsed = await parseBody(c, updateFeaturePresetSchema);

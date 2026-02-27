@@ -1,0 +1,35 @@
+---
+description: WorkOS hybrid data model conventions for Erato
+globs:
+  - apps/erato/src/services/**
+  - apps/erato/src/routes/organizations/**
+  - apps/erato/src/routes/users/**
+  - apps/erato/src/routes/me.ts
+alwaysApply: false
+---
+
+# WorkOS Hybrid Data Model
+
+Users and organizations follow a **hybrid ownership model**:
+
+- **WorkOS** owns canonical identity fields (`name`, `email`, timestamps, membership).
+- **Local D1 tables** own Vesta extension fields (`avatarUrl`, `bannerUrl`, `themeConfig`, `bio`).
+
+## Response Shape
+
+Return **flattened merged objects**. Clients must not see or depend on an `identity`/`extension` split.
+
+## Write Routing
+
+Only call the domain(s) that own changed fields:
+- `name` update → WorkOS API only.
+- `avatarUrl` update → D1 only.
+- Both → call both; if either fails, return error (no silent partial success).
+
+## List Semantics
+
+WorkOS is the source of truth for list/search. Fetch IDs from WorkOS first, then hydrate local extensions by ID. **Do not** use `runListQuery` for WorkOS-backed lists — it requires a Drizzle DB context.
+
+## Branding Fields
+
+Use `avatarUrl` (not `logoUrl`) across users, workspaces, and organizations for consistency.

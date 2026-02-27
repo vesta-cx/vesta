@@ -4,37 +4,37 @@ overview: "Implement the audited Erato gaps using a WorkOS-first hybrid model: a
 todos:
   - id: schema-org
     content: "Schemas (`packages/db`): add organizations extension table (WorkOS-id keyed) with minimal local fields (`avatarUrl`, optional `bannerUrl`, optional `themeConfig`) and align migrations."
-    status: pending
+    status: completed
   - id: service-org-hybrid
     content: "Implementation (`apps/erato`): implement WorkOS-first organizations adapter/service with field ownership split, flattened merged responses, and retry-safe error handling on partial write failures."
-    status: pending
+    status: completed
   - id: routes-org
     content: Add organizations route set (list/get/create/update/delete) and register in route index/registry.
-    status: pending
+    status: completed
   - id: route-permissions-get
     content: Add `GET /permissions/:id` route and register it.
-    status: pending
+    status: completed
   - id: route-engagements-update
     content: Add engagements update route and register it with explicit mutable fields.
-    status: pending
+    status: completed
   - id: route-me
     content: Add `GET /me` endpoint resolving subject object across user/workspace/organization sources.
-    status: pending
+    status: completed
   - id: route-introspect-admin
     content: Enforce `admin` scope in `/introspect/routes` handler (not metadata-only) since it is a protected debugging endpoint.
-    status: pending
+    status: completed
   - id: tests
     content: "Tests (vitest-writer): add and pass tests for organizations hybrid service/routes, permissions get, engagements update, and /me; then run `pnpm --filter erato test` + `pnpm --filter erato build`."
-    status: pending
+    status: completed
   - id: rules-skills
     content: "Rules & skills: capture any new WorkOS-hybrid ownership/merge convention in `.cursor/rules/` if a non-obvious pattern emerges during implementation; otherwise mark N/A with reason in final check."
-    status: pending
+    status: completed
   - id: documentation
     content: "Documentation: update `apps/docs` + `apps/erato/README.md` for hybrid organizations model, `avatarUrl` naming consistency, `/me`, permissions get, and engagements update."
-    status: pending
+    status: completed
   - id: review-close
     content: "Review & close (verifier): audit auth/scope enforcement, route metadata registration, failure modes, and simplification opportunities before finalizing."
-    status: pending
+    status: completed
 isProject: false
 ---
 
@@ -56,7 +56,7 @@ Implement the selected gaps:
 
 - **Organizations:** WorkOS owns canonical org fields; Erato D1 stores Vesta-specific extension fields.
 - **Users/Organizations hybrid behavior:** read returns a **flattened merged object** (no identity/extension split exposed to clients), writes fan out by field ownership.
-- `**/me` behavior:\*\* authenticated endpoint; resolves `subjectType` + `subjectId`; returns merged entity when resolvable (user/workspace/org) and explicit not-found/error contract when source entity is missing.
+- `**/me` behavior: authenticated endpoint; resolves `subjectType` + `subjectId`; returns merged entity when resolvable (user/workspace/org) and explicit not-found/error contract when source entity is missing.
 - **Branding field naming:** standardize on `avatarUrl` (not `logoUrl`) for consistency with users/workspaces; allow optional `bannerUrl`.
 - **Branding storage shape (this phase):** keep branding in entity-specific tables (`users`, `workspaces`, `organizations` extension) and defer any shared branding/theming table.
 - **Commercial/billing extension fields:** explicitly out of scope for now.

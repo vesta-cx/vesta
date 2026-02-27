@@ -2,8 +2,11 @@
 
 import { eq } from "drizzle-orm";
 import type { ListQueryConfig } from "@mia-cx/drizzle-query-factory";
+import {
+	resourceCreateSchema,
+	resourceUpdateSchema,
+} from "@vesta-cx/db/entity-schemas";
 import { resources } from "../db/schema";
-import { z } from "../lib/validation";
 
 export const resourceListConfig: ListQueryConfig = {
 	filters: {
@@ -21,20 +24,8 @@ export const resourceListConfig: ListQueryConfig = {
 	defaultSort: { key: "created_at", dir: "desc" },
 };
 
-export const createResourceSchema = z.object({
-	ownerType: z.string().min(1),
-	ownerId: z.string().min(1),
-	type: z.string().min(1),
-	title: z.string().nullable().optional(),
-	excerpt: z.string().nullable().optional(),
-	status: z.string().optional(),
-});
+export const createResourceSchema = resourceCreateSchema;
 
-export const updateResourceSchema = z.object({
-	type: z.string().min(1).optional(),
-	title: z.string().nullable().optional(),
-	excerpt: z.string().nullable().optional(),
-	status: z.string().optional(),
-});
+export const updateResourceSchema = resourceUpdateSchema;
 
 export const listedResourceWhere = () => eq(resources.status, "LISTED");

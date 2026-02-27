@@ -2,8 +2,11 @@
 
 import { eq, type SQL } from "drizzle-orm";
 import type { ListQueryConfig } from "@mia-cx/drizzle-query-factory";
+import {
+	userCreateSchema,
+	userUpdateSchema,
+} from "@vesta-cx/db/entity-schemas";
 import { users } from "../db/schema";
-import { z } from "../lib/validation";
 
 export const userListConfig: ListQueryConfig = {
 	filters: {
@@ -19,29 +22,9 @@ export const userListConfig: ListQueryConfig = {
 	defaultSort: { key: "created_at", dir: "desc" },
 };
 
-export const createUserSchema = z.object({
-	workosUserId: z.string().min(1),
-	email: z.string().email(),
-	displayName: z.string().nullable().optional(),
-	avatarUrl: z.string().url().nullable().optional(),
-	bio: z.string().nullable().optional(),
-	organizationId: z.string().min(1),
-});
+export const createUserSchema = userCreateSchema;
 
-export const updateUserSchema = z.object({
-	email: z.string().email().optional(),
-	displayName: z.string().nullable().optional(),
-	avatarUrl: z.string().url().nullable().optional(),
-	bio: z.string().nullable().optional(),
-	themeConfig: z
-		.object({
-			colors: z.record(z.string()).optional(),
-			fonts: z.record(z.string()).optional(),
-			layout: z.string().optional(),
-		})
-		.nullable()
-		.optional(),
-});
+export const updateUserSchema = userUpdateSchema;
 
 export const PUBLIC_USER_FIELDS = {
 	workosUserId: users.workosUserId,

@@ -2,8 +2,11 @@
 
 import { eq } from "drizzle-orm";
 import type { ListQueryConfig } from "@mia-cx/drizzle-query-factory";
+import {
+	workspaceCreateSchema,
+	workspaceUpdateSchema,
+} from "@vesta-cx/db/entity-schemas";
 import { workspaces } from "../db/schema";
-import { z } from "../lib/validation";
 
 export const workspaceListConfig: ListQueryConfig = {
 	filters: {
@@ -20,24 +23,8 @@ export const workspaceListConfig: ListQueryConfig = {
 	defaultSort: { key: "created_at", dir: "desc" },
 };
 
-export const createWorkspaceSchema = z.object({
-	name: z.string().min(1),
-	slug: z.string().min(1),
-	description: z.string().nullable().optional(),
-	ownerType: z.string().min(1),
-	ownerId: z.string().min(1),
-	avatarUrl: z.string().url().nullable().optional(),
-	bannerUrl: z.string().url().nullable().optional(),
-	visibility: z.enum(["public", "private", "unlisted"]).optional(),
-});
+export const createWorkspaceSchema = workspaceCreateSchema;
 
-export const updateWorkspaceSchema = z.object({
-	name: z.string().min(1).optional(),
-	slug: z.string().min(1).optional(),
-	description: z.string().nullable().optional(),
-	avatarUrl: z.string().url().nullable().optional(),
-	bannerUrl: z.string().url().nullable().optional(),
-	visibility: z.enum(["public", "private", "unlisted"]).optional(),
-});
+export const updateWorkspaceSchema = workspaceUpdateSchema;
 
 export const publicWorkspaceWhere = () => eq(workspaces.visibility, "public");

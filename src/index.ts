@@ -5,6 +5,8 @@ import { Hono } from "hono";
 import { cors } from "hono/cors";
 import { parseAllowedOrigins } from "@vesta-cx/utils/cors";
 import { transcodeRoutes } from "./routes/transcode.js";
+import { startJobRunner } from "./workers/job-runner.js";
+import { startOutboxRunner } from "./workers/outbox-runner.js";
 
 const app = new Hono();
 
@@ -28,3 +30,6 @@ const port = Number(process.env["PORT"]) || 3000;
 serve({ fetch: app.fetch, port }, (info) => {
 	console.log(`Euterpe listening on http://localhost:${info.port}`);
 });
+
+startJobRunner();
+startOutboxRunner();

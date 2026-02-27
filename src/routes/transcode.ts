@@ -3,36 +3,22 @@
 import { Hono } from "hono";
 import { eq } from "drizzle-orm";
 import { randomUUID } from "node:crypto";
-import * as fs from "node:fs";
-import * as path from "node:path";
-import * as os from "node:os";
-import { once } from "node:events";
 import { apiKeyAuth } from "../middleware/auth.js";
-import { transcode } from "../transcode.js";
-import { createStorage } from "../storage/factory.js";
-import { db, transcodeJobs } from "../db/index.js";
-import type { TranscodeConfig } from "../transcode.js";
+import { db, inboxJobs } from "../db/index.js";
+import type { EnqueueTranscodeRequest, EnqueueResponse } from "../types/contracts.js";
+import { createInboxJob } from "../services/inbox-repository.js";
+import {
+	IdempotencyConflictError,
+	getExistingIdempotentResult,
+	storeIdempotentResult,
+} from "../services/idempotency.js";
+import { encryptCredentials } from "../services/credential-encryption.js";
+import {
+	DEFAULT_WORKLOAD,
+	normalizeWorkloadToken,
+} from "../services/workload-policy.js";
 
 export const transcodeRoutes = new Hono();
-
-const writeFileStream = async (file: File, tmpPath: string): Promise<void> => {
-	const reader = file.stream().getReader();
-	const out = fs.createWriteStream(tmpPath);
-	try {
-		while (true) {
-			const { value, done } = await reader.read();
-			if (done) break;
-			if (!value || value.byteLength === 0) continue;
-			if (!out.write(value)) {
-				await once(out, "drain");
-			}
-		}
-	} finally {
-		reader.releaseLock();
-		out.end();
-		await once(out, "close");
-	}
-};
 
 transcodeRoutes.use("*", apiKeyAuth);
 
@@ -42,202 +28,165 @@ transcodeRoutes.get("/status", async (c) => {
 
 	const [job] = await db
 		.select()
-		.from(transcodeJobs)
-		.where(eq(transcodeJobs.id, jobId));
+		.from(inboxJobs)
+		.where(eq(inboxJobs.id, jobId));
 
 	if (!job) return c.json({ error: "Job not found" }, 404);
 
 	return c.json({
+		jobId: job.id,
+		workloadType: job.workloadType,
 		status: job.status,
+		requesterId: job.requesterId,
+		attemptCount: job.attemptCount,
+		maxAttempts: job.maxAttempts,
+		claimVersion: job.claimVersion,
+		workerId: job.workerId ?? undefined,
+		leaseExpiresAt: job.leaseExpiresAt?.toISOString(),
+		heartbeatAt: job.heartbeatAt?.toISOString(),
+		credentialVersion: job.credentialVersion,
 		sourceFileId: job.sourceFileId ?? undefined,
-		error: job.error ?? undefined,
+		error: job.lastError ?? undefined,
+		updatedAt: job.updatedAt.toISOString(),
 	});
 });
 
 transcodeRoutes.post("/", async (c) => {
-	const formData = await c.req.formData();
-	const file = formData.get("file");
-	const configRaw = formData.get("config");
-
-	if (!file || !(file instanceof File)) {
-		return c.json({ error: "Missing file" }, 400);
-	}
-	if (!configRaw || typeof configRaw !== "string") {
-		return c.json({ error: "Missing config JSON" }, 400);
-	}
-
-	let config: TranscodeConfig;
+	let request: EnqueueTranscodeRequest;
 	try {
-		config = JSON.parse(configRaw) as TranscodeConfig;
+		request = (await c.req.json()) as EnqueueTranscodeRequest;
 	} catch {
-		return c.json({ error: "Invalid config JSON" }, 400);
+		return c.json({ error: "Invalid JSON body" }, 400);
 	}
 
-	if (!config.targets?.length) {
-		return c.json({ error: "Config must include targets" }, 400);
+	if (!request.idempotencyKey || !request.requesterId) {
+		return c.json({ error: "Missing idempotencyKey or requesterId" }, 400);
 	}
-	if (!config.filename || typeof config.uploadPrefix !== "string") {
+	if (!request.sourceKey || !request.filename) {
 		return c.json(
 			{
-				error: "Config must include filename and uploadPrefix",
+				error: "Missing sourceKey or filename",
 			},
 			400,
 		);
 	}
-	const storageConfig = config.storage;
-	if (!storageConfig?.type) {
+	const normalizedWorkload = normalizeWorkloadToken(request.workloadType);
+	if (request.workloadType != null && !normalizedWorkload) {
 		return c.json(
 			{
-				error: "Config must include storage (type, bucket, credentials)",
+				error:
+					"workloadType must be a valid media:kind token (e.g. audio:analyze)",
 			},
 			400,
 		);
 	}
-	if (
-		!storageConfig.bucket ||
-		!storageConfig.accessKeyId ||
-		!storageConfig.secretAccessKey
-	) {
-		return c.json(
-			{
-				error: "Storage config must include bucket, accessKeyId, secretAccessKey",
-			},
-			400,
-		);
-	}
-	if (storageConfig.type === "r2" && !storageConfig.accountId) {
-		return c.json({ error: "R2 storage requires accountId" }, 400);
-	}
-	if (storageConfig.type === "s3" && !storageConfig.endpoint) {
-		return c.json({ error: "S3 storage requires endpoint" }, 400);
-	}
-	if (
-		config.naming?.pattern != null &&
-		typeof config.naming.pattern !== "string"
-	) {
-		return c.json(
-			{ error: "naming.pattern must be a string" },
-			400,
-		);
-	}
-	if (config.chunks?.segmentDurationMs != null) {
-		const ms = config.chunks.segmentDurationMs;
-		if (typeof ms !== "number" || ms < 1000 || ms > 60_000) {
+	const workloadType = normalizedWorkload ?? DEFAULT_WORKLOAD;
+	if (workloadType === "audio:transcode") {
+		if (!Array.isArray(request.targets) || request.targets.length === 0) {
 			return c.json(
-				{
-					error: "chunks.segmentDurationMs must be between 1000 and 60000 ms",
-				},
+				{ error: "targets must contain at least one transcode target" },
 				400,
 			);
 		}
 	}
+	if (!Array.isArray(request.targets)) {
+		request.targets = [];
+	}
+	for (const target of request.targets) {
+		if (!target || typeof target.codec !== "string" || typeof target.bitrate !== "number") {
+			return c.json({ error: "invalid transcode target payload" }, 400);
+		}
+		if (target.outputPrefix != null && typeof target.outputPrefix !== "string") {
+			return c.json({ error: "target.outputPrefix must be a string" }, 400);
+		}
+		if (target.outputSuffix != null && typeof target.outputSuffix !== "string") {
+			return c.json({ error: "target.outputSuffix must be a string" }, 400);
+		}
+	}
+	if (!request.storage?.type || !request.storage.bucket) {
+		return c.json(
+			{
+				error: "Invalid storage config",
+			},
+			400,
+		);
+	}
+	if (!request.storage.creds?.accessKeyId || !request.storage.creds?.secretAccessKey) {
+		return c.json({ error: "Storage creds are required" }, 400);
+	}
+	if (request.storage.type === "r2" && !request.storage.accountId) {
+		return c.json({ error: "R2 storage requires accountId" }, 400);
+	}
+	if (request.storage.type === "s3" && !request.storage.endpoint) {
+		return c.json({ error: "S3 storage requires endpoint" }, 400);
+	}
+	try {
+		const existing = await getExistingIdempotentResult({
+			scope: request.requesterId,
+			key: request.idempotencyKey,
+			requestBody: request,
+		});
+		if (existing) {
+			return c.json(existing.body, existing.status as 202);
+		}
+	} catch (error) {
+		if (error instanceof IdempotencyConflictError) {
+			return c.json({ error: error.message }, 409);
+		}
+		throw error;
+	}
 
 	const jobId = randomUUID();
-	const tmpDir = os.tmpdir();
-	const tmpPath = path.join(
-		tmpDir,
-		`euterpe_${jobId}_${path.basename(file.name || "audio.flac")}`,
+	const encrypted = encryptCredentials(
+		JSON.stringify(request.storage.creds),
+		`${jobId}:${request.requesterId}:1`,
 	);
-
-	const now = new Date();
-	await db.insert(transcodeJobs).values({
+	const job = await createInboxJob({
 		id: jobId,
-		status: "pending",
-		createdAt: now,
-		updatedAt: now,
+		requesterId: request.requesterId,
+		idempotencyScope: request.requesterId,
+		idempotencyKey: request.idempotencyKey,
+		priority: request.priority ?? 0,
+		maxAttempts: request.maxAttempts ?? 5,
+		maxRefreshAttempts: request.maxRefreshAttempts ?? 3,
+		sourceKey: request.sourceKey,
+		filename: request.filename,
+		uploadPrefix: request.uploadPrefix,
+		workloadType,
+		transcodeConfigJson: JSON.stringify({
+			targets: request.targets,
+			filename: request.filename,
+			uploadPrefix: request.uploadPrefix,
+			sourceFileId: request.sourceFileId,
+		}),
+		storageType: request.storage.type,
+		storageBucket: request.storage.bucket,
+		storageRegion: request.storage.region ?? null,
+		storageEndpoint:
+			request.storage.type === "s3" ? request.storage.endpoint : null,
+		storageAccountId:
+			request.storage.type === "r2" ? request.storage.accountId : null,
+		storageCredsEncrypted: encrypted.encryptedBlob,
+		storageCredsDekWrapped: encrypted.dekWrapped,
+		storageCredsKekId: encrypted.kekId,
+		storageCredsEncryptionVersion: encrypted.encryptionVersion,
+		credentialVersion: 1,
+		statusWebhookUrl: request.statusWebhookUrl ?? null,
+		refreshUrl: request.refreshUrl ?? null,
+		sourceFileId: request.sourceFileId ?? null,
 	});
 
-	await writeFileStream(file, tmpPath);
-
-	const webhookUrl = config.webhookUrl;
-
-	void (async () => {
-		const storage = createStorage(config.storage);
-
-		try {
-			await db
-				.update(transcodeJobs)
-				.set({
-					status: "processing",
-					updatedAt: new Date(),
-				})
-				.where(eq(transcodeJobs.id, jobId));
-
-			const result = await transcode(
-				tmpPath,
-				config,
-				storage,
-			);
-
-			await db
-				.update(transcodeJobs)
-				.set({
-					status: "complete",
-					sourceFileId: result.sourceFileId,
-					error: null,
-					updatedAt: new Date(),
-				})
-				.where(eq(transcodeJobs.id, jobId));
-
-			if (webhookUrl) {
-				await fetch(webhookUrl, {
-					method: "POST",
-					headers: {
-						"Content-Type":
-							"application/json",
-					},
-					body: JSON.stringify({
-						jobId,
-						status: "complete",
-						sourceFileId:
-							result.sourceFileId,
-						candidateIds:
-							result.candidateIds,
-						error: null,
-						source: result.source,
-						candidates: result.candidates,
-					}),
-				});
-			}
-		} catch (err) {
-			const msg =
-				err instanceof Error ?
-					err.message
-				:	String(err);
-			await db
-				.update(transcodeJobs)
-				.set({
-					status: "failed",
-					error: msg,
-					updatedAt: new Date(),
-				})
-				.where(eq(transcodeJobs.id, jobId));
-			if (webhookUrl) {
-				await fetch(webhookUrl, {
-					method: "POST",
-					headers: {
-						"Content-Type":
-							"application/json",
-					},
-					body: JSON.stringify({
-						jobId,
-						status: "failed",
-						sourceFileId: null,
-						candidateIds: [],
-						error: msg,
-						source: null,
-						candidates: [],
-					}),
-				});
-			}
-		} finally {
-			try {
-				fs.unlinkSync(tmpPath);
-			} catch {
-				// ignore
-			}
-		}
-	})();
-
-	return c.json({ jobId, status: "processing" }, 202);
+	const body: EnqueueResponse = {
+		jobId: job.id,
+		workloadType,
+		status: "queued",
+	};
+	await storeIdempotentResult({
+		scope: request.requesterId,
+		key: request.idempotencyKey,
+		requestBody: request,
+		status: 202,
+		body,
+	});
+	return c.json(body, 202);
 });

@@ -61,7 +61,7 @@ const validateKey = (provided: string): boolean => {
 	const validKeys = loadValidKeys();
 	if (validKeys.length === 0) return false;
 	const providedHash = hashKey(provided);
-	for (const valid of validKeys) {
+	for (const valid of Array.from(validKeys)) {
 		const validHash = hashKey(valid);
 		if (
 			providedHash.length === validHash.length &&

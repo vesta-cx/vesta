@@ -12,15 +12,17 @@ export type Codec = "flac" | "opus" | "mp3" | "aac";
 export interface TranscodeTarget {
 	codec: Codec;
 	bitrate: number;
+	/** Optional target output prefix. Before last '/' is key path; last segment prefixes filename. */
+	outputPrefix?: string;
+	/** Optional target-specific filename suffix. Default: "_<codec>_<bitrate>". */
+	outputSuffix?: string;
 	/** If true and codec supports it, also produce HLS (aac, mp3) or DASH (opus) segments alongside the whole file. */
 	chunks?: boolean;
 }
 
-import type { StorageConfig } from "./storage/factory.js";
-
 /** Controls output file and path naming conventions. */
 export interface TranscodeNaming {
-	/** Filename pattern for candidates. Placeholders: {basename}, {codec}, {bitrate}, {ext}. Default: "{basename}_{codec}_{bitrate}.{ext}" */
+	/** Filename pattern for candidates. Placeholders: {basename}, {prefix}, {suffix}, {codec}, {bitrate}, {ext}. Default: "{basename}{suffix}.{ext}" */
 	pattern?: string;
 	/** Include sourceId in candidate path. When true (default): candidates/{sourceId}/{filename}; when false: candidates/{filename}. */
 	includeSourceIdInPath?: boolean;
@@ -42,10 +44,8 @@ export interface TranscodeConfig {
 	naming?: TranscodeNaming;
 	/** Chunked output settings. Use TranscodeTarget.chunks to enable per-target. */
 	chunks?: TranscodeChunks;
-	webhookUrl?: string;
 	/** Client-provided source file ID. If set, used as source.id in webhook; otherwise generated. */
 	sourceFileId?: string;
-	storage: StorageConfig;
 }
 
 export interface WebhookSource {
@@ -199,6 +199,32 @@ const joinPrefix = (prefix: string, ...parts: string[]): string => {
 	return base + parts.filter(Boolean).join("/");
 };
 
+export const resolveTargetOutput = (
+	target: Pick<TranscodeTarget, "codec" | "bitrate" | "outputPrefix" | "outputSuffix">,
+): { targetPrefix: string; filenamePrefix: string; suffix: string } => {
+	const raw = (target.outputPrefix ?? `${target.codec}/`).trim();
+	const cleaned = raw.replace(/^\/+/, "").replace(/\/+$/, "");
+	const hadTrailingSlash = /\/\s*$/.test(raw);
+	let targetPrefix = "";
+	let filenamePrefix = "";
+	if (!cleaned) {
+		targetPrefix = `${target.codec}/`;
+	} else if (hadTrailingSlash) {
+		targetPrefix = `${cleaned}/`;
+	} else {
+		const separator = cleaned.lastIndexOf("/");
+		targetPrefix =
+			separator >= 0 ? `${cleaned.slice(0, separator + 1)}` : "";
+		filenamePrefix =
+			separator >= 0 ? cleaned.slice(separator + 1) : cleaned;
+	}
+	const suffix =
+		target.outputSuffix?.trim().length ?
+			target.outputSuffix.trim()
+		:	`_${target.codec}_${target.bitrate}`;
+	return { targetPrefix, filenamePrefix, suffix };
+};
+
 const uploadFile = async (
 	storage: StorageProvider,
 	key: string,
@@ -290,11 +316,14 @@ export const transcode = async (
 		}
 		const candidateId = randomUUID();
 		const ext = CODEC_EXTS[t.codec];
+		const resolved = resolveTargetOutput(t);
 		const pattern =
 			config.naming?.pattern ??
-			"{basename}_{codec}_{bitrate}.{ext}";
+			"{basename}{suffix}.{ext}";
 		const candidateFilename = pattern
-			.replace("{basename}", sanitized)
+			.replace("{basename}", `${resolved.filenamePrefix}${sanitized}`)
+			.replace("{prefix}", resolved.filenamePrefix)
+			.replace("{suffix}", resolved.suffix)
 			.replace("{codec}", t.codec)
 			.replace("{bitrate}", String(t.bitrate))
 			.replace("{ext}", ext);
@@ -302,8 +331,8 @@ export const transcode = async (
 			config.naming?.includeSourceIdInPath !== false;
 		const candidatePathParts =
 			includeSourceId ?
-				["candidates", sourceId, candidateFilename]
-			:	["candidates", candidateFilename];
+				["candidates", sourceId, resolved.targetPrefix, candidateFilename]
+			:	["candidates", resolved.targetPrefix, candidateFilename];
 		const candidateR2Key = joinPrefix(
 			uploadPrefix,
 			...candidatePathParts,

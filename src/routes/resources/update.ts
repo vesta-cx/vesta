@@ -32,7 +32,8 @@ route.put("/resources/:id", async (c) => {
 				eq(resources.id, id),
 				eq(
 					resources.ownerId,
-					(auth as { subjectId: string }).subjectId,
+					(auth as { subjectId: string })
+						.subjectId,
 				),
 			);
 

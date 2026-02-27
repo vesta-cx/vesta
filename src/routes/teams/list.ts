@@ -18,8 +18,10 @@ route.get("/teams", async (c) => {
 	if (!hasScope(auth, "teams:read")) return forbidden(c);
 
 	const envelope = await runListQuery({
-		db: getDB(c.env.DB), table: teams,
-		input: new URL(c.req.url).searchParams, config: teamListConfig,
+		db: getDB(c.env.DB),
+		table: teams,
+		input: new URL(c.req.url).searchParams,
+		config: teamListConfig,
 		mode: "envelope",
 	});
 	return c.json(envelope);

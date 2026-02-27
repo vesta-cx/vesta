@@ -3,6 +3,7 @@
   "version": "0.0.1",
   "type": "module",
   "scripts": {
+    "build": "pnpm run sync:api-version && node ./scripts/wrangler-versioned.mjs deploy --dry-run",
     "cf-typegen": "wrangler types --env-interface CloudflareBindings",
     "clean": "cleanc clean",
     "db:generate": "pnpm --filter @vesta-cx/db db:generate",
@@ -11,7 +12,6 @@
     "db:migrate": "pnpm run sync:api-version && node ./scripts/wrangler-versioned.mjs d1 migrations apply DB",
     "db:migrate:local": "node ./scripts/wrangler-versioned.mjs d1 migrations apply DB --env dev",
     "db:studio": "drizzle-kit studio",
-    "build": "pnpm run sync:api-version && node ./scripts/wrangler-versioned.mjs deploy --dry-run",
     "deploy": "pnpm run sync:api-version && node ./scripts/wrangler-versioned.mjs deploy",
     "dev": "wrangler dev --env dev",
     "dev:clean": "pnpm run clean && pnpm run dev",

@@ -26,10 +26,11 @@ route.post("/engagements", async (c) => {
 
 	const db = getDB(c.env.DB);
 	const engagementValues: typeof engagements.$inferInsert = {
-		subjectType: parsed.subjectType as typeof engagements.$inferInsert["subjectType"],
+		subjectType:
+			parsed.subjectType as (typeof engagements.$inferInsert)["subjectType"],
 		subjectId: parsed.subjectId,
-		action: parsed.action as typeof engagements.$inferInsert["action"],
-		objectType: parsed.objectType as typeof engagements.$inferInsert["objectType"],
+		action: parsed.action as (typeof engagements.$inferInsert)["action"],
+		objectType: parsed.objectType as (typeof engagements.$inferInsert)["objectType"],
 		objectId: parsed.objectId,
 	};
 

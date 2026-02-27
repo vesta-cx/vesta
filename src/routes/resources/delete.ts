@@ -24,7 +24,10 @@ route.delete("/resources/:id", async (c) => {
 	const where =
 		isAdmin ?
 			eq(resources.id, id)
-		:	and(eq(resources.id, id), eq(resources.ownerId, auth.subjectId));
+		:	and(
+				eq(resources.id, id),
+				eq(resources.ownerId, auth.subjectId),
+			);
 
 	const [row] = await db.delete(resources).where(where).returning();
 	if (!row) return notFound(c, "Resource");

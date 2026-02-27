@@ -2,7 +2,10 @@
 
 import { eq } from "drizzle-orm";
 import { Hono } from "hono";
-import { runListQuery, type ListQueryConfig } from "@mia-cx/drizzle-query-factory";
+import {
+	runListQuery,
+	type ListQueryConfig,
+} from "@mia-cx/drizzle-query-factory";
 import { requireAuth, requireScope } from "../../auth/helpers";
 import { getDB } from "../../db";
 import { userFeatures } from "../../db/schema";
@@ -32,8 +35,10 @@ route.get("/users/:userId/features", async (c) => {
 	if (!isAdmin && apiAuth.subjectId !== userId) return forbidden(c);
 
 	const envelope = await runListQuery({
-		db: getDB(c.env.DB), table: userFeatures,
-		input: new URL(c.req.url).searchParams, config: userFeatureListConfig,
+		db: getDB(c.env.DB),
+		table: userFeatures,
+		input: new URL(c.req.url).searchParams,
+		config: userFeatureListConfig,
 		baseWhere: eq(userFeatures.userId, userId),
 		mode: "envelope",
 	});

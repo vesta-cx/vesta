@@ -56,7 +56,11 @@ route.get("/collections/:collectionId/filters", async (c) => {
 	if (!existing) return notFound(c, "Collection");
 
 	const isAdmin = apiAuth.scopes.includes("admin");
-	const isOwner = await isCollectionOwner(db, existing, apiAuth.subjectId);
+	const isOwner = await isCollectionOwner(
+		db,
+		existing,
+		apiAuth.subjectId,
+	);
 	if (!isAdmin && !isOwner) return forbidden(c);
 
 	const authWhere = eq(collectionItemFilters.collectionId, collectionId);

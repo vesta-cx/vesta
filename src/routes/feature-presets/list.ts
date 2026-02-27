@@ -19,8 +19,10 @@ route.get("/feature-presets", async (c) => {
 	}
 
 	const envelope = await runListQuery({
-		db: getDB(c.env.DB), table: featurePresets,
-		input: new URL(c.req.url).searchParams, config: featurePresetListConfig,
+		db: getDB(c.env.DB),
+		table: featurePresets,
+		input: new URL(c.req.url).searchParams,
+		config: featurePresetListConfig,
 		mode: "envelope",
 	});
 	return c.json(envelope);

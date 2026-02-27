@@ -2,7 +2,10 @@
 
 import { eq } from "drizzle-orm";
 import { Hono } from "hono";
-import { runListQuery, type ListQueryConfig } from "@mia-cx/drizzle-query-factory";
+import {
+	runListQuery,
+	type ListQueryConfig,
+} from "@mia-cx/drizzle-query-factory";
 import { hasScope, isAuthenticated } from "../../../auth/helpers";
 import { getDB } from "../../../db";
 import { resourceAuthors } from "../../../db/schema";
@@ -31,9 +34,14 @@ route.get("/resources/:resourceId/authors", async (c) => {
 	}
 
 	const envelope = await runListQuery({
-		db: getDB(c.env.DB), table: resourceAuthors,
-		input: new URL(c.req.url).searchParams, config: authorListConfig,
-		baseWhere: eq(resourceAuthors.resourceId, c.req.param("resourceId")),
+		db: getDB(c.env.DB),
+		table: resourceAuthors,
+		input: new URL(c.req.url).searchParams,
+		config: authorListConfig,
+		baseWhere: eq(
+			resourceAuthors.resourceId,
+			c.req.param("resourceId"),
+		),
 		mode: "envelope",
 	});
 	return c.json(envelope);

@@ -19,8 +19,10 @@ route.get("/features", async (c) => {
 	}
 
 	const envelope = await runListQuery({
-		db: getDB(c.env.DB), table: features,
-		input: new URL(c.req.url).searchParams, config: featureListConfig,
+		db: getDB(c.env.DB),
+		table: features,
+		input: new URL(c.req.url).searchParams,
+		config: featureListConfig,
 		mode: "envelope",
 	});
 	return c.json(envelope);

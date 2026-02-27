@@ -20,9 +20,14 @@ route.get("/permissions", async (c) => {
 	const isAdmin = apiAuth.scopes.includes("admin");
 
 	const envelope = await runListQuery({
-		db: getDB(c.env.DB), table: permissions,
-		input: new URL(c.req.url).searchParams, config: permissionListConfig,
-		baseWhere: isAdmin ? undefined : eq(permissions.subjectId, apiAuth.subjectId),
+		db: getDB(c.env.DB),
+		table: permissions,
+		input: new URL(c.req.url).searchParams,
+		config: permissionListConfig,
+		baseWhere:
+			isAdmin ? undefined : (
+				eq(permissions.subjectId, apiAuth.subjectId)
+			),
 		mode: "envelope",
 	});
 	return c.json(envelope);

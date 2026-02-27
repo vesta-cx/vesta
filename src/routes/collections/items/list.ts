@@ -2,7 +2,10 @@
 
 import { eq } from "drizzle-orm";
 import { Hono } from "hono";
-import { runListQuery, type ListQueryConfig } from "@mia-cx/drizzle-query-factory";
+import {
+	runListQuery,
+	type ListQueryConfig,
+} from "@mia-cx/drizzle-query-factory";
 import { requireScope } from "../../../auth/helpers";
 import { getDB } from "../../../db";
 import { collections, collectionItems } from "../../../db/schema";
@@ -16,7 +19,10 @@ const collectionItemListConfig: ListQueryConfig = {
 	filters: {
 		item_type: { column: collectionItems.itemType },
 		item_id: { column: collectionItems.itemId },
-		position: { column: collectionItems.position, parse: (value) => Number(value) },
+		position: {
+			column: collectionItems.position,
+			parse: (value) => Number(value),
+		},
 	},
 	sortable: {
 		position: collectionItems.position,
@@ -40,8 +46,10 @@ route.get("/collections/:collectionId/items", async (c) => {
 	if (!exists) return notFound(c, "Collection");
 
 	const envelope = await runListQuery({
-		db, table: collectionItems,
-		input: new URL(c.req.url).searchParams, config: collectionItemListConfig,
+		db,
+		table: collectionItems,
+		input: new URL(c.req.url).searchParams,
+		config: collectionItemListConfig,
 		baseWhere: eq(collectionItems.collectionId, collectionId),
 		mode: "envelope",
 	});

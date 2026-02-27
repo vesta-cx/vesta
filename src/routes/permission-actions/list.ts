@@ -16,8 +16,10 @@ route.get("/permission-actions", async (c) => {
 	requireScope(auth, "permissions:read");
 
 	const envelope = await runListQuery({
-		db: getDB(c.env.DB), table: permissionActions,
-		input: new URL(c.req.url).searchParams, config: permissionActionListConfig,
+		db: getDB(c.env.DB),
+		table: permissionActions,
+		input: new URL(c.req.url).searchParams,
+		config: permissionActionListConfig,
 		mode: "envelope",
 	});
 	return c.json(envelope);

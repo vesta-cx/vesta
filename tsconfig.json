@@ -10,8 +10,6 @@
 		"sourceMap": true,
 		"strict": true,
 		"verbatimModuleSyntax": true,
-		"types": [
-			"./src/worker-configuration.d.ts"
-		]
+		"types": ["./src/worker-configuration.d.ts"]
 	}
 }

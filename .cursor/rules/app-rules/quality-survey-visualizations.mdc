@@ -1,0 +1,12 @@
+---
+description: Audio survey result visualizations and snapshot schema
+globs: apps/quality-survey/**
+---
+
+# Quality Survey Visualizations
+
+Visualization data comes from the **result_snapshots** table (pre-aggregated scalar columns and JSON blobs), not directly from answers. Page prefers snapshot data; falls back to `insights` when scalars are missing (legacy).
+
+PQ scores use the **Bradley-Terry model** (`src/lib/server/bradley-terry.ts`) — derives strength parameters from pairwise comparisons. Used for overall PQ scores and genre-segmented scores. Strengths normalized to sum to `items.length`.
+
+The shared `@vesta-cx/ui` Heatmap expects `value` in 0–1. For PQ (0–100), pass `value / 100` and use `label` for display.

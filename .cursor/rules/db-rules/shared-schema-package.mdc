@@ -1,0 +1,38 @@
+---
+description: Shared Drizzle ORM schema package pattern for vesta apps
+globs: packages/db/**, apps/*/src/lib/server/db/**, apps/*/drizzle.config.ts
+---
+
+# Shared Schema Package (`packages/db`)
+
+## Architecture
+
+`@vesta-cx/db` exports Drizzle table definitions, relations, enums, and types. It does NOT export a database client — each consuming app creates its own `getDb(platform)` factory.
+
+## Consuming in an app
+
+```ts
+// apps/<app>/src/lib/server/db/schema.ts
+export * from '@vesta-cx/db';
+
+// apps/<app>/src/lib/server/db/index.ts
+import { drizzle } from 'drizzle-orm/d1';
+import * as schema from './schema';
+export const getDb = (platform: App.Platform) => drizzle(platform.env.DB, { schema });
+```
+
+## drizzle.config.ts in consuming apps
+
+Point schema to the local re-export barrel. No `dbCredentials` for D1.
+
+```ts
+export default defineConfig({
+  schema: './src/lib/server/db/schema.ts',
+  out: './drizzle',
+  dialect: 'sqlite'
+});
+```
+
+## After editing schemas
+
+Rebuild: `pnpm --filter @vesta-cx/db build`. Apps import from `dist/`, so changes are invisible until rebuilt. HMR picks up the new dist if dev server is running.

@@ -1,0 +1,26 @@
+---
+description: Enforce Markdown links in docs content
+globs: apps/docs/content/**/*.md
+alwaysApply: false
+---
+
+# Docs link format: Markdown links only
+
+In `apps/docs/content/**/*.md`, always use standard Markdown links:
+
+- Use `[label](./relative-path.md)` for internal links
+- Use `[label](#heading-anchor)` for section links
+- Use full `https://...` URLs for external links
+
+Do not use Obsidian wiki-link syntax (`[[...]]`).
+
+## Gotcha
+
+Quartz deploys and GitHub rendering expect plain Markdown link syntax. Wiki-links can render inconsistently outside Obsidian and cause broken navigation after deployment.
+
+## Quick examples
+
+- Good: `[Feature Catalog](./feature-catalog.md)`
+- Good: `[Permissions](../permissions.md#permission-precedence-highest-to-lowest)`
+- Bad: `[[./feature-catalog.md|Feature Catalog]]`
+- Bad: `[[Permissions]]`

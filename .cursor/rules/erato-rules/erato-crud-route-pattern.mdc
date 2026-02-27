@@ -1,0 +1,61 @@
+---
+description: Erato CRUD route file pattern — export shape, auth, error handling, query factory usage
+globs: apps/erato/src/routes/**/*.ts
+alwaysApply: false
+---
+
+# Erato Route File Pattern
+
+Every route file under `apps/erato/src/routes/` follows this pattern.
+
+## Default Export Shape
+
+Each file must default-export a single object with route metadata:
+
+```typescript
+import type { RouteMetadata } from "../../registry";
+export default {
+  route,                                        // Hono<AppEnv> instance
+  method: "GET" as RouteMetadata["method"],     // HTTP method
+  path: "/resources/:id",                       // full path under API base
+  description: "Get resource by ID",            // human-readable
+  auth_required: true,                          // false only for guest-accessible
+  scopes: ["resources:read"],                   // required scope(s)
+};
+```
+
+The Hono app must register the **same path** as the export (e.g., `route.get("/resources/:id", handler)`).
+
+## Auth Flow
+
+1. **Guest-accessible routes**: Branch on `isAuthenticated(auth)` first; guests get filtered data.
+2. **Auth-required routes**: Call `requireScope(auth, scope)` or `requireAuth(auth)`.
+3. **Admin bypass**: `auth.scopes.includes("admin")` skips scope and row-level checks.
+4. **Owner check**: For write/delete, verify `entity.ownerId === auth.userId` or admin.
+
+## Query Factory (list routes)
+
+```typescript
+import { parseListQuery, listResponse } from "@mia-cx/drizzle-query-factory";
+const query = parseListQuery(new URL(c.req.url).searchParams, domainConfig);
+const finalWhere = authWhere ? (query.where ? and(authWhere, query.where) : authWhere) : query.where;
+```
+
+## Validation (create/update routes)
+
+```typescript
+const parsed = await parseBody(c, schema);
+if (isResponse(parsed)) return parsed;
+```
+
+## Error Responses
+
+Use helpers from `lib/errors`: `forbidden(c)`, `notFound(c, "Entity")`, `conflict(c, "msg", "field")`, `zodErrors(c, err)`.
+Unique constraint violations: catch and return `conflict()`.
+
+## Response Envelopes
+
+- List: `listResponse(rows, total, limit, offset)` → `{ data, meta }`
+- Single: `itemResponse(row)` → `{ data }`
+- Create: return 201
+- Delete: return `c.body(null, 204)`

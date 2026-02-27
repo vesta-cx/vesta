@@ -1,0 +1,15 @@
+---
+description: WorkOS AuthKit integration pattern for Cloudflare Workers
+globs: **/auth/**, **/hooks.server.*
+alwaysApply: false
+---
+
+# WorkOS on Cloudflare Workers
+
+The official `@workos/authkit-sveltekit` SDK does not work on Cloudflare Workers (relies on `process.env` and Node.js crypto). Use the **WorkOS REST API** via `@vesta-cx/utils/auth`.
+
+All auth logic lives in `packages/utils/src/auth/`. Apps import from `@vesta-cx/utils/auth`.
+
+## Cloudflare Adapter Typing Gotcha
+
+Remove `/// <reference types="@sveltejs/adapter-cloudflare" />` from `app.d.ts` — it declares `Platform.env: unknown`. Define `App.Platform` manually; runtime types come from `worker-configuration.d.ts`.

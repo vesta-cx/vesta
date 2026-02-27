@@ -1,3 +1,5 @@
+# @format
+
 # Ingress for external access. Sona (Cloudflare Workers) needs to reach Euterpe.
 # Adapt: host, TLS secret, ingressClassName for your cluster.
 apiVersion: networking.k8s.io/v1
@@ -11,9 +13,9 @@ metadata:
     # nginx.ingress.kubernetes.io/proxy-body-size: "100m"  # large audio uploads
     # nginx.ingress.kubernetes.io/proxy-read-timeout: "600"  # long-running transcodes
 spec:
-  ingressClassName: nginx  # or: traefik, kong, your cluster default
+  ingressClassName: nginx # or: traefik, kong, your cluster default
   rules:
-    - host: euterpe.example.com  # replace with your host
+    - host: euterpe.example.com # replace with your host
       http:
         paths:
           - path: /

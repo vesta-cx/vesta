@@ -1,0 +1,49 @@
+# @format
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: euterpe-transcode-workers
+  labels:
+    app: euterpe-transcode-workers
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: euterpe-transcode-workers
+  template:
+    metadata:
+      labels:
+        app: euterpe-transcode-workers
+    spec:
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+              - matchExpressions:
+                  - key: workload/audio-transcode
+                    operator: In
+                    values:
+                      - "true"
+      containers:
+        - name: euterpe
+          image: euterpe:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 3000
+              name: http
+          env:
+            - name: EUTERPE_ALLOWED_WORKLOADS
+              value: audio:transcode
+          envFrom:
+            - secretRef:
+                name: euterpe-secrets
+            - configMapRef:
+                name: euterpe-config
+          volumeMounts:
+            - name: data
+              mountPath: /data
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: euterpe-data

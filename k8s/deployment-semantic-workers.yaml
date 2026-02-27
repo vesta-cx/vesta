@@ -1,0 +1,49 @@
+# @format
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: euterpe-audio-analyze-workers
+  labels:
+    app: euterpe-audio-analyze-workers
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: euterpe-audio-analyze-workers
+  template:
+    metadata:
+      labels:
+        app: euterpe-audio-analyze-workers
+    spec:
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+              - matchExpressions:
+                  - key: workload/audio-analyze
+                    operator: In
+                    values:
+                      - "true"
+      containers:
+        - name: euterpe
+          image: euterpe:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 3000
+              name: http
+          env:
+            - name: EUTERPE_ALLOWED_WORKLOADS
+              value: audio:analyze
+          envFrom:
+            - secretRef:
+                name: euterpe-secrets
+            - configMapRef:
+                name: euterpe-config
+          volumeMounts:
+            - name: data
+              mountPath: /data
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: euterpe-data

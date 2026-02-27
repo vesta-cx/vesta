@@ -1,13 +1,13 @@
 {
-  "version": "7",
-  "dialect": "sqlite",
-  "entries": [
-    {
-      "idx": 0,
-      "version": "6",
-      "when": 1771172396062,
-      "tag": "0000_last_lily_hollister",
-      "breakpoints": true
-    }
-  ]
+    "version": "7",
+    "dialect": "sqlite",
+    "entries": [
+        {
+            "idx": 0,
+            "version": "6",
+            "when": 1771172396062,
+            "tag": "0000_last_lily_hollister",
+            "breakpoints": true
+        }
+    ]
 }

@@ -1,0 +1,14 @@
+---
+description: Euterpe inbox/outbox queue safety and callback guarantees
+globs: apps/euterpe/src/**
+---
+
+# Euterpe Inbox/Outbox Fencing
+
+- Use `claim_version` + `worker_id` on both inbox and outbox claims.
+- Every worker-owned state write must guard with `WHERE id = ? AND claim_version = ?` to prevent stale writes.
+- Claims must set lease fields (`lease_expires_at`, `heartbeat_at`), and workers must heartbeat while processing.
+- Treat storage `401/403` as credential refresh flow, not terminal by default.
+- Persist webhook events to outbox in the same transaction as job state transitions.
+- Sign callbacks with `x-euterpe-signature`, `x-euterpe-timestamp`, `x-euterpe-nonce`, `x-euterpe-event-id`.
+- Enqueue endpoint must be idempotent per requester and return `202 Accepted`.

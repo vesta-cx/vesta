@@ -1,0 +1,23 @@
+---
+description: Canonical entity schema ownership and reuse
+globs: packages/db/src/entity-schemas/**, apps/erato/src/services/**
+---
+
+# Canonical Entity Schemas
+
+Put canonical entity-level Zod schemas in `@vesta-cx/db/entity-schemas`.
+
+## Shared package owns
+
+- Stable entity create/update shapes reused by multiple apps.
+- Enum-safe constraints based on DB schema constants.
+
+## App layer owns
+
+- Route-specific payloads and nested endpoint-only shapes.
+- Request shapes that intentionally differ from canonical entity fields.
+
+## Usage
+
+- In Erato services, import canonical schemas from `@vesta-cx/db/entity-schemas`.
+- Keep route-local `z.object(...)` only when the schema is endpoint-specific.

@@ -1,0 +1,22 @@
+# Erato Permission Predicate + Merger
+
+When checking row-level permissions in Erato, always match the full tuple:
+
+- `subjectType`
+- `subjectId`
+- `objectType`
+- `objectId`
+- `action`
+- `value`
+
+Do not rely on partial predicates (for example `subjectId` + `objectType` only), because they can leak access across actions or subject domains.
+
+## Merger ownership
+
+- `packages/utils` owns the stateless permission merger.
+- Apps/clients (Erato/web/headless) own database reads and membership expansion.
+- Fetch permission rows in bulk, then merge in memory.
+
+## Owner override
+
+Owners always have read/write/delete access to their own objects, regardless of permission rows.

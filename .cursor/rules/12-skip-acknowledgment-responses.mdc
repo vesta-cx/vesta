@@ -1,0 +1,33 @@
+---
+description: Skip responses to acknowledgments and greetings without directives
+alwaysApply: true
+---
+
+# Skip Acknowledgment-Only Messages
+
+When a user sends a message that is **purely an acknowledgment, greeting, or thanks without any question or directive**, skip generating a response.
+
+## Examples of Messages to Skip
+
+- "perfect"
+- "thanks"
+- "thank you"
+- "got it"
+- "okay"
+- "ok"
+- "cool"
+- "looks good"
+- "great"
+- "hello"
+- "hi"
+- "hey"
+- "nice"
+- "awesome"
+
+## Rationale
+
+Responding to pure acknowledgments creates unnecessary tokens, chat clutter, and reduces efficiency. Silence confirms receipt and lets the user move to their next thought without interruption.
+
+## Exception
+
+If the acknowledgment includes a **follow-up question or directive** (e.g., "looks good, now can you...?"), respond normally to the new request.

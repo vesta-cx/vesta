@@ -4,14 +4,19 @@
   "scripts": {
     "build": "turbo run build",
     "check-types": "turbo run check-types",
+    "clean": "cleanc clean",
+    "build:clean": "pnpm run clean && pnpm run build",
+    "dev:clean": "pnpm run clean && pnpm run dev",
+    "install:clean": "pnpm run clean && node -e \"try{require('fs').rmSync(require('path').join(process.cwd(),'node_modules'),{recursive:true,force:true})}catch(_){}\" && pnpm i",
     "dev": "turbo run dev",
-    "format": "prettier --write \"**/*.{ts,tsx,md}\"",
+    "format": "turbo run format --filter='!./' && prettier --write .",
     "lint": "turbo run lint",
     "lint-staged": "lint-staged"
   },
   "devDependencies": {
     "@changesets/cli": "^2.29.8",
-    "config": "workspace:*",
+    "@vesta-cx/config": "workspace:*",
+    "cleanc": "workspace:*",
     "eslint": "^10.0.1",
     "lint-staged": "^16.2.7",
     "prettier": "^3.8.1",
@@ -26,17 +31,16 @@
   "pnpm": {
     "onlyBuiltDependencies": [
       "@parcel/watcher",
-      "@prisma/client",
-      "@prisma/engines",
       "@tailwindcss/oxide",
+      "better-sqlite3",
       "esbuild",
-      "prisma",
       "sharp",
       "svelte-preprocess",
       "unrs-resolver",
       "workerd"
     ],
     "ignoredBuiltDependencies": [
+      "better-sqlite3",
       "svelte-preprocess"
     ]
   }

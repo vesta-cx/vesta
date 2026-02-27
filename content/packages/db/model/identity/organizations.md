@@ -100,7 +100,7 @@ CREATE TABLE organizations (
 
 | Field         | Owner  | Mutable via API? |
 | ------------- | ------ | ---------------- |
-| `id`          | WorkOS | No (PK)         |
+| `id`          | WorkOS | No (PK)          |
 | `name`        | WorkOS | Yes (PUT)        |
 | `created_at`  | WorkOS | No               |
 | `updated_at`  | WorkOS | No               |

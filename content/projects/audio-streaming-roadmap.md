@@ -13,7 +13,7 @@ tags:
 
 ## Overview
 
-Designing an audio streaming system for Vesta: transcoding (Euterpe), delivery (Sona), and playback via **HLS** (MSE + HLS.js or native). Cast uses single-file Opus (full.mp4); we won't use AAC/MP3 for streaming. AirPlay uses output routing. Opus support may require a custom protocol extension (Safari doesn't support Opus fMP4 natively; AAC fallback or extension).
+Designing an audio streaming system for Vesta: transcoding ([Euterpe](../../packages/euterpe/index.md) — [API usage](../../packages/euterpe/api-usage.md)), delivery (Sona), and playback via **HLS** (MSE + HLS.js or native). Cast uses single-file Opus (full.mp4); we won't use AAC/MP3 for streaming. AirPlay uses output routing. Opus support may require a custom protocol extension (Safari doesn't support Opus fMP4 natively; AAC fallback or extension).
 
 ---
 
@@ -60,7 +60,7 @@ When casting, grey out the quality button. Tooltip: "Quality selection is disabl
 
 ### Pipeline
 
-1. **Euterpe** — ffmpeg HLS fMP4 → R2 at `candidates/{sourceId}/{name}_hls/` (init.mp4 + segments with opaque IDs, .m4s)
+1. **Euterpe** — ffmpeg HLS fMP4 → R2 at `candidates/{sourceId}/{name}_hls/` (init.mp4 + segments with opaque IDs, .m4s). Enqueue via [Euterpe API](../../packages/euterpe/api-usage.md); workers process from the inbox and write to client storage.
 2. **Manifest** — m3u8 (and/or custom JSON from DB). Webhook provides `segmentDurations`.
 3. **Stream API** — `GET /api/stream/{token}/manifest`, `GET /api/stream/{token}/init`, `GET /api/stream/{token}/seg/{id}`; Worker validates token, streams from R2
 4. **Client** — MSE + HLS.js (or native HLS). Fetch manifest, init, segments; append to SourceBuffer; play via media element.

@@ -46,9 +46,9 @@ admin      | Admin         | Full control including sharing/permissions         
 ```
 permissions:
 id                   UUID primary key
-subject_type         string ('user' | 'team' | 'organization')
+subject_type         string ('user' | 'team' | 'organization' | 'static')
 subject_id           string (WorkOS user/org ID or UUID)
-object_type          string ('workspace' | 'resource' | 'organization')
+object_type          string ('workspace' | 'resource' | 'organization' | 'collection')
 object_id            UUID
 action               string FK → permission_actions.slug
 value                string ('allow' | 'deny' | 'unset')
@@ -61,12 +61,14 @@ updated_at           timestamp
 - **User** — Individual user account (highest precedence)
 - **Team** — Group of users; permissions inherited by all members (medium precedence)
 - **Organization** — Organization-level permissions inherited by members (low precedence)
+- **Static** — Audience subjects for client-side visibility contexts (`guest`, `user`, `follower`, `subscriber`)
 
 ## Objects
 
 - **Workspace** — Artist or label profile
 - **Resource** — Creative work (song, album, post)
 - **Organization** — Organization-level resource
+- **Collection** — Curated sets of resources/users/workspaces/collections
 
 ## Permission Values
 
@@ -95,81 +97,63 @@ When determining if a user can perform an action:
 
 ## Permission Merger (Core Implementation)
 
-**This is business logic required immediately by vesta app.** The permission merger must be implemented in `packages/utils` as a reusable query function, not deferred to erato API.
+The permission merger is a **context-less / stateless helper** in `packages/utils`.
 
-Both vesta and erato (when built) will call this function to:
+App/client layers (Erato, web, headless frontends) are responsible for loading rows from tables (`permissions`, memberships, etc.). The helper only merges pre-fetched rows.
 
-1. Load all relevant permissions (user, team, org)
+Both vesta and erato can call this helper to:
+
+1. Receive already-fetched candidate rows (user, team, org, static)
 2. Merge according to precedence rules
-3. Return the computed permission value for each action
+3. Return the effective permission value (`allow` | `deny` | `unset`)
 
 The merger logic is stable and independent of API transport (REST, GraphQL, etc.).
 
-### Permission Merger Implementation
+### Required Predicate for Permission Checks
+
+All permission checks must match on the full predicate:
+
+- `subject_type`
+- `subject_id`
+- `object_type`
+- `object_id`
+- `action`
+- `value`
+
+Skipping any field can produce false positives (cross-subject or cross-action leakage).
+
+### Permission Merger Contract (In-Memory)
 
 ```typescript
-async function canUserDoAction(userId, objectId, action) {
-  // 1. Check user-level permissions
-  const userDeny = await db.permissions.findFirst({
-    where: { subject_type: "user", subject_id: userId, object_id: objectId, action, value: "deny" },
-  })
-  if (userDeny) return false // User explicitly denied
+type PermissionRow = {
+  subjectType: "user" | "team" | "organization" | "static"
+  subjectId: string
+  objectType: string
+  objectId: string
+  action: string
+  value: "allow" | "deny" | "unset"
+}
 
-  const userAllow = await db.permissions.findFirst({
-    where: {
-      subject_type: "user",
-      subject_id: userId,
-      object_id: objectId,
-      action,
-      value: "allow",
-    },
-  })
-  if (userAllow) return true // User explicitly allowed
-
-  // 2. Check team-level permissions (user is member of these teams)
-  const userTeams = await db.teamUsers.findMany({
-    where: { user_id: userId },
-  })
-
-  const teamDeny = await db.permissions.findFirst({
-    where: {
-      subject_type: "team",
-      subject_id: { in: userTeams.map((t) => t.team_id) },
-      object_id: objectId,
-      action,
-      value: "deny",
-    },
-  })
-  if (teamDeny) return false // Any team explicitly denied
-
-  const teamAllow = await db.permissions.findFirst({
-    where: {
-      subject_type: "team",
-      subject_id: { in: userTeams.map((t) => t.team_id) },
-      object_id: objectId,
-      action,
-      value: "allow",
-    },
-  })
-  if (teamAllow) return true // Any team explicitly allowed
-
-  // 3. Check organization-level (if applicable)
-  const org = await getUserOrganization(userId)
-  const orgAllow = await db.permissions.findFirst({
-    where: {
-      subject_type: "organization",
-      subject_id: org.id,
-      object_id: objectId,
-      action,
-      value: "allow",
-    },
-  })
-  if (orgAllow) return true
-
-  // 4. Default: deny
-  return false
+function resolvePermissionValue(rows: PermissionRow[], params: {
+  objectType: string
+  objectId: string
+  action: string
+  principals: Array<{ subjectType: PermissionRow["subjectType"]; subjectId: string }>
+}) {
+  // caller already fetched rows; helper only merges in memory
+  // precedence (highest -> lowest): user, team, organization, static
+  // within each level: deny beats allow
+  return "allow" | "deny" | "unset"
 }
 ```
+
+### Query Strategy (Caller Responsibility)
+
+To avoid N×action round trips:
+
+1. Fetch relevant permission rows in bulk for known principals.
+2. Filter by object/action as needed.
+3. Call merger helper in memory for each decision.
 
 ## See Also
 

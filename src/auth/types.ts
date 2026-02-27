@@ -44,6 +44,8 @@ export const SCOPES = [
 	"permissions:write",
 	"features:read",
 	"features:write",
+	"organizations:read",
+	"organizations:write",
 	"subscriptions:read",
 	"subscriptions:write",
 	"admin",

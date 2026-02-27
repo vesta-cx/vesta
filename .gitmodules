@@ -1,47 +1,59 @@
 [submodule "apps/erato"]
 	path = apps/erato
 	url = https://github.com/vesta-cx/erato.git
+	branch = main
 
 [submodule "packages/ui"]
 	path = packages/ui
 	url = https://github.com/vesta-cx/ui.git
+	branch = main
 
 [submodule "packages/utils"]
 	path = packages/utils
 	url = https://github.com/vesta-cx/utils.git
+	branch = main
 
 [submodule "apps/euterpe"]
 	path = apps/euterpe
 	url = https://github.com/vesta-cx/euterpe.git
+	branch = main
 
 [submodule "tools/scripts"]
 	path = tools/scripts
 	url = https://github.com/vesta-cx/scripts.git
-	
+	branch = main
+
 [submodule "apps/sona"]
 	path = apps/sona
 	url = https://github.com/vesta-cx/sona.git
+	branch = main
 
 [submodule "apps/docs"]
 	path = apps/docs
 	url = https://github.com/vesta-cx/docs.git
+	branch = main
 
 [submodule "apps/web"]
 	path = apps/web
 	url = https://github.com/vesta-cx/web.git
+	branch = main
 
 [submodule "packages/db"]
 	path = packages/db
 	url = https://github.com/vesta-cx/db.git
+	branch = main
 
 [submodule "packages/cleanup"]
 	path = packages/cleanup
 	url = https://github.com/vesta-cx/cleanup.git
+	branch = main
 
 [submodule "packages/drizzle-query-factory"]
 	path = packages/drizzle-query-factory
 	url = https://github.com/mia-cx/drizzle-query-factory.git
-	
+	branch = main
+
 [submodule "packages/cleanc"]
 	path = packages/cleanc
 	url = https://github.com/vesta-cx/cleanc.git
+	branch = main

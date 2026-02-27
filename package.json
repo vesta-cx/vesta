@@ -1,32 +1,38 @@
 {
-	"name": "euterpe",
-	"private": true,
-	"version": "0.0.1",
-	"type": "module",
-	"scripts": {
-		"dev": "tsx watch src/index.ts",
-		"start": "node dist/index.js",
-		"build": "tsc",
-		"gen-key": "tsx scripts/generate-api-key.ts",
-		"revoke-key": "tsx scripts/revoke-key.ts",
-		"db:generate": "drizzle-kit generate",
-		"db:migrate": "drizzle-kit migrate",
-		"db:push": "drizzle-kit push"
-	},
-	"dependencies": {
-		"@hono/node-server": "^1.19.0",
-		"@libsql/client": "^0.17.0",
-		"@vesta-cx/storage": "workspace:*",
-		"@vesta-cx/utils": "workspace:*",
-		"drizzle-orm": "^0.45.1",
-		"hono": "^4.12.1",
-		"postgres": "^3.4.5"
-	},
-	"devDependencies": {
-		"@types/node": "^25.3.0",
-		"config": "workspace:*",
-		"drizzle-kit": "^0.31.8",
-		"tsx": "^4.19.0",
-		"typescript": "^5.9.3"
-	}
+  "name": "euterpe",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "clean": "cleanc clean",
+    "build:clean": "pnpm run clean && pnpm run build",
+    "dev:clean": "pnpm run clean && pnpm run dev",
+    "install:clean": "pnpm run clean && node -e \"try{require('fs').rmSync(require('path').join(process.cwd(),'node_modules'),{recursive:true,force:true})}catch(_){}\" && pnpm i",
+    "build": "tsc",
+    "db:generate": "drizzle-kit generate",
+    "db:migrate": "drizzle-kit migrate",
+    "db:push": "drizzle-kit push",
+    "dev": "tsx watch src/index.ts",
+    "format": "prettier --write .",
+    "gen-key": "tsx scripts/generate-api-key.ts",
+    "revoke-key": "tsx scripts/revoke-key.ts",
+    "start": "node dist/index.js"
+  },
+  "dependencies": {
+    "@hono/node-server": "^1.19.0",
+    "@libsql/client": "^0.17.0",
+    "@vesta-cx/storage": "workspace:*",
+    "@vesta-cx/utils": "workspace:*",
+    "drizzle-orm": "^0.45.1",
+    "hono": "^4.12.1",
+    "postgres": "^3.4.5"
+  },
+  "devDependencies": {
+    "@types/node": "^25.3.0",
+    "@vesta-cx/config": "workspace:*",
+    "drizzle-kit": "^0.31.8",
+    "prettier": "^3.8.1",
+    "tsx": "^4.19.0",
+    "typescript": "^5.9.3"
+  }
 }

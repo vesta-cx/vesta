@@ -1,10 +1,14 @@
-import { defineConfig } from 'drizzle-kit';
+/** @format */
+
+import { defineConfig } from "drizzle-kit";
 
 export default defineConfig({
-	dialect: 'sqlite',
-	schema: './src/db/schema.ts',
-	out: './drizzle',
+	dialect: "sqlite",
+	schema: "./src/db/schema.ts",
+	out: "./drizzle",
 	dbCredentials: {
-		url: process.env['DATABASE_URL'] ?? 'file:./data/euterpe.sqlite'
-	}
+		url:
+			process.env["DATABASE_URL"] ??
+			"file:./data/euterpe.sqlite",
+	},
 });

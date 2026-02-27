@@ -1,3 +1,5 @@
+/** @format */
+
 import * as Iron from "iron-webcrypto";
 import type { Cookies } from "@sveltejs/kit";
 import type { AuthSession } from "./types.js";

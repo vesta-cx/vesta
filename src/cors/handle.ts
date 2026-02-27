@@ -1,5 +1,7 @@
-import type { Handle } from '@sveltejs/kit';
-import { isOriginAllowed, parseAllowedOrigins } from './index.js';
+/** @format */
+
+import type { Handle } from "@sveltejs/kit";
+import { isOriginAllowed, parseAllowedOrigins } from "./index.js";
 
 type Env = { CORS_ORIGINS?: string };
 
@@ -13,9 +15,9 @@ export const createCorsHandle = (options?: {
 	pathPattern?: RegExp | ((pathname: string) => boolean);
 }): Handle => {
 	const pathFilter: (p: string) => boolean =
-		options?.pathPattern instanceof RegExp
-			? (p) => (options.pathPattern as RegExp).test(p)
-			: options?.pathPattern ?? (() => true);
+		options?.pathPattern instanceof RegExp ?
+			(p) => (options.pathPattern as RegExp).test(p)
+		:	(options?.pathPattern ?? (() => true));
 
 	return async ({ event, resolve }) => {
 		const pathname = event.url.pathname;
@@ -25,31 +27,53 @@ export const createCorsHandle = (options?: {
 
 		const env = (event.platform as { env?: Env } | undefined)?.env;
 		const allowlist = parseAllowedOrigins(env?.CORS_ORIGINS);
-		const origin = event.request.headers.get('Origin');
+		const origin = event.request.headers.get("Origin");
 
 		const addCorsHeaders = (res: Response): Response => {
-			if (allowlist.length === 0 || !origin || !isOriginAllowed(origin, allowlist)) {
+			if (
+				allowlist.length === 0 ||
+				!origin ||
+				!isOriginAllowed(origin, allowlist)
+			) {
 				return res;
 			}
 			const next = new Response(res.body, {
 				status: res.status,
 				statusText: res.statusText,
-				headers: new Headers(res.headers)
+				headers: new Headers(res.headers),
 			});
-			next.headers.set('Access-Control-Allow-Origin', origin);
-			next.headers.set('Access-Control-Allow-Methods', 'GET, HEAD, POST, PUT, PATCH, DELETE, OPTIONS');
-			next.headers.set('Access-Control-Allow-Headers', 'Content-Type, Authorization');
-			next.headers.set('Access-Control-Max-Age', '86400');
+			next.headers.set("Access-Control-Allow-Origin", origin);
+			next.headers.set(
+				"Access-Control-Allow-Methods",
+				"GET, HEAD, POST, PUT, PATCH, DELETE, OPTIONS",
+			);
+			next.headers.set(
+				"Access-Control-Allow-Headers",
+				"Content-Type, Authorization",
+			);
+			next.headers.set("Access-Control-Max-Age", "86400");
 			return next;
 		};
 
-		if (event.request.method === 'OPTIONS') {
+		if (event.request.method === "OPTIONS") {
 			const res = new Response(null, { status: 204 });
 			if (origin && isOriginAllowed(origin, allowlist)) {
-				res.headers.set('Access-Control-Allow-Origin', origin);
-				res.headers.set('Access-Control-Allow-Methods', 'GET, HEAD, POST, PUT, PATCH, DELETE, OPTIONS');
-				res.headers.set('Access-Control-Allow-Headers', 'Content-Type, Authorization');
-				res.headers.set('Access-Control-Max-Age', '86400');
+				res.headers.set(
+					"Access-Control-Allow-Origin",
+					origin,
+				);
+				res.headers.set(
+					"Access-Control-Allow-Methods",
+					"GET, HEAD, POST, PUT, PATCH, DELETE, OPTIONS",
+				);
+				res.headers.set(
+					"Access-Control-Allow-Headers",
+					"Content-Type, Authorization",
+				);
+				res.headers.set(
+					"Access-Control-Max-Age",
+					"86400",
+				);
 			}
 			return res;
 		}

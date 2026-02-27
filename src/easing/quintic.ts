@@ -1,5 +1,7 @@
 /**
  * Quintic easing functions
+ *
+ * @format
  */
 
 /**
@@ -8,7 +10,7 @@
  * @returns Eased value between 0 and 1
  */
 export function easeInQuintic(t: number): number {
-  return t * t * t * t * t;
+	return t * t * t * t * t;
 }
 
 /**
@@ -17,7 +19,7 @@ export function easeInQuintic(t: number): number {
  * @returns Eased value between 0 and 1
  */
 export function easeOutQuintic(t: number): number {
-  return 1 - Math.pow(1 - t, 5);
+	return 1 - Math.pow(1 - t, 5);
 }
 
 /**
@@ -26,7 +28,12 @@ export function easeOutQuintic(t: number): number {
  * @returns Eased value between 0 and 1
  */
 export function easeInOutQuintic(t: number): number {
-  return t < 0.5 ? 16 * t * t * t * t * t : 1 - Math.pow(-2 * t + 2, 5) / 2;
+	return t < 0.5 ?
+			16 * t * t * t * t * t
+		:	1 - Math.pow(-2 * t + 2, 5) / 2;
 }
 
-export type QuinticEaseFunction = typeof easeInQuintic | typeof easeOutQuintic | typeof easeInOutQuintic;
+export type QuinticEaseFunction =
+	| typeof easeInQuintic
+	| typeof easeOutQuintic
+	| typeof easeInOutQuintic;

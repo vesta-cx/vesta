@@ -1,3 +1,5 @@
+/** @format */
+
 import type { CookieConfig } from "./types.js";
 
 let config: CookieConfig = {};

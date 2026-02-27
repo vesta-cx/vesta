@@ -1,5 +1,7 @@
 /**
  * Sine easing functions
+ *
+ * @format
  */
 
 /**
@@ -8,7 +10,7 @@
  * @returns Eased value between 0 and 1
  */
 export function easeInSine(t: number): number {
-  return 1 - Math.cos((t * Math.PI) / 2);
+	return 1 - Math.cos((t * Math.PI) / 2);
 }
 
 /**
@@ -17,7 +19,7 @@ export function easeInSine(t: number): number {
  * @returns Eased value between 0 and 1
  */
 export function easeOutSine(t: number): number {
-  return Math.sin((t * Math.PI) / 2);
+	return Math.sin((t * Math.PI) / 2);
 }
 
 /**
@@ -26,7 +28,10 @@ export function easeOutSine(t: number): number {
  * @returns Eased value between 0 and 1
  */
 export function easeInOutSine(t: number): number {
-  return -(Math.cos(Math.PI * t) - 1) / 2;
+	return -(Math.cos(Math.PI * t) - 1) / 2;
 }
 
-export type SineEaseFunction = typeof easeInSine | typeof easeOutSine | typeof easeInOutSine;
+export type SineEaseFunction =
+	| typeof easeInSine
+	| typeof easeOutSine
+	| typeof easeInOutSine;

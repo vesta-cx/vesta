@@ -1,5 +1,7 @@
 /**
  * Quadratic easing functions
+ *
+ * @format
  */
 
 /**
@@ -8,7 +10,7 @@
  * @returns Eased value between 0 and 1
  */
 export function easeInQuad(t: number): number {
-  return t * t;
+	return t * t;
 }
 
 /**
@@ -17,7 +19,7 @@ export function easeInQuad(t: number): number {
  * @returns Eased value between 0 and 1
  */
 export function easeOutQuad(t: number): number {
-  return 1 - Math.pow(1 - t, 2);
+	return 1 - Math.pow(1 - t, 2);
 }
 
 /**
@@ -26,7 +28,10 @@ export function easeOutQuad(t: number): number {
  * @returns Eased value between 0 and 1
  */
 export function easeInOutQuad(t: number): number {
-  return t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2;
+	return t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2;
 }
 
-export type QuadraticEaseFunction = typeof easeInQuad | typeof easeOutQuad | typeof easeInOutQuad;
+export type QuadraticEaseFunction =
+	| typeof easeInQuad
+	| typeof easeOutQuad
+	| typeof easeInOutQuad;

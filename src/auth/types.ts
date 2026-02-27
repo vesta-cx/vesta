@@ -1,4 +1,9 @@
-/** Encrypted session payload stored in the cookie. */
+/**
+ * Encrypted session payload stored in the cookie.
+ *
+ * @format
+ */
+
 export interface AuthSession {
 	userId: string;
 	email: string;

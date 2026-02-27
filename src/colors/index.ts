@@ -1,5 +1,7 @@
 /**
  * Color space parsing and interpolation utilities
+ *
+ * @format
  */
 
 export type { ColorSpace, ParsedColor } from "./types";

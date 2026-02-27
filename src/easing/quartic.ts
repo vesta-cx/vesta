@@ -1,5 +1,7 @@
 /**
  * Quartic easing functions
+ *
+ * @format
  */
 
 /**
@@ -8,7 +10,7 @@
  * @returns Eased value between 0 and 1
  */
 export function easeInQuartic(t: number): number {
-  return t * t * t * t;
+	return t * t * t * t;
 }
 
 /**
@@ -17,7 +19,7 @@ export function easeInQuartic(t: number): number {
  * @returns Eased value between 0 and 1
  */
 export function easeOutQuartic(t: number): number {
-  return 1 - Math.pow(1 - t, 4);
+	return 1 - Math.pow(1 - t, 4);
 }
 
 /**
@@ -26,7 +28,10 @@ export function easeOutQuartic(t: number): number {
  * @returns Eased value between 0 and 1
  */
 export function easeInOutQuartic(t: number): number {
-  return t < 0.5 ? 8 * t * t * t * t : 1 - Math.pow(-2 * t + 2, 4) / 2;
+	return t < 0.5 ? 8 * t * t * t * t : 1 - Math.pow(-2 * t + 2, 4) / 2;
 }
 
-export type QuarticEaseFunction = typeof easeInQuartic | typeof easeOutQuartic | typeof easeInOutQuartic;
+export type QuarticEaseFunction =
+	| typeof easeInQuartic
+	| typeof easeOutQuartic
+	| typeof easeInOutQuartic;

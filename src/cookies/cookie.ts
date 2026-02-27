@@ -1,3 +1,5 @@
+/** @format */
+
 import { ONE_YEAR } from "../constants.js";
 import { getCookieConfig } from "./config.js";
 import type { CookieAttributes } from "./types.js";
@@ -33,7 +35,10 @@ export const getCookie = (key: string): string | undefined => {
 export const setCookie = (
 	key: string,
 	value: string,
-	attributes: CookieAttributes = { "max-age": ONE_YEAR, samesite: "lax" },
+	attributes: CookieAttributes = {
+		"max-age": ONE_YEAR,
+		"samesite": "lax",
+	},
 ): string | undefined => {
 	if (!isBrowser) return undefined;
 
@@ -75,7 +80,7 @@ export const deleteCookie = (key: string): void => {
 	// Must include domain + path to match the original cookie
 	setCookie(key, "", {
 		"max-age": 0,
-		path: "/",
+		"path": "/",
 		...(globalConfig.domain ? { domain: globalConfig.domain } : {}),
 	});
 };

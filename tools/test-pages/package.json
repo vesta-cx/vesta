@@ -3,14 +3,14 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "clean": "cleanc clean",
-    "build:clean": "pnpm run clean && pnpm run build",
-    "dev:clean": "pnpm run clean && pnpm run dev",
-    "install:clean": "pnpm run clean && node -e \"try{require('fs').rmSync(require('path').join(process.cwd(),'node_modules'),{recursive:true,force:true})}catch(_){}\" && pnpm i",
     "build": "./node_modules/.bin/vite build",
+    "build:clean": "pnpm run clean && pnpm run build",
+    "clean": "cleanc clean",
     "deploy": "pnpm run build && (find dist -type f -size +25M -delete 2>/dev/null || true) && wrangler pages deploy",
     "dev": "./node_modules/.bin/vite",
+    "dev:clean": "pnpm run clean && pnpm run dev",
     "format": "prettier --write .",
+    "install:clean": "pnpm run clean && node -e \"try{require('fs').rmSync(require('path').join(process.cwd(),'node_modules'),{recursive:true,force:true})}catch(_){}\" && pnpm i",
     "preview": "./node_modules/.bin/vite preview"
   },
   "dependencies": {

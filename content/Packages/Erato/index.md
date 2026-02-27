@@ -79,7 +79,7 @@ pnpm --filter erato dev
 
 ## REST API (Phase 1)
 
-See [[Model]] for schema, [[app/stack]] for implementation details, and [[app/nanoid]] for ID generation.
+See [Model](../../apps/erato/Model/) for schema, [app/stack](./app/stack) for implementation details, and [app/nanoid](./app/nanoid) for ID generation.
 
 **Why REST, not GraphQL?**
 
@@ -125,5 +125,5 @@ When vesta outgrows D1:
 
 ## See Also
 
-- [[../../apps/vesta]] — Main public app
-- [[../../db]] — Shared database layer
+- [vesta](../../apps/vesta/index.md) — Main public app
+- [packages/db](../db/index.md) — Shared database layer

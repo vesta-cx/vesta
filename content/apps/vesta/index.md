@@ -30,7 +30,7 @@ description: Public-facing SvelteKit app for creators to build profiles, publish
 **Stack:**
 - SvelteKit 5 on Cloudflare Workers
 - `@sveltejs/adapter-cloudflare` (with `getPlatformProxy` for local D1)
-- D1 binding (same database as Erato; see [[../erato]])
+- D1 binding (same database as Erato; see [erato](../erato))
 - Drizzle ORM (schemas from `packages/db`)
 - Components from `@vesta-cx/ui` (shadcn-svelte, Bits-UI, TailwindCSS)
 - Auth via WorkOS (in `@vesta-cx/utils`)
@@ -139,7 +139,7 @@ pnpm --filter vesta deploy
 1. **SvelteKit `+server.ts` for all API routes** (Phase 1) — Avoids separate Erato calls, zero latency
 2. **Modular pricing** — Every feature is tagged (free, basic, pro, enterprise)
 3. **Creator identity via theming** — CSS variables for colors, fonts, layout (future: full customization)
-4. **Ephemeral URLs for smart links** — See [[../ephemeral-url-pattern]]
+4. **Ephemeral URLs for smart links** — See [ephemeral-url-pattern](../ephemeral-url-pattern)
 5. **Component reuse from `@vesta-cx/ui`** — No local UI library duplication
 
 ## Pricing & Feature Gates
@@ -171,7 +171,7 @@ export async function canUseAdvancedAnalytics(creatorId: string) {
 
 ## See Also
 
-- [[../erato]] — Data layer & REST API
-- [[../db]] — Shared database schemas
-- [[../../../ui]] — Component library
-- [[../../../utils]] — Shared auth, storage, helpers
+- [erato](../erato) — Data layer & REST API
+- [db](../db) — Shared database schemas
+- [ui](../../../ui) — Component library
+- [utils](../../../utils) — Shared auth, storage, helpers

@@ -70,5 +70,5 @@ VALUES (?, ?, ?, ?, ?);
 
 ## See Also
 
-- [[../Resource.md]] — Resources can have multiple URLs
-- [[../resource_types/posts.md]] — Posts with external links
+- [Resource](./resource.md) — Resources can have multiple URLs
+- [Post Resource Type](./resource_types/posts.md) — Posts with external links

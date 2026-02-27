@@ -120,7 +120,7 @@ primary key          (resource_id, workspace_id)
 **Permissions control access:**
 
 - Separate from status
-- See [[./Permissions.md]] for full model
+- See [Permissions](./permissions.md) for full model
 
 ## Types (Extensible)
 
@@ -152,9 +152,9 @@ A song can appear on multiple albums (compilations, reissues, etc.).
 
 ## See Also
 
-- [[./resource_types/posts.md|Post Resource Type]] — Post type (Phase 1)
-- [[./resource_types/songs.md]] — Song type (Phase 2+)
-- [[./resource_types/albums.md]] — Album type (Phase 2+)
-- [[./teams.md|Teams]] — Permissions subjects
-- [[./Permissions.md]] — Access control
-- [[./workspaces.md|Workspaces]] — Workspaces (artist profiles that author resources)
+- [Post Resource Type](./resource_types/posts.md) — Post type (Phase 1)
+- [songs](./resource_types/songs.md) — Song type (Phase 2+)
+- [albums](./resource_types/albums.md) — Album type (Phase 2+)
+- [Teams](./teams.md) — Permissions subjects
+- [Permissions](./permissions.md) — Access control
+- [Workspaces](./workspaces.md) — Workspaces (artist profiles that author resources)

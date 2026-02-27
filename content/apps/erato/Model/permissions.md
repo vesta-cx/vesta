@@ -158,6 +158,6 @@ async function canUserDoAction(userId, objectId, action) {
 
 ## See Also
 
-- [[./features-subscriptions.md|Features & Subscriptions]] — Feature access and pricing (separate from permissions)
-- [[./teams.md|Teams]] — Team membership for permission inheritance
-- [[./users.md|Users & Organizations (WorkOS-Managed)]] — User identity and organization context
+- [Features & Subscriptions](./features-subscriptions.md) — Feature access and pricing (separate from permissions)
+- [Teams](./teams.md) — Team membership for permission inheritance
+- [Users & Organizations (WorkOS-Managed)](./users.md) — User identity and organization context

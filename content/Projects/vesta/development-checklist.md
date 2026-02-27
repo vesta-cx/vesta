@@ -9,9 +9,9 @@ Before submitting a PR, verify all items below pass. These checks ensure consist
 
 ## Scope & Design
 
-- [ ] **Feature is Phase 1 scope.** Check [[./phase-1-roadmap.md#phase-1-scope]]. If not, open a backlog issue and defer.
-- [ ] **Pricing tier assigned.** See [[./phase-1-roadmap.md#feature-tiers-pricing--gating]]. Document in PR or code comments.
-- [ ] **No duplicate work.** Did you check [[../../../apps/sona/]] for existing patterns (D1 setup, R2 storage, auth, cron)?
+- [ ] **Feature is Phase 1 scope.** Check [Milestone 1 scope](./milestones.md#milestone-1-scope). If not, open a backlog issue and defer.
+- [ ] **Pricing tier assigned.** See [Feature tiers](./milestones.md#feature-tiers-pricing--gating). Document in PR or code comments.
+- [ ] **No duplicate work.** Did you check [sona](../../apps/sona/) for existing patterns (D1 setup, R2 storage, auth, cron)?
 
 ## Implementation
 
@@ -55,6 +55,6 @@ Copy patterns from sona; don't rebuild from scratch. If you find a gap, note it 
 
 ## See Also
 
-- [[./phase-1-roadmap.md|Milestone 1 Roadmap (Blogging + Smart Links)]] — Feature scope and pricing tiers
-- [[../../../README.md]] — vesta vision and architecture
-- [[../../../apps/erato/index.md|Erato]] — Data model docs
+- [Milestone 1 Roadmap (Blogging + Smart Links)](./milestones.md) — Feature scope and pricing tiers
+- [README](../../../../README.md) — vesta vision and architecture
+- [Erato](../../apps/erato/index.md) — Data model docs

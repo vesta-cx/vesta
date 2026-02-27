@@ -19,7 +19,7 @@ A naive approach (expand team permissions to individual users) creates **permiss
 
 **Better approach:** Query both permissions and team membership at evaluation time, merge results. No permission table updates when team membership changes.
 
-See [[./Permissions.md]] for the full precedence model.
+See [Permissions](./permissions.md) for the full precedence model.
 
 ## Schema
 
@@ -47,7 +47,7 @@ added_at             timestamp
 primary key          (team_id, user_id)
 ```
 
-When a user joins a team, they immediately inherit all the team's permissions via the [[./Permissions.md]] model.
+When a user joins a team, they immediately inherit all the team's permissions via the [Permissions](./permissions.md) model.
 
 ## Querying Team Permissions
 
@@ -55,7 +55,7 @@ When checking if a user can perform an action:
 
 1. Get all teams user belongs to: `SELECT team_id FROM team_users WHERE user_id = {user_id}`
 2. Query permissions for those teams: `SELECT * FROM permissions WHERE subject_type = 'team' AND subject_id IN (...)`
-3. Apply permission precedence logic (see [[./Permissions.md#permission-precedence]])
+3. Apply permission precedence logic (see [Permissions](./permissions.md#permission-precedence-highest-to-lowest))
 
 ## Example: Team-Based Permission Flow
 
@@ -80,7 +80,7 @@ When checking if a user can perform an action:
 
 Actually, clarification needed: If we have both `user:allow` and `user:deny` for the same permission, which wins? I think `user:deny` should win (more restrictive). Let me revise: the precedence is that we check for deny first, and if deny exists at ANY level, we stop and return false. Only if no deny exists, we check for allow.
 
-See [[./Permissions.md#permission-evaluation-logic]] for the implementation.
+See [Permissions](./permissions.md#permission-merger-core-implementation) for the implementation.
 
 ## Adding/Removing Users from Teams
 
@@ -122,5 +122,5 @@ A team belongs to a single organization (`teams.organization_id`). Users must be
 
 ## See Also
 
-- [[./Permissions.md]] — Full permission model with precedence rules
-- [[./organizations.md|Organizations (WorkOS-Managed)]] — Organizations contain teams
+- [Permissions](./permissions.md) — Full permission model with precedence rules
+- [Organizations (WorkOS-Managed)](./organizations.md) — Organizations contain teams

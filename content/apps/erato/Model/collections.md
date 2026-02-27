@@ -151,5 +151,5 @@ Decision deferred to Phase 3 pending actual usage patterns and performance needs
 
 ## See Also
 
-- [[./engagements.md]] — Engagements auto-populate collections
-- [[./Resource.md]] — Resources in collections
+- [engagements](./engagements.md) — Engagements auto-populate collections
+- [Resource](./resource.md) — Resources in collections

@@ -40,7 +40,7 @@ updated_at           timestamp
 ```
 
 **Key fields:**
-- `cost_tier` — Pre-assigned tier for tier presets (see [[#Pricing Tiers & Presets]])
+- `cost_tier` — Pre-assigned tier for tier presets (see [Pricing Tiers & Presets](#pricing-tiers--presets))
 - `cost_of_operation` — Actual hosting/infra cost; used to calculate discount curve floor
 - `base_price_cents` — Full price (retail); discount curve asymptotes toward cost_of_operation
 - `is_alpha` / `alpha_user_ids` — Gradual rollout control
@@ -205,6 +205,6 @@ This is more compact but less readable; use if JWT size becomes a bottleneck.
 
 ## See Also
 
-- [[./feature-catalog.md|Feature Catalog & Pricing Transparency]] — Complete feature list and pricing
-- [[./pricing-modular.md|Modular Pricing & Weighted Discount Curve]] — Individual feature pricing and tier presets
-- [[./development-checklist.md|Development Checklist (Phase 1)]] — Feature gating checklist for PRs
+- [Feature Catalog & Pricing Transparency](./feature-catalog.md) — Complete feature list and pricing
+- [Modular Pricing & Weighted Discount Curve](./pricing-modular.md) — Individual feature pricing and tier presets
+- [Development Checklist (Phase 1)](./development-checklist.md) — Feature gating checklist for PRs

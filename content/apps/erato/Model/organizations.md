@@ -43,7 +43,7 @@ Every vesta instance has a **global organization** for all users who don't belon
 | textile | `org_textile_*` | Default org for all textile users |
 | mia.cx  | `org_miacx_*`   | Default org for all mia.cx users  |
 
-All users in vesta belong to the "vesta" global org by default (see [[./users.md#organizational-architecture]]).
+All users in vesta belong to the "vesta" global org by default (see [Users](./users.md#organizational-architecture-multi-app-context)).
 
 ### Specific Organizations
 
@@ -57,7 +57,7 @@ Users can also belong to specific organizations (labels, collectives, teams):
 
 ## Workspace Ownership
 
-Organizations can own [[./workspaces.md|Workspaces]] (just like users can):
+Organizations can own [Workspaces](./workspaces.md) (just like users can):
 
 ```sql
 -- Get all workspaces owned by an organization
@@ -79,11 +79,11 @@ Users are members of organizations and can have roles assigned by WorkOS:
 - `member` — Standard member (read/write access to organization resources)
 - `viewer` — Read-only access
 
-Roles affect permissions on resources and workspaces owned by the organization (via the [[./Permissions.md]] model).
+Roles affect permissions on resources and workspaces owned by the organization (via the [Permissions](./permissions.md) model).
 
 ## No Custom Attributes on WorkOS Organizations
 
-Similar to [[./users.md#no-custom-attributes-on-workos]], vesta-specific org data is stored in vesta DB, not in WorkOS custom attributes.
+Similar to [Users](./users.md), vesta-specific org data is stored in vesta DB, not in WorkOS custom attributes.
 
 **Store in vesta DB:**
 
@@ -119,6 +119,6 @@ const workspaces = await db.query.workspaces.findMany({
 
 ## See Also
 
-- [[./users.md|Users & Organizations (WorkOS-Managed)]] — User schema and multi-org architecture
-- [[./workspaces.md|Workspaces]] — How workspaces reference organizations
-- [[./Permissions.md]] — Permission model (subjects include org members)
+- [Users & Organizations (WorkOS-Managed)](./users.md) — User schema and multi-org architecture
+- [Workspaces](./workspaces.md) — How workspaces reference organizations
+- [Permissions](./permissions.md) — Permission model (subjects include org members)

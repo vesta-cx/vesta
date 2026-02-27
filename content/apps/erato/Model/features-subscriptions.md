@@ -242,7 +242,7 @@ const token = jwt.sign(
 
 ## Discount Curve
 
-See [[../../../Projects/vesta/pricing-modular.md|Modular Pricing & Weighted Discount Curve]] for math. Implementation:
+See [Modular Pricing & Weighted Discount Curve](../../../projects/vesta/pricing-modular.md) for math. Implementation:
 
 1. Get user's selected `active_features` array
 2. Look up each feature's `base_price_cents` and `cost_of_operation` from `features` table
@@ -314,13 +314,13 @@ async function claimFeature(adminUserId, targetUserId, featureSlug, limitValue =
 
 ## Related Models
 
-- [[./permissions.md|Permissions]] — Who can do what (separate from feature access)
-- [[./users.md|Users & Organizations (WorkOS-Managed)]] — User identity
-- [[./engagements.md|Engagements]] — User interactions
-- [[./resource.md|Resource]] — Creative works (what features enable)
+- [Permissions](./permissions.md) — Who can do what (separate from feature access)
+- [Users & Organizations (WorkOS-Managed)](./users.md) — User identity
+- [Engagements](./engagements.md) — User interactions
+- [Resource](./resource.md) — Creative works (what features enable)
 
 ## See Also
 
-- [[../../../Projects/vesta/feature-catalog.md|Feature Catalog & Pricing Transparency]] — Complete feature list with COO and pricing
-- [[../../../Projects/vesta/feature-access-gating.md|Feature Access & Gating]] — Feature gating strategies and JWT
-- [[../../../Projects/vesta/pricing-modular.md|Modular Pricing & Weighted Discount Curve]] — Discount curve math
+- [Feature Catalog & Pricing Transparency](../../../projects/vesta/feature-catalog.md) — Complete feature list with COO and pricing
+- [Feature Access & Gating](../../../projects/vesta/feature-access-gating.md) — Feature gating strategies and JWT
+- [Modular Pricing & Weighted Discount Curve](../../../projects/vesta/pricing-modular.md) — Discount curve math

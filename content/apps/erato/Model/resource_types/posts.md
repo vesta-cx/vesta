@@ -37,5 +37,5 @@ WHERE r.type = 'post' AND r.id = {resource_id};
 
 ## See Also
 
-- [[../Resource.md]] — Base resource model
-- [[../Permissions.md]] — Who can view/edit posts
+- [Resource](../resource.md) — Base resource model
+- [Permissions](../permissions.md) — Who can view/edit posts

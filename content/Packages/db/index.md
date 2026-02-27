@@ -278,7 +278,7 @@ npm install @vesta-cx/db
 
 ## See Also
 
-- [[../erato]] — Data layer API (consumes this package)
-- [[../Apps/vesta]] — Main app (consumes this package)
-- [[../utils]] — Shared auth, storage helpers
+- [erato](../Erato/index.md) — Data layer API (consumes this package)
+- [vesta](../../apps/vesta/index.md) — Main app (consumes this package)
+- [utils](../utils) — Shared auth, storage helpers
 - [Drizzle ORM Docs](https://orm.drizzle.team/)

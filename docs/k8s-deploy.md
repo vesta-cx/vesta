@@ -1,11 +1,15 @@
+<!-- @format -->
+
 # Deploy Euterpe on Kubernetes
 
-Sona calls Euterpe from Cloudflare Workers, so Euterpe must be reachable at a public URL. Use Ingress + TLS or a LoadBalancer.
+Sona calls Euterpe from Cloudflare Workers, so Euterpe must be reachable at a
+public URL. Use Ingress + TLS or a LoadBalancer.
 
 ## Prerequisites
 
 - `kubectl` configured for your cluster
-- Container registry the cluster can pull from (GHCR, GCR, ECR, or local for kind/minikube)
+- Container registry the cluster can pull from (GHCR, GCR, ECR, or local for
+  kind/minikube)
 - ffmpeg runs inside the container (included in the Docker image)
 
 ## 1. Build and push the image
@@ -43,7 +47,7 @@ If you use a different image name or registry, set it in `k8s/deployment.yaml`:
 ```yaml
 containers:
   - name: euterpe
-    image: ghcr.io/myorg/euterpe:latest  # change from euterpe:latest
+    image: ghcr.io/myorg/euterpe:latest # change from euterpe:latest
 ```
 
 ## 4. Apply manifests
@@ -75,14 +79,16 @@ kubectl patch service euterpe -p '{"spec":{"type":"LoadBalancer"}}'
 kubectl get svc euterpe  # use EXTERNAL-IP as EUTERPE_URL
 ```
 
-Use HTTPS in front (e.g. load balancer termination or an Ingress) for secure traffic.
+Use HTTPS in front (e.g. load balancer termination or an Ingress) for secure
+traffic.
 
 ## 6. Configure Sona
 
 Set in Sona’s wrangler secrets or env:
 
 - `EUTERPE_URL` — public URL (e.g. `https://euterpe.example.com`)
-- `PRIVATE_EUTERPE_API_KEY` — same value as `EUTERPE_API_KEY` in the Euterpe secret
+- `PRIVATE_EUTERPE_API_KEY` — same value as `EUTERPE_API_KEY` in the Euterpe
+  secret
 
 ## Verify
 

@@ -33,3 +33,7 @@
 [submodule "packages/db"]
 	path = packages/db
 	url = https://github.com/vesta-cx/db.git
+
+[submodule "packages/drizzle-query-factory"]
+	path = packages/drizzle-query-factory
+	url = https://github.com/mia-cx/drizzle-query-factory.git

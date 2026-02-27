@@ -57,8 +57,11 @@ if (!wrangler.env) {
 	wrangler.env = {};
 }
 
-// Start with prod defaults (deep copy to avoid mutation)
+// Start with prod defaults (deep copy to avoid mutation).
+// Strip prod-only keys that versioned envs should not inherit.
 const prodDefaults = structuredClone(wrangler.env.prod || {});
+delete prodDefaults.main;
+delete prodDefaults.routes;
 
 // Build routes: start from prod defaults, then append the versioned path-pattern route.
 // deepMerge replaces arrays, so routes must be assembled separately.
@@ -66,10 +69,7 @@ const versionedRoute = {
 	pattern: `erato.vesta.cx/${apiVersion}/*`,
 	zone_name: "vesta.cx",
 };
-const baseRoutes = (prodDefaults.routes || []).filter(
-	(r) => r.pattern !== versionedRoute.pattern,
-);
-const envRoutes = [...baseRoutes, versionedRoute];
+const envRoutes = [versionedRoute];
 
 // Merge: prodDefaults < existingEnv < newApiEnvBlock
 // This preserves any manual overrides in existingEnv while inheriting prod bindings

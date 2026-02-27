@@ -15,6 +15,7 @@
   ],
   "env": {
     "prod": {
+      "main": "src/gateway.ts",
       "routes": [
         {
           "pattern": "erato.vesta.cx",
@@ -57,17 +58,6 @@
       ]
     },
     "v0": {
-      "routes": [
-        {
-          "pattern": "erato.vesta.cx",
-          "zone_name": "vesta.cx",
-          "custom_domain": true
-        },
-        {
-          "pattern": "erato.vesta.cx/v0/*",
-          "zone_name": "vesta.cx"
-        }
-      ],
       "d1_databases": [
         {
           "binding": "DB",
@@ -82,6 +72,12 @@
           "binding": "KV",
           "id": "bf788f28eae944b7b198e697e097c48c",
           "remote": true
+        }
+      ],
+      "routes": [
+        {
+          "pattern": "erato.vesta.cx/v0/*",
+          "zone_name": "vesta.cx"
         }
       ],
       "name": "vesta_erato_v0",

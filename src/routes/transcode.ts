@@ -15,10 +15,7 @@ import type { TranscodeConfig } from "../transcode.js";
 
 export const transcodeRoutes = new Hono();
 
-const writeFileStream = async (
-	file: File,
-	tmpPath: string,
-): Promise<void> => {
+const writeFileStream = async (file: File, tmpPath: string): Promise<void> => {
 	const reader = file.stream().getReader();
 	const out = fs.createWriteStream(tmpPath);
 	try {

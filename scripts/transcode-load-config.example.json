@@ -1,17 +1,17 @@
 {
-  "targets": [
-    {
-      "codec": "opus",
-      "bitrate": 128
+    "targets": [
+        {
+            "codec": "opus",
+            "bitrate": 128
+        }
+    ],
+    "filename": "load-check",
+    "uploadPrefix": "benchmarks",
+    "storage": {
+        "type": "s3",
+        "endpoint": "https://s3.example.com",
+        "bucket": "audio-bucket",
+        "accessKeyId": "REPLACE_ME",
+        "secretAccessKey": "REPLACE_ME"
     }
-  ],
-  "filename": "load-check",
-  "uploadPrefix": "benchmarks",
-  "storage": {
-    "type": "s3",
-    "endpoint": "https://s3.example.com",
-    "bucket": "audio-bucket",
-    "accessKeyId": "REPLACE_ME",
-    "secretAccessKey": "REPLACE_ME"
-  }
 }

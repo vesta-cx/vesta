@@ -32,7 +32,10 @@ const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
 const url = ensure(parseArg("--url"), "Missing --url=https://...");
 const apiKey = ensure(parseArg("--api-key"), "Missing --api-key=...");
-const filePath = ensure(parseArg("--file"), "Missing --file=/path/to/audio.flac");
+const filePath = ensure(
+	parseArg("--file"),
+	"Missing --file=/path/to/audio.flac",
+);
 const configPath = ensure(
 	parseArg("--config"),
 	"Missing --config=/path/to/transcode-config.json",
@@ -71,7 +74,9 @@ const runOne = async (index) => {
 
 	if (!postRes.ok) {
 		const body = await postRes.text();
-		throw new Error(`request ${index} POST failed: ${postRes.status} ${body}`);
+		throw new Error(
+			`request ${index} POST failed: ${postRes.status} ${body}`,
+		);
 	}
 
 	const { jobId } = await postRes.json();
@@ -104,7 +109,9 @@ const runOne = async (index) => {
 			};
 		}
 		if (statusJson.status === "failed") {
-			throw new Error(`request ${index} job failed: ${statusJson.error ?? "unknown"}`);
+			throw new Error(
+				`request ${index} job failed: ${statusJson.error ?? "unknown"}`,
+			);
 		}
 	}
 
@@ -138,7 +145,9 @@ const worker = async () => {
 	}
 };
 
-await Promise.all(Array.from({ length: Math.min(concurrency, requestCount) }, worker));
+await Promise.all(
+	Array.from({ length: Math.min(concurrency, requestCount) }, worker),
+);
 
 console.log("\n=== Summary ===");
 console.log(`completed=${completed} failed=${failed}`);

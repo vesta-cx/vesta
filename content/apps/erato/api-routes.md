@@ -17,11 +17,12 @@ All routes are prefixed with `/v0`. Authentication is via `Authorization: Bearer
 
 ## Identity
 
-| Method | Path  | Auth     | Description                                          |
-| ------ | ----- | -------- | ---------------------------------------------------- |
-| GET    | `/me` | Required | Returns the authenticated subject's identity object  |
+| Method | Path  | Auth     | Description                                         |
+| ------ | ----- | -------- | --------------------------------------------------- |
+| GET    | `/me` | Required | Returns the authenticated subject's identity object |
 
 Resolves by API key `subjectType`:
+
 - `user` — WorkOS user merged with local user extensions
 - `organization` — WorkOS org merged with local org extensions
 - `workspace` — Local workspace row
@@ -78,20 +79,44 @@ Returns `404` when subject entity not found, `401` for missing/invalid key.
 
 | Method | Path                                    | Auth     | Scopes            |
 | ------ | --------------------------------------- | -------- | ----------------- |
-| GET    | `/resources/:resourceId/urls`           | Optional | `resources:read`  |
+| GET    | `/resources/:resourceId/urls`           | Required | `resources:read`  |
 | POST   | `/resources/:resourceId/urls`           | Required | `resources:write` |
 | PUT    | `/resources/:resourceId/urls/:position` | Required | `resources:write` |
 | DELETE | `/resources/:resourceId/urls/:position` | Required | `resources:write` |
+
+### Workspace URLs
+
+| Method | Path                                      | Auth     | Scopes             |
+| ------ | ----------------------------------------- | -------- | ------------------ |
+| GET    | `/workspaces/:workspaceId/urls`           | Required | `workspaces:read`  |
+| POST   | `/workspaces/:workspaceId/urls`           | Required | `workspaces:write` |
+| PUT    | `/workspaces/:workspaceId/urls/:position` | Required | `workspaces:write` |
+| DELETE | `/workspaces/:workspaceId/urls/:position` | Required | `workspaces:write` |
+
+### Generic External Links
+
+| Method | Path                                    | Auth     | Scopes                              |
+| ------ | --------------------------------------- | -------- | ----------------------------------- |
+| GET    | `/links/:subjectType/:subjectId`        | Required | `resources:read` or `workspaces:read` |
+| POST   | `/links/:subjectType/:subjectId`        | Required | `resources:write` or `workspaces:write` |
+| PUT    | `/links/:subjectType/:subjectId/:position` | Required | `resources:write` or `workspaces:write` |
+| DELETE | `/links/:subjectType/:subjectId/:position` | Required | `resources:write` or `workspaces:write` |
+
+`subjectType` currently supports `resource` and `workspace`.
+Resource URL routes are retained for compatibility and backed by the same `external_links` model.
 
 ## Collections
 
 | Method | Path               | Auth     | Scopes                      | Guest       |
 | ------ | ------------------ | -------- | --------------------------- | ----------- |
-| GET    | `/collections`     | Optional | `collections:read`          | Public only |
-| GET    | `/collections/:id` | Optional | `collections:read`          | Public only |
+| GET    | `/collections`     | Required | `collections:read`          | No          |
+| GET    | `/collections/:id` | Required | `collections:read`          | No          |
 | POST   | `/collections`     | Required | `collections:write`         | No          |
 | PUT    | `/collections/:id` | Required | `collections:write` (owner) | No          |
 | DELETE | `/collections/:id` | Required | `collections:write` (owner) | No          |
+
+Collections now use `status` (`LISTED` / `UNLISTED`) plus explicit permissions (`objectType=collection`, action-scoped checks).
+For follower-only behavior, clients can set static rules (`static:follower allow`, `static:user deny`, `static:guest deny`) and resolve effective visibility in the client/app permission layer.
 
 ### Collection Items
 
@@ -100,13 +125,6 @@ Returns `404` when subject entity not found, `401` for missing/invalid key.
 | GET    | `/collections/:collectionId/items`                   | Required | `collections:read`  |
 | POST   | `/collections/:collectionId/items`                   | Required | `collections:write` |
 | DELETE | `/collections/:collectionId/items/:itemType/:itemId` | Required | `collections:write` |
-
-### Collection Visibility
-
-| Method | Path                                    | Auth     | Scopes                      |
-| ------ | --------------------------------------- | -------- | --------------------------- |
-| GET    | `/collections/:collectionId/visibility` | Required | `collections:read` (owner)  |
-| PUT    | `/collections/:collectionId/visibility` | Required | `collections:write` (owner) |
 
 ### Collection Filters
 
@@ -137,13 +155,13 @@ Returns `404` when subject entity not found, `401` for missing/invalid key.
 
 Organizations use a **hybrid model**: WorkOS is source of truth for canonical identity fields; Erato D1 stores local extension fields (`avatarUrl`, `bannerUrl`, `themeConfig`). Responses are flattened merged objects — clients cannot distinguish which domain owns each field.
 
-| Method | Path                  | Auth     | Scopes                 |
-| ------ | --------------------- | -------- | ---------------------- |
-| GET    | `/organizations`      | Required | `organizations:read`   |
-| GET    | `/organizations/:id`  | Required | `organizations:read`   |
-| POST   | `/organizations`      | Required | `organizations:write`  |
-| PUT    | `/organizations/:id`  | Required | `organizations:write`  |
-| DELETE | `/organizations/:id`  | Required | `organizations:write`  |
+| Method | Path                 | Auth     | Scopes                |
+| ------ | -------------------- | -------- | --------------------- |
+| GET    | `/organizations`     | Required | `organizations:read`  |
+| GET    | `/organizations/:id` | Required | `organizations:read`  |
+| POST   | `/organizations`     | Required | `organizations:write` |
+| PUT    | `/organizations/:id` | Required | `organizations:write` |
+| DELETE | `/organizations/:id` | Required | `organizations:write` |
 
 **List pagination**: Organizations list uses WorkOS cursor-based pagination (`after`, `before`, `limit` params), not offset-based. `runListQuery` is not used here.
 
@@ -184,6 +202,9 @@ Organizations use a **hybrid model**: WorkOS is source of truth for canonical id
 | POST   | `/permissions`     | Required | `permissions:write` |
 | PUT    | `/permissions/:id` | Required | `permissions:write` |
 | DELETE | `/permissions/:id` | Required | `permissions:write` |
+
+Permission checks are action-scoped and must include all fields:
+`subjectType`, `subjectId`, `objectType`, `objectId`, `action`, and `value`.
 
 ### Permission Actions
 
@@ -298,16 +319,16 @@ GET /resources?status=LISTED&type=post&sort=created_at&order=desc&limit=20&offse
 
 21 scopes control API access:
 
-| Scope                                            | Description                      |
-| ------------------------------------------------ | -------------------------------- |
-| `users:read` / `users:write`                     | User management                  |
-| `workspaces:read` / `workspaces:write`           | Workspace management             |
-| `organizations:read` / `organizations:write`     | Organization management          |
-| `resources:read` / `resources:write`             | Resource management              |
-| `collections:read` / `collections:write`         | Collection management            |
-| `teams:read` / `teams:write`                     | Team management                  |
-| `engagements:read` / `engagements:write`         | Engagement management            |
-| `permissions:read` / `permissions:write`         | Permission management            |
-| `features:read` / `features:write`               | Feature catalog management       |
-| `subscriptions:read` / `subscriptions:write`     | Subscription management          |
-| `admin`                                          | Full access, bypasses all checks |
+| Scope                                        | Description                      |
+| -------------------------------------------- | -------------------------------- |
+| `users:read` / `users:write`                 | User management                  |
+| `workspaces:read` / `workspaces:write`       | Workspace management             |
+| `organizations:read` / `organizations:write` | Organization management          |
+| `resources:read` / `resources:write`         | Resource management              |
+| `collections:read` / `collections:write`     | Collection management            |
+| `teams:read` / `teams:write`                 | Team management                  |
+| `engagements:read` / `engagements:write`     | Engagement management            |
+| `permissions:read` / `permissions:write`     | Permission management            |
+| `features:read` / `features:write`           | Feature catalog management       |
+| `subscriptions:read` / `subscriptions:write` | Subscription management          |
+| `admin`                                      | Full access, bypasses all checks |

@@ -1,9 +1,31 @@
-.DS_Store
+# Dependencies
 node_modules
+
+# Local env files
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Testing
+coverage
+
+# Turbo
+.turbo
+
+# Build Outputs
+build
+dist
+out
 public
 prof
 tsconfig.tsbuildinfo
+
+# Misc
+.DS_Store
 .quartz-cache
 private/
 .replit
 replit.nix
+*.pem

@@ -38,6 +38,8 @@ todos:
 isProject: false
 ---
 
+<!-- @format -->
+
 # Implement Erato Gap Set (WorkOS-First Hybrid)
 
 ## Scope
@@ -54,7 +56,7 @@ Implement the selected gaps:
 
 - **Organizations:** WorkOS owns canonical org fields; Erato D1 stores Vesta-specific extension fields.
 - **Users/Organizations hybrid behavior:** read returns a **flattened merged object** (no identity/extension split exposed to clients), writes fan out by field ownership.
-- `**/me` behavior:** authenticated endpoint; resolves `subjectType` + `subjectId`; returns merged entity when resolvable (user/workspace/org) and explicit not-found/error contract when source entity is missing.
+- `**/me` behavior:\*\* authenticated endpoint; resolves `subjectType` + `subjectId`; returns merged entity when resolvable (user/workspace/org) and explicit not-found/error contract when source entity is missing.
 - **Branding field naming:** standardize on `avatarUrl` (not `logoUrl`) for consistency with users/workspaces; allow optional `bannerUrl`.
 - **Branding storage shape (this phase):** keep branding in entity-specific tables (`users`, `workspaces`, `organizations` extension) and defer any shared branding/theming table.
 - **Commercial/billing extension fields:** explicitly out of scope for now.
@@ -169,4 +171,3 @@ Implement the selected gaps:
 - **Dual-write consistency (WorkOS + D1):** only call changed domains; on any called-domain failure, return explicit error and include recovery guidance/log correlation.
 - **Scope drift for new endpoints:** mirror existing scope naming conventions (`*:read` / `*:write`) and enforce in route handlers.
 - **Type drift across auth context changes:** keep `subjectType`/`subjectId` as the only identity fields in auth context and tests.
-

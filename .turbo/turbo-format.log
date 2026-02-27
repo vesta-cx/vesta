@@ -1,0 +1,33 @@
+
+
+> docs@4.5.2 format /Users/mia/vesta-cx/vesta/apps/docs
+> npx prettier . --write
+
+[1mnpm[22m [33mwarn[39m [94mUnknown env config "verify-deps-before-run". This will stop working in the next major version of npm.[39m
+[1mnpm[22m [33mwarn[39m [94mUnknown env config "_jsr-registry". This will stop working in the next major version of npm.[39m
+[1mnpm[22m [33mwarn[39m [94mUnknown env config "store-dir". This will stop working in the next major version of npm.[39m
+⠙[1G[0K.gitattributes[2K[1G.github/dependabot.yml[2K[1G[90m.github/dependabot.yml[39m 7ms (unchanged)
+.github/FUNDING.yml[2K[1G[90m.github/FUNDING.yml[39m 1ms (unchanged)
+.github/ISSUE_TEMPLATE/bug_report.md[2K[1G[90m.github/ISSUE_TEMPLATE/bug_report.md[39m 18ms (unchanged)
+.github/ISSUE_TEMPLATE/feature_request.md[2K[1G[90m.github/ISSUE_TEMPLATE/feature_request.md[39m 4ms (unchanged)
+.github/pull_request_template.md[2K[1G[90m.github/pull_request_template.md[39m 1ms (unchanged)
+.github/workflows/build-preview.yaml[2K[1G[90m.github/workflows/build-preview.yaml[39m 4ms (unchanged)
+.github/workflows/ci.yaml[2K[1G[90m.github/workflows/ci.yaml[39m 5ms (unchanged)
+.github/workflows/deploy-preview.yaml[2K[1G[90m.github/workflows/deploy-preview.yaml[39m 3ms (unchanged)
+.github/workflows/docker-build-push.yaml[2K[1G[90m.github/workflows/docker-build-push.yaml[39m 6ms (unchanged)
+.gitignore[2K[1G.node-version[2K[1G.npmrc[2K[1G.prettierignore[2K[1G.prettierrc[2K[1G[90m.prettierrc[39m 12ms (unchanged)
+.turbo/turbo-format.log[2K[1GCODE_OF_CONDUCT.md[2K[1G[90mCODE_OF_CONDUCT.md[39m 15ms (unchanged)
+content/.gitignore[2K[1Gcontent/.obsidian/app.json[2K[1G[90mcontent/.obsidian/app.json[39m 1ms (unchanged)
+content/.obsidian/appearance.json[2K[1G[90mcontent/.obsidian/appearance.json[39m 0ms (unchanged)
+content/.obsidian/backlink.json[2K[1G[90mcontent/.obsidian/backlink.json[39m 1ms (unchanged)
+content/.obsidian/community-plugins.json[2K[1G[90mcontent/.obsidian/community-plugins.json[39m 2ms (unchanged)
+content/.obsidian/core-plugins.json[2K[1G[90mcontent/.obsidian/core-plugins.json[39m 2ms (unchanged)
+content/.obsidian/fonts/archivo-black.css[2K[1G[90mcontent/.obsidian/fonts/archivo-black.css[39m 16ms (unchanged)
+content/.obsidian/fonts/archivo.css[2K[1G[90mcontent/.obsidian/fonts/archivo.css[39m 34ms (unchanged)
+content/.obsidian/fonts/google-sans-code.css[2K[1G[90mcontent/.obsidian/fonts/google-sans-code.css[39m 28ms (unchanged)
+content/.obsidian/graph.json[2K[1G[90mcontent/.obsidian/graph.json[39m 2ms (unchanged)
+content/.obsidian/hotkeys.json[2K[1G[90mcontent/.obsidian/hotkeys.json[39m 1ms (unchanged)
+content/.obsidian/plugins/advanced-canvas/main.js[2K[1G[90mcontent/.obsidian/plugins/advanced-canvas/main.js[39m 390ms (unchanged)
+content/.obsidian/plugins/advanced-canvas/manifest.json[2K[1G[90mcontent/.obsidian/plugins/advanced-canvas/manifest.json[39m 2ms (unchanged)
+content/.obsidian/plugins/advanced-canvas/styles.css[2K[1G[90mcontent/.obsidian/plugins/advanced-canvas/styles.css[39m 30ms (unchanged)
+content/.obsidian/plugins/alpha-bullet/main.js[41m[30m ELIFECYCLE [39m[49m [31mCommand failed.[39m

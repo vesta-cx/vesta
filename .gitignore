@@ -1,9 +1,34 @@
-# prod
-dist/
-
-# dev
+# Dependencies
+node_modules/
 .yarn/
 !.yarn/releases
+
+# Local env files
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+.dev.vars
+.dev.vars*
+!.dev.vars.example
+!.env.example
+
+# Testing
+coverage
+
+# Turbo
+.turbo
+
+# Build Outputs
+dist/
+build
+out
+
+# Wrangler
+.wrangler
+
+# IDE
 .vscode/*
 !.vscode/launch.json
 !.vscode/*.code-snippets
@@ -11,16 +36,7 @@ dist/
 .idea/usage.statistics.xml
 .idea/shelf
 
-# deps
-node_modules/
-.wrangler
-
-# env
-.env
-.env.production
-.dev.vars
-
-# logs
+# Logs
 logs/
 *.log
 npm-debug.log*
@@ -29,9 +45,6 @@ yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
 
-# misc
+# Misc
 .DS_Store
-
-.dev.vars*
-!.dev.vars.example
-!.env.example
+*.pem

@@ -1,7 +1,7 @@
 import Root from './view-transition.svelte';
 
 export {
-    Root,
-    //
-    Root as ViewTransition,
+	Root,
+	//
+	Root as ViewTransition
 };

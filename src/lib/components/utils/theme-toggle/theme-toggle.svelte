@@ -59,11 +59,11 @@
 		title="Theme: {theme === 'auto' ? 'System' : theme}"
 	>
 		<figure
-			class="pointer-events-none absolute left-1/2 top-1/2 h-8 w-8 -translate-x-1/2 -translate-y-1/2 overflow-clip rounded-full bg-secondary"
+			class="pointer-events-none absolute top-1/2 left-1/2 h-8 w-8 -translate-x-1/2 -translate-y-1/2 overflow-clip rounded-full bg-secondary"
 		>
 			<!-- Inner shadow circle -->
 			<div
-				class="pointer-events-none absolute right-1/2 bottom-1/2 h-6 w-6 scale-75 translate-x-1/2 translate-y-1/2 rounded-full bg-primary"
+				class="pointer-events-none absolute right-1/2 bottom-1/2 h-6 w-6 translate-x-1/2 translate-y-1/2 scale-75 rounded-full bg-primary"
 			></div>
 			<!-- Base circle -->
 			<div
@@ -72,13 +72,13 @@
 			<!-- Moon/sun orb - moves by theme: light (right), auto (center), dark (left) -->
 			<div
 				class="pointer-events-none absolute -top-[25%] left-full h-6 w-6 rounded-full bg-secondary transition-all duration-500
-					group-data-[theme='dark']:-top-[5%] group-data-[theme='dark']:left-[35%]
-					group-data-[theme='auto']:-top-[15%] group-data-[theme='auto']:left-1/2 group-data-[theme='auto']:-translate-x-1/2"
+					group-data-[theme='auto']:-top-[15%] group-data-[theme='auto']:left-1/2
+					group-data-[theme='auto']:-translate-x-1/2 group-data-[theme='dark']:-top-[5%] group-data-[theme='dark']:left-[35%]"
 			></div>
 		</figure>
 	</button>
 
 	{#if showLabel && label}
-		<span class="text-muted-foreground text-sm font-medium">{label}</span>
+		<span class="text-sm font-medium text-muted-foreground">{label}</span>
 	{/if}
 </div>

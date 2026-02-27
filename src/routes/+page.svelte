@@ -12,7 +12,7 @@
 		/>
 	</Section.Background>
 
-	<Section.Content data-section="hero-content" class="bg-background/50 rounded-2xl">
+	<Section.Content data-section="hero-content" class="rounded-2xl bg-background/50">
 		<h1>Vesta UI</h1>
 		<p>Welcome to the Vesta UI component library!</p>
 	</Section.Content>

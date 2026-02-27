@@ -21,15 +21,12 @@
 <label
 	class="flex cursor-pointer items-center gap-2 rounded-md px-2 py-1.5 hover:bg-muted/50 {className}"
 >
-	<Checkbox.Root
-		checked={checked}
-		onCheckedChange={(v) => onCheckedChange(v === true)}
-	/>
+	<Checkbox.Root {checked} onCheckedChange={(v) => onCheckedChange(v === true)} />
 	<span class="text-sm">{label}</span>
 	{#if infoContent}
 		<Popover.Root>
 			<Popover.Trigger
-				class="text-muted-foreground hover:text-foreground ml-auto rounded p-0.5"
+				class="ml-auto rounded p-0.5 text-muted-foreground hover:text-foreground"
 				aria-label="Info"
 			>
 				<InfoIcon class="size-3.5" />

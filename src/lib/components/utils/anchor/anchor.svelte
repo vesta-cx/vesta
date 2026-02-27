@@ -51,7 +51,7 @@
 			/>
 		{:else}
 			<ArrowRightIcon
-				class="ml-0.5 inline-block size-[1em] shrink-0 align-baseline translate-x-0 translate-y-[5%] opacity-50 transition-[opacity,translate] group-hover:translate-x-0.5 group-hover:opacity-100"
+				class="ml-0.5 inline-block size-[1em] shrink-0 translate-x-0 translate-y-[5%] align-baseline opacity-50 transition-[opacity,translate] group-hover:translate-x-0.5 group-hover:opacity-100"
 			/>
 		{/if}
 	{/if}

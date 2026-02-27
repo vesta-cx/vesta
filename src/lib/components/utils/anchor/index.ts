@@ -1,7 +1,7 @@
-import Root from "./anchor.svelte";
+import Root from './anchor.svelte';
 
 export {
 	Root,
 	//
-	Root as Anchor,
+	Root as Anchor
 };

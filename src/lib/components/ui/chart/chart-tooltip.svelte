@@ -19,7 +19,7 @@
 {#if visible}
 	<div
 		class={cn(
-			'bg-popover text-popover-foreground pointer-events-none absolute z-50 rounded-md border px-3 py-1.5 text-xs shadow-md',
+			'pointer-events-none absolute z-50 rounded-md border bg-popover px-3 py-1.5 text-xs text-popover-foreground shadow-md',
 			className
 		)}
 		style="left: {x}px; top: {y}px; transform: translate(-50%, -100%) translateY(-8px);"

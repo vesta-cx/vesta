@@ -12,7 +12,7 @@ export {
 	Root as Header,
 	Logo as HeaderLogo,
 	Navigation as HeaderNavigation,
-	Actions as HeaderActions,
+	Actions as HeaderActions
 };
 
 export default Root;

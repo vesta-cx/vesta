@@ -6,11 +6,7 @@
 	import { Anchor } from '$lib/components/utils/anchor';
 	import ExternalLinkIcon from '@lucide/svelte/icons/external-link';
 	import type { Snippet } from 'svelte';
-	import {
-		consentStore,
-		acceptAllVendors,
-		rejectAllVendors,
-	} from '@vesta-cx/utils/cookies';
+	import { consentStore, acceptAllVendors, rejectAllVendors } from '@vesta-cx/utils/cookies';
 	import type { VendorDefinition, VendorConsent } from '@vesta-cx/utils/cookies';
 
 	type CookieConsentFormProps = {
@@ -38,9 +34,7 @@
 		const draft: Record<string, VendorConsent> = {};
 		for (const v of vendors) {
 			const existing = current.vendors[v.id];
-			draft[v.id] = existing
-				? { ...existing }
-				: { analytics: 'false', advertising: 'false' };
+			draft[v.id] = existing ? { ...existing } : { analytics: 'false', advertising: 'false' };
 		}
 		vendorDraft = draft;
 	};
@@ -54,7 +48,7 @@
 		consentStore.set({
 			essential: 'true',
 			preferences: preferences ? 'true' : 'false',
-			vendors: { ...vendorDraft },
+			vendors: { ...vendorDraft }
 		});
 		onSave?.();
 	};
@@ -75,7 +69,7 @@
 		if (!current) return;
 		vendorDraft[vendorId] = {
 			...current,
-			[purpose]: current[purpose] === 'true' ? 'false' : 'true',
+			[purpose]: current[purpose] === 'true' ? 'false' : 'true'
 		};
 	};
 </script>
@@ -90,7 +84,9 @@
 		<div class="flex items-center justify-between gap-4">
 			<div>
 				<p class="text-sm font-medium">Essential cookies</p>
-				<p class="text-muted-foreground text-xs">Required for the site to function. Always enabled.</p>
+				<p class="text-xs text-muted-foreground">
+					Required for the site to function. Always enabled.
+				</p>
 			</div>
 			<Switch checked={true} disabled aria-label="Essential cookies — always enabled" />
 		</div>
@@ -101,7 +97,7 @@
 		<div class="flex items-center justify-between gap-4">
 			<div>
 				<p class="text-sm font-medium">Preference cookies</p>
-				<p class="text-muted-foreground text-xs">
+				<p class="text-xs text-muted-foreground">
 					Remember your settings like theme, language, and layout.
 				</p>
 			</div>
@@ -114,7 +110,7 @@
 			<!-- Vendor list -->
 			<div>
 				<p class="text-sm font-semibold">Third-party vendors</p>
-				<p class="text-muted-foreground mt-0.5 text-xs">
+				<p class="mt-0.5 text-xs text-muted-foreground">
 					Control analytics and advertising cookies per vendor.
 				</p>
 			</div>
@@ -124,7 +120,7 @@
 					{@const draft = vendorDraft[vendor.id]}
 					{#if draft}
 						<div
-							class="bg-muted/40 rounded-lg p-3 @sm:flex @sm:items-start @sm:justify-between @sm:gap-6"
+							class="rounded-lg bg-muted/40 p-3 @sm:flex @sm:items-start @sm:justify-between @sm:gap-6"
 						>
 							<!-- Vendor info -->
 							<div class="mb-2 min-w-0 @sm:mb-0">
@@ -142,7 +138,7 @@
 									{/if}
 								</div>
 								{#if vendor.description}
-									<p class="text-muted-foreground text-xs">{vendor.description}</p>
+									<p class="text-xs text-muted-foreground">{vendor.description}</p>
 								{/if}
 							</div>
 
@@ -151,8 +147,7 @@
 								<label class="flex items-center gap-2 text-xs">
 									<Switch
 										checked={draft.analytics === 'true'}
-										onCheckedChange={() =>
-											handleToggleVendorPurpose(vendor.id, 'analytics')}
+										onCheckedChange={() => handleToggleVendorPurpose(vendor.id, 'analytics')}
 										aria-label="{vendor.name} analytics"
 									/>
 									<span class="text-muted-foreground">Analytics</span>
@@ -161,8 +156,7 @@
 								<label class="flex items-center gap-2 text-xs">
 									<Switch
 										checked={draft.advertising === 'true'}
-										onCheckedChange={() =>
-											handleToggleVendorPurpose(vendor.id, 'advertising')}
+										onCheckedChange={() => handleToggleVendorPurpose(vendor.id, 'advertising')}
 										aria-label="{vendor.name} advertising"
 									/>
 									<span class="text-muted-foreground">Ads</span>

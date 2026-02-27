@@ -19,7 +19,11 @@
 </script>
 
 {#snippet content()}
-	<div class="container p-4 rounded-none sm:rounded-2xl transition-[border-radius] duration-300 ease-out {className}" data-slot="section-content" {...restProps}>
+	<div
+		class="container rounded-none p-4 transition-[border-radius] duration-300 ease-out sm:rounded-2xl {className}"
+		data-slot="section-content"
+		{...restProps}
+	>
 		{@render children()}
 	</div>
 {/snippet}

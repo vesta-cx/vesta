@@ -41,7 +41,6 @@
 		}
 		return `radial-gradient(${mask.position}, var(--mask-stop-1), var(--mask-stop-2), var(--mask-stop-3), var(--mask-stop-4))`;
 	};
-
 </script>
 
 <div class="pointer-events-none absolute -inset-4 {className}" {...restProps}>
@@ -60,29 +59,27 @@
 </div>
 
 <style lang="scss">
-	
-		@property --top {
-			syntax: '<length-percentage>';
-			initial-value: -1rem;
-			inherits: false;
-		}
+	@property --top {
+		syntax: '<length-percentage>';
+		initial-value: -1rem;
+		inherits: false;
+	}
 
-		@property --right {
-			syntax: '<length-percentage>';
-			initial-value: -1rem;
-			inherits: false;
-		}
+	@property --right {
+		syntax: '<length-percentage>';
+		initial-value: -1rem;
+		inherits: false;
+	}
 
-		@property --bottom {
-			syntax: '<length-percentage>';
-			initial-value: -1rem;
-			inherits: false;
-		}
+	@property --bottom {
+		syntax: '<length-percentage>';
+		initial-value: -1rem;
+		inherits: false;
+	}
 
-		@property --left {
-			syntax: '<length-percentage>';
-			initial-value: -1rem;
-			inherits: false;
-		}
-	
+	@property --left {
+		syntax: '<length-percentage>';
+		initial-value: -1rem;
+		inherits: false;
+	}
 </style>

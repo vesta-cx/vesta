@@ -39,16 +39,19 @@
 
 		if (hero) {
 			const supportsViewTimeline = CSS.supports(
-						'(view-timeline: --hero-timeline) and (animation-timeline: --hero-timeline) and (animation-range: exit 0% 90%) and (timeline-scope: --hero-timeline)'
-					);
+				'(view-timeline: --hero-timeline) and (animation-timeline: --hero-timeline) and (animation-range: exit 0% 90%) and (timeline-scope: --hero-timeline)'
+			);
 			// console.log('[Header] supportsViewTimeline:', supportsViewTimeline);
 			let observer: IntersectionObserver | null = null;
 
 			if (!supportsViewTimeline) {
 				observer = new IntersectionObserver(
 					([entry]) => {
-						heroIntersectionRatio = 1-(Math.max(entry.intersectionRatio, 0.1) - 0.1) / 9 * 10;
-						header?.style.setProperty('--hero-intersection-ratio', `${(-5 + heroIntersectionRatio * 3) *100}%`);
+						heroIntersectionRatio = 1 - ((Math.max(entry.intersectionRatio, 0.1) - 0.1) / 9) * 10;
+						header?.style.setProperty(
+							'--hero-intersection-ratio',
+							`${(-5 + heroIntersectionRatio * 3) * 100}%`
+						);
 						heroVisible = heroIntersectionRatio < 0.9;
 						// console.log('[Header] IO (fallback):', { intersectionRatio: entry.intersectionRatio, heroIntersectionRatio, heroVisible });
 					},
@@ -79,7 +82,7 @@
 <header
 	id="header"
 	data-hero-visible={heroVisible}
-	class="fixed top-0 left-0 right-0 z-10 flex w-full items-center justify-center [transform:translateZ(0)] [backface-visibility:hidden] [-webkit-backface-visibility:hidden] {className}"
+	class="fixed top-0 right-0 left-0 z-10 flex w-full [transform:translateZ(0)] items-center justify-center [-webkit-backface-visibility:hidden] [backface-visibility:hidden] {className}"
 	{...restProps}
 >
 	<GradientBlur
@@ -122,10 +125,10 @@
 			{@render slots.logo?.()}
 		{/if}
 		{#if slots.nav}
-			<div class="flex flex-1 justify-center min-w-0">{@render slots.nav?.()}</div>
+			<div class="flex min-w-0 flex-1 justify-center">{@render slots.nav?.()}</div>
 		{/if}
 		{#if slots.actions}
-			<div class="flex items-center gap-2 shrink-0" data-slot="header-actions">
+			<div class="flex shrink-0 items-center gap-2" data-slot="header-actions">
 				{@render slots.actions?.()}
 			</div>
 		{/if}

@@ -40,7 +40,7 @@
 	<DropdownMenu.Root>
 		<DropdownMenu.Trigger
 			class={cn(
-				'text-muted-foreground hover:text-foreground flex items-center gap-2 rounded-lg px-2 py-1.5 text-sm transition-colors focus-visible:ring-2 focus-visible:ring-ring',
+				'flex items-center gap-2 rounded-lg px-2 py-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring',
 				className
 			)}
 			aria-label="Theme"
@@ -60,7 +60,7 @@
 	</DropdownMenu.Root>
 {:else}
 	<div class={cn('flex flex-col gap-2', className)}>
-		<p class="text-muted-foreground text-sm font-medium">Theme</p>
+		<p class="text-sm font-medium text-muted-foreground">Theme</p>
 		<div class="flex gap-1 rounded-lg border border-border p-1">
 			{#each options as { value: optValue, label, icon: Icon } (optValue)}
 				<button

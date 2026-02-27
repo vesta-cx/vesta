@@ -12,7 +12,7 @@
 	$effect(() => {
 		// Register the background snippet with the context
 		if (ctx && background) {
-			ctx.register('background',background);
+			ctx.register('background', background);
 		}
 	});
 </script>

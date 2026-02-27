@@ -6,11 +6,7 @@
 	import CookieIcon from '@lucide/svelte/icons/cookie';
 	import ChevronLeftIcon from '@lucide/svelte/icons/chevron-left';
 	import { fly } from 'svelte/transition';
-	import {
-		hasConsented,
-		acceptAllVendors,
-		rejectAllVendors,
-	} from '@vesta-cx/utils/cookies';
+	import { hasConsented, acceptAllVendors, rejectAllVendors } from '@vesta-cx/utils/cookies';
 	import type { VendorDefinition } from '@vesta-cx/utils/cookies';
 
 	type CookieConsentDialogProps = {
@@ -50,16 +46,14 @@
 {#if visible}
 	<div
 		class={cn(
-			'fixed right-4 bottom-4 z-50 w-[24rem] max-w-[calc(100vw-2rem)] @container',
-			className,
+			'@container fixed right-4 bottom-4 z-50 w-[24rem] max-w-[calc(100vw-2rem)]',
+			className
 		)}
 		transition:fly={{ y: 20, duration: 300 }}
 		role="dialog"
 		aria-label="Cookie consent"
 	>
-		<div
-			class="bg-background border-border overflow-hidden rounded-xl border shadow-lg"
-		>
+		<div class="overflow-hidden rounded-xl border border-border bg-background shadow-lg">
 			{#if expanded}
 				<!-- Expanded: full form -->
 				<div class="p-4">
@@ -84,14 +78,14 @@
 				<!-- Compact: summary + quick actions -->
 				<div class="p-4">
 					<div class="flex items-start gap-3">
-						<div class="bg-muted flex size-9 shrink-0 items-center justify-center rounded-lg">
-							<CookieIcon class="text-muted-foreground size-4" />
+						<div class="flex size-9 shrink-0 items-center justify-center rounded-lg bg-muted">
+							<CookieIcon class="size-4 text-muted-foreground" />
 						</div>
 						<div class="min-w-0">
 							<p class="text-sm font-semibold">We use cookies</p>
-							<p class="text-muted-foreground mt-1 text-xs leading-relaxed">
-								We use cookies for essential functionality and, with your consent, for analytics
-								and advertising. You can customize your preferences or accept/reject all.
+							<p class="mt-1 text-xs leading-relaxed text-muted-foreground">
+								We use cookies for essential functionality and, with your consent, for analytics and
+								advertising. You can customize your preferences or accept/reject all.
 							</p>
 						</div>
 					</div>

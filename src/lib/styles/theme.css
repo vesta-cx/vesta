@@ -67,9 +67,14 @@
 		@apply border-border outline-ring/50;
 	}
 	body {
-		@apply bg-background text-foreground font-sans;
+		@apply bg-background font-sans text-foreground;
 	}
-	h1, h2, h3, h4, h5, h6 {
+	h1,
+	h2,
+	h3,
+	h4,
+	h5,
+	h6 {
 		@apply font-heading;
 	}
 	/* Interactive elements: pointer cursor by default (disabled:cursor-not-allowed overrides when applied) */

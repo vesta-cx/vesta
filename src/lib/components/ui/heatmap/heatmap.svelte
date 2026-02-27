@@ -66,33 +66,35 @@
 	<!-- Tooltip -->
 	{#if hoveredCell}
 		<div
-			class="bg-popover text-popover-foreground pointer-events-none absolute z-50 rounded-md border px-3 py-1.5 text-xs shadow-md"
+			class="pointer-events-none absolute z-50 rounded-md border bg-popover px-3 py-1.5 text-xs text-popover-foreground shadow-md"
 			style="left: {tooltipX}px; top: {tooltipY}px; transform: translate(-50%, -100%) translateY(-8px);"
 		>
 			<span class="font-medium">{hoveredCell.row} × {hoveredCell.col}</span>
-			<span class="text-muted-foreground ml-2">{hoveredCell.label ?? `${(hoveredCell.value * 100).toFixed(1)}%`}</span>
+			<span class="ml-2 text-muted-foreground"
+				>{hoveredCell.label ?? `${(hoveredCell.value * 100).toFixed(1)}%`}</span
+			>
 		</div>
 	{/if}
 
 	<div class="overflow-x-auto">
 		<table class="w-full border-collapse">
 			{#if colLabel}
-				<caption class="text-muted-foreground mb-2 text-xs">{colLabel}</caption>
+				<caption class="mb-2 text-xs text-muted-foreground">{colLabel}</caption>
 			{/if}
 			<thead>
 				<tr>
-					<th class="text-muted-foreground p-1 text-xs font-normal">
+					<th class="p-1 text-xs font-normal text-muted-foreground">
 						{rowLabel}
 					</th>
 					{#each cols as col}
-						<th class="text-muted-foreground p-1 text-center text-xs font-normal">{col}</th>
+						<th class="p-1 text-center text-xs font-normal text-muted-foreground">{col}</th>
 					{/each}
 				</tr>
 			</thead>
 			<tbody>
 				{#each rows as row}
 					<tr>
-						<td class="text-muted-foreground p-1 text-right text-xs">{row}</td>
+						<td class="p-1 text-right text-xs text-muted-foreground">{row}</td>
 						{#each cols as col}
 							{@const cell = getCellValue(row, col)}
 							<td class="p-0.5">

@@ -1,3 +1,5 @@
+/** @format */
+
 import { TSESLint } from "@typescript-eslint/utils";
 import base from "./base";
 import eslintConfigPrettier from "eslint-config-prettier";
@@ -24,7 +26,9 @@ export default [
 	...new Set([
 		...base,
 		...json,
-		...(eslintPluginJsonc.configs["flat/prettier"] as TSESLint.FlatConfig.ConfigArray),
+		...(eslintPluginJsonc.configs[
+			"flat/prettier"
+		] as TSESLint.FlatConfig.ConfigArray),
 		eslintConfigPrettier,
 	]),
 ] as TSESLint.FlatConfig.ConfigArray;

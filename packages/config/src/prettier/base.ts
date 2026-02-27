@@ -1,3 +1,5 @@
+/** @format */
+
 import { type Config } from "prettier";
 
 const overridableDefaults: Config = {
@@ -12,25 +14,25 @@ const overridableDefaults: Config = {
 const base: Config = {
 	...overridableDefaults,
 
-        bracketSameLine: true,
-        experimentalTernaries: true,
-        insertPragma: true,
-        plugins: ["prettier-plugin-packagejson"],
-        proseWrap: "always",
-        quoteProps: "consistent",
-        singleAttributePerLine: true,
-        vueIndentScriptAndStyle: true,
+	bracketSameLine: true,
+	experimentalTernaries: true,
+	insertPragma: true,
+	plugins: ["prettier-plugin-packagejson"],
+	proseWrap: "always",
+	quoteProps: "consistent",
+	singleAttributePerLine: true,
+	vueIndentScriptAndStyle: true,
 
 	overrides: [
 		{
-                        // JSON
-                        excludeFiles: ["package.json"],
-                        files: ["*.json?([c5])", ".prettierrc"],
-                        options: {
-                                tabWidth: 4,
-                                useTabs: false
-                        }
-                },
+			// JSON
+			excludeFiles: ["package.json"],
+			files: ["*.json?([c5])", ".prettierrc"],
+			options: {
+				tabWidth: 4,
+				useTabs: false,
+			},
+		},
 		{
 			// Package.json
 			files: ["package.json"],
@@ -57,7 +59,7 @@ const base: Config = {
 		},
 		{
 			// CSS
-			files: ["*.css","*.s[ac]ss", "*.less"],
+			files: ["*.css", "*.s[ac]ss", "*.less"],
 			options: {
 				useTabs: false,
 			},

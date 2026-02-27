@@ -9,7 +9,7 @@
         "tests/**/*.ts",
         "tests/**/*.tsx",
         "tests/**/*.mts",
-        "tests/**/*.cts",
+        "tests/**/*.cts"
     ],
     "exclude": ["dist", "node_modules"],
     "compilerOptions": {
@@ -17,6 +17,6 @@
         "emitDeclarationOnly": true,
         "declarationDir": "dist/",
         "outDir": "dist/",
-        "rootDir": "src/",
+        "rootDir": "src/"
     }
 }

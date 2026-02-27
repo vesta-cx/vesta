@@ -1,0 +1,13 @@
+---
+description: Multi-track directory upload pattern for quality-survey admin sources
+globs: apps/quality-survey/src/routes/(app)/admin/sources/**
+---
+
+# Multi-track directory upload
+
+The directory upload expects files in the structure produced by `generate-permutations.sh`:
+`{codec}/{basename}_{codec}_{bitrate}.{ext}`.
+
+- **Grouping**: Files are grouped by basename. One `TrackEntry` per unique basename.
+- **Sequential upload**: Client uploads each file via `uploadSingleFile` (one XHR per file) to avoid large single-request body limits. FLAC first per track, then candidates.
+- **Merge on upload**: If a source with the same basename exists, new candidates are added instead of creating a duplicate. Duplicate codec+bitrate candidates are skipped.

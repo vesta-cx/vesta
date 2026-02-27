@@ -1,0 +1,31 @@
+---
+description: Enforce atomic file-based routing in Erato
+globs: apps/erato/**
+alwaysApply: false
+---
+
+# Erato Routing Convention (Hono)
+
+Erato uses atomic file-based route modules by design.
+
+## Required pattern
+
+- Organize routes by domain and version in files under `src/routes/`
+- Keep route handlers small and focused per file
+- Mount route modules from a central app entry (`src/app.ts` or similar)
+
+Example shape:
+
+- `src/routes/v1/workspaces/list.ts`
+- `src/routes/v1/workspaces/get-by-id.ts`
+- `src/routes/v1/resources/list.ts`
+
+## Avoid
+
+- Defining all routes in one large router file
+- Mixing unrelated domains in a single route module
+- Embedding substantial business logic directly in route files (move to services/lib)
+
+## Why
+
+This is a deliberate project convention (not Hono default style) to preserve domain separation, maintainability, and testability as the API grows.

@@ -1,0 +1,18 @@
+---
+description: HLS, Cast, and AirPlay browser requirements from compatibility tests
+globs: tools/test-pages/**, apps/sona/**
+---
+
+# HLS, Cast, and AirPlay Requirements
+
+## Cast (Chromecast)
+
+- **Device discovery** works only in **Google Chrome**, not plain Chromium. Chromium loads the Cast SDK but no devices are discoverable.
+- **Media URL reachability:** The Chromecast fetches media itself. Run dev/preview with `--host` so the server is reachable on LAN.
+- **CORS:** Adaptive streaming (HLS, DASH) requires `Access-Control-Allow-Origin` on manifest and segments. Add to `_headers` (Pages) or equivalent.
+- Many Cast receivers do not support HLS. Use single-file Opus (`full.mp4`) for Cast — HLS and FLAC are unreliable on embedded receivers. Vesta streams Opus only.
+
+## AirPlay
+
+- **WebKit API** (`webkitShowPlaybackTargetPicker`) — Safari and WebKit browsers only.
+- AirPlay treats the device as a wireless audio output — the playing device decodes and streams. It's output routing, not URL-based casting.

@@ -1,0 +1,55 @@
+---
+description: Drizzle ORM + Cloudflare D1 patterns for SvelteKit and Hono
+globs: **/db/**, **/drizzle.config.*
+alwaysApply: false
+---
+
+# Drizzle + Cloudflare D1
+
+## Shared schema
+
+All vesta schemas live in `@vesta-cx/db`. Consumer apps re-export and create a local Drizzle client:
+
+```ts
+// src/db/schema.ts
+export * from '@vesta-cx/db/schema';
+```
+
+## DB access pattern — SvelteKit
+
+Factory function takes `platform` (request-scoped D1 binding):
+
+```ts
+import { drizzle } from 'drizzle-orm/d1';
+export const getDb = (platform: App.Platform) => drizzle(platform.env.DB, { schema });
+```
+
+## DB access pattern — Hono (Workers)
+
+Factory function takes `D1Database` directly from Hono context:
+
+```ts
+import { drizzle } from 'drizzle-orm/d1';
+export const getDb = (d1: D1Database) => drizzle(d1, { schema });
+// Usage in route: const db = getDb(c.env.DB);
+```
+
+Define `AppEnv` to make `DB` required (wrangler generates optionals for inherited bindings):
+
+```ts
+type AppEnv = { Bindings: CloudflareBindings & { DB: D1Database } };
+const app = new Hono<AppEnv>();
+```
+
+## Never a module-level singleton
+
+D1 binding is request-scoped. Always use a factory.
+
+## drizzle.config.ts
+
+`dialect: 'sqlite'`, no `dbCredentials`. Point `out` to `../../packages/db/drizzle` for shared migrations. Generate with `drizzle-kit generate`, apply with `wrangler d1 migrations apply`.
+
+## Local dev
+
+- **SvelteKit:** `vite dev` — adapter-cloudflare uses `getPlatformProxy()`.
+- **Hono:** `wrangler dev` — emulates D1 locally. Secrets go in `.dev.vars`.

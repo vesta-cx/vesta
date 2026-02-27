@@ -1,0 +1,27 @@
+---
+description: Require LLM model disclosure when running in Auto mode
+alwaysApply: false
+---
+
+# Auto Mode Model Disclosure
+
+When running in **Auto mode** (where Cursor automatically selects the model), always disclose which LLM / model you are at the start of your response.
+
+## Why
+
+Auto mode abstracts away model selection from the user. Disclosing the model restores transparency and helps the user understand the capabilities and reasoning style behind the response.
+
+## How
+
+At the start of your first response in a conversation, include a simple disclosure like:
+
+- "I'm running **Claude 4.5 Haiku** for this task."
+- "Using **GPT-5.3 Codex** for this implementation."
+- "Running **Opus 4.6** for architectural planning."
+
+Then proceed normally with your response.
+
+## When NOT to disclose
+
+- The user explicitly set the model (not Auto mode) — they already know.
+- Your context does not include the model name — do not guess or invent one.

@@ -44,31 +44,31 @@ Parses query parameters into a `ParsedListQuery` that can be spread directly int
 
 The function never throws on bad input:
 
-| Input | Behavior |
-|-------|----------|
-| Unknown param key | Ignored |
-| Empty param value | Ignored |
-| Invalid sort key | `defaultSort.key` |
-| Invalid order value | `defaultSort.dir` |
-| Non-numeric limit | `defaultLimit` (20) |
-| Limit > maxLimit | Clamped to `maxLimit` (100) |
-| Limit < 1 | Clamped to 1 |
-| Negative offset | Clamped to 0 |
+| Input               | Behavior                    |
+| ------------------- | --------------------------- |
+| Unknown param key   | Ignored                     |
+| Empty param value   | Ignored                     |
+| Invalid sort key    | `defaultSort.key`           |
+| Invalid order value | `defaultSort.dir`           |
+| Non-numeric limit   | `defaultLimit` (20)         |
+| Limit > maxLimit    | Clamped to `maxLimit` (100) |
+| Limit < 1           | Clamped to 1                |
+| Negative offset     | Clamped to 0                |
 
 ### Framework usage
 
 ```typescript
 // Hono — pass the raw Request
-const query = parseListQuery(c.req.raw, config);
+const query = parseListQuery(c.req.raw, config)
 
 // SvelteKit load — pass the URL
-const query = parseListQuery(event.url, config);
+const query = parseListQuery(event.url, config)
 
 // SvelteKit API route — pass the Request
-const query = parseListQuery(event.request, config);
+const query = parseListQuery(event.request, config)
 
 // Tests — pass a plain object
-const query = parseListQuery({ status: "LISTED", limit: "10" }, config);
+const query = parseListQuery({ status: "LISTED", limit: "10" }, config)
 ```
 
 ### Composing with auth
@@ -76,15 +76,11 @@ const query = parseListQuery({ status: "LISTED", limit: "10" }, config);
 The returned `where` is partial by design — it should be AND-ed with authorization conditions:
 
 ```typescript
-const authWhere = isAdmin ? undefined : eq(resources.status, "LISTED");
+const authWhere = isAdmin ? undefined : eq(resources.status, "LISTED")
 
-const finalWhere = authWhere
-  ? query.where
-    ? and(authWhere, query.where)
-    : authWhere
-  : query.where;
+const finalWhere = authWhere ? (query.where ? and(authWhere, query.where) : authWhere) : query.where
 
-db.select().from(resources).where(finalWhere);
+db.select().from(resources).where(finalWhere)
 ```
 
 This guarantees query params can never widen access beyond what the auth layer allows.
@@ -129,8 +125,8 @@ Used for `limit` and `offset` parsing.
 
 ## Constants
 
-| Constant | Value | Purpose |
-|----------|-------|---------|
-| `DEFAULT_LIMIT` | `20` | Page size when `?limit` is absent |
-| `MAX_LIMIT` | `100` | Upper bound for `?limit` |
-| `RESERVED_PARAMS` | `sort, order, limit, offset` | Skipped during filter iteration |
+| Constant          | Value                        | Purpose                           |
+| ----------------- | ---------------------------- | --------------------------------- |
+| `DEFAULT_LIMIT`   | `20`                         | Page size when `?limit` is absent |
+| `MAX_LIMIT`       | `100`                        | Upper bound for `?limit`          |
+| `RESERVED_PARAMS` | `sort, order, limit, offset` | Skipped during filter iteration   |

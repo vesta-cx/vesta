@@ -28,6 +28,8 @@ description: vesta Milestone 1 scope, feature tiers, and out-of-scope items
 - **Usage metrics** (admin) — Monitor platform health and adoption
 - **Smart collections UI/UX** — Guided creation of filtered collections (e.g., discographies, genre-specific playlists); auto-creates "template"/"example" collections and walks creators through organizing their content automatically with filtered collections.
 
+Roadmap detail: [Usage Metrics & Analytics Roadmap](./usage-metrics-roadmap.md)
+
 ## Milestone 3: Marketing & Monetization
 
 **Goal:** Self-sustaining platform; creators can run ads and earn from fans.
@@ -96,6 +98,7 @@ The vesta design system must support extensive customization (colors, fonts, lay
 - [Feature Catalog & Pricing Transparency](./feature-catalog.md) — Complete feature list with pricing
 - [Feature Access & Gating](./feature-access-gating.md) — Feature gating and access control
 - [Modular Pricing & Weighted Discount Curve](./pricing-modular.md) — Modular pricing model and discount curve
+- [Usage Metrics & Analytics Roadmap](./usage-metrics-roadmap.md) — PostHog-first analytics path and long-term in-house migration
 - [Development Checklist (Phase 1)](./development-checklist.md) — PR guidelines for Milestone 1 development
 - [vesta app docs](../../apps/vesta/index.md) — vesta app docs
 - [Erato data layer docs](../../apps/erato/index.md) — Erato data layer docs

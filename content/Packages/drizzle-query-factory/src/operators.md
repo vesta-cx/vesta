@@ -13,14 +13,14 @@ Maps each `FilterOp` to its Drizzle ORM comparison function and exposes `applyOp
 
 ```typescript
 const operatorMap: Record<FilterOp, OperatorFn> = {
-  eq:   (col, val) => eq(col, val),
+  eq: (col, val) => eq(col, val),
   like: (col, val) => like(col, `%${String(val)}%`),
-  gt:   (col, val) => gt(col, val),
-  gte:  (col, val) => gte(col, val),
-  lt:   (col, val) => lt(col, val),
-  lte:  (col, val) => lte(col, val),
-  in:   (col, val) => inArray(col, Array.isArray(val) ? val : [val]),
-};
+  gt: (col, val) => gt(col, val),
+  gte: (col, val) => gte(col, val),
+  lt: (col, val) => lt(col, val),
+  lte: (col, val) => lte(col, val),
+  in: (col, val) => inArray(col, Array.isArray(val) ? val : [val]),
+}
 ```
 
 Notable behaviors:
@@ -51,9 +51,9 @@ This is the low-level building block used internally by `parseListQuery`. It's e
 **Returns:** A Drizzle `SQL` expression.
 
 ```typescript
-import { applyOperator } from "@mia-cx/drizzle-query-factory";
-import { resources } from "./schema";
+import { applyOperator } from "@mia-cx/drizzle-query-factory"
+import { resources } from "./schema"
 
-const condition = applyOperator("gte", resources.createdAt, 1700000000);
+const condition = applyOperator("gte", resources.createdAt, 1700000000)
 // → gte(resources.createdAt, 1700000000)
 ```

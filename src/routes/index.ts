@@ -15,3 +15,4 @@ export * as subscriptions from "./subscriptions/index";
 export * as userFeatures from "./user-features/index";
 export * as permissions from "./permissions/index";
 export * as permissionActions from "./permission-actions/index";
+export * as links from "./links/index";

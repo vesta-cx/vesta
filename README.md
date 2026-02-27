@@ -1,34 +1,33 @@
-# Erato
+<!-- @format -->
 
-Erato is the database app for canvas.
-
-## Music metadata schema (reference)
-
-Notes for a fully fledged music metadata DB schema. More will follow.
-
-### Track label display format
-
-**Single-line** (default):
-
-```
-<main_artists> — <song_title> <featured_artists> <remix_artists>
+```txt
+pnpm install
+pnpm run dev
 ```
 
-**Multiline** (when vertical space is preferred):
-
-```
-<song_title> <remix_artists>
-<main_artists> <featured_artists>
+```txt
+pnpm run deploy
 ```
 
-Element formatting (same for both):
-- **main_artists**: `artist1, artist2 & artist3` (comma-separated; last two joined with ` & `)
-- **song_title**: Literal string, the track title
-- **featured_artists**: `(feat. artist4, artist5 & artist6)` — includes parentheses
-- **remix_artists**: `(artist7, artist8 & artist9 Remix)` — includes parentheses
+[For generating/synchronizing types based on your Worker configuration run](https://developers.cloudflare.com/workers/wrangler/commands/#types):
 
-### Storage format (semicolon-separated)
+```txt
+pnpm run cf-typegen
+```
 
-All artist lists (main, featured, remix) stored as semicolon-separated: `"Artist A; Artist B"`.
+`dev` and `deploy` are version-aware:
 
-Use `\;` to escape semicolons in artist names, `\\` for backslashes.
+- API major is derived from `package.json` via `semver`
+- deploy target is `wrangler --env v<major>`
+- route is env-scoped to `erato.vesta.cx/v<major>/*`
+
+This allows multiple API majors to stay live concurrently (for example, `v1` and
+`v2`) because each major is deployed to a separate Wrangler environment/Worker
+service.
+
+Pass the `CloudflareBindings` as generics when instantiation `Hono`:
+
+```ts
+// src/index.ts
+const app = new Hono<{ Bindings: CloudflareBindings }>();
+```

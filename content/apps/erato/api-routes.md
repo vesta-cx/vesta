@@ -15,6 +15,19 @@ All routes are prefixed with `/v0`. Authentication is via `Authorization: Bearer
 | ------ | --------- | ---- | ------------ |
 | GET    | `/health` | No   | Health check |
 
+## Identity
+
+| Method | Path  | Auth     | Description                                          |
+| ------ | ----- | -------- | ---------------------------------------------------- |
+| GET    | `/me` | Required | Returns the authenticated subject's identity object  |
+
+Resolves by API key `subjectType`:
+- `user` — WorkOS user merged with local user extensions
+- `organization` — WorkOS org merged with local org extensions
+- `workspace` — Local workspace row
+
+Returns `404` when subject entity not found, `401` for missing/invalid key.
+
 ## Users
 
 | Method | Path         | Auth     | Scopes                        | Guest                |
@@ -120,6 +133,36 @@ All routes are prefixed with `/v0`. Authentication is via `Authorization: Bearer
 | POST   | `/teams/:teamId/members`         | Required | `teams:write` |
 | DELETE | `/teams/:teamId/members/:userId` | Required | `teams:write` |
 
+## Organizations
+
+Organizations use a **hybrid model**: WorkOS is source of truth for canonical identity fields; Erato D1 stores local extension fields (`avatarUrl`, `bannerUrl`, `themeConfig`). Responses are flattened merged objects — clients cannot distinguish which domain owns each field.
+
+| Method | Path                  | Auth     | Scopes                 |
+| ------ | --------------------- | -------- | ---------------------- |
+| GET    | `/organizations`      | Required | `organizations:read`   |
+| GET    | `/organizations/:id`  | Required | `organizations:read`   |
+| POST   | `/organizations`      | Required | `organizations:write`  |
+| PUT    | `/organizations/:id`  | Required | `organizations:write`  |
+| DELETE | `/organizations/:id`  | Required | `organizations:write`  |
+
+**List pagination**: Organizations list uses WorkOS cursor-based pagination (`after`, `before`, `limit` params), not offset-based. `runListQuery` is not used here.
+
+**Example response** (`GET /organizations/:id`):
+
+```json
+{
+  "data": {
+    "id": "org_01EHWNCE74X7JSDV0X3SZ3KJNY",
+    "name": "Glassnote Records",
+    "avatarUrl": "https://cdn.vesta.cx/orgs/glassnote/avatar.png",
+    "bannerUrl": null,
+    "themeConfig": null,
+    "createdAt": "2025-10-01T14:00:00Z",
+    "updatedAt": "2025-10-15T09:30:00Z"
+  }
+}
+```
+
 ## Engagements
 
 | Method | Path               | Auth     | Scopes              |
@@ -127,13 +170,17 @@ All routes are prefixed with `/v0`. Authentication is via `Authorization: Bearer
 | GET    | `/engagements`     | Required | `engagements:read`  |
 | GET    | `/engagements/:id` | Required | `engagements:read`  |
 | POST   | `/engagements`     | Required | `engagements:write` |
+| PUT    | `/engagements/:id` | Required | `engagements:write` |
 | DELETE | `/engagements/:id` | Required | `engagements:write` |
+
+`PUT /engagements/:id` allows updating mutable sub-resources (`comment`, `mention`) only. Core identity fields (`subjectType`, `subjectId`, `action`, `objectType`, `objectId`) are immutable after creation.
 
 ## Permissions
 
 | Method | Path               | Auth     | Scopes              |
 | ------ | ------------------ | -------- | ------------------- |
 | GET    | `/permissions`     | Required | `permissions:read`  |
+| GET    | `/permissions/:id` | Required | `permissions:read`  |
 | POST   | `/permissions`     | Required | `permissions:write` |
 | PUT    | `/permissions/:id` | Required | `permissions:write` |
 | DELETE | `/permissions/:id` | Required | `permissions:write` |
@@ -249,17 +296,18 @@ GET /resources?status=LISTED&type=post&sort=created_at&order=desc&limit=20&offse
 
 ## Scopes
 
-19 scopes control API access:
+21 scopes control API access:
 
-| Scope                                        | Description                      |
-| -------------------------------------------- | -------------------------------- |
-| `users:read` / `users:write`                 | User management                  |
-| `workspaces:read` / `workspaces:write`       | Workspace management             |
-| `resources:read` / `resources:write`         | Resource management              |
-| `collections:read` / `collections:write`     | Collection management            |
-| `teams:read` / `teams:write`                 | Team management                  |
-| `engagements:read` / `engagements:write`     | Engagement management            |
-| `permissions:read` / `permissions:write`     | Permission management            |
-| `features:read` / `features:write`           | Feature catalog management       |
-| `subscriptions:read` / `subscriptions:write` | Subscription management          |
-| `admin`                                      | Full access, bypasses all checks |
+| Scope                                            | Description                      |
+| ------------------------------------------------ | -------------------------------- |
+| `users:read` / `users:write`                     | User management                  |
+| `workspaces:read` / `workspaces:write`           | Workspace management             |
+| `organizations:read` / `organizations:write`     | Organization management          |
+| `resources:read` / `resources:write`             | Resource management              |
+| `collections:read` / `collections:write`         | Collection management            |
+| `teams:read` / `teams:write`                     | Team management                  |
+| `engagements:read` / `engagements:write`         | Engagement management            |
+| `permissions:read` / `permissions:write`         | Permission management            |
+| `features:read` / `features:write`               | Feature catalog management       |
+| `subscriptions:read` / `subscriptions:write`     | Subscription management          |
+| `admin`                                          | Full access, bypasses all checks |

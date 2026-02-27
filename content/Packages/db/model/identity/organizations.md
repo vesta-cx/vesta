@@ -81,16 +81,40 @@ Users are members of organizations and can have roles assigned by WorkOS:
 
 Roles affect permissions on resources and workspaces owned by the organization (via the [Permissions](../access/permissions.md) model).
 
-## No Custom Attributes on WorkOS Organizations
+## Local Extension Table (`organizations`)
 
-Similar to [Users](./users.md), vesta-specific org data is stored in vesta DB, not in WorkOS custom attributes.
+Vesta-specific organization data is stored in a local D1 extension table, **not** in WorkOS custom attributes. The Erato API returns a flattened merged response that combines WorkOS canonical fields with local extension fields — clients cannot tell which domain owns each field.
 
-**Store in vesta DB:**
+### Schema
 
-- Organization settings (branding, preferences)
-- Subscription/billing info
-- Analytics and metrics
-- Organization-specific features/flags
+```sql
+CREATE TABLE organizations (
+  workos_org_id TEXT PRIMARY KEY,
+  avatar_url    TEXT,
+  banner_url    TEXT,
+  theme_config  TEXT  -- JSON: { colors?, fonts?, layout? }
+);
+```
+
+### Field Ownership
+
+| Field         | Owner  | Mutable via API? |
+| ------------- | ------ | ---------------- |
+| `id`          | WorkOS | No (PK)         |
+| `name`        | WorkOS | Yes (PUT)        |
+| `created_at`  | WorkOS | No               |
+| `updated_at`  | WorkOS | No               |
+| `avatarUrl`   | Local  | Yes (PUT)        |
+| `bannerUrl`   | Local  | Yes (PUT)        |
+| `themeConfig` | Local  | Yes (PUT)        |
+
+### Write Routing
+
+Writes only touch the domain(s) that own the changed fields. If a request updates both `name` (WorkOS) and `avatarUrl` (local), both domains are called. If either fails, an error is returned (no silent partial success).
+
+### Branding
+
+Branding fields use `avatarUrl` (not `logoUrl`) for consistency with users and workspaces. `themeConfig` is a placeholder for future theming/colorscheme work.
 
 **Why?** Avoid namespace collisions in shared WorkOS workspace and keep vesta independent.
 

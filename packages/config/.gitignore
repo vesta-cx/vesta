@@ -1,9 +1,35 @@
-**/.dist
-**/dist
+# Dependencies
+node_modules
+**/node_modules
 
-**/.tsup
+# Local env files
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Testing
+coverage
+**/coverage
+
+# Turbo
+.turbo
+
+# Build Outputs
+dist
+**/dist
+.dist
+**/.dist
+build
+**/build
+out
+
+# Build tools
+.tsup
 **/tsup
 
+# Misc
+.DS_Store
+*.pem
 **/legacy
-
-**/node_modules

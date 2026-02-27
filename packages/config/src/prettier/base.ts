@@ -45,6 +45,7 @@ const base: Config = {
 			// Markdown
 			files: ["*.md?(x)", "*.?svx"],
 			options: {
+				proseWrap: "never",
 				tabWidth: 2,
 				useTabs: false,
 			},

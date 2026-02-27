@@ -31,13 +31,13 @@
     "dist"
   ],
   "scripts": {
-    "clean": "cleanc clean",
-    "build:clean": "pnpm run clean && pnpm run build",
-    "dev:clean": "pnpm run clean && pnpm run dev",
-    "install:clean": "pnpm run clean && node -e \"try{require('fs').rmSync(require('path').join(process.cwd(),'node_modules'),{recursive:true,force:true})}catch(_){}\" && pnpm i",
     "build": "tsc",
+    "build:clean": "pnpm run clean && pnpm run build",
+    "clean": "cleanc clean",
     "dev": "tsc --watch",
+    "dev:clean": "pnpm run clean && pnpm run dev",
     "format": "prettier --write .",
+    "install:clean": "pnpm run clean && node -e \"try{require('fs').rmSync(require('path').join(process.cwd(),'node_modules'),{recursive:true,force:true})}catch(_){}\" && pnpm i",
     "lint": "eslint .",
     "test": "vitest run",
     "test:coverage": "vitest run --coverage",

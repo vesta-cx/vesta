@@ -3,13 +3,13 @@
   "private": true,
   "scripts": {
     "build": "turbo run build",
+    "build:clean": "pnpm run clean && pnpm run build",
     "check-types": "turbo run check-types",
     "clean": "cleanc clean",
-    "build:clean": "pnpm run clean && pnpm run build",
-    "dev:clean": "pnpm run clean && pnpm run dev",
-    "install:clean": "pnpm run clean && node -e \"try{require('fs').rmSync(require('path').join(process.cwd(),'node_modules'),{recursive:true,force:true})}catch(_){}\" && pnpm i",
     "dev": "turbo run dev",
+    "dev:clean": "pnpm run clean && pnpm run dev",
     "format": "turbo run format --filter='!./' && prettier --write .",
+    "install:clean": "pnpm run clean && node -e \"try{require('fs').rmSync(require('path').join(process.cwd(),'node_modules'),{recursive:true,force:true})}catch(_){}\" && pnpm i",
     "lint": "turbo run lint",
     "lint-staged": "lint-staged"
   },

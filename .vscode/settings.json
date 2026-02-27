@@ -14,7 +14,7 @@
         "**/.wrangler": true,
         "**/.svelte-kit": true,
         "**/.vercel": true,
-        "**/.git": true,
+        "**/.git": true
     },
     "explorer.fileNesting.enabled": true,
     "explorer.fileNesting.patterns": {

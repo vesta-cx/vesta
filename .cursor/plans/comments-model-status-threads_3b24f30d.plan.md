@@ -23,7 +23,7 @@ todos:
 isProject: false
 ---
 
-<!-- @format -->
+
 
 # Status-Based Comments Model Plan
 
@@ -34,7 +34,7 @@ Adopt a unified comments/threading model where comments are `status` resources:
 - top-level status: no parent
 - reply/comment: `parent_resource_id` set
 
-This plan is `**packages/db` first\*\*. Erato route/service implementation is explicitly deferred.
+This plan is `**packages/db` first. Erato route/service implementation is explicitly deferred.
 
 ## Scope (Phase 1: `packages/db` only)
 
@@ -51,12 +51,12 @@ This plan is `**packages/db` first\*\*. Erato route/service implementation is ex
 - `rootResourceId` (nullable self-reference)
 - `threadDepth` (nullable integer)
 
-3. Add indexes for thread reads:
+1. Add indexes for thread reads:
 
 - `(parent_resource_id, created_at)`
 - `(root_resource_id, created_at)` if `rootResourceId` is adopted
 
-4. Keep `type = 'status'` as canonical comment/reply type (no new `comment` resource type)
+1. Keep `type = 'status'` as canonical comment/reply type (no new `comment` resource type)
 
 ## Validation/Constraint Rules (to encode in app logic later)
 
@@ -89,9 +89,12 @@ flowchart LR
   cutover --> deprecate[Deprecate engagementComments writes]
 ```
 
+
+
 ## Acceptance Criteria
 
 - `packages/db` schema supports status threading (`parent_resource_id` baseline)
 - migrations exist and are reversible/safe
 - db docs clearly describe status-as-comment model and transition state
 - no Erato API behavior change is included in this first phase
+

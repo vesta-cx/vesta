@@ -16,6 +16,7 @@
     "deploy:gateway": "pnpm run sync:fonts && wrangler deploy --env prod --minify",
     "dev": "pnpm run sync:fonts && wrangler dev --env dev",
     "dev:clean": "pnpm run clean && pnpm run dev",
+    "docs:scopes": "node ./scripts/generate-scopes-doc.mjs",
     "format": "prettier --write .",
     "install:clean": "pnpm run clean && node -e \"try{require('fs').rmSync(require('path').join(process.cwd(),'node_modules'),{recursive:true,force:true})}catch(_){}\" && pnpm i",
     "sync:api-version": "node ./scripts/sync-api-version.mjs",

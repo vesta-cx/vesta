@@ -17,6 +17,8 @@
     "install:clean": "pnpm run clean && node -e \"try{require('fs').rmSync(require('path').join(process.cwd(),'node_modules'),{recursive:true,force:true})}catch(_){}\" && pnpm i",
     "revoke-key": "tsx scripts/revoke-key.ts",
     "start": "node dist/index.js",
+    "test": "vitest run",
+    "test:coverage": "vitest run --coverage",
     "test:load": "node ./scripts/transcode-load-check.mjs"
   },
   "dependencies": {
@@ -31,9 +33,11 @@
   "devDependencies": {
     "@types/node": "^25.3.0",
     "@vesta-cx/config": "workspace:*",
+    "@vitest/coverage-v8": "^4.0.18",
     "drizzle-kit": "^0.31.8",
     "prettier": "^3.8.1",
     "tsx": "^4.19.0",
-    "typescript": "^5.9.3"
+    "typescript": "^5.9.3",
+    "vitest": "^4.0.18"
   }
 }

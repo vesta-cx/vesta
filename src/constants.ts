@@ -1,4 +1,9 @@
-/** String representation of a boolean, for cookie/attribute storage. */
+/**
+ * String representation of a boolean, for cookie/attribute storage.
+ *
+ * @format
+ */
+
 export type Boolstring = "true" | "false";
 
 export const ONE_MINUTE = 60;

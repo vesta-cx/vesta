@@ -1,3 +1,5 @@
+/** @format */
+
 import { persistentAtom } from "@nanostores/persistent";
 import { ONE_WEEK, ONE_YEAR } from "../constants.js";
 import { deleteCookie, getCookies, setCookie } from "./cookie.js";
@@ -12,13 +14,13 @@ import type {
 // ── Compliance attributes ────────────────────────────────────────────────────
 
 const simpleCategoryAttributes: Record<SimpleCategory, CookieAttributes> = {
-	essential: { samesite: "strict", "max-age": ONE_YEAR },
+	essential: { "samesite": "strict", "max-age": ONE_YEAR },
 	preferences: { "max-age": ONE_YEAR },
 };
 
 const vendorPurposeAttributes: Record<VendorPurpose, CookieAttributes> = {
 	analytics: { "max-age": ONE_WEEK * 4 },
-	advertising: { partitioned: true, "max-age": ONE_WEEK * 4 },
+	advertising: { "partitioned": true, "max-age": ONE_WEEK * 4 },
 };
 
 // ── Consent key in localStorage ──────────────────────────────────────────────
@@ -66,7 +68,9 @@ export const setConsentCookie = (
 ): void => {
 	const consent = consentStore.get();
 	const consented =
-		category === "essential" ? true : consent.preferences === "true";
+		category === "essential" ? true : (
+			consent.preferences === "true"
+		);
 
 	if (consented) {
 		setCookie(`${category}:${key}`, value, {
@@ -116,7 +120,11 @@ export const applyConsent = (consent: CookieConsent): void => {
 	const cookies = getCookies();
 
 	// Persist preferences flag as an essential cookie
-	setConsentCookie("essential", "consent.preferences", consent.preferences);
+	setConsentCookie(
+		"essential",
+		"consent.preferences",
+		consent.preferences,
+	);
 
 	// Purge preference cookies if revoked
 	if (consent.preferences !== "true") {
@@ -128,7 +136,9 @@ export const applyConsent = (consent: CookieConsent): void => {
 	}
 
 	// Persist per-vendor consent flags + purge revoked vendor cookies
-	for (const [vendorId, vendorConsent] of Object.entries(consent.vendors)) {
+	for (const [vendorId, vendorConsent] of Object.entries(
+		consent.vendors,
+	)) {
 		for (const purpose of ["analytics", "advertising"] as const) {
 			const value = vendorConsent[purpose];
 
@@ -159,7 +169,10 @@ export const applyConsent = (consent: CookieConsent): void => {
  * Also enables preferences.
  */
 export const acceptAllVendors = (vendorIds: string[]): void => {
-	const allTrue: VendorConsent = { analytics: "true", advertising: "true" };
+	const allTrue: VendorConsent = {
+		analytics: "true",
+		advertising: "true",
+	};
 	const vendors: Record<string, VendorConsent> = {};
 	for (const id of vendorIds) {
 		vendors[id] = { ...allTrue };

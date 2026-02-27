@@ -1,5 +1,7 @@
 /**
  * Circular easing functions
+ *
+ * @format
  */
 
 /**
@@ -8,7 +10,7 @@
  * @returns Eased value between 0 and 1
  */
 export function easeInCircular(t: number): number {
-  return 1 - Math.sqrt(1 - Math.pow(t, 2));
+	return 1 - Math.sqrt(1 - Math.pow(t, 2));
 }
 
 /**
@@ -17,7 +19,7 @@ export function easeInCircular(t: number): number {
  * @returns Eased value between 0 and 1
  */
 export function easeOutCircular(t: number): number {
-  return Math.sqrt(1 - Math.pow(t - 1, 2));
+	return Math.sqrt(1 - Math.pow(t - 1, 2));
 }
 
 /**
@@ -26,9 +28,12 @@ export function easeOutCircular(t: number): number {
  * @returns Eased value between 0 and 1
  */
 export function easeInOutCircular(t: number): number {
-  return t < 0.5
-    ? (1 - Math.sqrt(1 - Math.pow(2 * t, 2))) / 2
-    : (Math.sqrt(1 - Math.pow(-2 * t + 2, 2)) + 1) / 2;
+	return t < 0.5 ?
+			(1 - Math.sqrt(1 - Math.pow(2 * t, 2))) / 2
+		:	(Math.sqrt(1 - Math.pow(-2 * t + 2, 2)) + 1) / 2;
 }
 
-export type CircularEaseFunction = typeof easeInCircular | typeof easeOutCircular | typeof easeInOutCircular;
+export type CircularEaseFunction =
+	| typeof easeInCircular
+	| typeof easeOutCircular
+	| typeof easeInOutCircular;

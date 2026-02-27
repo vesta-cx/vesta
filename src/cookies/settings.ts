@@ -1,3 +1,5 @@
+/** @format */
+
 import { persistentMap } from "@nanostores/persistent";
 import { setConsentCookie } from "./consent.js";
 import type { UserSettings } from "./types.js";
@@ -40,7 +42,8 @@ export const applySettings = (settings: UserSettings): void => {
 					document.documentElement.lang = value;
 					break;
 				default:
-					document.documentElement.dataset[key] = value;
+					document.documentElement.dataset[key] =
+						value;
 					break;
 			}
 		}

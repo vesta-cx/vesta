@@ -1,6 +1,8 @@
 /**
  * Easing functions for animations and transitions
  * All functions accept a value t between 0 and 1 and return an eased value between 0 and 1
+ *
+ * @format
  */
 
 import type { BackEaseFunction } from "./back";
@@ -34,7 +36,11 @@ export { easeInOutQuintic, easeInQuintic, easeOutQuintic } from "./quintic";
 export { easeInOutSine, easeInSine, easeOutSine } from "./sine";
 
 // Exponential
-export { easeInExponential, easeInOutExponential, easeOutExponential } from "./exponential";
+export {
+	easeInExponential,
+	easeInOutExponential,
+	easeOutExponential,
+} from "./exponential";
 
 // Circular
 export { easeInCircular, easeInOutCircular, easeOutCircular } from "./circular";
@@ -49,28 +55,28 @@ export { easeInElastic, easeInOutElastic, easeOutElastic } from "./elastic";
 export { easeInBounce, easeInOutBounce, easeOutBounce } from "./bounce";
 
 export type EaseFunction =
-    | LinearEaseFunction
-    | QuadraticEaseFunction
-    | CubicEaseFunction
-    | QuarticEaseFunction
-    | QuinticEaseFunction
-    | SineEaseFunction
-    | ExponentialEaseFunction
-    | CircularEaseFunction
-    | BackEaseFunction
-    | ElasticEaseFunction
-    | BounceEaseFunction;
+	| LinearEaseFunction
+	| QuadraticEaseFunction
+	| CubicEaseFunction
+	| QuarticEaseFunction
+	| QuinticEaseFunction
+	| SineEaseFunction
+	| ExponentialEaseFunction
+	| CircularEaseFunction
+	| BackEaseFunction
+	| ElasticEaseFunction
+	| BounceEaseFunction;
 
 export type {
-    BackEaseFunction,
-    BounceEaseFunction,
-    CircularEaseFunction,
-    CubicEaseFunction,
-    ElasticEaseFunction,
-    ExponentialEaseFunction,
-    LinearEaseFunction,
-    QuadraticEaseFunction,
-    QuarticEaseFunction,
-    QuinticEaseFunction,
-    SineEaseFunction,
+	BackEaseFunction,
+	BounceEaseFunction,
+	CircularEaseFunction,
+	CubicEaseFunction,
+	ElasticEaseFunction,
+	ExponentialEaseFunction,
+	LinearEaseFunction,
+	QuadraticEaseFunction,
+	QuarticEaseFunction,
+	QuinticEaseFunction,
+	SineEaseFunction,
 };

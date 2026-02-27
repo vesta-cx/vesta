@@ -1,3 +1,5 @@
+/** @format */
+
 // @vitest-environment happy-dom
 
 import { describe, it, expect, beforeEach } from "vitest";
@@ -99,7 +101,9 @@ describe("cookie consent", () => {
 
 		consentStore.set({ ...defaultConsent, preferences: "false" });
 		setConsentCookie("preferences", "color", "blue");
-		expect(getCookie("preferences:color") || undefined).toBeUndefined();
+		expect(
+			getCookie("preferences:color") || undefined,
+		).toBeUndefined();
 	});
 
 	it("should always allow essential cookies", () => {
@@ -110,7 +114,12 @@ describe("cookie consent", () => {
 	it("should set a vendor cookie when vendor purpose is consented", () => {
 		consentStore.set({
 			...defaultConsent,
-			vendors: { google: { analytics: "true", advertising: "false" } },
+			vendors: {
+				google: {
+					analytics: "true",
+					advertising: "false",
+				},
+			},
 		});
 
 		setVendorCookie("google", "analytics", "ga-id", "UA-123");
@@ -120,25 +129,39 @@ describe("cookie consent", () => {
 	it("should not set a vendor cookie when purpose is not consented", () => {
 		consentStore.set({
 			...defaultConsent,
-			vendors: { google: { analytics: "true", advertising: "false" } },
+			vendors: {
+				google: {
+					analytics: "true",
+					advertising: "false",
+				},
+			},
 		});
 
 		setVendorCookie("google", "advertising", "ad-id", "AD-456");
-		expect(getCookie("google:advertising:ad-id") || undefined).toBeUndefined();
+		expect(
+			getCookie("google:advertising:ad-id") || undefined,
+		).toBeUndefined();
 	});
 
 	it("should not set a vendor cookie when vendor is unknown", () => {
 		consentStore.set({ ...defaultConsent, vendors: {} });
 
 		setVendorCookie("unknown", "analytics", "id", "123");
-		expect(getCookie("unknown:analytics:id") || undefined).toBeUndefined();
+		expect(
+			getCookie("unknown:analytics:id") || undefined,
+		).toBeUndefined();
 	});
 
 	it("should purge vendor cookies when consent is revoked via applyConsent", () => {
 		// Set up with consent
 		consentStore.set({
 			...defaultConsent,
-			vendors: { google: { analytics: "true", advertising: "true" } },
+			vendors: {
+				google: {
+					analytics: "true",
+					advertising: "true",
+				},
+			},
 		});
 		setVendorCookie("google", "analytics", "ga-id", "UA-123");
 		setVendorCookie("google", "advertising", "ad-id", "AD-456");
@@ -148,10 +171,17 @@ describe("cookie consent", () => {
 		// Revoke analytics
 		applyConsent({
 			...defaultConsent,
-			vendors: { google: { analytics: "false", advertising: "true" } },
+			vendors: {
+				google: {
+					analytics: "false",
+					advertising: "true",
+				},
+			},
 		});
 
-		expect(getCookie("google:analytics:ga-id") || undefined).toBeUndefined();
+		expect(
+			getCookie("google:analytics:ga-id") || undefined,
+		).toBeUndefined();
 		expect(getCookie("google:advertising:ad-id")).toBe("AD-456");
 	});
 
@@ -164,7 +194,9 @@ describe("cookie consent", () => {
 			preferences: "false",
 		});
 
-		expect(getCookie("preferences:setting") || undefined).toBeUndefined();
+		expect(
+			getCookie("preferences:setting") || undefined,
+		).toBeUndefined();
 	});
 });
 
@@ -238,7 +270,11 @@ describe("settings", () => {
 	});
 
 	it("should persist settings as preference cookies", () => {
-		applySettings({ theme: "light", locale: "en", currency: "EUR" });
+		applySettings({
+			theme: "light",
+			locale: "en",
+			currency: "EUR",
+		});
 		expect(getCookie("preferences:settings.theme")).toBe("light");
 		expect(getCookie("preferences:settings.locale")).toBe("en");
 		expect(getCookie("preferences:settings.currency")).toBe("EUR");
@@ -246,6 +282,8 @@ describe("settings", () => {
 
 	it("should not set DOM attribute for currency", () => {
 		applySettings({ theme: "auto", locale: "en", currency: "USD" });
-		expect(document.documentElement.dataset["currency"]).toBeUndefined();
+		expect(
+			document.documentElement.dataset["currency"],
+		).toBeUndefined();
 	});
 });

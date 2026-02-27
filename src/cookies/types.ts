@@ -1,13 +1,15 @@
+/** @format */
+
 import type { Boolstring } from "../constants.js";
 
 export interface CookieAttributes {
-	domain?: string;
-	expires?: Date;
+	"domain"?: string;
+	"expires"?: Date;
 	"max-age"?: number;
-	partitioned?: boolean;
-	path?: string;
-	samesite?: "strict" | "lax" | "none";
-	secure?: boolean;
+	"partitioned"?: boolean;
+	"path"?: string;
+	"samesite"?: "strict" | "lax" | "none";
+	"secure"?: boolean;
 }
 
 // ── Consent types ────────────────────────────────────────────────────────────

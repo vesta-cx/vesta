@@ -1,3 +1,5 @@
+/** @format */
+
 import type { AuthResult } from "./types.js";
 
 /** Raw shape returned by WorkOS User Management authenticate endpoint. */

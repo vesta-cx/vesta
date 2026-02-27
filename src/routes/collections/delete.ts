@@ -1,0 +1,50 @@
+import { eq } from "drizzle-orm";
+import { Hono } from "hono";
+import { isAuthenticated, requireScope } from "../../auth/helpers";
+import { getDb } from "../../db";
+import { collections } from "../../db/schema";
+import { forbidden, notFound } from "../../lib/errors";
+import { isCollectionOwner } from "../../services/collections";
+import type { AppEnv } from "../../env";
+import type { RouteMetadata } from "../../registry";
+
+const route = new Hono<AppEnv>();
+
+route.delete("/collections/:id", async (c) => {
+	const auth = c.get("auth");
+	if (!isAuthenticated(auth)) {
+		return c.json({ error: "Unauthorized" }, 401);
+	}
+	requireScope(auth, "collections:write");
+
+	const id = c.req.param("id");
+	const db = getDb(c.env.DB);
+
+	const [existing] = await db
+		.select()
+		.from(collections)
+		.where(eq(collections.id, id))
+		.limit(1);
+	if (!existing) return notFound(c, "Collection");
+
+	const isAdmin = auth.scopes.includes("admin");
+	const isOwner = await isCollectionOwner(db, existing, auth.userId);
+	if (!isAdmin && !isOwner) return forbidden(c);
+
+	const [row] = await db
+		.delete(collections)
+		.where(eq(collections.id, id))
+		.returning();
+	if (!row) return notFound(c, "Collection");
+
+	return c.body(null, 204);
+});
+
+export default {
+	route,
+	method: "DELETE" as RouteMetadata["method"],
+	path: "/collections/:id",
+	description: "Delete collection",
+	auth_required: true,
+	scopes: ["collections:write"],
+};

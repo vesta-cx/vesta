@@ -1,6 +1,12 @@
 /** @format */
 
-import { index, integer, sqliteTable, text, uniqueIndex } from "drizzle-orm/sqlite-core";
+import {
+	index,
+	integer,
+	sqliteTable,
+	text,
+	uniqueIndex,
+} from "drizzle-orm/sqlite-core";
 
 export const inboxJobs = sqliteTable(
 	"inbox",
@@ -14,10 +20,18 @@ export const inboxJobs = sqliteTable(
 		priority: integer("priority").notNull().default(0),
 		attemptCount: integer("attempt_count").notNull().default(0),
 		maxAttempts: integer("max_attempts").notNull().default(5),
-		refreshAttemptCount: integer("refresh_attempt_count").notNull().default(0),
-		maxRefreshAttempts: integer("max_refresh_attempts").notNull().default(3),
-		scheduledAt: integer("scheduled_at", { mode: "timestamp" }).notNull(),
-		leaseExpiresAt: integer("lease_expires_at", { mode: "timestamp" }),
+		refreshAttemptCount: integer("refresh_attempt_count")
+			.notNull()
+			.default(0),
+		maxRefreshAttempts: integer("max_refresh_attempts")
+			.notNull()
+			.default(3),
+		scheduledAt: integer("scheduled_at", {
+			mode: "timestamp",
+		}).notNull(),
+		leaseExpiresAt: integer("lease_expires_at", {
+			mode: "timestamp",
+		}),
 		heartbeatAt: integer("heartbeat_at", { mode: "timestamp" }),
 		status: text("status", {
 			enum: [
@@ -51,23 +65,38 @@ export const inboxJobs = sqliteTable(
 			.notNull()
 			.default("audio:transcode"),
 		transcodeConfigJson: text("transcode_config_json").notNull(),
-		storageType: text("storage_type", { enum: ["r2", "s3"] }).notNull(),
+		storageType: text("storage_type", {
+			enum: ["r2", "s3"],
+		}).notNull(),
 		storageBucket: text("storage_bucket").notNull(),
 		storageRegion: text("storage_region"),
 		storageEndpoint: text("storage_endpoint"),
 		storageAccountId: text("storage_account_id"),
-		storageCredsEncrypted: text("storage_creds_encrypted").notNull(),
-		storageCredsDekWrapped: text("storage_creds_dek_wrapped").notNull(),
+		storageCredsEncrypted: text(
+			"storage_creds_encrypted",
+		).notNull(),
+		storageCredsDekWrapped: text(
+			"storage_creds_dek_wrapped",
+		).notNull(),
 		storageCredsKekId: text("storage_creds_kek_id").notNull(),
-		storageCredsEncryptionVersion:
-			integer("storage_creds_encryption_version").notNull().default(1),
-		credentialVersion: integer("credential_version").notNull().default(1),
+		storageCredsEncryptionVersion: integer(
+			"storage_creds_encryption_version",
+		)
+			.notNull()
+			.default(1),
+		credentialVersion: integer("credential_version")
+			.notNull()
+			.default(1),
 		statusWebhookUrl: text("status_webhook_url"),
 		refreshUrl: text("refresh_url"),
 		sourceFileId: text("source_file_id"),
 		lastError: text("last_error"),
-		createdAt: integer("created_at", { mode: "timestamp" }).notNull(),
-		updatedAt: integer("updated_at", { mode: "timestamp" }).notNull(),
+		createdAt: integer("created_at", {
+			mode: "timestamp",
+		}).notNull(),
+		updatedAt: integer("updated_at", {
+			mode: "timestamp",
+		}).notNull(),
 	},
 	(table) => ({
 		claimScan: index("idx_inbox_claim_scan").on(
@@ -116,19 +145,34 @@ export const jobOutboxEvents = sqliteTable(
 		eventId: text("event_id").notNull(),
 		payloadJson: text("payload_json").notNull(),
 		status: text("status", {
-			enum: ["pending", "claimed", "delivered", "dead_letter"],
+			enum: [
+				"pending",
+				"claimed",
+				"delivered",
+				"dead_letter",
+			],
 		}).notNull(),
 		claimVersion: integer("claim_version").notNull().default(0),
 		workerId: text("worker_id"),
 		attemptCount: integer("attempt_count").notNull().default(0),
 		maxAttempts: integer("max_attempts").notNull().default(8),
-		scheduledAt: integer("scheduled_at", { mode: "timestamp" }).notNull(),
-		nextAttemptAt: integer("next_attempt_at", { mode: "timestamp" }).notNull(),
-		leaseExpiresAt: integer("lease_expires_at", { mode: "timestamp" }),
+		scheduledAt: integer("scheduled_at", {
+			mode: "timestamp",
+		}).notNull(),
+		nextAttemptAt: integer("next_attempt_at", {
+			mode: "timestamp",
+		}).notNull(),
+		leaseExpiresAt: integer("lease_expires_at", {
+			mode: "timestamp",
+		}),
 		heartbeatAt: integer("heartbeat_at", { mode: "timestamp" }),
 		lastError: text("last_error"),
-		createdAt: integer("created_at", { mode: "timestamp" }).notNull(),
-		updatedAt: integer("updated_at", { mode: "timestamp" }).notNull(),
+		createdAt: integer("created_at", {
+			mode: "timestamp",
+		}).notNull(),
+		updatedAt: integer("updated_at", {
+			mode: "timestamp",
+		}).notNull(),
 	},
 	(table) => ({
 		pollIndex: index("idx_outbox_poll").on(
@@ -149,8 +193,12 @@ export const idempotencyKeys = sqliteTable(
 		requestHash: text("request_hash").notNull(),
 		responseStatus: integer("response_status").notNull(),
 		responseJson: text("response_json").notNull(),
-		createdAt: integer("created_at", { mode: "timestamp" }).notNull(),
-		expiresAt: integer("expires_at", { mode: "timestamp" }).notNull(),
+		createdAt: integer("created_at", {
+			mode: "timestamp",
+		}).notNull(),
+		expiresAt: integer("expires_at", {
+			mode: "timestamp",
+		}).notNull(),
 	},
 	(table) => ({
 		scopeKeyUnique: uniqueIndex("idx_idempotency_scope_key").on(
@@ -166,9 +214,15 @@ export const requesterSigningSecrets = sqliteTable(
 		id: text("id").primaryKey(),
 		requesterId: text("requester_id").notNull(),
 		secret: text("secret").notNull(),
-		isActive: integer("is_active", { mode: "boolean" }).notNull().default(true),
-		createdAt: integer("created_at", { mode: "timestamp" }).notNull(),
-		updatedAt: integer("updated_at", { mode: "timestamp" }).notNull(),
+		isActive: integer("is_active", { mode: "boolean" })
+			.notNull()
+			.default(true),
+		createdAt: integer("created_at", {
+			mode: "timestamp",
+		}).notNull(),
+		updatedAt: integer("updated_at", {
+			mode: "timestamp",
+		}).notNull(),
 	},
 	(table) => ({
 		requesterActiveIdx: index("idx_requester_signing_active").on(

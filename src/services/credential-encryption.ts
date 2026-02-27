@@ -41,7 +41,8 @@ export interface EncryptedCredentialBlob {
 
 const parseKeks = (): KekStore => {
 	const configured = process.env["EUTERPE_KEK_KEYS"]?.trim();
-	const activeId = process.env["EUTERPE_KEK_ACTIVE_ID"]?.trim() || "local-dev";
+	const activeId =
+		process.env["EUTERPE_KEK_ACTIVE_ID"]?.trim() || "local-dev";
 	const keys = new Map<string, Buffer>();
 
 	if (configured) {
@@ -58,8 +59,17 @@ const parseKeks = (): KekStore => {
 	if (!keys.has(activeId)) {
 		const fallback = process.env["EUTERPE_KEK"]?.trim();
 		const key =
-			fallback ? Buffer.from(fallback, "base64") : createHash("sha256").update("euterpe-local-dev-kek").digest();
-		keys.set(activeId, key.length === 32 ? key : createHash("sha256").update(key).digest());
+			fallback ?
+				Buffer.from(fallback, "base64")
+			:	createHash("sha256")
+					.update("euterpe-local-dev-kek")
+					.digest();
+		keys.set(
+			activeId,
+			key.length === 32 ?
+				key
+			:	createHash("sha256").update(key).digest(),
+		);
 	}
 
 	return { activeId, keys };
@@ -71,11 +81,18 @@ const fromB64 = (value: string): Buffer => Buffer.from(value, "base64");
 const hashAad = (aad: string): string =>
 	createHash("sha256").update(aad, "utf8").digest("hex");
 
-const aesEncrypt = (plaintext: Buffer, key: Buffer, aad: string): EncryptedPayload => {
+const aesEncrypt = (
+	plaintext: Buffer,
+	key: Buffer,
+	aad: string,
+): EncryptedPayload => {
 	const iv = randomBytes(12);
 	const cipher = createCipheriv(ALGO, key, iv);
 	cipher.setAAD(Buffer.from(aad, "utf8"));
-	const ciphertext = Buffer.concat([cipher.update(plaintext), cipher.final()]);
+	const ciphertext = Buffer.concat([
+		cipher.update(plaintext),
+		cipher.final(),
+	]);
 	const tag = cipher.getAuthTag();
 	return {
 		v: ENC_VERSION,
@@ -136,7 +153,11 @@ export const encryptCredentials = (
 	const kek = keks.keys.get(keks.activeId);
 	if (!kek) throw new Error("No active KEK configured");
 	const dek = randomBytes(32);
-	const encryptedBlob = aesEncrypt(Buffer.from(plaintextJson, "utf8"), dek, aad);
+	const encryptedBlob = aesEncrypt(
+		Buffer.from(plaintextJson, "utf8"),
+		dek,
+		aad,
+	);
 	const dekWrapped = wrapDek(dek, kek);
 	return {
 		encryptedBlob: JSON.stringify(encryptedBlob),

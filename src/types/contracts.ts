@@ -2,7 +2,12 @@
 
 import type { Codec } from "../transcode.js";
 
-export type WorkloadMediaType = "audio" | "image" | "video" | "document" | "other";
+export type WorkloadMediaType =
+	| "audio"
+	| "image"
+	| "video"
+	| "document"
+	| "other";
 export type WorkloadKind =
 	| "transcode"
 	| "analyze"

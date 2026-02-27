@@ -8,7 +8,10 @@ export const jitter = (valueMs: number): number => {
 	return Math.max(50, valueMs + offset);
 };
 
-export const computeBackoffMs = (attempt: number, statusCode?: number): number => {
+export const computeBackoffMs = (
+	attempt: number,
+	statusCode?: number,
+): number => {
 	if (statusCode === 429) {
 		return jitter(Math.min(120_000, 5_000 * Math.max(1, attempt)));
 	}

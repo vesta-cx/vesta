@@ -32,7 +32,12 @@ if (raw.startsWith("file:")) {
 
 const client = createClient({ url });
 export const db = drizzle(client, {
-	schema: { inboxJobs, jobOutboxEvents, idempotencyKeys, requesterSigningSecrets },
+	schema: {
+		inboxJobs,
+		jobOutboxEvents,
+		idempotencyKeys,
+		requesterSigningSecrets,
+	},
 });
 
 export {

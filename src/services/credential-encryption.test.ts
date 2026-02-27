@@ -43,7 +43,8 @@ describe("credential encryption", () => {
 					encryptedBlob: encrypted.encryptedBlob,
 					dekWrapped: encrypted.dekWrapped,
 					kekId: encrypted.kekId,
-					encryptionVersion: encrypted.encryptionVersion,
+					encryptionVersion:
+						encrypted.encryptionVersion,
 				},
 				"job-2:req:2",
 			);

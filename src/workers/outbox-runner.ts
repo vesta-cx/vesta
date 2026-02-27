@@ -22,7 +22,8 @@ const getWorkerId = (): string =>
 	`boot-outbox-${randomUUID()}`;
 
 const jitter = (): number =>
-	Math.floor(Math.random() * (POLL_MAX_MS - POLL_MIN_MS + 1)) + POLL_MIN_MS;
+	Math.floor(Math.random() * (POLL_MAX_MS - POLL_MIN_MS + 1)) +
+	POLL_MIN_MS;
 
 const deliver = async (workerId: string): Promise<void> => {
 	const rows = await claimOutboxBatch({
@@ -40,31 +41,43 @@ const deliver = async (workerId: string): Promise<void> => {
 		chunks.push(
 			(async () => {
 				try {
-					const webhook = await getJobWebhookDetails(row.jobId);
+					const webhook =
+						await getJobWebhookDetails(
+							row.jobId,
+						);
 					if (!webhook?.url) {
 						await markOutboxDelivered({
 							id: row.id,
 							workerId,
-							claimVersion: row.claimVersion,
+							claimVersion:
+								row.claimVersion,
 						});
 						return;
 					}
 					const body = row.payloadJson;
-					const headers = await buildSignedWebhookHeaders({
-						requesterId: webhook.requesterId,
-						rawBody: body,
-						eventId: row.eventId,
-					});
-					const response = await fetch(webhook.url, {
-						method: "POST",
-						headers,
-						body,
-					});
+					const headers =
+						await buildSignedWebhookHeaders(
+							{
+								requesterId:
+									webhook.requesterId,
+								rawBody: body,
+								eventId: row.eventId,
+							},
+						);
+					const response = await fetch(
+						webhook.url,
+						{
+							method: "POST",
+							headers,
+							body,
+						},
+					);
 					if (response.ok) {
 						await markOutboxDelivered({
 							id: row.id,
 							workerId,
-							claimVersion: row.claimVersion,
+							claimVersion:
+								row.claimVersion,
 						});
 						return;
 					}
@@ -73,15 +86,23 @@ const deliver = async (workerId: string): Promise<void> => {
 						workerId,
 						claimVersion: row.claimVersion,
 						error: `Webhook failed with ${response.status}`,
-						backoffMs: computeBackoffMs(row.attemptCount + 1, response.status),
+						backoffMs: computeBackoffMs(
+							row.attemptCount + 1,
+							response.status,
+						),
 					});
 				} catch (error) {
 					await markOutboxFailed({
 						id: row.id,
 						workerId,
 						claimVersion: row.claimVersion,
-						error: error instanceof Error ? error.message : String(error),
-						backoffMs: computeBackoffMs(row.attemptCount + 1),
+						error:
+							error instanceof Error ?
+								error.message
+							:	String(error),
+						backoffMs: computeBackoffMs(
+							row.attemptCount + 1,
+						),
 					});
 				}
 			})(),

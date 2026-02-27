@@ -30,7 +30,9 @@ export const parseByteSize = (
 	// Accept plain bytes, e.g. "5368709120"
 	if (/^\d+$/.test(raw)) {
 		const parsed = Number(raw);
-		return Number.isFinite(parsed) && parsed > 0 ? Math.floor(parsed) : fallbackBytes;
+		return Number.isFinite(parsed) && parsed > 0 ?
+				Math.floor(parsed)
+			:	fallbackBytes;
 	}
 
 	// Accept human-readable units, e.g. "10m", "50g", "512KiB"
@@ -40,7 +42,8 @@ export const parseByteSize = (
 	const amount = Number(match[1]);
 	const unit = match[2]!.toLowerCase();
 	const multiplier = UNIT_MAP[unit];
-	if (!Number.isFinite(amount) || amount <= 0 || !multiplier) return fallbackBytes;
+	if (!Number.isFinite(amount) || amount <= 0 || !multiplier)
+		return fallbackBytes;
 
 	return Math.floor(amount * multiplier);
 };

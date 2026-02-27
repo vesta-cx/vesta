@@ -5,7 +5,10 @@ import { eq } from "drizzle-orm";
 import { randomUUID } from "node:crypto";
 import { apiKeyAuth } from "../middleware/auth.js";
 import { db, inboxJobs } from "../db/index.js";
-import type { EnqueueTranscodeRequest, EnqueueResponse } from "../types/contracts.js";
+import type {
+	EnqueueTranscodeRequest,
+	EnqueueResponse,
+} from "../types/contracts.js";
 import { createInboxJob } from "../services/inbox-repository.js";
 import {
 	IdempotencyConflictError,
@@ -60,7 +63,10 @@ transcodeRoutes.post("/", async (c) => {
 	}
 
 	if (!request.idempotencyKey || !request.requesterId) {
-		return c.json({ error: "Missing idempotencyKey or requesterId" }, 400);
+		return c.json(
+			{ error: "Missing idempotencyKey or requesterId" },
+			400,
+		);
 	}
 	if (!request.sourceKey || !request.filename) {
 		return c.json(
@@ -74,17 +80,21 @@ transcodeRoutes.post("/", async (c) => {
 	if (request.workloadType != null && !normalizedWorkload) {
 		return c.json(
 			{
-				error:
-					"workloadType must be a valid media:kind token (e.g. audio:analyze)",
+				error: "workloadType must be a valid media:kind token (e.g. audio:analyze)",
 			},
 			400,
 		);
 	}
 	const workloadType = normalizedWorkload ?? DEFAULT_WORKLOAD;
 	if (workloadType === "audio:transcode") {
-		if (!Array.isArray(request.targets) || request.targets.length === 0) {
+		if (
+			!Array.isArray(request.targets) ||
+			request.targets.length === 0
+		) {
 			return c.json(
-				{ error: "targets must contain at least one transcode target" },
+				{
+					error: "targets must contain at least one transcode target",
+				},
 				400,
 			);
 		}
@@ -93,14 +103,37 @@ transcodeRoutes.post("/", async (c) => {
 		request.targets = [];
 	}
 	for (const target of request.targets) {
-		if (!target || typeof target.codec !== "string" || typeof target.bitrate !== "number") {
-			return c.json({ error: "invalid transcode target payload" }, 400);
+		if (
+			!target ||
+			typeof target.codec !== "string" ||
+			typeof target.bitrate !== "number"
+		) {
+			return c.json(
+				{ error: "invalid transcode target payload" },
+				400,
+			);
 		}
-		if (target.outputPrefix != null && typeof target.outputPrefix !== "string") {
-			return c.json({ error: "target.outputPrefix must be a string" }, 400);
+		if (
+			target.outputPrefix != null &&
+			typeof target.outputPrefix !== "string"
+		) {
+			return c.json(
+				{
+					error: "target.outputPrefix must be a string",
+				},
+				400,
+			);
 		}
-		if (target.outputSuffix != null && typeof target.outputSuffix !== "string") {
-			return c.json({ error: "target.outputSuffix must be a string" }, 400);
+		if (
+			target.outputSuffix != null &&
+			typeof target.outputSuffix !== "string"
+		) {
+			return c.json(
+				{
+					error: "target.outputSuffix must be a string",
+				},
+				400,
+			);
 		}
 	}
 	if (!request.storage?.type || !request.storage.bucket) {
@@ -111,7 +144,10 @@ transcodeRoutes.post("/", async (c) => {
 			400,
 		);
 	}
-	if (!request.storage.creds?.accessKeyId || !request.storage.creds?.secretAccessKey) {
+	if (
+		!request.storage.creds?.accessKeyId ||
+		!request.storage.creds?.secretAccessKey
+	) {
 		return c.json({ error: "Storage creds are required" }, 400);
 	}
 	if (request.storage.type === "r2" && !request.storage.accountId) {
@@ -163,9 +199,13 @@ transcodeRoutes.post("/", async (c) => {
 		storageBucket: request.storage.bucket,
 		storageRegion: request.storage.region ?? null,
 		storageEndpoint:
-			request.storage.type === "s3" ? request.storage.endpoint : null,
+			request.storage.type === "s3" ?
+				request.storage.endpoint
+			:	null,
 		storageAccountId:
-			request.storage.type === "r2" ? request.storage.accountId : null,
+			request.storage.type === "r2" ?
+				request.storage.accountId
+			:	null,
 		storageCredsEncrypted: encrypted.encryptedBlob,
 		storageCredsDekWrapped: encrypted.dekWrapped,
 		storageCredsKekId: encrypted.kekId,

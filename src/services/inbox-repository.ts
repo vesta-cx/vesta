@@ -2,7 +2,12 @@
 
 import { and, asc, eq, gt, isNull, lt, or } from "drizzle-orm";
 import { randomUUID } from "node:crypto";
-import { db, idempotencyKeys, inboxJobs, jobOutboxEvents } from "../db/index.js";
+import {
+	db,
+	idempotencyKeys,
+	inboxJobs,
+	jobOutboxEvents,
+} from "../db/index.js";
 import type {
 	EnqueueResponse,
 	JobStatus,
@@ -50,14 +55,21 @@ export interface InboxJobRecord {
 const now = (): Date => new Date();
 
 export const hashRequest = async (input: string): Promise<string> => {
-	const digest = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(input));
+	const digest = await crypto.subtle.digest(
+		"SHA-256",
+		new TextEncoder().encode(input),
+	);
 	return Buffer.from(digest).toString("hex");
 };
 
 export const getIdempotentResponse = async (
 	scope: string,
 	key: string,
-): Promise<{ status: number; body: EnqueueResponse; requestHash: string } | null> => {
+): Promise<{
+	status: number;
+	body: EnqueueResponse;
+	requestHash: string;
+} | null> => {
 	const current = now();
 	const [row] = await db
 		.select()
@@ -88,7 +100,9 @@ export const saveIdempotentResponse = async (params: {
 }): Promise<void> => {
 	const createdAt = now();
 	const ttlHours = params.ttlHours ?? 24;
-	const expiresAt = new Date(createdAt.getTime() + ttlHours * 60 * 60 * 1000);
+	const expiresAt = new Date(
+		createdAt.getTime() + ttlHours * 60 * 60 * 1000,
+	);
 	await db
 		.insert(idempotencyKeys)
 		.values({
@@ -102,7 +116,10 @@ export const saveIdempotentResponse = async (params: {
 			expiresAt,
 		})
 		.onConflictDoUpdate({
-			target: [idempotencyKeys.scope, idempotencyKeys.idempotencyKey],
+			target: [
+				idempotencyKeys.scope,
+				idempotencyKeys.idempotencyKey,
+			],
 			set: {
 				requestHash: params.requestHash,
 				responseStatus: params.status,
@@ -112,10 +129,12 @@ export const saveIdempotentResponse = async (params: {
 		});
 };
 
-export const createInboxJob = async (values: Omit<
-	typeof inboxJobs.$inferInsert,
-	"id" | "createdAt" | "updatedAt" | "scheduledAt" | "status"
-> & { id?: string }): Promise<InboxJobRecord> => {
+export const createInboxJob = async (
+	values: Omit<
+		typeof inboxJobs.$inferInsert,
+		"id" | "createdAt" | "updatedAt" | "scheduledAt" | "status"
+	> & { id?: string },
+): Promise<InboxJobRecord> => {
 	const id = values.id ?? randomUUID();
 	const createdAt = now();
 	const scheduledAt = createdAt;
@@ -134,13 +153,23 @@ export const createInboxJob = async (values: Omit<
 		createdAt,
 		updatedAt: createdAt,
 	});
-	const [job] = await db.select().from(inboxJobs).where(eq(inboxJobs.id, id)).limit(1);
+	const [job] = await db
+		.select()
+		.from(inboxJobs)
+		.where(eq(inboxJobs.id, id))
+		.limit(1);
 	if (!job) throw new Error("Failed to create job");
 	return job as InboxJobRecord;
 };
 
-export const getInboxJobById = async (jobId: string): Promise<InboxJobRecord | null> => {
-	const [job] = await db.select().from(inboxJobs).where(eq(inboxJobs.id, jobId)).limit(1);
+export const getInboxJobById = async (
+	jobId: string,
+): Promise<InboxJobRecord | null> => {
+	const [job] = await db
+		.select()
+		.from(inboxJobs)
+		.where(eq(inboxJobs.id, jobId))
+		.limit(1);
 	return (job as InboxJobRecord | undefined) ?? null;
 };
 
@@ -156,13 +185,29 @@ export const claimNextInboxJob = async (params: {
 		.from(inboxJobs)
 		.where(
 			and(
-				or(eq(inboxJobs.status, "queued"), eq(inboxJobs.status, "failed")),
-				or(isNull(inboxJobs.leaseExpiresAt), lt(inboxJobs.leaseExpiresAt, claimedAt)),
-				lt(inboxJobs.attemptCount, inboxJobs.maxAttempts),
-				lt(inboxJobs.scheduledAt, new Date(claimedAt.getTime() + 1)),
 				or(
-					...params.allowedWorkloads.map((workload) =>
-						eq(inboxJobs.workloadType, workload),
+					eq(inboxJobs.status, "queued"),
+					eq(inboxJobs.status, "failed"),
+				),
+				or(
+					isNull(inboxJobs.leaseExpiresAt),
+					lt(inboxJobs.leaseExpiresAt, claimedAt),
+				),
+				lt(
+					inboxJobs.attemptCount,
+					inboxJobs.maxAttempts,
+				),
+				lt(
+					inboxJobs.scheduledAt,
+					new Date(claimedAt.getTime() + 1),
+				),
+				or(
+					...params.allowedWorkloads.map(
+						(workload) =>
+							eq(
+								inboxJobs.workloadType,
+								workload,
+							),
 					),
 				),
 			),
@@ -186,8 +231,14 @@ export const claimNextInboxJob = async (params: {
 			.where(
 				and(
 					eq(inboxJobs.id, candidate.id),
-					eq(inboxJobs.claimVersion, candidate.claimVersion),
-					or(eq(inboxJobs.status, "queued"), eq(inboxJobs.status, "failed")),
+					eq(
+						inboxJobs.claimVersion,
+						candidate.claimVersion,
+					),
+					or(
+						eq(inboxJobs.status, "queued"),
+						eq(inboxJobs.status, "failed"),
+					),
 				),
 			);
 		const [claimed] = await db
@@ -269,33 +320,41 @@ export const transitionInboxStatus = async (params: {
 				and(
 					eq(inboxJobs.id, params.jobId),
 					eq(inboxJobs.workerId, params.workerId),
-					eq(inboxJobs.claimVersion, params.claimVersion),
+					eq(
+						inboxJobs.claimVersion,
+						params.claimVersion,
+					),
 				),
 			);
 
-		const [job] = await tx.select().from(inboxJobs).where(eq(inboxJobs.id, params.jobId)).limit(1);
+		const [job] = await tx
+			.select()
+			.from(inboxJobs)
+			.where(eq(inboxJobs.id, params.jobId))
+			.limit(1);
 		if (!job || !job.statusWebhookUrl) return;
-		const eventPayload: WebhookPayload =
-			params.terminalPayload ?? {
-				eventId: randomUUID(),
-				jobId: job.id,
-				requesterId: job.requesterId,
-				workloadType: job.workloadType as WorkloadToken,
-				status: params.status,
-				attemptCount: job.attemptCount,
-				updatedAt: updatedAt.toISOString(),
-				error: params.lastError ?? null,
-			};
+		const eventPayload: WebhookPayload = params.terminalPayload ?? {
+			eventId: randomUUID(),
+			jobId: job.id,
+			requesterId: job.requesterId,
+			workloadType: job.workloadType as WorkloadToken,
+			status: params.status,
+			attemptCount: job.attemptCount,
+			updatedAt: updatedAt.toISOString(),
+			error: params.lastError ?? null,
+		};
 		await tx.insert(jobOutboxEvents).values({
 			id: randomUUID(),
 			jobId: job.id,
 			requesterId: job.requesterId,
 			eventType:
-				params.status === "succeeded" ||
-				params.status === "failed" ||
-				params.status === "dead_letter"
-					? "terminal"
-					: "status",
+				(
+					params.status === "succeeded" ||
+					params.status === "failed" ||
+					params.status === "dead_letter"
+				) ?
+					"terminal"
+				:	"status",
 			eventStatus: params.status,
 			eventId: eventPayload.eventId,
 			payloadJson: JSON.stringify(eventPayload),

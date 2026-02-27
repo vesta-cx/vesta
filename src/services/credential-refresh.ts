@@ -36,7 +36,9 @@ export const requestCredentialRefresh = async (params: {
 		return (await response.json()) as RefreshCredentialsResponse;
 	}
 	if (isRetryableHttpStatus(response.status)) {
-		throw new Error(`Credential refresh retryable failure: ${response.status}`);
+		throw new Error(
+			`Credential refresh retryable failure: ${response.status}`,
+		);
 	}
 	return null;
 };

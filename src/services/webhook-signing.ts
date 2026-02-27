@@ -14,8 +14,14 @@ const getSecretFromDb = async (requesterId: string): Promise<string | null> => {
 			.from(requesterSigningSecrets)
 			.where(
 				and(
-					eq(requesterSigningSecrets.requesterId, requesterId),
-					eq(requesterSigningSecrets.isActive, true),
+					eq(
+						requesterSigningSecrets.requesterId,
+						requesterId,
+					),
+					eq(
+						requesterSigningSecrets.isActive,
+						true,
+					),
 				),
 			)
 			.orderBy(desc(requesterSigningSecrets.updatedAt))
@@ -32,7 +38,12 @@ const getSecret = async (requesterId: string): Promise<string | null> => {
 	return process.env["EUTERPE_WEBHOOK_SECRET"] ?? null;
 };
 
-const signRaw = (secret: string, timestamp: string, nonce: string, body: string): string =>
+const signRaw = (
+	secret: string,
+	timestamp: string,
+	nonce: string,
+	body: string,
+): string =>
 	createHmac("sha256", secret)
 		.update(`${timestamp}.${nonce}.${body}`, "utf8")
 		.digest("hex");
@@ -43,7 +54,10 @@ export const buildSignedWebhookHeaders = async (params: {
 	eventId: string;
 }): Promise<Record<string, string>> => {
 	const secret = await getSecret(params.requesterId);
-	if (!secret) throw new Error(`Missing webhook secret for requester: ${params.requesterId}`);
+	if (!secret)
+		throw new Error(
+			`Missing webhook secret for requester: ${params.requesterId}`,
+		);
 	const timestamp = Date.now().toString();
 	const nonce = randomUUID();
 	const signature = signRaw(secret, timestamp, nonce, params.rawBody);
@@ -74,7 +88,12 @@ export const verifyInboundSignature = async (params: {
 	if (seenAt && Date.now() - seenAt < DEFAULT_SKEW_MS) return false;
 	nonceCache.set(cacheKey, Date.now());
 
-	const expected = signRaw(secret, params.timestamp, params.nonce, params.rawBody);
+	const expected = signRaw(
+		secret,
+		params.timestamp,
+		params.nonce,
+		params.rawBody,
+	);
 	const actual = params.signature;
 	const expectedBuf = Buffer.from(expected, "hex");
 	const actualBuf = Buffer.from(actual, "hex");

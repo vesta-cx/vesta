@@ -32,14 +32,23 @@ export const claimOutboxBatch = async (params: {
 		.where(
 			and(
 				eq(jobOutboxEvents.status, "pending"),
-				lt(jobOutboxEvents.nextAttemptAt, new Date(claimedAt.getTime() + 1)),
+				lt(
+					jobOutboxEvents.nextAttemptAt,
+					new Date(claimedAt.getTime() + 1),
+				),
 				or(
 					isNull(jobOutboxEvents.leaseExpiresAt),
-					lt(jobOutboxEvents.leaseExpiresAt, claimedAt),
+					lt(
+						jobOutboxEvents.leaseExpiresAt,
+						claimedAt,
+					),
 				),
 			),
 		)
-		.orderBy(asc(jobOutboxEvents.nextAttemptAt), asc(jobOutboxEvents.createdAt))
+		.orderBy(
+			asc(jobOutboxEvents.nextAttemptAt),
+			asc(jobOutboxEvents.createdAt),
+		)
 		.limit(params.limit * 2);
 
 	const claimed: OutboxRecord[] = [];
@@ -59,7 +68,10 @@ export const claimOutboxBatch = async (params: {
 			.where(
 				and(
 					eq(jobOutboxEvents.id, candidate.id),
-					eq(jobOutboxEvents.claimVersion, candidate.claimVersion),
+					eq(
+						jobOutboxEvents.claimVersion,
+						candidate.claimVersion,
+					),
 					eq(jobOutboxEvents.status, "pending"),
 				),
 			);
@@ -69,8 +81,14 @@ export const claimOutboxBatch = async (params: {
 			.where(
 				and(
 					eq(jobOutboxEvents.id, candidate.id),
-					eq(jobOutboxEvents.workerId, params.workerId),
-					eq(jobOutboxEvents.claimVersion, nextVersion),
+					eq(
+						jobOutboxEvents.workerId,
+						params.workerId,
+					),
+					eq(
+						jobOutboxEvents.claimVersion,
+						nextVersion,
+					),
 					eq(jobOutboxEvents.status, "claimed"),
 				),
 			)
@@ -98,7 +116,10 @@ export const markOutboxDelivered = async (params: {
 			and(
 				eq(jobOutboxEvents.id, params.id),
 				eq(jobOutboxEvents.workerId, params.workerId),
-				eq(jobOutboxEvents.claimVersion, params.claimVersion),
+				eq(
+					jobOutboxEvents.claimVersion,
+					params.claimVersion,
+				),
 			),
 		);
 };
@@ -125,7 +146,9 @@ export const markOutboxFailed = async (params: {
 			status: dead ? "dead_letter" : "pending",
 			attemptCount: nextAttempts,
 			lastError: params.error,
-			nextAttemptAt: new Date(ts.getTime() + params.backoffMs),
+			nextAttemptAt: new Date(
+				ts.getTime() + params.backoffMs,
+			),
 			workerId: null,
 			leaseExpiresAt: null,
 			heartbeatAt: null,
@@ -135,12 +158,17 @@ export const markOutboxFailed = async (params: {
 			and(
 				eq(jobOutboxEvents.id, params.id),
 				eq(jobOutboxEvents.workerId, params.workerId),
-				eq(jobOutboxEvents.claimVersion, params.claimVersion),
+				eq(
+					jobOutboxEvents.claimVersion,
+					params.claimVersion,
+				),
 			),
 		);
 };
 
-export const getJobWebhookDetails = async (jobId: string): Promise<{
+export const getJobWebhookDetails = async (
+	jobId: string,
+): Promise<{
 	url: string | null;
 	requesterId: string;
 } | null> => {

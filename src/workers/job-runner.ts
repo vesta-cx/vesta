@@ -16,8 +16,15 @@ import {
 	transitionInboxStatus,
 	type InboxJobRecord,
 } from "../services/inbox-repository.js";
-import { decryptCredentials, encryptCredentials } from "../services/credential-encryption.js";
-import { computeBackoffMs, isStorageAuthStatus, sleep } from "../services/retry.js";
+import {
+	decryptCredentials,
+	encryptCredentials,
+} from "../services/credential-encryption.js";
+import {
+	computeBackoffMs,
+	isStorageAuthStatus,
+	sleep,
+} from "../services/retry.js";
 import { requestCredentialRefresh } from "../services/credential-refresh.js";
 import { parseAllowedWorkloads } from "../services/workload-policy.js";
 import { parseByteSize } from "../services/byte-size.js";
@@ -31,7 +38,8 @@ const maxInputSizeBytes = parseByteSize(
 	5 * 1024 * 1024 * 1024,
 );
 
-const jitter = (base: number): number => Math.max(100, base + Math.floor(Math.random() * 600));
+const jitter = (base: number): number =>
+	Math.max(100, base + Math.floor(Math.random() * 600));
 
 const getWorkerId = (): string =>
 	process.env["POD_NAME"] ??
@@ -51,7 +59,10 @@ const readStorageConfig = (job: InboxJobRecord) => {
 		},
 		aadForJob(job),
 	);
-	const creds = JSON.parse(credsJson) as { accessKeyId: string; secretAccessKey: string };
+	const creds = JSON.parse(credsJson) as {
+		accessKeyId: string;
+		secretAccessKey: string;
+	};
 	if (job.storageType === "r2") {
 		return {
 			type: "r2" as const,
@@ -84,7 +95,9 @@ const writeReadableToFile = async (
 			if (!value) continue;
 			written += value.byteLength;
 			if (written > maxInputSizeBytes) {
-				throw new Error(`Input exceeded max allowed size (${maxInputSizeBytes} bytes)`);
+				throw new Error(
+					`Input exceeded max allowed size (${maxInputSizeBytes} bytes)`,
+				);
 			}
 			if (!out.write(value)) await once(out, "drain");
 		}
@@ -103,12 +116,17 @@ const ensureOutputSizeGuardrail = (dir: string, inputSize: number): void => {
 		const abs = path.join(dir, entry);
 		if (!fs.statSync(abs).isFile()) continue;
 		if (fs.statSync(abs).size > maxOutputBytes) {
-			throw new Error(`Output file exceeded 200% guardrail: ${entry}`);
+			throw new Error(
+				`Output file exceeded 200% guardrail: ${entry}`,
+			);
 		}
 	}
 };
 
-const processJob = async (job: InboxJobRecord, workerId: string): Promise<void> => {
+const processJob = async (
+	job: InboxJobRecord,
+	workerId: string,
+): Promise<void> => {
 	const tempDir = path.join(os.tmpdir(), `euterpe-job-${job.id}`);
 	fs.mkdirSync(tempDir, { recursive: true });
 	const sourcePath = path.join(tempDir, "source-input.flac");
@@ -131,8 +149,14 @@ const processJob = async (job: InboxJobRecord, workerId: string): Promise<void> 
 
 		const storage = createStorage(readStorageConfig(job));
 		const source = await storage.get(job.sourceKey);
-		if (!source) throw new Error(`Source object not found: ${job.sourceKey}`);
-		const inputSize = await writeReadableToFile(source.body, sourcePath);
+		if (!source)
+			throw new Error(
+				`Source object not found: ${job.sourceKey}`,
+			);
+		const inputSize = await writeReadableToFile(
+			source.body,
+			sourcePath,
+		);
 
 		await transitionInboxStatus({
 			jobId: job.id,
@@ -146,7 +170,9 @@ const processJob = async (job: InboxJobRecord, workerId: string): Promise<void> 
 				`Workload "${job.workloadType}" is not implemented on this worker image`,
 			);
 		}
-		const config = JSON.parse(job.transcodeConfigJson) as TranscodeConfig;
+		const config = JSON.parse(
+			job.transcodeConfigJson,
+		) as TranscodeConfig;
 		const result = await transcode(sourcePath, config, storage);
 		ensureOutputSizeGuardrail(tempDir, inputSize);
 
@@ -181,12 +207,16 @@ const processJob = async (job: InboxJobRecord, workerId: string): Promise<void> 
 			},
 		});
 	} catch (error) {
-		const message = error instanceof Error ? error.message : String(error);
+		const message =
+			error instanceof Error ? error.message : String(error);
 		await transitionInboxStatus({
 			jobId: job.id,
 			workerId,
 			claimVersion: job.claimVersion,
-			status: job.attemptCount >= job.maxAttempts ? "dead_letter" : "failed",
+			status:
+				job.attemptCount >= job.maxAttempts ?
+					"dead_letter"
+				:	"failed",
 			lastError: message,
 		});
 		throw error;
@@ -255,15 +285,30 @@ export const startJobRunner = (): void => {
 		try {
 			await processJob(job, workerId);
 		} catch (error) {
-			const msg = error instanceof Error ? error.message : String(error);
-			const authLike = /(\b401\b|\b403\b|AccessDenied|ExpiredToken|InvalidAccessKeyId)/i.test(
-				msg,
+			const msg =
+				error instanceof Error ?
+					error.message
+				:	String(error);
+			const authLike =
+				/(\b401\b|\b403\b|AccessDenied|ExpiredToken|InvalidAccessKeyId)/i.test(
+					msg,
+				);
+			const statusCode = Number(
+				msg.match(/\b(401|403)\b/)?.[1] ?? NaN,
 			);
-			const statusCode = Number(msg.match(/\b(401|403)\b/)?.[1] ?? NaN);
 			if (isStorageAuthStatus(statusCode) || authLike) {
-				const ok = await refreshCredentialsForJob(job, workerId);
+				const ok = await refreshCredentialsForJob(
+					job,
+					workerId,
+				);
 				if (!ok) {
-					await sleep(computeBackoffMs(job.refreshAttemptCount + 1, statusCode));
+					await sleep(
+						computeBackoffMs(
+							job.refreshAttemptCount +
+								1,
+							statusCode,
+						),
+					);
 				}
 			}
 		}

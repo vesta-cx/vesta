@@ -200,7 +200,10 @@ const joinPrefix = (prefix: string, ...parts: string[]): string => {
 };
 
 export const resolveTargetOutput = (
-	target: Pick<TranscodeTarget, "codec" | "bitrate" | "outputPrefix" | "outputSuffix">,
+	target: Pick<
+		TranscodeTarget,
+		"codec" | "bitrate" | "outputPrefix" | "outputSuffix"
+	>,
 ): { targetPrefix: string; filenamePrefix: string; suffix: string } => {
 	const raw = (target.outputPrefix ?? `${target.codec}/`).trim();
 	const cleaned = raw.replace(/^\/+/, "").replace(/\/+$/, "");
@@ -214,7 +217,9 @@ export const resolveTargetOutput = (
 	} else {
 		const separator = cleaned.lastIndexOf("/");
 		targetPrefix =
-			separator >= 0 ? `${cleaned.slice(0, separator + 1)}` : "";
+			separator >= 0 ?
+				`${cleaned.slice(0, separator + 1)}`
+			:	"";
 		filenamePrefix =
 			separator >= 0 ? cleaned.slice(separator + 1) : cleaned;
 	}
@@ -318,10 +323,12 @@ export const transcode = async (
 		const ext = CODEC_EXTS[t.codec];
 		const resolved = resolveTargetOutput(t);
 		const pattern =
-			config.naming?.pattern ??
-			"{basename}{suffix}.{ext}";
+			config.naming?.pattern ?? "{basename}{suffix}.{ext}";
 		const candidateFilename = pattern
-			.replace("{basename}", `${resolved.filenamePrefix}${sanitized}`)
+			.replace(
+				"{basename}",
+				`${resolved.filenamePrefix}${sanitized}`,
+			)
 			.replace("{prefix}", resolved.filenamePrefix)
 			.replace("{suffix}", resolved.suffix)
 			.replace("{codec}", t.codec)
@@ -331,8 +338,17 @@ export const transcode = async (
 			config.naming?.includeSourceIdInPath !== false;
 		const candidatePathParts =
 			includeSourceId ?
-				["candidates", sourceId, resolved.targetPrefix, candidateFilename]
-			:	["candidates", resolved.targetPrefix, candidateFilename];
+				[
+					"candidates",
+					sourceId,
+					resolved.targetPrefix,
+					candidateFilename,
+				]
+			:	[
+					"candidates",
+					resolved.targetPrefix,
+					candidateFilename,
+				];
 		const candidateR2Key = joinPrefix(
 			uploadPrefix,
 			...candidatePathParts,

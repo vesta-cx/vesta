@@ -21,7 +21,9 @@ export const getExistingIdempotentResult = async (params: {
 }): Promise<{ status: number; body: EnqueueResponse } | null> => {
 	const existing = await getIdempotentResponse(params.scope, params.key);
 	if (!existing) return null;
-	const requestHash = await hashRequest(JSON.stringify(params.requestBody));
+	const requestHash = await hashRequest(
+		JSON.stringify(params.requestBody),
+	);
 	if (existing.requestHash !== requestHash) {
 		throw new IdempotencyConflictError(
 			"Idempotency key reuse with different payload is not allowed",
@@ -37,7 +39,9 @@ export const storeIdempotentResult = async (params: {
 	status: number;
 	body: EnqueueResponse;
 }): Promise<void> => {
-	const requestHash = await hashRequest(JSON.stringify(params.requestBody));
+	const requestHash = await hashRequest(
+		JSON.stringify(params.requestBody),
+	);
 	await saveIdempotentResponse({
 		scope: params.scope,
 		key: params.key,

@@ -18,14 +18,20 @@ vi.mock("node:child_process", () => {
 
 		setImmediate(() => {
 			if (command === "ffprobe") {
-				proc.stdout?.emit("data", Buffer.from("12.34\n"));
+				proc.stdout?.emit(
+					"data",
+					Buffer.from("12.34\n"),
+				);
 				proc.emit("close", 0);
 				return;
 			}
 
 			if (command === "ffmpeg") {
 				const outputPath = args[args.length - 1]!;
-				fs.writeFileSync(outputPath, Buffer.from("mock-audio"));
+				fs.writeFileSync(
+					outputPath,
+					Buffer.from("mock-audio"),
+				);
 				proc.emit("close", 0);
 				return;
 			}
@@ -61,7 +67,9 @@ afterEach(() => {
 
 describe("transcode", () => {
 	it("uploads source and candidates with expected key layout", async () => {
-		const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "euterpe-transcode-"));
+		const tempDir = fs.mkdtempSync(
+			path.join(os.tmpdir(), "euterpe-transcode-"),
+		);
 		const inputPath = path.join(tempDir, "input.flac");
 		fs.writeFileSync(inputPath, Buffer.from("input"));
 
@@ -74,7 +82,11 @@ describe("transcode", () => {
 				sourceFileId: "source-12345678",
 				targets: [
 					{ codec: "flac", bitrate: 320 },
-					{ codec: "opus", bitrate: 128, outputPrefix: "mobile/opus_" },
+					{
+						codec: "opus",
+						bitrate: 128,
+						outputPrefix: "mobile/opus_",
+					},
 				],
 			},
 			storage,
@@ -83,18 +95,28 @@ describe("transcode", () => {
 		expect(result.sourceFileId).toBe("source-12345678");
 		expect(result.source.r2Key).toContain("audio/2026/sources/");
 		expect(result.candidates.length).toBe(2);
-		expect(keys.some((key) => key.includes("audio/2026/sources/"))).toBe(true);
 		expect(
-			keys.some((key) => key.includes("audio/2026/candidates/source-12345678/mobile/")),
+			keys.some((key) => key.includes("audio/2026/sources/")),
 		).toBe(true);
 		expect(
-			keys.some((key) => key.includes("opus_my_song_opus_128.ogg")),
+			keys.some((key) =>
+				key.includes(
+					"audio/2026/candidates/source-12345678/mobile/",
+				),
+			),
+		).toBe(true);
+		expect(
+			keys.some((key) =>
+				key.includes("opus_my_song_opus_128.ogg"),
+			),
 		).toBe(true);
 		fs.rmSync(tempDir, { recursive: true, force: true });
 	});
 
 	it("throws when no targets are provided", async () => {
-		const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "euterpe-transcode-"));
+		const tempDir = fs.mkdtempSync(
+			path.join(os.tmpdir(), "euterpe-transcode-"),
+		);
 		const inputPath = path.join(tempDir, "input.flac");
 		fs.writeFileSync(inputPath, Buffer.from("input"));
 		const { storage } = mkStorage();

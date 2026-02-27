@@ -2,79 +2,52 @@
 
 # vesta
 
-**vesta** is an all-in-one platform helping independent musicians, small labels,
-and creative publishers manage their catalog, build their brand, and reach their
-audience.
+**vesta** is an all-in-one platform helping independent musicians, small labels, and creative publishers manage their catalog, build their brand, and reach their audience.
 
 ## Vision
 
-vesta solves the fragmentation problem facing indie creators. Instead of
-maintaining profiles across 10+ platforms, writing metadata into spreadsheets,
-and paying $20–100/month for features they don't use, creators get one platform
-that handles discovery (smart links), identity (customizable pages), community
-(feeds, collections), and eventually streaming and commerce.
+vesta solves the fragmentation problem facing indie creators. Instead of maintaining profiles across 10+ platforms, writing metadata into spreadsheets, and paying $20–100/month for features they don't use, creators get one platform that handles discovery (smart links), identity (customizable pages), community (feeds, collections), and eventually streaming and commerce.
 
-We start with the problems that hurt most: **conversion** (smart links to reduce
-friction) and **identity** (beautiful, customizable pages). From there, we
-expand into the full suite.
+We start with the problems that hurt most: **conversion** (smart links to reduce friction) and **identity** (beautiful, customizable pages). From there, we expand into the full suite.
 
 ### Target Audience
 
-**Primary:** Independent musicians, small labels, and music collectives—people
-with limited budgets, limited time, but unlimited creativity.
+**Primary:** Independent musicians, small labels, and music collectives—people with limited budgets, limited time, but unlimited creativity.
 
-**Secondary:** Curators and listeners—for the platform to matter, people need a
-reason to visit and engage with content.
+**Secondary:** Curators and listeners—for the platform to matter, people need a reason to visit and engage with content.
 
-**Aspirational:** As vesta matures, we expand to other media (visual art,
-literature, film) and grow into a full industry-grade tool suite that keeps
-creators on the platform as they scale.
+**Aspirational:** As vesta matures, we expand to other media (visual art, literature, film) and grow into a full industry-grade tool suite that keeps creators on the platform as they scale.
 
 ## The Problems We're Solving
 
-1. **Conversion friction** — Artists share links, fans click, but without a
-   smart link they have to manually search for the song on their streaming
-   platform. Many give up. Smart links cut that friction to zero.
-2. **Identity** — Existing platforms look the same. vesta lets creators
-   customize every aspect of their page: colors, fonts, layout, theme. Your page
-   should feel like your home.
-3. **Decentralization overhead** — Creators maintain profiles on Spotify,
-   SoundCloud, Instagram, TikTok, YouTube, Bandcamp, etc. Managing metadata
-   across all of them is a full-time job. vesta centralizes this.
-4. **Data quality** — Labels organizing compilations have to track artist names,
-   metadata, legal info, royalty splits in spreadsheets. There's no better tool.
-5. **Collaboration** — Tools like Splice Studio (discontinued) let musicians
-   collaborate on projects with version control. This space is empty and sorely
-   missed.
+1. **Conversion friction** — Artists share links, fans click, but without a smart link they have to manually search for the song on their streaming platform. Many give up. Smart links cut that friction to zero.
+2. **Identity** — Existing platforms look the same. vesta lets creators customize every aspect of their page: colors, fonts, layout, theme. Your page should feel like your home.
+3. **Decentralization overhead** — Creators maintain profiles on Spotify, SoundCloud, Instagram, TikTok, YouTube, Bandcamp, etc. Managing metadata across all of them is a full-time job. vesta centralizes this.
+4. **Data quality** — Labels organizing compilations have to track artist names, metadata, legal info, royalty splits in spreadsheets. There's no better tool.
+5. **Collaboration** — Tools like Splice Studio (discontinued) let musicians collaborate on projects with version control. This space is empty and sorely missed.
 
 ## Roadmap (Phase-Driven)
 
-vesta reaches market through disciplined phases. Each phase is self-contained
-and valuable on its own.
+vesta reaches market through disciplined phases. Each phase is self-contained and valuable on its own.
 
 ### Phase 1: Blogging Engine + Smart Links (NOW)
 
-**Goal:** Get creators using vesta to announce releases and let fans find music
-with zero friction.
+**Goal:** Get creators using vesta to announce releases and let fans find music with zero friction.
 
 **Features:**
 
 - Artist/label profiles (customizable appearance)
 - Post-based blogging engine (updates, release announcements)
-- Smart links (links to Spotify, Apple Music, SoundCloud, YouTube, Bandcamp,
-  etc.)
+- Smart links (links to Spotify, Apple Music, SoundCloud, YouTube, Bandcamp, etc.)
 - User engagement (like, comment, repost, subscribe on posts)
 - Collections (curated lists of posts that other users can follow)
 - Free tier + modular pricing (see below)
 
-**Why this first:** Conversion is the #1 friction point. Once creators see this
-working, they adopt the platform. No technology blocker (we reuse patterns from
-`apps/sona`).
+**Why this first:** Conversion is the #1 friction point. Once creators see this working, they adopt the platform. No technology blocker (we reuse patterns from `apps/sona`).
 
 ### Phase 2: Pre-Save & DSP Announcements
 
-**Goal:** Creators announce upcoming releases; fans pre-save them with one
-click.
+**Goal:** Creators announce upcoming releases; fans pre-save them with one click.
 
 **Features:**
 
@@ -82,13 +55,11 @@ click.
 - "Future pre-save" (fans pre-save all releases without pre-saving each one)
 - Scheduled pages (pages go live at a specific time)
 
-**Why this phase:** Completes the "announcement" story. Creators get real
-conversion data.
+**Why this phase:** Completes the "announcement" story. Creators get real conversion data.
 
 ### Phase 3: Analytics + Ad Platform Integration
 
-**Goal:** Creators track which links drive traffic and revenue; they set up
-retargeting campaigns.
+**Goal:** Creators track which links drive traffic and revenue; they set up retargeting campaigns.
 
 **Features:**
 
@@ -96,14 +67,11 @@ retargeting campaigns.
 - Export to Meta Ads, TikTok Ads, Google Analytics (for retargeting)
 - Conversion tracking (tie ad spend to link clicks)
 
-**Why this phase:** Data-driven creators will pay for this. Provides feedback
-loop for future development. After Phase 3 is stable, vesta becomes
-self-sustaining.
+**Why this phase:** Data-driven creators will pay for this. Provides feedback loop for future development. After Phase 3 is stable, vesta becomes self-sustaining.
 
 ### Phase 4: Public Sign-Up & Network Effects
 
-**Goal:** Open the platform publicly. Introduce feed, follows, and community
-features.
+**Goal:** Open the platform publicly. Introduce feed, follows, and community features.
 
 **Features:**
 
@@ -118,13 +86,10 @@ features.
 
 Once self-sustaining, decide based on user feedback and runway:
 
-- **Custom domains** — Let labels/artists use their own domain (vesta.io
-  handling DNS)
+- **Custom domains** — Let labels/artists use their own domain (vesta.io handling DNS)
 - **Streaming** — Embed playable audio; eventually full music streaming
-- **Merch & Commerce** — Integrate Shopify (or Stripe) for selling merch, vinyl,
-  digital downloads
-- **Advanced DQM** — Tools for managing metadata, royalty splits, compilations
-  at scale
+- **Merch & Commerce** — Integrate Shopify (or Stripe) for selling merch, vinyl, digital downloads
+- **Advanced DQM** — Tools for managing metadata, royalty splits, compilations at scale
 - **Collaboration** — Version control for music projects (long-term vision)
 
 ---
@@ -133,19 +98,18 @@ Once self-sustaining, decide based on user feedback and runway:
 
 **vesta is built on existing foundations in this monorepo.** Don't reinvent.
 
-| Layer                 | Technology                      | Why                                         |
-| --------------------- | ------------------------------- | ------------------------------------------- |
-| **Frontend**          | SvelteKit 5                     | Fast, reactive, server-first architecture   |
-| **Styling**           | TailwindCSS v4 + OKLCH tokens   | Utility-first, design-system ready          |
-| **Components**        | shadcn-svelte + Bits-UI         | Accessible, headless, customizable          |
-| **Hosting & Compute** | Cloudflare Workers              | Fast cold starts, zero ops, great DX        |
-| **Database**          | D1 (SQLite on CF) + Drizzle ORM | Schema-first, type-safe, migration-friendly |
-| **Storage**           | R2 (Cloudflare S3-compatible)   | Audio files, cover art, user uploads        |
-| **Auth**              | WorkOS (or other OIDC provider) | OAuth, SSO, zero custom auth logic          |
-| **State**             | nanostores                      | Lightweight, reactive, no boilerplate       |
+| Layer | Technology | Why |
+| --- | --- | --- |
+| **Frontend** | SvelteKit 5 | Fast, reactive, server-first architecture |
+| **Styling** | TailwindCSS v4 + OKLCH tokens | Utility-first, design-system ready |
+| **Components** | shadcn-svelte + Bits-UI | Accessible, headless, customizable |
+| **Hosting & Compute** | Cloudflare Workers | Fast cold starts, zero ops, great DX |
+| **Database** | D1 (SQLite on CF) + Drizzle ORM | Schema-first, type-safe, migration-friendly |
+| **Storage** | R2 (Cloudflare S3-compatible) | Audio files, cover art, user uploads |
+| **Auth** | WorkOS (or other OIDC provider) | OAuth, SSO, zero custom auth logic |
+| **State** | nanostores | Lightweight, reactive, no boilerplate |
 
-**Reference app:** `apps/sona` is your playbook. It uses all of these
-technologies in production. Copy patterns, don't rebuild.
+**Reference app:** `apps/sona` is your playbook. It uses all of these technologies in production. Copy patterns, don't rebuild.
 
 ---
 
@@ -153,8 +117,7 @@ technologies in production. Copy patterns, don't rebuild.
 
 ### Shared Packages (Don't Duplicate)
 
-All vesta apps must use these packages. **No local component libraries. No local
-utilities.**
+All vesta apps must use these packages. **No local component libraries. No local utilities.**
 
 #### `packages/ui` (`@vesta-cx/ui`)
 
@@ -163,8 +126,7 @@ utilities.**
 - Design tokens (OKLCH colors, spacing, typography via TailwindCSS)
 - Utility components (layout, forms, charts)
 
-**Usage:** Import components from `@vesta-cx/ui` in all apps. Build on top;
-don't duplicate.
+**Usage:** Import components from `@vesta-cx/ui` in all apps. Build on top; don't duplicate.
 
 #### `packages/utils` (`@vesta-cx/utils`)
 
@@ -173,9 +135,7 @@ don't duplicate.
 - Type definitions (shared across apps)
 - Utility functions (date, string, number helpers)
 
-**Plan:** As vesta-specific patterns emerge (feature gating, pricing tier
-checks, creator analytics), extend this package. Keep app-specific logic in the
-app; keep shared logic here.
+**Plan:** As vesta-specific patterns emerge (feature gating, pricing tier checks, creator analytics), extend this package. Keep app-specific logic in the app; keep shared logic here.
 
 #### `packages/config`
 
@@ -205,16 +165,13 @@ app; keep shared logic here.
 #### `apps/vesta-admin` (Creator Dashboard, separated if needed)
 
 - **Purpose:** Advanced tooling (analytics, link management, bulk operations)
-- **Future scope:** After Phase 3 (analytics) is built in main app, might
-  extract to separate app for perf
+- **Future scope:** After Phase 3 (analytics) is built in main app, might extract to separate app for perf
 - **For now:** Keep in `apps/vesta`; separate only if needed
 
 #### `apps/vesta-api` (Backend APIs, if needed)
 
-- **Purpose:** GraphQL or REST endpoints for mobile apps, third-party
-  integrations
-- **For now:** Implement via SvelteKit `+server.ts` routes in `apps/vesta`;
-  extract to separate app only if load demands it
+- **Purpose:** GraphQL or REST endpoints for mobile apps, third-party integrations
+- **For now:** Implement via SvelteKit `+server.ts` routes in `apps/vesta`; extract to separate app only if load demands it
 
 ### Reference Apps (Don't Copy, Understand)
 
@@ -241,12 +198,9 @@ vesta's core value: **creators only pay for features they need.**
 
 Each feature has:
 
-1. **Cost of Operation** — What it costs to run and support (e.g., R2 storage,
-   database compute, Stripe fees)
-2. **Base Price** — A fair, competitive price above that cost (e.g., $5/month
-   for a feature costing $0.50/month to operate)
-3. **Discount Curve** — As creators add more features, the total plan price
-   approaches the midpoint between base price and operational cost
+1. **Cost of Operation** — What it costs to run and support (e.g., R2 storage, database compute, Stripe fees)
+2. **Base Price** — A fair, competitive price above that cost (e.g., $5/month for a feature costing $0.50/month to operate)
+3. **Discount Curve** — As creators add more features, the total plan price approaches the midpoint between base price and operational cost
 
 ### Example
 
@@ -256,8 +210,7 @@ If a creator uses:
 - Custom domain ($5/month base)
 - Basic analytics ($10/month base)
 
-Instead of $15/month, they get a discount: maybe $12/month. More features =
-bigger discount, up to a cap.
+Instead of $15/month, they get a discount: maybe $12/month. More features = bigger discount, up to a cap.
 
 ### Trial Features (No Payment)
 
@@ -277,8 +230,7 @@ Features with negligible operational cost are always free:
 
 ### Implication for Development
 
-**Every feature must have an assigned tier (trial, basic, pro, enterprise).**
-This informs feature gating logic and helps prioritize what to build.
+**Every feature must have an assigned tier (trial, basic, pro, enterprise).** This informs feature gating logic and helps prioritize what to build.
 
 ---
 
@@ -349,14 +301,12 @@ pnpm --filter vesta db:migrate
 ### Styling
 
 - **Use Tailwind only.** No `<style>` blocks or inline CSS.
-- **Design tokens in OKLCH color space** (e.g., `oklch(0.141 0.005 285.823)`),
-  not hex or HSL
+- **Design tokens in OKLCH color space** (e.g., `oklch(0.141 0.005 285.823)`), not hex or HSL
 - **Import from `@vesta-cx/ui`** — reuse components, don't rebuild
 
 ### Component Development
 
-If you build a component that's reusable across vesta apps or the wider
-ecosystem:
+If you build a component that's reusable across vesta apps or the wider ecosystem:
 
 1. Add it to `packages/ui/src/components/`
 2. Export from `packages/ui/src/index.js`
@@ -385,10 +335,8 @@ pnpm --filter vesta deploy:dev
 
 ### Why SvelteKit + Cloudflare?
 
-- **SvelteKit:** Minimal abstraction, reactive, server-first, ships less
-  JavaScript
-- **Cloudflare:** Zero cold starts, great perf globally, built-in primitives
-  (D1, R2, KV), no ops burden
+- **SvelteKit:** Minimal abstraction, reactive, server-first, ships less JavaScript
+- **Cloudflare:** Zero cold starts, great perf globally, built-in primitives (D1, R2, KV), no ops burden
 
 ### Why Drizzle ORM?
 
@@ -438,11 +386,9 @@ vesta-cx/vesta/
 
 ### Before Starting Work
 
-1. **Check the current phase** (see Roadmap section above). Is your feature in
-   scope?
+1. **Check the current phase** (see Roadmap section above). Is your feature in scope?
 2. **Check the rules** (`.cursor/rules/`) for project conventions and patterns.
-3. **Reuse packages first:** Does `@vesta-cx/ui`, `@vesta-cx/utils`, or
-   `apps/sona` already have what you need?
+3. **Reuse packages first:** Does `@vesta-cx/ui`, `@vesta-cx/utils`, or `apps/sona` already have what you need?
 
 ### Feature Work
 
@@ -474,14 +420,11 @@ For now, SvelteKit `+server.ts` routes handle everything.
 
 ### Q: Should I use GraphQL or REST for the API?
 
-**A:** REST for Phase 1. GraphQL when the data graph justifies it (Phase 3+,
-when analytics queries get complex). Avoid premature complexity.
+**A:** REST for Phase 1. GraphQL when the data graph justifies it (Phase 3+, when analytics queries get complex). Avoid premature complexity.
 
 ### Q: How do I add a new environment variable?
 
-**A:** Add to `.dev.vars` (local) or Cloudflare dashboard (production). Use
-`PRIVATE_` prefix for server-only vars. Reference via
-`import { env } from '$env/static/private'` in `+server.ts` or load functions.
+**A:** Add to `.dev.vars` (local) or Cloudflare dashboard (production). Use `PRIVATE_` prefix for server-only vars. Reference via `import { env } from '$env/static/private'` in `+server.ts` or load functions.
 
 ### Q: How do I seed the database locally?
 
@@ -517,5 +460,4 @@ pnpm wrangler d1 execute vesta-db-dev --file=query.sql
 
 **Last updated:** February 26, 2026
 
-For the full vesta product vision, see the
-[full project brief](https://docs.vesta.cx/Projects/vesta/).
+For the full vesta product vision, see the [full project brief](https://docs.vesta.cx/Projects/vesta/).

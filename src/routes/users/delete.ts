@@ -1,7 +1,9 @@
+/** @format */
+
 import { eq } from "drizzle-orm";
 import { Hono } from "hono";
 import { requireAuth } from "../../auth/helpers";
-import { getDb } from "../../db";
+import { getDB } from "../../db";
 import { users } from "../../db/schema";
 import { forbidden, notFound } from "../../lib/errors";
 import type { AppEnv } from "../../env";
@@ -16,7 +18,7 @@ route.delete("/users/:id", async (c) => {
 	}
 
 	const id = c.req.param("id");
-	const db = getDb(c.env.DB);
+	const db = getDB(c.env.DB);
 	const [row] = await db
 		.delete(users)
 		.where(eq(users.workosUserId, id))

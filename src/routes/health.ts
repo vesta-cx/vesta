@@ -1,3 +1,5 @@
+/** @format */
+
 import { Hono } from "hono";
 import type { AppEnv } from "../env";
 import type { RouteMetadata } from "../registry";

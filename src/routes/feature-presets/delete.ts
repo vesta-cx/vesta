@@ -1,7 +1,9 @@
+/** @format */
+
 import { eq } from "drizzle-orm";
 import { Hono } from "hono";
 import { requireAuth } from "../../auth/helpers";
-import { getDb } from "../../db";
+import { getDB } from "../../db";
 import { featurePresets } from "../../db/schema";
 import { forbidden, notFound } from "../../lib/errors";
 import type { AppEnv } from "../../env";
@@ -15,7 +17,7 @@ route.delete("/feature-presets/:name", async (c) => {
 	if (!apiAuth.scopes.includes("admin")) return forbidden(c);
 
 	const name = c.req.param("name");
-	const db = getDb(c.env.DB);
+	const db = getDB(c.env.DB);
 
 	const [existing] = await db
 		.select()

@@ -2,12 +2,26 @@
 
 export type GuestAuth = { type: "guest" };
 
-export type ApiKeyAuth = { type: "apikey"; userId: string; scopes: string[] };
+export const API_KEY_SUBJECT_TYPES = [
+	"user",
+	"organization",
+	"workspace",
+] as const;
+
+export type ApiKeySubjectType = (typeof API_KEY_SUBJECT_TYPES)[number];
+
+export type ApiKeyAuth = {
+	type: "apikey";
+	subjectType: ApiKeySubjectType;
+	subjectId: string;
+	scopes: string[];
+};
 
 export type AuthContext = GuestAuth | ApiKeyAuth;
 
 export type ApiKeyMeta = {
-	userId: string;
+	subjectType: ApiKeySubjectType;
+	subjectId: string;
 	scopes: string[];
 	createdAt: string;
 	expiresAt: string | null;
@@ -46,7 +60,11 @@ export const isApiKeyMeta = (value: unknown): value is ApiKeyMeta => {
 	if (!value || typeof value !== "object") return false;
 	const meta = value as Partial<ApiKeyMeta>;
 	return (
-		typeof meta.userId === "string" &&
+		typeof meta.subjectId === "string" &&
+		typeof meta.subjectType === "string" &&
+		(API_KEY_SUBJECT_TYPES as readonly string[]).includes(
+			meta.subjectType,
+		) &&
 		isStringArray(meta.scopes) &&
 		typeof meta.createdAt === "string" &&
 		(typeof meta.expiresAt === "string" || meta.expiresAt === null)

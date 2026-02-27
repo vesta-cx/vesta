@@ -1,3 +1,5 @@
+/** @format */
+
 import type { Context } from "hono";
 import type { ZodError } from "zod";
 
@@ -44,8 +46,10 @@ export const zodErrors = (c: Context, error: ZodError) => {
 export const notFound = (c: Context, entity: string) =>
 	singleError(c, 404, `${entity} not found`, "NOT_FOUND");
 
-export const forbidden = (c: Context, message = "Forbidden: insufficient scope") =>
-	singleError(c, 403, message, "FORBIDDEN");
+export const forbidden = (
+	c: Context,
+	message = "Forbidden: insufficient scope",
+) => singleError(c, 403, message, "FORBIDDEN");
 
 export const conflict = (c: Context, message: string, path?: string) =>
 	singleError(c, 409, message, "CONFLICT", path);

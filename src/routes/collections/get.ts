@@ -1,8 +1,10 @@
+/** @format */
+
 import { and, eq } from "drizzle-orm";
 import { Hono } from "hono";
 import { itemResponse } from "@mia-cx/drizzle-query-factory";
 import { hasScope, isAuthenticated } from "../../auth/helpers";
-import { getDb } from "../../db";
+import { getDB } from "../../db";
 import { collections } from "../../db/schema";
 import { forbidden, notFound } from "../../lib/errors";
 import { publicCollectionWhere } from "../../services/collections";
@@ -13,7 +15,7 @@ const route = new Hono<AppEnv>();
 
 route.get("/collections/:id", async (c) => {
 	const auth = c.get("auth");
-	const db = getDb(c.env.DB);
+	const db = getDB(c.env.DB);
 	const id = c.req.param("id");
 
 	if (isAuthenticated(auth) && auth.scopes.includes("admin")) {
@@ -22,7 +24,9 @@ route.get("/collections/:id", async (c) => {
 			.from(collections)
 			.where(eq(collections.id, id))
 			.limit(1);
-		return row ? c.json(itemResponse(row)) : notFound(c, "Collection");
+		return row ?
+				c.json(itemResponse(row))
+			:	notFound(c, "Collection");
 	}
 
 	if (isAuthenticated(auth)) {
@@ -32,7 +36,9 @@ route.get("/collections/:id", async (c) => {
 			.from(collections)
 			.where(eq(collections.id, id))
 			.limit(1);
-		return row ? c.json(itemResponse(row)) : notFound(c, "Collection");
+		return row ?
+				c.json(itemResponse(row))
+			:	notFound(c, "Collection");
 	}
 
 	const [row] = await db

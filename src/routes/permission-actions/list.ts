@@ -1,11 +1,9 @@
-import { sql } from "drizzle-orm";
+/** @format */
+
 import { Hono } from "hono";
-import {
-	parseListQuery,
-	listResponse,
-} from "@mia-cx/drizzle-query-factory";
+import { runListQuery } from "@mia-cx/drizzle-query-factory";
 import { requireScope } from "../../auth/helpers";
-import { getDb } from "../../db";
+import { getDB } from "../../db";
 import { permissionActions } from "../../db/schema";
 import { permissionActionListConfig } from "../../services/permissions";
 import type { AppEnv } from "../../env";
@@ -17,31 +15,12 @@ route.get("/permission-actions", async (c) => {
 	const auth = c.get("auth");
 	requireScope(auth, "permissions:read");
 
-	const db = getDb(c.env.DB);
-	const query = parseListQuery(
-		new URL(c.req.url).searchParams,
-		permissionActionListConfig,
-	);
-
-	const whereClause = query.where ?? sql`1=1`;
-
-	const [rows, countResult] = await Promise.all([
-		db
-			.select()
-			.from(permissionActions)
-			.where(whereClause)
-			.orderBy(query.orderBy)
-			.limit(query.limit)
-			.offset(query.offset),
-		db
-			.select({ total: sql<number>`count(*)` })
-			.from(permissionActions)
-			.where(whereClause),
-	]);
-
-	return c.json(
-		listResponse(rows, countResult[0]?.total ?? 0, query.limit, query.offset),
-	);
+	const envelope = await runListQuery({
+		db: getDB(c.env.DB), table: permissionActions,
+		input: new URL(c.req.url).searchParams, config: permissionActionListConfig,
+		mode: "envelope",
+	});
+	return c.json(envelope);
 });
 
 export default {

@@ -1,3 +1,5 @@
+/** @format */
+
 import { eq } from "drizzle-orm";
 import type { ListQueryConfig } from "@mia-cx/drizzle-query-factory";
 import { workspaces } from "../db/schema";

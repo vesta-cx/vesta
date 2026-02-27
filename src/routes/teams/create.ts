@@ -1,7 +1,9 @@
+/** @format */
+
 import { Hono } from "hono";
 import { itemResponse } from "@mia-cx/drizzle-query-factory";
 import { requireScope } from "../../auth/helpers";
-import { getDb } from "../../db";
+import { getDB } from "../../db";
 import { teams } from "../../db/schema";
 import { parseBody, isResponse } from "../../lib/validation";
 import { createTeamSchema } from "../../services/teams";
@@ -17,7 +19,7 @@ route.post("/teams", async (c) => {
 	const parsed = await parseBody(c, createTeamSchema);
 	if (isResponse(parsed)) return parsed;
 
-	const db = getDb(c.env.DB);
+	const db = getDB(c.env.DB);
 
 	const [row] = await db
 		.insert(teams)

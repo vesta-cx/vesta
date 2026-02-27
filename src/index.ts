@@ -1,3 +1,5 @@
+/** @format */
+
 import { Hono } from "hono";
 import { API_BASE_PATH } from "./config/api-version";
 import type { AppEnv } from "./env";
@@ -52,7 +54,9 @@ const registerRoutes = (obj: Record<string, unknown>) => {
 			routeRegistry.push({
 				method: value.method,
 				path: value.path,
-				description: value.description ?? `Route: ${value.path}`,
+				description:
+					value.description ??
+					`Route: ${value.path}`,
 				auth_required: value.auth_required ?? true,
 				scopes: value.scopes,
 			});

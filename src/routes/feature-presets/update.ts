@@ -1,8 +1,10 @@
+/** @format */
+
 import { eq } from "drizzle-orm";
 import { Hono } from "hono";
 import { itemResponse } from "@mia-cx/drizzle-query-factory";
 import { requireAuth } from "../../auth/helpers";
-import { getDb } from "../../db";
+import { getDB } from "../../db";
 import { featurePresets } from "../../db/schema";
 import { conflict, forbidden, notFound } from "../../lib/errors";
 import { parseBody, isResponse } from "../../lib/validation";
@@ -21,7 +23,7 @@ route.put("/feature-presets/:name", async (c) => {
 	const parsed = await parseBody(c, updateFeaturePresetSchema);
 	if (isResponse(parsed)) return parsed;
 
-	const db = getDb(c.env.DB);
+	const db = getDB(c.env.DB);
 	const [existing] = await db
 		.select()
 		.from(featurePresets)
@@ -35,7 +37,9 @@ route.put("/feature-presets/:name", async (c) => {
 			.set({ ...parsed, updatedAt: new Date() })
 			.where(eq(featurePresets.name, name))
 			.returning();
-		return row ? c.json(itemResponse(row)) : notFound(c, "Feature preset");
+		return row ?
+				c.json(itemResponse(row))
+			:	notFound(c, "Feature preset");
 	} catch (err) {
 		if (err instanceof Error && /UNIQUE/i.test(err.message)) {
 			return conflict(c, "Conflict on update");

@@ -1,7 +1,9 @@
+/** @format */
+
 import { eq } from "drizzle-orm";
 import { Hono } from "hono";
 import { requireAuth, requireScope } from "../../../auth/helpers";
-import { getDb } from "../../../db";
+import { getDB } from "../../../db";
 import { collections, collectionVisibilitySettings } from "../../../db/schema";
 import { forbidden, notFound } from "../../../lib/errors";
 import { isCollectionOwner } from "../../../services/collections";
@@ -15,7 +17,7 @@ route.get("/collections/:collectionId/visibility", async (c) => {
 	requireScope(auth, "collections:read");
 	const apiAuth = requireAuth(auth);
 
-	const db = getDb(c.env.DB);
+	const db = getDB(c.env.DB);
 	const collectionId = c.req.param("collectionId");
 
 	const [existing] = await db
@@ -26,13 +28,18 @@ route.get("/collections/:collectionId/visibility", async (c) => {
 	if (!existing) return notFound(c, "Collection");
 
 	const isAdmin = apiAuth.scopes.includes("admin");
-	const isOwner = await isCollectionOwner(db, existing, apiAuth.userId);
+	const isOwner = await isCollectionOwner(db, existing, apiAuth.subjectId);
 	if (!isAdmin && !isOwner) return forbidden(c);
 
 	const rows = await db
 		.select()
 		.from(collectionVisibilitySettings)
-		.where(eq(collectionVisibilitySettings.collectionId, collectionId));
+		.where(
+			eq(
+				collectionVisibilitySettings.collectionId,
+				collectionId,
+			),
+		);
 
 	return c.json({ data: rows });
 });

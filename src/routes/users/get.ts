@@ -1,8 +1,10 @@
+/** @format */
+
 import { eq } from "drizzle-orm";
 import { Hono } from "hono";
 import { itemResponse } from "@mia-cx/drizzle-query-factory";
 import { hasScope, isAuthenticated } from "../../auth/helpers";
-import { getDb } from "../../db";
+import { getDB } from "../../db";
 import { users } from "../../db/schema";
 import { forbidden, notFound } from "../../lib/errors";
 import { PUBLIC_USER_FIELDS } from "../../services/users";
@@ -14,7 +16,7 @@ const route = new Hono<AppEnv>();
 route.get("/users/:id", async (c) => {
 	const id = c.req.param("id");
 	const auth = c.get("auth");
-	const db = getDb(c.env.DB);
+	const db = getDB(c.env.DB);
 
 	if (isAuthenticated(auth) && auth.scopes.includes("admin")) {
 		const [row] = await db

@@ -1,7 +1,9 @@
+/** @format */
+
 import { eq } from "drizzle-orm";
 import { Hono } from "hono";
 import { requireAuth, requireScope } from "../../auth/helpers";
-import { getDb } from "../../db";
+import { getDB } from "../../db";
 import { permissions } from "../../db/schema";
 import { forbidden, notFound } from "../../lib/errors";
 import type { AppEnv } from "../../env";
@@ -15,7 +17,7 @@ route.delete("/permissions/:id", async (c) => {
 	const apiAuth = requireAuth(auth);
 
 	const id = c.req.param("id");
-	const db = getDb(c.env.DB);
+	const db = getDB(c.env.DB);
 
 	const [existing] = await db
 		.select()
@@ -25,7 +27,7 @@ route.delete("/permissions/:id", async (c) => {
 	if (!existing) return notFound(c, "Permission");
 
 	const isAdmin = apiAuth.scopes.includes("admin");
-	const isSubject = existing.subjectId === apiAuth.userId;
+	const isSubject = existing.subjectId === apiAuth.subjectId;
 	if (!isAdmin && !isSubject) return forbidden(c);
 
 	const [row] = await db

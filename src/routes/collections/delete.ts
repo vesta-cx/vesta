@@ -1,7 +1,9 @@
+/** @format */
+
 import { eq } from "drizzle-orm";
 import { Hono } from "hono";
 import { isAuthenticated, requireScope } from "../../auth/helpers";
-import { getDb } from "../../db";
+import { getDB } from "../../db";
 import { collections } from "../../db/schema";
 import { forbidden, notFound } from "../../lib/errors";
 import { isCollectionOwner } from "../../services/collections";
@@ -18,7 +20,7 @@ route.delete("/collections/:id", async (c) => {
 	requireScope(auth, "collections:write");
 
 	const id = c.req.param("id");
-	const db = getDb(c.env.DB);
+	const db = getDB(c.env.DB);
 
 	const [existing] = await db
 		.select()
@@ -28,7 +30,7 @@ route.delete("/collections/:id", async (c) => {
 	if (!existing) return notFound(c, "Collection");
 
 	const isAdmin = auth.scopes.includes("admin");
-	const isOwner = await isCollectionOwner(db, existing, auth.userId);
+	const isOwner = await isCollectionOwner(db, existing, auth.subjectId);
 	if (!isAdmin && !isOwner) return forbidden(c);
 
 	const [row] = await db

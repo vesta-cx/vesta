@@ -1,3 +1,5 @@
+/** @format */
+
 import { describe, expect, it, vi } from "vitest";
 import { Hono } from "hono";
 
@@ -20,8 +22,16 @@ describe("error helpers", () => {
 	it("errorResponse returns multiple errors with status", async () => {
 		const { res, json } = await createContext((c) =>
 			errorResponse(c, 422, [
-				{ code: "VALIDATION_ERROR", message: "Field required", path: "name" },
-				{ code: "VALIDATION_ERROR", message: "Invalid email", path: "email" },
+				{
+					code: "VALIDATION_ERROR",
+					message: "Field required",
+					path: "name",
+				},
+				{
+					code: "VALIDATION_ERROR",
+					message: "Invalid email",
+					path: "email",
+				},
 			]),
 		);
 		expect(res.status).toBe(422);
@@ -39,7 +49,9 @@ describe("error helpers", () => {
 	});
 
 	it("notFound returns 404", async () => {
-		const { res, json } = await createContext((c) => notFound(c, "User"));
+		const { res, json } = await createContext((c) =>
+			notFound(c, "User"),
+		);
 		expect(res.status).toBe(404);
 		expect(json.errors[0].message).toBe("User not found");
 	});

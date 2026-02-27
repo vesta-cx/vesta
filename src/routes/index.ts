@@ -1,3 +1,5 @@
+/** @format */
+
 export { default as introspect } from "./introspect";
 export * as collections from "./collections/index";
 export * as resources from "./resources/index";

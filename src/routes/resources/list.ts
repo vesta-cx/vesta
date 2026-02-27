@@ -1,3 +1,5 @@
+/** @format */
+
 import { and, eq, inArray, or } from "drizzle-orm";
 import { Hono } from "hono";
 import {
@@ -6,7 +8,7 @@ import {
 	type ListQueryConfig,
 } from "@mia-cx/drizzle-query-factory";
 import { hasScope, isAuthenticated } from "../../auth/helpers";
-import { getDb } from "../../db";
+import { getDB } from "../../db";
 import { permissions, resources } from "../../db/schema";
 import { forbidden } from "../../lib/errors";
 import type { AppEnv } from "../../env";
@@ -32,12 +34,17 @@ const route = new Hono<AppEnv>();
 
 route.get("/resources", async (c) => {
 	const auth = c.get("auth");
-	const db = getDb(c.env.DB);
-	const query = parseListQuery(new URL(c.req.url).searchParams, queryConfig);
+	const db = getDB(c.env.DB);
+	const query = parseListQuery(
+		new URL(c.req.url).searchParams,
+		queryConfig,
+	);
 
 	if (isAuthenticated(auth) && auth.scopes.includes("admin")) {
 		const { rows, total } = await paginatedQuery(db, query);
-		return c.json(listResponse(rows, total, query.limit, query.offset));
+		return c.json(
+			listResponse(rows, total, query.limit, query.offset),
+		);
 	}
 
 	if (isAuthenticated(auth)) {
@@ -54,16 +61,31 @@ route.get("/resources", async (c) => {
 					.from(permissions)
 					.where(
 						and(
-							eq(permissions.subjectId, auth.userId),
-							eq(permissions.objectType, "resource"),
-							eq(permissions.value, "allow"),
+							eq(
+								permissions.subjectId,
+								auth.subjectId,
+							),
+							eq(
+								permissions.objectType,
+								"resource",
+							),
+							eq(
+								permissions.value,
+								"allow",
+							),
 						),
 					),
 			),
 		);
 
-		const { rows, total } = await paginatedQuery(db, query, authWhere);
-		return c.json(listResponse(rows, total, query.limit, query.offset));
+		const { rows, total } = await paginatedQuery(
+			db,
+			query,
+			authWhere,
+		);
+		return c.json(
+			listResponse(rows, total, query.limit, query.offset),
+		);
 	}
 
 	const authWhere = eq(resources.status, "LISTED");
@@ -85,15 +107,16 @@ export default {
 import { sql, type SQL } from "drizzle-orm";
 
 const paginatedQuery = async (
-	db: ReturnType<typeof getDb>,
+	db: ReturnType<typeof getDB>,
 	query: ReturnType<typeof parseListQuery>,
 	authWhere?: SQL,
 ) => {
-	const finalWhere = authWhere
-		? query.where
-			? and(authWhere, query.where)
-			: authWhere
-		: query.where;
+	const finalWhere =
+		authWhere ?
+			query.where ?
+				and(authWhere, query.where)
+			:	authWhere
+		:	query.where;
 
 	const [rows, countResult] = await Promise.all([
 		db

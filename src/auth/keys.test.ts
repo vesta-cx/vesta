@@ -62,14 +62,16 @@ describe("storeApiKey + getApiKeyMeta round-trip", () => {
 	it("stores and retrieves key metadata", async () => {
 		const rawKey = generateApiKey();
 		await storeApiKey(kv, rawKey, {
-			userId: "org_123",
+			subjectType: "organization",
+			subjectId: "org_123",
 			scopes: ["resources:read"],
 			expiresAt: null,
 		});
 
 		const meta = await getApiKeyMeta(kv, rawKey);
 		expect(meta).not.toBeNull();
-		expect(meta!.userId).toBe("org_123");
+		expect(meta!.subjectId).toBe("org_123");
+		expect(meta!.subjectType).toBe("organization");
 		expect(meta!.scopes).toEqual(["resources:read"]);
 		expect(meta!.expiresAt).toBeNull();
 		expect(meta!.createdAt).toBeTruthy();
@@ -87,7 +89,8 @@ describe("storeApiKey + getApiKeyMeta round-trip", () => {
 		).toISOString();
 
 		await storeApiKey(kv, rawKey, {
-			userId: "org_456",
+			subjectType: "organization",
+			subjectId: "org_456",
 			scopes: ["resources:read", "resources:write"],
 			expiresAt: futureDate,
 		});
@@ -104,7 +107,8 @@ describe("revokeApiKey", () => {
 		const rawKey = generateApiKey();
 
 		await storeApiKey(kv, rawKey, {
-			userId: "org_789",
+			subjectType: "organization",
+			subjectId: "org_789",
 			scopes: ["resources:read"],
 			expiresAt: null,
 		});

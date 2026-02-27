@@ -1,3 +1,5 @@
+/** @format */
+
 import type { Context } from "hono";
 import { z, type ZodSchema } from "zod";
 import { zodErrors } from "./errors";
@@ -11,7 +13,12 @@ export const parseBody = async <T>(
 		return c.json(
 			{
 				error: "Invalid JSON body",
-				errors: [{ code: "PARSE_ERROR", message: "Invalid JSON body" }],
+				errors: [
+					{
+						code: "PARSE_ERROR",
+						message: "Invalid JSON body",
+					},
+				],
 			},
 			400,
 		);

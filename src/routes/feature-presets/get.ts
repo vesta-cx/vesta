@@ -1,8 +1,10 @@
+/** @format */
+
 import { eq } from "drizzle-orm";
 import { Hono } from "hono";
 import { itemResponse } from "@mia-cx/drizzle-query-factory";
 import { hasScope, isAuthenticated } from "../../auth/helpers";
-import { getDb } from "../../db";
+import { getDB } from "../../db";
 import { featurePresets } from "../../db/schema";
 import { forbidden, notFound } from "../../lib/errors";
 import type { AppEnv } from "../../env";
@@ -17,7 +19,7 @@ route.get("/feature-presets/:name", async (c) => {
 	}
 
 	const name = c.req.param("name");
-	const db = getDb(c.env.DB);
+	const db = getDB(c.env.DB);
 
 	const [row] = await db
 		.select()

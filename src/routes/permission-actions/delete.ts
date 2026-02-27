@@ -1,7 +1,9 @@
+/** @format */
+
 import { eq } from "drizzle-orm";
 import { Hono } from "hono";
 import { requireScope } from "../../auth/helpers";
-import { getDb } from "../../db";
+import { getDB } from "../../db";
 import { permissionActions } from "../../db/schema";
 import { notFound } from "../../lib/errors";
 import type { AppEnv } from "../../env";
@@ -14,7 +16,7 @@ route.delete("/permission-actions/:slug", async (c) => {
 	requireScope(auth, "admin");
 
 	const slug = c.req.param("slug");
-	const db = getDb(c.env.DB);
+	const db = getDB(c.env.DB);
 
 	const [existing] = await db
 		.select()

@@ -1,8 +1,10 @@
+/** @format */
+
 import { eq } from "drizzle-orm";
 import { Hono } from "hono";
 import { itemResponse } from "@mia-cx/drizzle-query-factory";
 import { requireAuth } from "../../../auth/helpers";
-import { getDb } from "../../../db";
+import { getDB } from "../../../db";
 import { featurePricing, features } from "../../../db/schema";
 import { forbidden, notFound } from "../../../lib/errors";
 import { parseBody, isResponse } from "../../../lib/validation";
@@ -21,7 +23,7 @@ route.put("/features/:slug/pricing", async (c) => {
 	const parsed = await parseBody(c, updateFeaturePricingSchema);
 	if (isResponse(parsed)) return parsed;
 
-	const db = getDb(c.env.DB);
+	const db = getDB(c.env.DB);
 
 	const [existingFeature] = await db
 		.select()
@@ -42,7 +44,9 @@ route.put("/features/:slug/pricing", async (c) => {
 			.set({ ...parsed, updatedAt: new Date() })
 			.where(eq(featurePricing.featureSlug, slug))
 			.returning();
-		return row ? c.json(itemResponse(row)) : notFound(c, "Feature pricing");
+		return row ?
+				c.json(itemResponse(row))
+			:	notFound(c, "Feature pricing");
 	}
 
 	const [row] = await db

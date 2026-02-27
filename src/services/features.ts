@@ -1,3 +1,5 @@
+/** @format */
+
 import type { ListQueryConfig } from "@mia-cx/drizzle-query-factory";
 import {
 	features,

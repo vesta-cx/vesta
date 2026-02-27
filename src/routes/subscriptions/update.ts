@@ -1,8 +1,10 @@
+/** @format */
+
 import { eq } from "drizzle-orm";
 import { Hono } from "hono";
 import { itemResponse } from "@mia-cx/drizzle-query-factory";
 import { requireAuth } from "../../auth/helpers";
-import { getDb } from "../../db";
+import { getDB } from "../../db";
 import { userSubscriptions } from "../../db/schema";
 import { conflict, forbidden, notFound } from "../../lib/errors";
 import { parseBody, isResponse } from "../../lib/validation";
@@ -21,7 +23,7 @@ route.put("/subscriptions/:userId", async (c) => {
 	const parsed = await parseBody(c, updateSubscriptionSchema);
 	if (isResponse(parsed)) return parsed;
 
-	const db = getDb(c.env.DB);
+	const db = getDB(c.env.DB);
 	const [existing] = await db
 		.select()
 		.from(userSubscriptions)
@@ -35,7 +37,9 @@ route.put("/subscriptions/:userId", async (c) => {
 			.set({ ...parsed, updatedAt: new Date() })
 			.where(eq(userSubscriptions.userId, userId))
 			.returning();
-		return row ? c.json(itemResponse(row)) : notFound(c, "Subscription");
+		return row ?
+				c.json(itemResponse(row))
+			:	notFound(c, "Subscription");
 	} catch (err) {
 		if (err instanceof Error && /UNIQUE/i.test(err.message)) {
 			return conflict(c, "Conflict on update");

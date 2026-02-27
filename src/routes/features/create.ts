@@ -1,7 +1,9 @@
+/** @format */
+
 import { Hono } from "hono";
 import { itemResponse } from "@mia-cx/drizzle-query-factory";
 import { requireAuth } from "../../auth/helpers";
-import { getDb } from "../../db";
+import { getDB } from "../../db";
 import { features } from "../../db/schema";
 import { conflict, forbidden } from "../../lib/errors";
 import { parseBody, isResponse } from "../../lib/validation";
@@ -19,9 +21,12 @@ route.post("/features", async (c) => {
 	const parsed = await parseBody(c, createFeatureSchema);
 	if (isResponse(parsed)) return parsed;
 
-	const db = getDb(c.env.DB);
+	const db = getDB(c.env.DB);
 	try {
-		const [row] = await db.insert(features).values(parsed).returning();
+		const [row] = await db
+			.insert(features)
+			.values(parsed)
+			.returning();
 		return c.json(itemResponse(row!), 201);
 	} catch (err) {
 		if (err instanceof Error && /UNIQUE/i.test(err.message)) {

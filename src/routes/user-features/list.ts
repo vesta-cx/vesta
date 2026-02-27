@@ -1,13 +1,26 @@
+/** @format */
+
 import { eq } from "drizzle-orm";
 import { Hono } from "hono";
+import { runListQuery, type ListQueryConfig } from "@mia-cx/drizzle-query-factory";
 import { requireAuth, requireScope } from "../../auth/helpers";
-import { getDb } from "../../db";
+import { getDB } from "../../db";
 import { userFeatures } from "../../db/schema";
 import { forbidden } from "../../lib/errors";
 import type { AppEnv } from "../../env";
 import type { RouteMetadata } from "../../registry";
 
 const route = new Hono<AppEnv>();
+
+const userFeatureListConfig: ListQueryConfig = {
+	filters: {
+		feature_slug: { column: userFeatures.featureSlug },
+	},
+	sortable: {
+		feature_slug: userFeatures.featureSlug,
+	},
+	defaultSort: { key: "feature_slug", dir: "asc" },
+};
 
 route.get("/users/:userId/features", async (c) => {
 	const auth = c.get("auth");
@@ -16,16 +29,15 @@ route.get("/users/:userId/features", async (c) => {
 
 	const userId = c.req.param("userId");
 	const isAdmin = apiAuth.scopes.includes("admin");
-	if (!isAdmin && apiAuth.userId !== userId) return forbidden(c);
+	if (!isAdmin && apiAuth.subjectId !== userId) return forbidden(c);
 
-	const db = getDb(c.env.DB);
-
-	const rows = await db
-		.select()
-		.from(userFeatures)
-		.where(eq(userFeatures.userId, userId));
-
-	return c.json({ data: rows });
+	const envelope = await runListQuery({
+		db: getDB(c.env.DB), table: userFeatures,
+		input: new URL(c.req.url).searchParams, config: userFeatureListConfig,
+		baseWhere: eq(userFeatures.userId, userId),
+		mode: "envelope",
+	});
+	return c.json(envelope);
 });
 
 export default {

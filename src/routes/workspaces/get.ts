@@ -1,8 +1,10 @@
+/** @format */
+
 import { and, eq } from "drizzle-orm";
 import { Hono } from "hono";
 import { itemResponse } from "@mia-cx/drizzle-query-factory";
 import { hasScope, isAuthenticated } from "../../auth/helpers";
-import { getDb } from "../../db";
+import { getDB } from "../../db";
 import { workspaces } from "../../db/schema";
 import { notFound } from "../../lib/errors";
 import { publicWorkspaceWhere } from "../../services/workspaces";
@@ -14,7 +16,7 @@ const route = new Hono<AppEnv>();
 route.get("/workspaces/:id", async (c) => {
 	const id = c.req.param("id");
 	const auth = c.get("auth");
-	const db = getDb(c.env.DB);
+	const db = getDB(c.env.DB);
 
 	const idEq = eq(workspaces.id, id);
 

@@ -112,7 +112,8 @@ describe("auth middleware", () => {
 			const rawKey = "expired-key";
 			const hash = await hashApiKey(rawKey);
 			const meta: ApiKeyMeta = {
-				userId: "org_expired",
+				subjectType: "organization",
+				subjectId: "org_expired",
 				scopes: ["resources:read"],
 				createdAt: "2024-01-01T00:00:00Z",
 				expiresAt: "2024-01-02T00:00:00Z",
@@ -137,7 +138,8 @@ describe("auth middleware", () => {
 			rawKey = "valid-test-key";
 			const hash = await hashApiKey(rawKey);
 			const meta: ApiKeyMeta = {
-				userId: "org_valid",
+				subjectType: "organization",
+				subjectId: "org_valid",
 				scopes: ["resources:read", "resources:write"],
 				createdAt: new Date().toISOString(),
 				expiresAt: null,
@@ -158,7 +160,8 @@ describe("auth middleware", () => {
 			const body = await res.json();
 			expect(body).toEqual({
 				type: "apikey",
-				userId: "org_valid",
+				subjectType: "organization",
+				subjectId: "org_valid",
 				scopes: ["resources:read", "resources:write"],
 			});
 		});
@@ -167,7 +170,8 @@ describe("auth middleware", () => {
 			const futureKey = "future-key";
 			const hash = await hashApiKey(futureKey);
 			const meta: ApiKeyMeta = {
-				userId: "org_future",
+				subjectType: "organization",
+				subjectId: "org_future",
 				scopes: ["admin"],
 				createdAt: new Date().toISOString(),
 				expiresAt: new Date(
@@ -186,11 +190,11 @@ describe("auth middleware", () => {
 
 			const body = (await res.json()) as {
 				type: string;
-				userId: string;
+				subjectId: string;
 				scopes: string[];
 			};
 			expect(body.type).toBe("apikey");
-			expect(body.userId).toBe("org_future");
+			expect(body.subjectId).toBe("org_future");
 			expect(body.scopes).toEqual(["admin"]);
 		});
 	});

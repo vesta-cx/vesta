@@ -1,8 +1,10 @@
+/** @format */
+
 import { and, eq } from "drizzle-orm";
 import { Hono } from "hono";
 import { itemResponse } from "@mia-cx/drizzle-query-factory";
 import { hasScope, requireAuth, requireScope } from "../../auth/helpers";
-import { getDb } from "../../db";
+import { getDB } from "../../db";
 import { workspaces } from "../../db/schema";
 import { conflict, forbidden, notFound } from "../../lib/errors";
 import { parseBody, isResponse } from "../../lib/validation";
@@ -21,7 +23,7 @@ route.put("/workspaces/:id", async (c) => {
 	const parsed = await parseBody(c, updateWorkspaceSchema);
 	if (isResponse(parsed)) return parsed;
 
-	const db = getDb(c.env.DB);
+	const db = getDB(c.env.DB);
 
 	const [existing] = await db
 		.select()
@@ -30,7 +32,7 @@ route.put("/workspaces/:id", async (c) => {
 	if (!existing) return notFound(c, "Workspace");
 
 	const isAdmin = hasScope(auth, "admin");
-	const isOwner = existing.ownerId === apiAuth.userId;
+	const isOwner = existing.ownerId === apiAuth.subjectId;
 	if (!isAdmin && !isOwner) return forbidden(c);
 
 	const data: Record<string, unknown> = {
@@ -38,10 +40,12 @@ route.put("/workspaces/:id", async (c) => {
 	};
 	if (parsed.name !== undefined) data.name = parsed.name;
 	if (parsed.slug !== undefined) data.slug = parsed.slug;
-	if (parsed.description !== undefined) data.description = parsed.description;
+	if (parsed.description !== undefined)
+		data.description = parsed.description;
 	if (parsed.avatarUrl !== undefined) data.avatarUrl = parsed.avatarUrl;
 	if (parsed.bannerUrl !== undefined) data.bannerUrl = parsed.bannerUrl;
-	if (parsed.visibility !== undefined) data.visibility = parsed.visibility;
+	if (parsed.visibility !== undefined)
+		data.visibility = parsed.visibility;
 
 	try {
 		const [row] = await db
@@ -52,7 +56,11 @@ route.put("/workspaces/:id", async (c) => {
 		return c.json(itemResponse(row!));
 	} catch (err) {
 		if (err instanceof Error && err.message.includes("UNIQUE")) {
-			return conflict(c, "Workspace with this slug already exists", "slug");
+			return conflict(
+				c,
+				"Workspace with this slug already exists",
+				"slug",
+			);
 		}
 		throw err;
 	}

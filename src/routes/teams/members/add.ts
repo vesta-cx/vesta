@@ -1,8 +1,10 @@
+/** @format */
+
 import { and, eq } from "drizzle-orm";
 import { Hono } from "hono";
 import { itemResponse } from "@mia-cx/drizzle-query-factory";
 import { hasScope, requireAuth, requireScope } from "../../../auth/helpers";
-import { getDb } from "../../../db";
+import { getDB } from "../../../db";
 import { teamUsers, teams } from "../../../db/schema";
 import { conflict, forbidden, notFound } from "../../../lib/errors";
 import { parseBody, isResponse, z } from "../../../lib/validation";
@@ -24,7 +26,7 @@ route.post("/teams/:teamId/members", async (c) => {
 	const parsed = await parseBody(c, addMemberSchema);
 	if (isResponse(parsed)) return parsed;
 
-	const db = getDb(c.env.DB);
+	const db = getDB(c.env.DB);
 
 	const [team] = await db
 		.select()
@@ -33,7 +35,7 @@ route.post("/teams/:teamId/members", async (c) => {
 	if (!team) return notFound(c, "Team");
 
 	const isAdmin = hasScope(auth, "admin");
-	const isOwner = team.ownerId === apiAuth.userId;
+	const isOwner = team.ownerId === apiAuth.subjectId;
 	if (!isAdmin && !isOwner) return forbidden(c);
 
 	try {

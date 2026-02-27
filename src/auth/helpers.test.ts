@@ -14,17 +14,20 @@ import type { AuthContext } from "./types";
 const guest: AuthContext = { type: "guest" };
 const readUser: AuthContext = {
 	type: "apikey",
-	userId: "user_01",
+	subjectType: "user",
+	subjectId: "user_01",
 	scopes: ["resources:read"],
 };
 const admin: AuthContext = {
 	type: "apikey",
-	userId: "user_admin",
+	subjectType: "user",
+	subjectId: "user_admin",
 	scopes: ["admin"],
 };
 const multiScope: AuthContext = {
 	type: "apikey",
-	userId: "user_02",
+	subjectType: "user",
+	subjectId: "user_02",
 	scopes: ["resources:read", "resources:write"],
 };
 
@@ -70,7 +73,7 @@ describe("requireAuth", () => {
 	it("returns ApiKeyAuth for authenticated user", () => {
 		const result = requireAuth(readUser);
 		expect(result.type).toBe("apikey");
-		expect(result.userId).toBe("user_01");
+		expect(result.subjectId).toBe("user_01");
 	});
 });
 

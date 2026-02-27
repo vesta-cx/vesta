@@ -1,7 +1,9 @@
+/** @format */
+
 import { eq } from "drizzle-orm";
 import { Hono } from "hono";
 import { hasScope, requireAuth, requireScope } from "../../auth/helpers";
-import { getDb } from "../../db";
+import { getDB } from "../../db";
 import { workspaces } from "../../db/schema";
 import { forbidden, notFound } from "../../lib/errors";
 import type { AppEnv } from "../../env";
@@ -15,7 +17,7 @@ route.delete("/workspaces/:id", async (c) => {
 	const apiAuth = requireAuth(auth);
 	requireScope(auth, "workspaces:write");
 
-	const db = getDb(c.env.DB);
+	const db = getDB(c.env.DB);
 
 	const [existing] = await db
 		.select()
@@ -24,7 +26,7 @@ route.delete("/workspaces/:id", async (c) => {
 	if (!existing) return notFound(c, "Workspace");
 
 	const isAdmin = hasScope(auth, "admin");
-	const isOwner = existing.ownerId === apiAuth.userId;
+	const isOwner = existing.ownerId === apiAuth.subjectId;
 	if (!isAdmin && !isOwner) return forbidden(c);
 
 	await db.delete(workspaces).where(eq(workspaces.id, id));

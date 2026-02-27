@@ -1,12 +1,11 @@
+/** @format */
+
 import type { SQL } from "drizzle-orm";
 import { and, sql } from "drizzle-orm";
 import { Hono } from "hono";
-import {
-	parseListQuery,
-	listResponse,
-} from "@mia-cx/drizzle-query-factory";
+import { parseListQuery, listResponse } from "@mia-cx/drizzle-query-factory";
 import { hasScope, isAuthenticated } from "../../auth/helpers";
-import { getDb } from "../../db";
+import { getDB } from "../../db";
 import { collections } from "../../db/schema";
 import { forbidden } from "../../lib/errors";
 import {
@@ -20,7 +19,7 @@ const route = new Hono<AppEnv>();
 
 route.get("/collections", async (c) => {
 	const auth = c.get("auth");
-	const db = getDb(c.env.DB);
+	const db = getDB(c.env.DB);
 	const query = parseListQuery(
 		new URL(c.req.url).searchParams,
 		collectionListConfig,
@@ -28,19 +27,26 @@ route.get("/collections", async (c) => {
 
 	let authWhere: SQL | undefined = publicCollectionWhere();
 	if (isAuthenticated(auth)) {
-		if (!hasScope(auth, "collections:read") && !auth.scopes.includes("admin")) {
+		if (
+			!hasScope(auth, "collections:read") &&
+			!auth.scopes.includes("admin")
+		) {
 			return forbidden(c);
 		}
-		if (hasScope(auth, "collections:read") || auth.scopes.includes("admin")) {
+		if (
+			hasScope(auth, "collections:read") ||
+			auth.scopes.includes("admin")
+		) {
 			authWhere = undefined;
 		}
 	}
 
-	const finalWhere = authWhere
-		? query.where
-			? and(authWhere, query.where)
-			: authWhere
-		: query.where;
+	const finalWhere =
+		authWhere ?
+			query.where ?
+				and(authWhere, query.where)
+			:	authWhere
+		:	query.where;
 
 	const whereClause = finalWhere ?? sql`1=1`;
 
@@ -58,7 +64,12 @@ route.get("/collections", async (c) => {
 			.where(whereClause),
 	]);
 	return c.json(
-		listResponse(rows, countResult[0]?.total ?? 0, query.limit, query.offset),
+		listResponse(
+			rows,
+			countResult[0]?.total ?? 0,
+			query.limit,
+			query.offset,
+		),
 	);
 });
 

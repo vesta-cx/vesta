@@ -21,9 +21,7 @@ pnpm run cf-typegen
 - deploy target is `wrangler --env v<major>`
 - route is env-scoped to `erato.vesta.cx/v<major>/*`
 
-This allows multiple API majors to stay live concurrently (for example, `v1` and
-`v2`) because each major is deployed to a separate Wrangler environment/Worker
-service.
+This allows multiple API majors to stay live concurrently (for example, `v1` and `v2`) because each major is deployed to a separate Wrangler environment/Worker service.
 
 Pass the `CloudflareBindings` as generics when instantiation `Hono`:
 

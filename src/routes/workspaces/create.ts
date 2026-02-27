@@ -1,7 +1,9 @@
+/** @format */
+
 import { Hono } from "hono";
 import { itemResponse } from "@mia-cx/drizzle-query-factory";
 import { requireScope } from "../../auth/helpers";
-import { getDb } from "../../db";
+import { getDB } from "../../db";
 import { workspaces } from "../../db/schema";
 import { conflict } from "../../lib/errors";
 import { parseBody, isResponse } from "../../lib/validation";
@@ -18,10 +20,11 @@ route.post("/workspaces", async (c) => {
 	const parsed = await parseBody(c, createWorkspaceSchema);
 	if (isResponse(parsed)) return parsed;
 
-	const db = getDb(c.env.DB);
+	const db = getDB(c.env.DB);
 
 	const visibility = parsed.visibility ?? "public";
-	const validVisibility = visibility === "unlisted" ? "public" : visibility;
+	const validVisibility =
+		visibility === "unlisted" ? "public" : visibility;
 
 	try {
 		const [row] = await db
@@ -30,17 +33,25 @@ route.post("/workspaces", async (c) => {
 				name: parsed.name,
 				slug: parsed.slug,
 				description: parsed.description ?? null,
-				ownerType: parsed.ownerType as "user" | "organization",
+				ownerType: parsed.ownerType as
+					| "user"
+					| "organization",
 				ownerId: parsed.ownerId,
 				avatarUrl: parsed.avatarUrl ?? null,
 				bannerUrl: parsed.bannerUrl ?? null,
-				visibility: validVisibility as "public" | "private",
+				visibility: validVisibility as
+					| "public"
+					| "private",
 			})
 			.returning();
 		return c.json(itemResponse(row!), 201);
 	} catch (err) {
 		if (err instanceof Error && err.message.includes("UNIQUE")) {
-			return conflict(c, "Workspace with this slug already exists", "slug");
+			return conflict(
+				c,
+				"Workspace with this slug already exists",
+				"slug",
+			);
 		}
 		throw err;
 	}

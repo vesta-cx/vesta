@@ -1,8 +1,10 @@
+/** @format */
+
 import { and, eq } from "drizzle-orm";
 import { Hono } from "hono";
 import { itemResponse } from "@mia-cx/drizzle-query-factory";
 import { requireScope } from "../../../auth/helpers";
-import { getDb } from "../../../db";
+import { getDB } from "../../../db";
 import { resourceUrls } from "../../../db/schema";
 import { notFound } from "../../../lib/errors";
 import { parseBody, isResponse, z } from "../../../lib/validation";
@@ -24,7 +26,7 @@ route.put("/resources/:resourceId/urls/:position", async (c) => {
 	const parsed = await parseBody(c, updateUrlSchema);
 	if (isResponse(parsed)) return parsed;
 
-	const db = getDb(c.env.DB);
+	const db = getDB(c.env.DB);
 	const resourceId = c.req.param("resourceId");
 	const position = parseInt(c.req.param("position"), 10);
 

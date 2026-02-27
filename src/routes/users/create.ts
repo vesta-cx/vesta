@@ -1,7 +1,9 @@
+/** @format */
+
 import { Hono } from "hono";
 import { itemResponse } from "@mia-cx/drizzle-query-factory";
 import { requireAuth } from "../../auth/helpers";
-import { getDb } from "../../db";
+import { getDB } from "../../db";
 import { users } from "../../db/schema";
 import { conflict, forbidden } from "../../lib/errors";
 import { parseBody, isResponse } from "../../lib/validation";
@@ -20,17 +22,18 @@ route.post("/users", async (c) => {
 	const parsed = await parseBody(c, createUserSchema);
 	if (isResponse(parsed)) return parsed;
 
-	const db = getDb(c.env.DB);
+	const db = getDB(c.env.DB);
 	try {
-		const [row] = await db
-			.insert(users)
-			.values(parsed)
-			.returning();
+		const [row] = await db.insert(users).values(parsed).returning();
 		return c.json(itemResponse(row!), 201);
 	} catch (err) {
 		const msg = err instanceof Error ? err.message : "";
 		if (/UNIQUE|unique constraint/i.test(msg)) {
-			return conflict(c, "User already exists", "workosUserId");
+			return conflict(
+				c,
+				"User already exists",
+				"workosUserId",
+			);
 		}
 		throw err;
 	}

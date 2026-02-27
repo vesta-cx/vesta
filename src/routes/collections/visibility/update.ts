@@ -1,7 +1,9 @@
+/** @format */
+
 import { eq } from "drizzle-orm";
 import { Hono } from "hono";
 import { requireAuth, requireScope } from "../../../auth/helpers";
-import { getDb } from "../../../db";
+import { getDB } from "../../../db";
 import {
 	ENGAGEMENT_FILTER_ACTIONS,
 	collections,
@@ -30,7 +32,7 @@ route.put("/collections/:collectionId/visibility", async (c) => {
 	const parsed = await parseBody(c, updateVisibilitySchema);
 	if (isResponse(parsed)) return parsed;
 
-	const db = getDb(c.env.DB);
+	const db = getDB(c.env.DB);
 	const collectionId = c.req.param("collectionId");
 
 	const [existing] = await db
@@ -41,12 +43,17 @@ route.put("/collections/:collectionId/visibility", async (c) => {
 	if (!existing) return notFound(c, "Collection");
 
 	const isAdmin = apiAuth.scopes.includes("admin");
-	const isOwner = await isCollectionOwner(db, existing, apiAuth.userId);
+	const isOwner = await isCollectionOwner(db, existing, apiAuth.subjectId);
 	if (!isAdmin && !isOwner) return forbidden(c);
 
 	await db
 		.delete(collectionVisibilitySettings)
-		.where(eq(collectionVisibilitySettings.collectionId, collectionId));
+		.where(
+			eq(
+				collectionVisibilitySettings.collectionId,
+				collectionId,
+			),
+		);
 
 	if (parsed.length > 0) {
 		await db.insert(collectionVisibilitySettings).values(
@@ -61,7 +68,12 @@ route.put("/collections/:collectionId/visibility", async (c) => {
 	const rows = await db
 		.select()
 		.from(collectionVisibilitySettings)
-		.where(eq(collectionVisibilitySettings.collectionId, collectionId));
+		.where(
+			eq(
+				collectionVisibilitySettings.collectionId,
+				collectionId,
+			),
+		);
 
 	return c.json({ data: rows });
 });

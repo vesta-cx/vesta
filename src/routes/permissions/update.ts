@@ -1,8 +1,10 @@
+/** @format */
+
 import { eq } from "drizzle-orm";
 import { Hono } from "hono";
 import { itemResponse } from "@mia-cx/drizzle-query-factory";
 import { requireAuth, requireScope } from "../../auth/helpers";
-import { getDb } from "../../db";
+import { getDB } from "../../db";
 import { permissions } from "../../db/schema";
 import { conflict, forbidden, notFound } from "../../lib/errors";
 import { parseBody, isResponse } from "../../lib/validation";
@@ -21,7 +23,7 @@ route.put("/permissions/:id", async (c) => {
 	const parsed = await parseBody(c, updatePermissionSchema);
 	if (isResponse(parsed)) return parsed;
 
-	const db = getDb(c.env.DB);
+	const db = getDB(c.env.DB);
 	const [existing] = await db
 		.select()
 		.from(permissions)
@@ -30,7 +32,7 @@ route.put("/permissions/:id", async (c) => {
 	if (!existing) return notFound(c, "Permission");
 
 	const isAdmin = apiAuth.scopes.includes("admin");
-	const isSubject = existing.subjectId === apiAuth.userId;
+	const isSubject = existing.subjectId === apiAuth.subjectId;
 	if (!isAdmin && !isSubject) return forbidden(c);
 
 	try {
@@ -39,7 +41,9 @@ route.put("/permissions/:id", async (c) => {
 			.set({ ...parsed, updatedAt: new Date() })
 			.where(eq(permissions.id, id))
 			.returning();
-		return row ? c.json(itemResponse(row)) : notFound(c, "Permission");
+		return row ?
+				c.json(itemResponse(row))
+			:	notFound(c, "Permission");
 	} catch (err) {
 		if (err instanceof Error && /UNIQUE/i.test(err.message)) {
 			return conflict(c, "Conflict on update");

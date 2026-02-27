@@ -42,7 +42,8 @@ export const authMiddleware = createMiddleware<AuthEnv>(async (c, next) => {
 
 	c.set("auth", {
 		type: "apikey",
-		userId: meta.userId,
+		subjectType: meta.subjectType,
+		subjectId: meta.subjectId,
 		scopes: meta.scopes,
 	});
 

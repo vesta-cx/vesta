@@ -1,7 +1,9 @@
+/** @format */
+
 import { and, eq } from "drizzle-orm";
 import { Hono } from "hono";
 import { hasScope, requireAuth, requireScope } from "../../../auth/helpers";
-import { getDb } from "../../../db";
+import { getDB } from "../../../db";
 import { teamUsers, teams } from "../../../db/schema";
 import { forbidden, notFound } from "../../../lib/errors";
 import type { AppEnv } from "../../../env";
@@ -15,7 +17,7 @@ route.delete("/teams/:teamId/members/:userId", async (c) => {
 	const apiAuth = requireAuth(auth);
 	requireScope(auth, "teams:write");
 
-	const db = getDb(c.env.DB);
+	const db = getDB(c.env.DB);
 
 	const [team] = await db
 		.select()
@@ -24,12 +26,17 @@ route.delete("/teams/:teamId/members/:userId", async (c) => {
 	if (!team) return notFound(c, "Team");
 
 	const isAdmin = hasScope(auth, "admin");
-	const isOwner = team.ownerId === apiAuth.userId;
+	const isOwner = team.ownerId === apiAuth.subjectId;
 	if (!isAdmin && !isOwner) return forbidden(c);
 
 	const [deleted] = await db
 		.delete(teamUsers)
-		.where(and(eq(teamUsers.teamId, teamId), eq(teamUsers.userId, userId)))
+		.where(
+			and(
+				eq(teamUsers.teamId, teamId),
+				eq(teamUsers.userId, userId),
+			),
+		)
 		.returning();
 
 	if (!deleted) return notFound(c, "Team member");

@@ -1,3 +1,5 @@
+/** @format */
+
 import { eq, type SQL } from "drizzle-orm";
 import type { ListQueryConfig } from "@mia-cx/drizzle-query-factory";
 import { users } from "../db/schema";

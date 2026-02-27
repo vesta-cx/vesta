@@ -1,7 +1,9 @@
+/** @format */
+
 import { eq } from "drizzle-orm";
 import { Hono } from "hono";
 import { requireScope } from "../../auth/helpers";
-import { getDb } from "../../db";
+import { getDB } from "../../db";
 import {
 	engagementComments,
 	engagementMentions,
@@ -18,7 +20,7 @@ route.delete("/engagements/:id", async (c) => {
 	const auth = c.get("auth");
 	requireScope(auth, "engagements:write");
 
-	const db = getDb(c.env.DB);
+	const db = getDB(c.env.DB);
 
 	const [existing] = await db
 		.select()
@@ -26,8 +28,12 @@ route.delete("/engagements/:id", async (c) => {
 		.where(eq(engagements.id, id));
 	if (!existing) return notFound(c, "Engagement");
 
-	await db.delete(engagementComments).where(eq(engagementComments.engagementId, id));
-	await db.delete(engagementMentions).where(eq(engagementMentions.engagementId, id));
+	await db
+		.delete(engagementComments)
+		.where(eq(engagementComments.engagementId, id));
+	await db
+		.delete(engagementMentions)
+		.where(eq(engagementMentions.engagementId, id));
 	await db.delete(engagements).where(eq(engagements.id, id));
 
 	return c.body(null, 204);

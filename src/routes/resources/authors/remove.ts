@@ -1,7 +1,9 @@
+/** @format */
+
 import { and, eq } from "drizzle-orm";
 import { Hono } from "hono";
 import { requireScope } from "../../../auth/helpers";
-import { getDb } from "../../../db";
+import { getDB } from "../../../db";
 import { resourceAuthors } from "../../../db/schema";
 import { notFound } from "../../../lib/errors";
 import type { AppEnv } from "../../../env";
@@ -15,15 +17,21 @@ route.delete(
 		const auth = c.get("auth");
 		requireScope(auth, "resources:write");
 
-		const db = getDb(c.env.DB);
+		const db = getDB(c.env.DB);
 		const { resourceId, authorType, authorId } = c.req.param();
 
 		const [row] = await db
 			.delete(resourceAuthors)
 			.where(
 				and(
-					eq(resourceAuthors.resourceId, resourceId),
-					eq(resourceAuthors.authorType, authorType),
+					eq(
+						resourceAuthors.resourceId,
+						resourceId,
+					),
+					eq(
+						resourceAuthors.authorType,
+						authorType,
+					),
 					eq(resourceAuthors.authorId, authorId),
 				),
 			)

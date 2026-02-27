@@ -1,3 +1,5 @@
+/** @format */
+
 import { eq } from "drizzle-orm";
 import type { ListQueryConfig } from "@mia-cx/drizzle-query-factory";
 import type { Database } from "../db";
@@ -41,8 +43,7 @@ export const updateCollectionSchema = z.object({
 	visibility: z.enum(COLLECTION_VISIBILITY).optional(),
 });
 
-export const publicCollectionWhere = () =>
-	eq(collections.visibility, "public");
+export const publicCollectionWhere = () => eq(collections.visibility, "public");
 
 export const isCollectionOwner = async (
 	db: Database,

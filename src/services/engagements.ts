@@ -1,3 +1,5 @@
+/** @format */
+
 import type { ListQueryConfig } from "@mia-cx/drizzle-query-factory";
 import { engagements } from "../db/schema";
 import { z } from "../lib/validation";

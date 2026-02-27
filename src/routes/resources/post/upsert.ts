@@ -1,8 +1,10 @@
+/** @format */
+
 import { eq } from "drizzle-orm";
 import { Hono } from "hono";
 import { itemResponse } from "@mia-cx/drizzle-query-factory";
 import { requireScope } from "../../../auth/helpers";
-import { getDb } from "../../../db";
+import { getDB } from "../../../db";
 import { posts } from "../../../db/schema";
 import { parseBody, isResponse, z } from "../../../lib/validation";
 import type { AppEnv } from "../../../env";
@@ -23,7 +25,7 @@ route.put("/resources/:resourceId/post", async (c) => {
 	const parsed = await parseBody(c, upsertPostSchema);
 	if (isResponse(parsed)) return parsed;
 
-	const db = getDb(c.env.DB);
+	const db = getDB(c.env.DB);
 	const resourceId = c.req.param("resourceId");
 
 	const [existing] = await db

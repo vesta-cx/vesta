@@ -1,7 +1,9 @@
+/** @format */
+
 import { Hono } from "hono";
 import { itemResponse } from "@mia-cx/drizzle-query-factory";
 import { requireScope } from "../../../auth/helpers";
-import { getDb } from "../../../db";
+import { getDB } from "../../../db";
 import { resourceUrls } from "../../../db/schema";
 import { conflict } from "../../../lib/errors";
 import { parseBody, isResponse, z } from "../../../lib/validation";
@@ -24,7 +26,7 @@ route.post("/resources/:resourceId/urls", async (c) => {
 	const parsed = await parseBody(c, addUrlSchema);
 	if (isResponse(parsed)) return parsed;
 
-	const db = getDb(c.env.DB);
+	const db = getDB(c.env.DB);
 	const resourceId = c.req.param("resourceId");
 
 	try {
@@ -35,7 +37,11 @@ route.post("/resources/:resourceId/urls", async (c) => {
 		return c.json(itemResponse(row!), 201);
 	} catch (err) {
 		if (err instanceof Error && /UNIQUE/i.test(err.message)) {
-			return conflict(c, "URL at this position already exists", "position");
+			return conflict(
+				c,
+				"URL at this position already exists",
+				"position",
+			);
 		}
 		throw err;
 	}

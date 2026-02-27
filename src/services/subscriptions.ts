@@ -1,3 +1,5 @@
+/** @format */
+
 import { DISCOUNT_TYPES } from "../db/schema";
 import { z } from "../lib/validation";
 

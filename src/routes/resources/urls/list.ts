@@ -1,7 +1,10 @@
+/** @format */
+
 import { eq } from "drizzle-orm";
 import { Hono } from "hono";
+import { runListQuery, type ListQueryConfig } from "@mia-cx/drizzle-query-factory";
 import { hasScope, isAuthenticated } from "../../../auth/helpers";
-import { getDb } from "../../../db";
+import { getDB } from "../../../db";
 import { resourceUrls } from "../../../db/schema";
 import { forbidden } from "../../../lib/errors";
 import type { AppEnv } from "../../../env";
@@ -9,22 +12,27 @@ import type { RouteMetadata } from "../../../registry";
 
 const route = new Hono<AppEnv>();
 
+const resourceUrlListConfig: ListQueryConfig = {
+	filters: {
+		position: { column: resourceUrls.position, parse: (value) => Number(value) },
+	},
+	sortable: { position: resourceUrls.position },
+	defaultSort: { key: "position", dir: "asc" },
+};
+
 route.get("/resources/:resourceId/urls", async (c) => {
 	const auth = c.get("auth");
 	if (isAuthenticated(auth) && !hasScope(auth, "resources:read")) {
 		return forbidden(c);
 	}
 
-	const db = getDb(c.env.DB);
-	const resourceId = c.req.param("resourceId");
-
-	const rows = await db
-		.select()
-		.from(resourceUrls)
-		.where(eq(resourceUrls.resourceId, resourceId))
-		.orderBy(resourceUrls.position);
-
-	return c.json({ data: rows });
+	const envelope = await runListQuery({
+		db: getDB(c.env.DB), table: resourceUrls,
+		input: new URL(c.req.url).searchParams, config: resourceUrlListConfig,
+		baseWhere: eq(resourceUrls.resourceId, c.req.param("resourceId")),
+		mode: "envelope",
+	});
+	return c.json(envelope);
 });
 
 export default {

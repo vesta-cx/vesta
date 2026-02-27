@@ -1,8 +1,10 @@
+/** @format */
+
 import { and, eq } from "drizzle-orm";
 import { Hono } from "hono";
 import { itemResponse } from "@mia-cx/drizzle-query-factory";
 import { isAuthenticated, requireScope } from "../../auth/helpers";
-import { getDb } from "../../db";
+import { getDB } from "../../db";
 import { resources } from "../../db/schema";
 import { conflict, forbidden, notFound } from "../../lib/errors";
 import { parseBody, isResponse } from "../../lib/validation";
@@ -20,15 +22,18 @@ route.put("/resources/:id", async (c) => {
 	const parsed = await parseBody(c, updateResourceSchema);
 	if (isResponse(parsed)) return parsed;
 
-	const db = getDb(c.env.DB);
+	const db = getDB(c.env.DB);
 
-	const isAdmin =
-		isAuthenticated(auth) && auth.scopes.includes("admin");
-	const where = isAdmin
-		? eq(resources.id, id)
-		: and(
+	const isAdmin = isAuthenticated(auth) && auth.scopes.includes("admin");
+	const where =
+		isAdmin ?
+			eq(resources.id, id)
+		:	and(
 				eq(resources.id, id),
-				eq(resources.ownerId, (auth as { userId: string }).userId),
+				eq(
+					resources.ownerId,
+					(auth as { subjectId: string }).subjectId,
+				),
 			);
 
 	try {
@@ -37,7 +42,9 @@ route.put("/resources/:id", async (c) => {
 			.set({ ...parsed, updatedAt: new Date() })
 			.where(where)
 			.returning();
-		return row ? c.json(itemResponse(row)) : notFound(c, "Resource");
+		return row ?
+				c.json(itemResponse(row))
+			:	notFound(c, "Resource");
 	} catch (err) {
 		if (err instanceof Error && /UNIQUE/i.test(err.message)) {
 			return conflict(c, "Conflict on update");

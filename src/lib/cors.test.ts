@@ -1,3 +1,5 @@
+/** @format */
+
 import { describe, expect, it } from "vitest";
 import { Hono } from "hono";
 import { corsMiddleware } from "./cors";
@@ -65,7 +67,7 @@ describe("CORS middleware", () => {
 		const res = await app.request("/test", {
 			method: "OPTIONS",
 			headers: {
-				Origin: "https://vesta.cx",
+				"Origin": "https://vesta.cx",
 				"Access-Control-Request-Method": "POST",
 			},
 		});

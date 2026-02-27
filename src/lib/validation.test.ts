@@ -1,3 +1,5 @@
+/** @format */
+
 import { describe, expect, it } from "vitest";
 import { Hono } from "hono";
 import { parseBody, isResponse, z } from "./validation";
@@ -23,7 +25,10 @@ describe("parseBody", () => {
 		const res = await app.request("/test", {
 			method: "POST",
 			headers: { "Content-Type": "application/json" },
-			body: JSON.stringify({ name: "Test", email: "test@example.com" }),
+			body: JSON.stringify({
+				name: "Test",
+				email: "test@example.com",
+			}),
 		});
 		expect(res.status).toBe(200);
 		const json = await res.json();
@@ -45,7 +50,10 @@ describe("parseBody", () => {
 		const res = await app.request("/test", {
 			method: "POST",
 			headers: { "Content-Type": "application/json" },
-			body: JSON.stringify({ name: "", email: "not-an-email" }),
+			body: JSON.stringify({
+				name: "",
+				email: "not-an-email",
+			}),
 		});
 		expect(res.status).toBe(422);
 		const json = await res.json();

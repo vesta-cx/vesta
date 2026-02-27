@@ -1,8 +1,10 @@
+/** @format */
+
 import { eq } from "drizzle-orm";
 import { Hono } from "hono";
 import { itemResponse } from "@mia-cx/drizzle-query-factory";
 import { requireAuth } from "../../auth/helpers";
-import { getDb } from "../../db";
+import { getDB } from "../../db";
 import { users } from "../../db/schema";
 import { forbidden, notFound } from "../../lib/errors";
 import { parseBody, isResponse } from "../../lib/validation";
@@ -16,7 +18,7 @@ route.put("/users/:id", async (c) => {
 	const id = c.req.param("id");
 	const auth = requireAuth(c.get("auth"));
 
-	const isSelf = auth.userId === id;
+	const isSelf = auth.subjectId === id;
 	const isAdmin = auth.scopes.includes("admin");
 
 	if (!isSelf && !isAdmin) {
@@ -31,7 +33,7 @@ route.put("/users/:id", async (c) => {
 	const parsed = await parseBody(c, updateUserSchema);
 	if (isResponse(parsed)) return parsed;
 
-	const db = getDb(c.env.DB);
+	const db = getDB(c.env.DB);
 	const [row] = await db
 		.update(users)
 		.set({ ...parsed, updatedAt: new Date() })

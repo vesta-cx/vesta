@@ -1,8 +1,10 @@
+/** @format */
+
 import { and, eq, sql } from "drizzle-orm";
 import { Hono } from "hono";
 import { parseListQuery, listResponse } from "@mia-cx/drizzle-query-factory";
 import { hasScope, isAuthenticated } from "../../auth/helpers";
-import { getDb } from "../../db";
+import { getDB } from "../../db";
 import { workspaces } from "../../db/schema";
 import { forbidden } from "../../lib/errors";
 import {
@@ -16,8 +18,11 @@ const route = new Hono<AppEnv>();
 
 route.get("/workspaces", async (c) => {
 	const auth = c.get("auth");
-	const db = getDb(c.env.DB);
-	const query = parseListQuery(new URL(c.req.url).searchParams, workspaceListConfig);
+	const db = getDB(c.env.DB);
+	const query = parseListQuery(
+		new URL(c.req.url).searchParams,
+		workspaceListConfig,
+	);
 
 	let authWhere: ReturnType<typeof eq> | undefined;
 
@@ -32,11 +37,12 @@ route.get("/workspaces", async (c) => {
 		authWhere = publicWorkspaceWhere();
 	}
 
-	const finalWhere = authWhere
-		? query.where
-			? and(authWhere, query.where)
-			: authWhere
-		: query.where;
+	const finalWhere =
+		authWhere ?
+			query.where ?
+				and(authWhere, query.where)
+			:	authWhere
+		:	query.where;
 
 	const [rows, countResult] = await Promise.all([
 		db

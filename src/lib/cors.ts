@@ -1,3 +1,5 @@
+/** @format */
+
 import { cors } from "hono/cors";
 
 const DEFAULT_ALLOWED_ORIGINS = ["https://vesta.cx"];
@@ -21,14 +23,19 @@ const isAllowedOrigin = (origin: string, allowedOrigins: string[]): boolean => {
 };
 
 export const corsMiddleware = (envOrigins?: string) => {
-	const extraOrigins = envOrigins
-		? envOrigins.split(",").map((s) => s.trim()).filter(Boolean)
-		: [];
+	const extraOrigins =
+		envOrigins ?
+			envOrigins
+				.split(",")
+				.map((s) => s.trim())
+				.filter(Boolean)
+		:	[];
 	const allowedOrigins = [...DEFAULT_ALLOWED_ORIGINS, ...extraOrigins];
 
 	return cors({
 		origin: (origin) => {
-			if (isAllowedOrigin(origin, allowedOrigins)) return origin;
+			if (isAllowedOrigin(origin, allowedOrigins))
+				return origin;
 			return "";
 		},
 		allowMethods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],

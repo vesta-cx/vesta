@@ -53,8 +53,7 @@ Examples: AdminSidebar, UploadProgressToast, SurveyPlayer, SourceEditor
 {/if}
 ```
 
-→ `ExpandableRow` or `AccordionItem` in UI package (if generic) or app component
-(if domain-bound)
+→ `ExpandableRow` or `AccordionItem` in UI package (if generic) or app component (if domain-bound)
 
 ### Action button group
 
@@ -65,8 +64,7 @@ Examples: AdminSidebar, UploadProgressToast, SurveyPlayer, SourceEditor
 </div>
 ```
 
-→ `ButtonGroup` or use existing `Button` with variant; only extract if the
-pattern repeats with same structure
+→ `ButtonGroup` or use existing `Button` with variant; only extract if the pattern repeats with same structure
 
 ## Monorepo Structure (Vesta/mia-cx)
 

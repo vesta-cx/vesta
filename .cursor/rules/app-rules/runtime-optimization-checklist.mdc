@@ -1,0 +1,27 @@
+# Runtime Optimization Checklist
+
+Use this checklist before applying runtime-level performance tweaks.
+
+## 1) Match optimization to runtime
+
+- **Node container services** (Docker/Kubernetes): Node runtime optimizations can apply (e.g. pointer compression).
+- **Cloudflare Workers** (`wrangler.jsonc` apps): Node base-image optimizations do **not** apply.
+
+## 2) Remove buffering before runtime swaps
+
+For media/file-heavy Node services, prioritize stream-based I/O first:
+
+- Avoid `file.arrayBuffer()` for multi-MB/GB uploads.
+- Avoid `readFileSync()` before object-storage upload.
+- Prefer request->disk and disk->storage streaming paths.
+
+## 3) Canary + rollback required
+
+Before rollout, compare baseline vs canary on realistic workloads:
+
+- Memory (RSS + `heapUsed`)
+- p50/p95/p99 latency
+- Error/failure rate
+- CPU throttling and queue depth
+
+Rollback if correctness regresses, failure rate rises, or tail latency degrades beyond agreed threshold.

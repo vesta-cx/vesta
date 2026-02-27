@@ -1,0 +1,30 @@
+---
+description: cleanc Wrangler-style invariants for config loading and command resolution. Apply when editing packages/cleanc or .cleancrc/cleanc.config files to avoid breaking merge semantics, legacy compatibility, and schema discoverability.
+alwaysApply: false
+globs: packages/cleanc/**, **/.cleancrc*, **/cleanc.config.*
+---
+
+# cleanc config/runtime invariants
+
+## Keep config model stable (why: UX contract)
+
+- cleanc config shape is Wrangler-style: top-level `dirs` plus `commands.<name>.dirs`.
+- Runtime contract: bare `cleanc` uses `dirs`; `cleanc <command>` uses merged `dirs + commands[command].dirs`.
+- Keep built-ins in `packages/cleanc/src/built-ins.ts` and expose via `init`/docs. Do not silently inject broad built-ins at runtime.
+
+## Keep migrations and aliases stable (why: avoid breaking existing repos)
+
+- Preserve aliases: `clean` => global run, `install:clean` => `install`.
+- Preserve legacy mapping in loader:
+  - `clean` -> `dirs`
+  - `installClean` -> `commands.install.dirs`
+  - `buildClean` -> `commands.build:clean.dirs`
+  - `devClean` -> `commands.dev:clean.dirs`
+  - `vesta:clean.dirs` / `cleanDirs` -> `dirs`
+- Unknown command must fail and list available configured commands.
+
+## Keep safety + IntelliSense wired (why: prevent destructive mistakes and config drift)
+
+- Preserve path-traversal guard in run logic (`cwd` confinement) for both config and `--dirs` overrides.
+- Keep `--dirs` as highest precedence override for one-off runs.
+- Keep schema integration in sync: `schema/cleancrc.schema.json`, `package.json` export `./schema`, and README `$schema` example.

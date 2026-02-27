@@ -1,9 +1,6 @@
 ---
 name: optimize-agent-rules
-description:
-  Audit and improve rules, skills, and subagents by keeping tribal knowledge and
-  removing noise. Apply refactoring patterns (Vague→Specific, Negative→Positive,
-  Imprecise→Precise) to tighten guidance.
+description: Audit and improve rules, skills, and subagents by keeping tribal knowledge and removing noise. Apply refactoring patterns (Vague→Specific, Negative→Positive, Imprecise→Precise) to tighten guidance.
 ---
 
 <!-- @format -->
@@ -12,9 +9,7 @@ description:
 
 ## Purpose
 
-Audit and improve existing rules, skills, and subagents by focusing on **tribal
-knowledge** (non-obvious facts agents can't infer from code) and removing noise,
-redundancy, and inferrable content.
+Audit and improve existing rules, skills, and subagents by focusing on **tribal knowledge** (non-obvious facts agents can't infer from code) and removing noise, redundancy, and inferrable content.
 
 ---
 
@@ -22,12 +17,9 @@ redundancy, and inferrable content.
 
 **For all rules/skills/subagents:**
 
-- [ ] **Tribal, not inferrable**: Can agents discover this in code, tests, or
-      docs? If yes, delete or move.
-- [ ] **Focused, not comprehensive**: <50 lines for rules; 2–3 core concepts for
-      skills. If longer, extract to external docs.
-- [ ] **Explains the "why"**: Is there a constraint or gotcha? Not just "use
-      X"—"use X because Y constraint."
+- [ ] **Tribal, not inferrable**: Can agents discover this in code, tests, or docs? If yes, delete or move.
+- [ ] **Focused, not comprehensive**: <50 lines for rules; 2–3 core concepts for skills. If longer, extract to external docs.
+- [ ] **Explains the "why"**: Is there a constraint or gotcha? Not just "use X"—"use X because Y constraint."
 
 ---
 
@@ -35,8 +27,7 @@ redundancy, and inferrable content.
 
 ### Rules (`.cursor/rules/*.mdc`)
 
-- [ ] **Remove inferrable content**: If agents can discover it from code, tests,
-      or linting config, delete it
+- [ ] **Remove inferrable content**: If agents can discover it from code, tests, or linting config, delete it
 - [ ] **Scope tight**: Does it have `globs` limiting where it applies?
 - [ ] **Emphasize "why"**: Explain the constraint, not just the pattern
 
@@ -79,8 +70,7 @@ Be concise. Don't ramble. Use good formatting.
 
 ### Pattern 2: Negative → Positive
 
-Reframe as desired behavior, not forbidden action. Negative instructions make
-models fixate on the forbidden action.
+Reframe as desired behavior, not forbidden action. Negative instructions make models fixate on the forbidden action.
 
 **Before:**
 
@@ -132,8 +122,7 @@ Use 2–3 sentences. Target: high school student. Include one concrete example.
 **Comprehensive skill → Focused reference**
 
 ```markdown
-Before: 9 sections (History, Concepts, Setup, Writing, Testing, Deployment,
-Troubleshooting, Tuning, Rollbacks)
+Before: 9 sections (History, Concepts, Setup, Writing, Testing, Deployment, Troubleshooting, Tuning, Rollbacks)
 
 After:
 
@@ -156,8 +145,7 @@ After:
 ```markdown
 Before: Use openpyxl for Excel, not xlrd.
 
-After: Use openpyxl for Excel, not xlrd. Reason: xlrd only supports .xls
-(legacy); doesn't support .xlsx.
+After: Use openpyxl for Excel, not xlrd. Reason: xlrd only supports .xls (legacy); doesn't support .xlsx.
 ```
 
 ---
@@ -179,9 +167,7 @@ After:
 
 # WorkOS + Cloudflare Workers
 
-WorkOS SDK doesn't run in Workers. Use custom REST API instead. See
-apps/shared/auth/workos-rest.ts for endpoints and request format. (Token
-storage, signing, rotation are discoverable from code/tests.)
+WorkOS SDK doesn't run in Workers. Use custom REST API instead. See apps/shared/auth/workos-rest.ts for endpoints and request format. (Token storage, signing, rotation are discoverable from code/tests.)
 ```
 
 ---
@@ -189,11 +175,8 @@ storage, signing, rotation are discoverable from code/tests.)
 ## Workflow
 
 1. Read the rule/skill
-2. Ask: **Is this tribal?** (Discoverable from code/tests/external docs?) → If
-   no, delete or move
+2. Ask: **Is this tribal?** (Discoverable from code/tests/external docs?) → If no, delete or move
 3. Ask: **Is this focused?** (< limit?) → If no, extract to external docs
-4. Ask: **Does it explain why?** (Constraint, gotcha, non-obvious choice?) → If
-   no, add it
-5. Apply refactoring patterns: Vague→Specific, Negative→Positive,
-   Imprecise→Precise
+4. Ask: **Does it explain why?** (Constraint, gotcha, non-obvious choice?) → If no, add it
+5. Apply refactoring patterns: Vague→Specific, Negative→Positive, Imprecise→Precise
 6. Commit

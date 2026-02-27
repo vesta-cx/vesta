@@ -1,3 +1,5 @@
+<!-- @format -->
+
 # Abstract Component — Reference
 
 ## UI Package vs App Components
@@ -5,6 +7,7 @@
 ### UI Package (`packages/ui/src/lib/components/`)
 
 Suitable when:
+
 - No imports from app routes, server modules, or app config
 - No domain-specific types (e.g. `TrackEntry`, `SourceFile`)
 - Can be styled by theme tokens / Tailwind
@@ -15,6 +18,7 @@ Examples: Button, Card, Dialog, FormField, Toast, Section, Header
 ### App Components (`apps/<app>/src/lib/components/`)
 
 Suitable when:
+
 - Uses app routes, load data, or server modules
 - Wired to domain entities
 - Implements app-specific flows (admin sidebar, survey setup)
@@ -49,7 +53,8 @@ Examples: AdminSidebar, UploadProgressToast, SurveyPlayer, SourceEditor
 {/if}
 ```
 
-→ `ExpandableRow` or `AccordionItem` in UI package (if generic) or app component (if domain-bound)
+→ `ExpandableRow` or `AccordionItem` in UI package (if generic) or app component
+(if domain-bound)
 
 ### Action button group
 
@@ -60,7 +65,8 @@ Examples: AdminSidebar, UploadProgressToast, SurveyPlayer, SourceEditor
 </div>
 ```
 
-→ `ButtonGroup` or use existing `Button` with variant; only extract if the pattern repeats with same structure
+→ `ButtonGroup` or use existing `Button` with variant; only extract if the
+pattern repeats with same structure
 
 ## Monorepo Structure (Vesta/mia-cx)
 

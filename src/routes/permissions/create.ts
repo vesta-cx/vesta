@@ -2,7 +2,7 @@
 
 import { Hono } from "hono";
 import { itemResponse } from "@mia-cx/drizzle-query-factory";
-import { requireScope } from "../../auth/helpers";
+import { requireAuth, requireScope } from "../../auth/helpers";
 import { getDB } from "../../db";
 import { permissions } from "../../db/schema";
 import { conflict } from "../../lib/errors";
@@ -14,11 +14,16 @@ import type { RouteMetadata } from "../../registry";
 const route = new Hono<AppEnv>();
 
 route.post("/permissions", async (c) => {
-	const auth = c.get("auth");
+	const auth = requireAuth(c.get("auth"));
+
 	requireScope(auth, "permissions:write");
 
 	const parsed = await parseBody(c, createPermissionSchema);
 	if (isResponse(parsed)) return parsed;
+
+	if (parsed.objectType === "collection") {
+		requireScope(auth, "collections:write");
+	}
 
 	const db = getDB(c.env.DB);
 	try {

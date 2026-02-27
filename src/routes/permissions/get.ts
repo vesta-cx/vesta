@@ -3,7 +3,7 @@
 import { eq } from "drizzle-orm";
 import { Hono } from "hono";
 import { itemResponse } from "@mia-cx/drizzle-query-factory";
-import { requireAuth, requireScope } from "../../auth/helpers";
+import { requireAuth, requireScope, hasScope } from "../../auth/helpers";
 import { getDB } from "../../db";
 import { permissions } from "../../db/schema";
 import { forbidden, notFound } from "../../lib/errors";
@@ -13,9 +13,8 @@ import type { RouteMetadata } from "../../registry";
 const route = new Hono<AppEnv>();
 
 route.get("/permissions/:id", async (c) => {
-	const auth = c.get("auth");
+	const auth = requireAuth(c.get("auth"));
 	requireScope(auth, "permissions:read");
-	const apiAuth = requireAuth(auth);
 
 	const id = c.req.param("id");
 	const db = getDB(c.env.DB);
@@ -27,9 +26,16 @@ route.get("/permissions/:id", async (c) => {
 		.limit(1);
 	if (!row) return notFound(c, "Permission");
 
-	const isAdmin = apiAuth.scopes.includes("admin");
-	const isSubject = row.subjectId === apiAuth.subjectId;
-	if (!isAdmin && !isSubject) return forbidden(c);
+	const isAdmin = hasScope(auth, "admin");
+	const isSubject =
+		row.subjectType === auth.subjectType &&
+		row.subjectId === auth.subjectId;
+	const canReadCollectionPermission =
+		row.objectType === "collection" &&
+		hasScope(auth, "collections:read");
+	if (!isAdmin && !isSubject && !canReadCollectionPermission) {
+		return forbidden(c);
+	}
 
 	return c.json(itemResponse(row));
 });

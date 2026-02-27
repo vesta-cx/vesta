@@ -39,6 +39,18 @@ API keys are stored in Cloudflare KV. Each key is associated with a `subjectType
 
 The `admin` scope bypasses all scope and row-level permission checks.
 
+## Shared Entity Schemas
+
+Canonical entity validation schemas now live in `@vesta-cx/db/entity-schemas` and are reused by Erato services.
+
+- Shared package owns canonical entity shapes and enum-safe field constraints.
+- Erato keeps route-specific payload schemas local to route files when they are endpoint-specific.
+- Import examples in Erato services:
+  - `resourceCreateSchema`, `resourceUpdateSchema`
+  - `workspaceCreateSchema`, `workspaceUpdateSchema`
+  - `userCreateSchema`, `userUpdateSchema`
+  - `collectionCreateSchema`, `collectionUpdateSchema`
+
 ## Hybrid Data Model (WorkOS + Local D1)
 
 **Users** and **Organizations** follow a hybrid ownership model:

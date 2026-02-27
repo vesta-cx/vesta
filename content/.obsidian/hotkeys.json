@@ -1,84 +1,61 @@
 {
   "command-palette:open": [
     {
-      "modifiers": [
-        "Mod",
-        "Shift"
-      ],
+      "modifiers": ["Mod", "Shift"],
       "key": "P"
     }
   ],
   "editor:toggle-source": [
     {
-      "modifiers": [
-        "Alt"
-      ],
+      "modifiers": ["Alt"],
       "key": "S"
     }
   ],
   "alpha-bullet:ascending": [
     {
-      "modifiers": [
-        "Alt"
-      ],
+      "modifiers": ["Alt"],
       "key": "A"
     }
   ],
   "app:toggle-left-sidebar": [
     {
-      "modifiers": [
-        "Alt"
-      ],
+      "modifiers": ["Alt"],
       "key": "["
     }
   ],
   "app:toggle-right-sidebar": [
     {
-      "modifiers": [
-        "Alt"
-      ],
+      "modifiers": ["Alt"],
       "key": "]"
     }
   ],
   "alpha-bullet:descending": [
     {
-      "modifiers": [
-        "Alt"
-      ],
+      "modifiers": ["Alt"],
       "key": "Z"
     }
   ],
   "wikilinks-to-mdlinks-obsidian:toggle-wiki-md-links": [
     {
-      "modifiers": [
-        "Alt"
-      ],
+      "modifiers": ["Alt"],
       "key": "W"
     }
   ],
   "obsidian-git:push": [
     {
-      "modifiers": [
-        "Alt",
-        "Shift"
-      ],
+      "modifiers": ["Alt", "Shift"],
       "key": "S"
     }
   ],
   "prettier:format-selection": [
     {
-      "modifiers": [
-        "Alt",
-        "Shift"
-      ],
+      "modifiers": ["Alt", "Shift"],
       "key": "F"
     }
   ],
   "obsidian-auto-link-title:enhance-url-with-title": [
     {
-      "modifiers": [
-        "Alt"
-      ],
+      "modifiers": ["Alt"],
       "key": "D"
     }
   ]

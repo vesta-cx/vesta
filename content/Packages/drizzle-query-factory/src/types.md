@@ -200,8 +200,7 @@ Base arguments shared by all `runListQuery` call signatures.
 ## `RunListQueryRowsOptions<TTable>`
 
 ```typescript
-type RunListQueryRowsOptions<TTable extends Table> =
-  RunListQueryArgs<TTable> & { mode?: "rows" }
+type RunListQueryRowsOptions<TTable extends Table> = RunListQueryArgs<TTable> & { mode?: "rows" }
 ```
 
 Options for `runListQuery` when returning `ListQueryResult<T>`.
@@ -209,8 +208,9 @@ Options for `runListQuery` when returning `ListQueryResult<T>`.
 ## `RunListQueryEnvelopeOptions<TTable>`
 
 ```typescript
-type RunListQueryEnvelopeOptions<TTable extends Table> =
-  RunListQueryArgs<TTable> & { mode: "envelope" }
+type RunListQueryEnvelopeOptions<TTable extends Table> = RunListQueryArgs<TTable> & {
+  mode: "envelope"
+}
 ```
 
 Options for `runListQuery` when returning `ListResponseEnvelope<T>` directly.

@@ -4167,7 +4167,8 @@ var multiInject = injectBase(MULTI_INJECT_TAG)
 
 // node_modules/inversify/es/interfaces/interfaces.js
 var interfaces
-/* @__PURE__ */ ;(function (interfaces4) {})(interfaces || (interfaces = {}))
+  /* @__PURE__ */
+;(function (interfaces4) {})(interfaces || (interfaces = {}))
 
 // config/inversify.types.ts
 var SI = {

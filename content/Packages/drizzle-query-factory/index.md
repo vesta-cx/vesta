@@ -64,10 +64,10 @@ listResponse()           { data, meta: { total, limit, offset, has_more } }
 
 `runListQuery` takes the Drizzle DB context and runs the query for you. Best for straightforward single-table lists where the boilerplate is identical. See [run-list-query.ts](./src/run-list-query.md) for details.
 
-| Mode | Use when |
-| --- | --- |
-| Parser-only | Complex joins, custom projections, multi-step auth logic |
-| Execution helper | Simple single-table lists with optional baseWhere |
+| Mode             | Use when                                                 |
+| ---------------- | -------------------------------------------------------- |
+| Parser-only      | Complex joins, custom projections, multi-step auth logic |
+| Execution helper | Simple single-table lists with optional baseWhere        |
 
 ## Package Structure
 

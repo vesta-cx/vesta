@@ -27,14 +27,14 @@ function runListQuery<TTable extends Table>(
 
 ### Parameters
 
-| Param | Type | Required | Description |
-| --- | --- | --- | --- |
-| `db` | `{ select: SelectFn }` | Yes | Any Drizzle database instance (D1, Postgres, MySQL, better-sqlite3) |
-| `table` | `Table` | Yes | The Drizzle table to select from |
-| `query` | `ParsedListQuery` | Yes | Output of `parseListQuery` |
-| `baseWhere` | `SQL` | No | Additional WHERE condition composed with `query.where` via `and()` |
-| `count` | `boolean` | No | Run a `count(*)` query for exact total. Default: `true` |
-| `mode` | `"rows" \| "envelope"` | No | Return shape. Default: `"rows"` |
+| Param       | Type                   | Required | Description                                                         |
+| ----------- | ---------------------- | -------- | ------------------------------------------------------------------- |
+| `db`        | `{ select: SelectFn }` | Yes      | Any Drizzle database instance (D1, Postgres, MySQL, better-sqlite3) |
+| `table`     | `Table`                | Yes      | The Drizzle table to select from                                    |
+| `query`     | `ParsedListQuery`      | Yes      | Output of `parseListQuery`                                          |
+| `baseWhere` | `SQL`                  | No       | Additional WHERE condition composed with `query.where` via `and()`  |
+| `count`     | `boolean`              | No       | Run a `count(*)` query for exact total. Default: `true`             |
+| `mode`      | `"rows" \| "envelope"` | No       | Return shape. Default: `"rows"`                                     |
 
 ### Return Types
 
@@ -65,12 +65,12 @@ Ready to return directly as JSON — no additional wrapping needed.
 
 `baseWhere` and `query.where` are combined with `and()`:
 
-| `baseWhere` | `query.where` | Effective WHERE |
-| --- | --- | --- |
-| defined | defined | `and(baseWhere, query.where)` |
-| defined | `undefined` | `baseWhere` |
-| `undefined` | defined | `query.where` |
-| `undefined` | `undefined` | `undefined` (no WHERE clause) |
+| `baseWhere` | `query.where` | Effective WHERE               |
+| ----------- | ------------- | ----------------------------- |
+| defined     | defined       | `and(baseWhere, query.where)` |
+| defined     | `undefined`   | `baseWhere`                   |
+| `undefined` | defined       | `query.where`                 |
+| `undefined` | `undefined`   | `undefined` (no WHERE clause) |
 
 ### Count Behavior
 
@@ -95,34 +95,41 @@ Useful for "load more" UIs where exact totals aren't needed.
 #### Simple table scan
 
 ```typescript
-const query = parseListQuery(c.req.url, featureListConfig);
+const query = parseListQuery(c.req.url, featureListConfig)
 
 const envelope = await runListQuery({
-  db, table: features, query, mode: "envelope",
-});
-return c.json(envelope);
+  db,
+  table: features,
+  query,
+  mode: "envelope",
+})
+return c.json(envelope)
 ```
 
 #### Sub-resource with baseWhere
 
 ```typescript
-const query = parseListQuery(c.req.url, collectionItemListConfig);
+const query = parseListQuery(c.req.url, collectionItemListConfig)
 
 const envelope = await runListQuery({
-  db, table: collectionItems, query,
+  db,
+  table: collectionItems,
+  query,
   baseWhere: eq(collectionItems.collectionId, collectionId),
   mode: "envelope",
-});
-return c.json(envelope);
+})
+return c.json(envelope)
 ```
 
 #### Rows mode with custom response
 
 ```typescript
 const { rows, total, has_more } = await runListQuery({
-  db, table: features, query,
-});
-return c.json({ features: rows, total, has_more });
+  db,
+  table: features,
+  query,
+})
+return c.json({ features: rows, total, has_more })
 ```
 
 ### Caveats

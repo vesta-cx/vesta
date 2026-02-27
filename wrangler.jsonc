@@ -1,89 +1,94 @@
-/** @format */
-
 {
-    "$schema": "node_modules/wrangler/config-schema.json",
-    "name": "vesta_erato",
-    "main": "src/index.ts",
-    "compatibility_date": "2026-02-27",
-    "assets": {
-        "binding": "ASSETS",
-        "directory": "./public"
-    },
-    "observability": {
-        "enabled": true
-    },
-    "compatibility_flags": ["nodejs_compat"],
-    "env": {
-        "prod": {
-            "routes": [
-                {
-                    "pattern": "erato.vesta.cx",
-                    "zone_name": "vesta.cx",
-                    "custom_domain": true
-                }
-            ],
-            "d1_databases": [
-                {
-                    "binding": "DB",
-                    "database_name": "vesta-db",
-                    "database_id": "30d655ef-a360-403c-a6aa-7f5752d4f836",
-                    "migrations_dir": "../../packages/db/drizzle",
-                    "remote": true
-                }
-            ],
-            "kv_namespaces": [
-                {
-                    "binding": "KV",
-                    "id": "bf788f28eae944b7b198e697e097c48c",
-                    "remote": true
-                }
-            ]
-        },
-        "dev": {
-            "name": "vesta_erato_dev",
-            "d1_databases": [
-                {
-                    "binding": "DB",
-                    "database_name": "vesta-db-dev",
-                    "database_id": "057f8953-4606-4e13-92e3-bf17a3f25ef9",
-                    "migrations_dir": "../../packages/db/drizzle"
-                }
-            ],
-            "kv_namespaces": [
-                {
-                    "binding": "KV",
-                    "id": "6071dee233be4689b8a69e21252d1629"
-                }
-            ]
-        },
-        "v0": {
-            "d1_databases": [
-                {
-                    "binding": "DB",
-                    "database_name": "vesta-db",
-                    "database_id": "30d655ef-a360-403c-a6aa-7f5752d4f836",
-                    "migrations_dir": "../../packages/db/drizzle",
-                    "remote": true
-                }
-            ],
-            "kv_namespaces": [
-                {
-                    "binding": "KV",
-                    "id": "bf788f28eae944b7b198e697e097c48c",
-                    "remote": true
-                }
-            ],
-            "name": "vesta_erato_v0",
-            "routes": [
-                {
-                    "pattern": "erato.vesta.cx/v0/*",
-                    "zone_name": "vesta.cx"
-                }
-            ],
-            "vars": {
-                "API_VERSION": "v0",
-                "API_BASE_PATH": "/v0"
-            }
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "vesta_erato",
+  "main": "src/index.ts",
+  "compatibility_date": "2026-02-27",
+  "assets": {
+    "binding": "ASSETS",
+    "directory": "./public"
+  },
+  "observability": {
+    "enabled": true
+  },
+  "compatibility_flags": [
+    "nodejs_compat"
+  ],
+  "env": {
+    "prod": {
+      "routes": [
+        {
+          "pattern": "erato.vesta.cx",
+          "zone_name": "vesta.cx",
+          "custom_domain": true
         }
+      ],
+      "d1_databases": [
+        {
+          "binding": "DB",
+          "database_name": "vesta-db",
+          "database_id": "30d655ef-a360-403c-a6aa-7f5752d4f836",
+          "migrations_dir": "../../packages/db/drizzle",
+          "remote": true
+        }
+      ],
+      "kv_namespaces": [
+        {
+          "binding": "KV",
+          "id": "bf788f28eae944b7b198e697e097c48c",
+          "remote": true
+        }
+      ]
+    },
+    "dev": {
+      "name": "vesta_erato_dev",
+      "d1_databases": [
+        {
+          "binding": "DB",
+          "database_name": "vesta-db-dev",
+          "database_id": "057f8953-4606-4e13-92e3-bf17a3f25ef9",
+          "migrations_dir": "../../packages/db/drizzle"
+        }
+      ],
+      "kv_namespaces": [
+        {
+          "binding": "KV",
+          "id": "6071dee233be4689b8a69e21252d1629"
+        }
+      ]
+    },
+    "v0": {
+      "routes": [
+        {
+          "pattern": "erato.vesta.cx",
+          "zone_name": "vesta.cx",
+          "custom_domain": true
+        },
+        {
+          "pattern": "erato.vesta.cx/v0/*",
+          "zone_name": "vesta.cx"
+        }
+      ],
+      "d1_databases": [
+        {
+          "binding": "DB",
+          "database_name": "vesta-db",
+          "database_id": "30d655ef-a360-403c-a6aa-7f5752d4f836",
+          "migrations_dir": "../../packages/db/drizzle",
+          "remote": true
+        }
+      ],
+      "kv_namespaces": [
+        {
+          "binding": "KV",
+          "id": "bf788f28eae944b7b198e697e097c48c",
+          "remote": true
+        }
+      ],
+      "name": "vesta_erato_v0",
+      "vars": {
+        "API_VERSION": "v0",
+        "API_BASE_PATH": "/v0"
+      }
     }
+  }
 }

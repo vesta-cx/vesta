@@ -3,7 +3,9 @@
     "ui": "tui",
     "tasks": {
         "clean": {},
-        "format": {},
+        "format": {
+            "cache": false
+        },
         "build": {
             "dependsOn": ["^build"],
             "outputs": ["dist/**"]

@@ -29,6 +29,8 @@ todos:
 isProject: false
 ---
 
+<!-- @format -->
+
 # Improve Test Coverage Incrementally
 
 ## Current State (from repo scan)
@@ -82,4 +84,3 @@ coverage: {
 - Every actively maintained package has `test:coverage` plus thresholds.
 - CI fails on threshold regressions.
 - Trend shows threshold ratcheting upward over time, not one-off spikes.
-

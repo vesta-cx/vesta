@@ -1,14 +1,19 @@
-import * as fs from 'node:fs';
-import * as path from 'node:path';
-import { createClient } from '@libsql/client';
-import { drizzle } from 'drizzle-orm/libsql';
-import { transcodeJobs } from './schema.js';
+/** @format */
 
-const raw = process.env['DATABASE_URL'] ?? 'file:./data/euterpe.sqlite';
+import * as fs from "node:fs";
+import * as path from "node:path";
+import { createClient } from "@libsql/client";
+import { drizzle } from "drizzle-orm/libsql";
+import { transcodeJobs } from "./schema.js";
+
+const raw = process.env["DATABASE_URL"] ?? "file:./data/euterpe.sqlite";
 let url: string;
-if (raw.startsWith('file:')) {
-	const pathPart = raw.slice(5).replace(/^\/+/, '/') || '.';
-	const dbPath = path.isAbsolute(pathPart) ? pathPart : path.resolve(process.cwd(), pathPart);
+if (raw.startsWith("file:")) {
+	const pathPart = raw.slice(5).replace(/^\/+/, "/") || ".";
+	const dbPath =
+		path.isAbsolute(pathPart) ? pathPart : (
+			path.resolve(process.cwd(), pathPart)
+		);
 	url = `file:${dbPath}`;
 	const dir = path.dirname(dbPath);
 	try {
@@ -23,4 +28,4 @@ if (raw.startsWith('file:')) {
 const client = createClient({ url });
 export const db = drizzle(client, { schema: { transcodeJobs } });
 
-export { transcodeJobs } from './schema.js';
+export { transcodeJobs } from "./schema.js";

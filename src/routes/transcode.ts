@@ -6,6 +6,7 @@ import { randomUUID } from "node:crypto";
 import * as fs from "node:fs";
 import * as path from "node:path";
 import * as os from "node:os";
+import { once } from "node:events";
 import { apiKeyAuth } from "../middleware/auth.js";
 import { transcode } from "../transcode.js";
 import { createStorage } from "../storage/factory.js";
@@ -13,6 +14,28 @@ import { db, transcodeJobs } from "../db/index.js";
 import type { TranscodeConfig } from "../transcode.js";
 
 export const transcodeRoutes = new Hono();
+
+const writeFileStream = async (
+	file: File,
+	tmpPath: string,
+): Promise<void> => {
+	const reader = file.stream().getReader();
+	const out = fs.createWriteStream(tmpPath);
+	try {
+		while (true) {
+			const { value, done } = await reader.read();
+			if (done) break;
+			if (!value || value.byteLength === 0) continue;
+			if (!out.write(value)) {
+				await once(out, "drain");
+			}
+		}
+	} finally {
+		reader.releaseLock();
+		out.end();
+		await once(out, "close");
+	}
+};
 
 transcodeRoutes.use("*", apiKeyAuth);
 
@@ -127,8 +150,7 @@ transcodeRoutes.post("/", async (c) => {
 		updatedAt: now,
 	});
 
-	const buffer = Buffer.from(await file.arrayBuffer());
-	fs.writeFileSync(tmpPath, buffer);
+	await writeFileStream(file, tmpPath);
 
 	const webhookUrl = config.webhookUrl;
 

@@ -4,6 +4,7 @@ import * as fs from "node:fs";
 import * as path from "node:path";
 import { spawn } from "node:child_process";
 import { randomUUID } from "node:crypto";
+import { Readable } from "node:stream";
 import type { StorageProvider } from "@vesta-cx/storage";
 
 export type Codec = "flac" | "opus" | "mp3" | "aac";
@@ -198,6 +199,19 @@ const joinPrefix = (prefix: string, ...parts: string[]): string => {
 	return base + parts.filter(Boolean).join("/");
 };
 
+const uploadFile = async (
+	storage: StorageProvider,
+	key: string,
+	filePath: string,
+	contentType: string,
+): Promise<void> => {
+	await storage.put(
+		key,
+		Readable.toWeb(fs.createReadStream(filePath)),
+		contentType,
+	);
+};
+
 export const transcode = async (
 	inputPath: string,
 	config: TranscodeConfig,
@@ -232,13 +246,10 @@ export const transcode = async (
 			sourceTarget.codec,
 			sourceTarget.bitrate,
 		);
-		const buf = fs.readFileSync(sourceTmp);
-		await storage.put(
+		await uploadFile(
+			storage,
 			sourceR2Key,
-			buf.buffer.slice(
-				buf.byteOffset,
-				buf.byteOffset + buf.byteLength,
-			),
+			sourceTmp,
 			`audio/${sourceExt === "ogg" ? "ogg" : sourceExt}`,
 		);
 	} finally {
@@ -303,13 +314,10 @@ export const transcode = async (
 		);
 		try {
 			await runFfmpeg(inputPath, tmpPath, t.codec, t.bitrate);
-			const buf = fs.readFileSync(tmpPath);
-			await storage.put(
+			await uploadFile(
+				storage,
 				candidateR2Key,
-				buf.buffer.slice(
-					buf.byteOffset,
-					buf.byteOffset + buf.byteLength,
-				),
+				tmpPath,
 				`audio/${ext === "ogg" ? "ogg" : ext}`,
 			);
 			candidates.push({

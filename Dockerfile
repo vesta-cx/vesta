@@ -1,5 +1,6 @@
 # Build from monorepo root: docker build -f apps/euterpe/Dockerfile .
-FROM node:20-slim
+ARG NODE_IMAGE=node:20-slim
+FROM ${NODE_IMAGE}
 
 RUN apt-get update && apt-get install -y --no-install-recommends ffmpeg \
 	&& rm -rf /var/lib/apt/lists/*

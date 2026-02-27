@@ -4,18 +4,19 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "clean": "cleanc clean",
-    "build:clean": "pnpm run clean && pnpm run build",
-    "dev:clean": "pnpm run clean && pnpm run dev",
-    "install:clean": "pnpm run clean && node -e \"try{require('fs').rmSync(require('path').join(process.cwd(),'node_modules'),{recursive:true,force:true})}catch(_){}\" && pnpm i",
     "build": "tsc",
+    "build:clean": "pnpm run clean && pnpm run build",
+    "clean": "cleanc clean",
     "db:generate": "drizzle-kit generate",
     "db:migrate": "drizzle-kit migrate",
     "db:push": "drizzle-kit push",
     "dev": "tsx watch src/index.ts",
+    "dev:clean": "pnpm run clean && pnpm run dev",
     "format": "prettier --write .",
     "gen-key": "tsx scripts/generate-api-key.ts",
+    "install:clean": "pnpm run clean && node -e \"try{require('fs').rmSync(require('path').join(process.cwd(),'node_modules'),{recursive:true,force:true})}catch(_){}\" && pnpm i",
     "revoke-key": "tsx scripts/revoke-key.ts",
+    "test:load": "node ./scripts/transcode-load-check.mjs",
     "start": "node dist/index.js"
   },
   "dependencies": {

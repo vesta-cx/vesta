@@ -34,6 +34,10 @@
 	path = packages/db
 	url = https://github.com/vesta-cx/db.git
 
+[submodule "packages/cleanup"]
+	path = packages/cleanup
+	url = https://github.com/vesta-cx/cleanup.git
+
 [submodule "packages/drizzle-query-factory"]
 	path = packages/drizzle-query-factory
 	url = https://github.com/mia-cx/drizzle-query-factory.git

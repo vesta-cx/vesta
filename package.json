@@ -3,7 +3,7 @@
   "version": "0.1.3",
   "type": "module",
   "scripts": {
-    "build": "pnpm run sync:api-version && node ./scripts/wrangler-versioned.mjs deploy --dry-run",
+    "build": "pnpm run sync:fonts && pnpm run sync:api-version && node ./scripts/wrangler-versioned.mjs deploy --dry-run",
     "cf-typegen": "wrangler types --env-interface CloudflareBindings",
     "clean": "cleanc clean",
     "db:generate": "pnpm --filter @vesta-cx/db db:generate",
@@ -13,11 +13,13 @@
     "db:migrate:local": "node ./scripts/wrangler-versioned.mjs d1 migrations apply DB --env dev",
     "db:studio": "drizzle-kit studio",
     "deploy": "pnpm run sync:api-version && node ./scripts/wrangler-versioned.mjs deploy",
-    "dev": "wrangler dev --env dev",
+    "deploy:gateway": "pnpm run sync:fonts && wrangler deploy --env prod --minify",
+    "dev": "pnpm run sync:fonts && wrangler dev --env dev",
     "dev:clean": "pnpm run clean && pnpm run dev",
     "format": "prettier --write .",
     "install:clean": "pnpm run clean && node -e \"try{require('fs').rmSync(require('path').join(process.cwd(),'node_modules'),{recursive:true,force:true})}catch(_){}\" && pnpm i",
     "sync:api-version": "node ./scripts/sync-api-version.mjs",
+    "sync:fonts": "node ./scripts/sync-fonts.mjs",
     "test": "vitest run",
     "test:coverage": "vitest run --coverage",
     "test:watch": "vitest"
@@ -30,6 +32,8 @@
     "zod": "^3.24.0"
   },
   "devDependencies": {
+    "@fontsource/archivo": "^5.2.8",
+    "@fontsource/jetbrains-mono": "^5.2.8",
     "@types/node": "^25.3.2",
     "@vesta-cx/config": "workspace:*",
     "@vitest/coverage-v8": "^4.0.18",

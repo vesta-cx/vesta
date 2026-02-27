@@ -40,7 +40,6 @@ if (!semver.valid(version)) {
 }
 
 const apiVersion = `v${semver.major(version)}`;
-const apiBasePath = `/${apiVersion}`;
 const apiEnv = apiVersion;
 const workerName = `vesta_erato_${apiVersion}`;
 
@@ -61,20 +60,25 @@ if (!wrangler.env) {
 // Start with prod defaults (deep copy to avoid mutation)
 const prodDefaults = structuredClone(wrangler.env.prod || {});
 
+// Build routes: start from prod defaults, then append the versioned path-pattern route.
+// deepMerge replaces arrays, so routes must be assembled separately.
+const versionedRoute = {
+	pattern: `erato.vesta.cx/${apiVersion}/*`,
+	zone_name: "vesta.cx",
+};
+const baseRoutes = (prodDefaults.routes || []).filter(
+	(r) => r.pattern !== versionedRoute.pattern,
+);
+const envRoutes = [...baseRoutes, versionedRoute];
+
 // Merge: prodDefaults < existingEnv < newApiEnvBlock
 // This preserves any manual overrides in existingEnv while inheriting prod bindings
 const existingEnv = wrangler.env[apiEnv] || {};
 const mergedEnv = deepMerge(deepMerge(prodDefaults, existingEnv), {
 	name: workerName,
-	routes: [
-		{
-			pattern: `erato.vesta.cx/${apiVersion}/*`,
-			zone_name: "vesta.cx",
-		},
-	],
+	routes: envRoutes,
 	vars: {
 		API_VERSION: apiVersion,
-		API_BASE_PATH: apiBasePath,
 	},
 });
 
@@ -84,8 +88,7 @@ wrangler.env[apiEnv] = mergedEnv;
 await writeFile(wranglerPath, JSON.stringify(wrangler, null, 2) + "\n", "utf8");
 
 const appVersionConfig = `export const API_VERSION = "${apiVersion}";
-export const API_BASE_PATH = "${apiBasePath}";
-export const API_ENV = "${apiEnv}";
+export const API_BASE_PATH = \`/\${API_VERSION}\`;
 `;
 await writeFile(appVersionConfigPath, appVersionConfig, "utf8");
 

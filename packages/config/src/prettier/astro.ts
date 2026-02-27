@@ -1,3 +1,5 @@
+/** @format */
+
 import { Config } from "prettier";
 import { Override } from "../lib/types/prettier";
 import base from "./base";

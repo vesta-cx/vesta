@@ -1,3 +1,5 @@
+/** @format */
+
 import * as eslintPluginMdx from "eslint-plugin-mdx";
 
 import { TSESLint } from "@typescript-eslint/utils";

@@ -1,3 +1,5 @@
+/** @format */
+
 import { Options } from "prettier";
 
 export type Override = {

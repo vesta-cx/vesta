@@ -1,3 +1,5 @@
+/** @format */
+
 import { TSESLint } from "@typescript-eslint/utils";
 import { base } from "./base";
 import eslintConfigPrettier from "eslint-config-prettier";

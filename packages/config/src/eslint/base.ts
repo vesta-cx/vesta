@@ -1,3 +1,5 @@
+/** @format */
+
 import type { TSESLint } from "@typescript-eslint/utils";
 import eslintConfigPrettier from "eslint-config-prettier";
 import tseslint from "typescript-eslint";

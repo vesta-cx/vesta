@@ -1,7 +1,7 @@
 {
-  "name": "config",
-  "private": true,
+  "name": "@vesta-cx/config",
   "version": "1.0.0",
+  "private": true,
   "description": "shared configs for the vesta monorepo",
   "keywords": [
     "config",
@@ -69,10 +69,14 @@
     "./types/**/*.ts"
   ],
   "scripts": {
+    "clean": "cleanc clean",
+    "build:clean": "pnpm run clean && pnpm run build",
+    "dev:clean": "pnpm run clean && pnpm run dev",
+    "install:clean": "pnpm run clean && node -e \"try{require('fs').rmSync(require('path').join(process.cwd(),'node_modules'),{recursive:true,force:true})}catch(_){}\" && pnpm i",
     "build": "tsup",
     "dev": "tsup --watch",
-    "format": "prettier --write . --ignore-path ../../.*ignore",
-    "lint": "prettier --check . --ignore-path ../../.*ignore && eslint .",
+    "format": "prettier --write . --ignore-path ../../.prettierignore",
+    "lint": "prettier --check . --ignore-path ../../.prettierignore && eslint .",
     "prepublishOnly": "pnpm run build",
     "test": "echo \"Error: no test specified\" && exit 1",
     "tsup": "tsup"

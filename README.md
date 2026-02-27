@@ -2,13 +2,13 @@
 
 # Euterpe
 
-Node.js microservice that transcodes audio uploads (FLAC, WAV, etc.) to requested codecs (flac, opus, mp3, aac) and writes to client-specified storage (R2/S3-compatible).
+Node.js microservice that enqueues and processes audio transcode jobs with ffmpeg using an inbox/outbox queue model with lease-based worker claims and signed status callbacks.
 
 ## Stack
 
 - Hono, Node.js, ffmpeg (child_process)
-- `@vesta-cx/storage` — client-driven: each request includes storage config (R2 or S3 credentials)
-- Drizzle ORM + libsql (SQLite-compatible, no native bindings) for job status (`transcode_jobs`)
+- `@vesta-cx/storage` — client-driven storage access (R2/S3-compatible)
+- Drizzle ORM + libsql (SQLite-compatible) for queue tables (`inbox`, `outbox`, `idempotency_keys`)
 
 ## Quick start
 
@@ -43,28 +43,108 @@ pnpm run dev
 
 ## API
 
-- `POST /transcode` — multipart form: `file`, `config` (JSON). Returns `202 { jobId }`.
-- `GET /transcode/status?jobId=x` — job status (pending, processing, complete, failed).
+- `POST /transcode` — JSON enqueue contract, returns `202 { jobId, status: "queued" }`.
+- `GET /transcode/status?jobId=x` — returns `200` and full job status metadata.
 - `GET /health` — health check
 
-## Job status and webhook
+## Enqueue contract (`POST /transcode`)
 
-Euterpe stores job state in its own DB (SQLite). Clients poll `GET /transcode/status` or rely on the webhook.
+Example request body:
 
-On completion, euterpe POSTs to `webhookUrl` with `{ jobId, status, sourceFileId, candidateIds, source, candidates }`. The client persists `source` and `candidates` to its own DB.
+```json
+{
+  "idempotencyKey": "req-123",
+  "requesterId": "vesta",
+  "workloadType": "audio:transcode",
+  "sourceKey": "uploads/raw/song.flac",
+  "filename": "song",
+  "uploadPrefix": "audio/2026",
+  "targets": [
+    {
+      "codec": "opus",
+      "bitrate": 128,
+      "outputPrefix": "opus/",
+      "outputSuffix": "_opus_128"
+    }
+  ],
+  "statusWebhookUrl": "https://example.com/api/euterpe/status",
+  "refreshUrl": "https://example.com/api/euterpe/refresh-credentials",
+  "sourceFileId": "optional-source-id",
+  "storage": {
+    "type": "r2",
+    "accountId": "<account>",
+    "bucket": "<bucket>",
+    "creds": {
+      "accessKeyId": "<scoped-key>",
+      "secretAccessKey": "<scoped-secret>"
+    }
+  }
+}
+```
 
-## Config shape
+Notes:
 
-Each request includes a `config` JSON field with:
+- Idempotency scope is requester + `idempotencyKey`.
+- Reusing a key with a different payload returns `409`.
+- Storage credentials are encrypted at rest (envelope encryption) in queue storage.
+- `workloadType` defaults to `audio:transcode`.
+- Workload tokens use `media:kind` format, e.g. `audio:analyze`, `image:optimize`, `video:thumbnail`.
+- For each `target`, `outputPrefix` and `outputSuffix` are optional:
+  - `outputPrefix` splits at the last `/`: path part + filename prefix part
+  - `outputPrefix: "mobile/opus_"` -> path `mobile/`, filename prefix `opus_`
+  - `outputPrefix: "mobile/"` -> path `mobile/`, empty filename prefix
+  - default prefix: `<codec>/` (path only)
+  - default suffix: `_<codec>_<bitrate>`
 
-- `targets` — transcoding targets (codec, bitrate)
-- `filename` — base name for output files (used in object keys)
-- `uploadPrefix` — path prefix in bucket (e.g. `""`, `"sources"`, `"audio/2025"`)
-- `webhookUrl` — callback when complete
-- `sourceFileId` — optional; client-provided UUID used as `source.id` in webhook (enables writing metadata to DB at submit, then updating on completion)
-- `storage` — **client-driven** storage connection:
-  - **R2**: `{ type: "r2", accountId, bucket, accessKeyId, secretAccessKey }`
-  - **S3**: `{ type: "s3", endpoint, bucket, accessKeyId, secretAccessKey }`
+## Job lifecycle
+
+Statuses:
+
+- `queued -> claimed -> fetching -> processing -> uploading -> succeeded`
+- Failure path: `failed` and eventually `dead_letter` when retry budget is exhausted.
+
+Workers enforce claim fencing using `claim_version` + `worker_id`, lease TTL, and heartbeat updates.
+
+## Callback delivery (outbox)
+
+- Every state change writes an outbox event.
+- Workers poll and deliver callbacks with retry/backoff + jitter.
+- Callback headers:
+  - `x-euterpe-signature`
+  - `x-euterpe-timestamp`
+  - `x-euterpe-nonce`
+  - `x-euterpe-event-id`
+- Signature input: `timestamp + "." + nonce + "." + raw_body` with HMAC-SHA256.
+
+## Credential refresh
+
+- Storage `401`/`403` triggers worker-side credential refresh via `refreshUrl`.
+- Requester rotates scoped credentials and Euterpe increments `credential_version`.
+- If refresh and retries are exhausted, job transitions to `dead_letter`.
+
+## Operational defaults
+
+- Job lease TTL: 5m
+- Heartbeat interval: 30s
+- Outbox poll jitter: 500ms-1500ms
+- Outbox claim batch: default 10 (configurable)
+- Output guardrail: each output cannot exceed 200% of source size when source > 1GB
+
+## Workload-aware worker pools
+
+Set worker workload allowlists with:
+
+- `EUTERPE_ALLOWED_WORKLOADS=audio:transcode`
+- `EUTERPE_ALLOWED_WORKLOADS=audio:analyze`
+- `EUTERPE_ALLOWED_WORKLOADS=audio:transcode,audio:analyze`
+
+Workers only claim jobs whose `workloadType` is in their allowlist.
+
+## Tests
+
+```bash
+pnpm --filter euterpe test
+```
 
 ## Deploy
 

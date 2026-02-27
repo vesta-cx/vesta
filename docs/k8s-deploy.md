@@ -65,6 +65,27 @@ kubectl apply -f apps/euterpe/k8s/deployment.yaml
 kubectl apply -f apps/euterpe/k8s/service.yaml
 ```
 
+## 4b. Optional: split worker pools by workload
+
+Use workload-specific deployments to isolate scheduling and capacity:
+
+```bash
+# Transcode-only workers
+kubectl apply -f apps/euterpe/k8s/deployment-transcode-workers.yaml
+
+# Audio-analyze workers
+kubectl apply -f apps/euterpe/k8s/deployment-semantic-workers.yaml
+```
+
+Each deployment sets `EUTERPE_ALLOWED_WORKLOADS` and node affinity. Label nodes accordingly:
+
+```bash
+kubectl label node <node-name> workload/audio-transcode=true
+kubectl label node <node-name> workload/audio-analyze=true
+```
+
+`EUTERPE_ALLOWED_WORKLOADS` uses `media:kind` tokens (for example `audio:transcode,audio:analyze`).
+
 ## 5. Expose externally
 
 **Option A: Ingress** (typical for production)

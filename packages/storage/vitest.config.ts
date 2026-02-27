@@ -1,14 +1,19 @@
-import { defineConfig } from 'vitest/config';
-import { resolve } from 'node:path';
+/** @format */
+
+import { defineConfig } from "vitest/config";
+import { resolve } from "node:path";
 
 export default defineConfig({
 	test: {
-		environment: 'node',
-		include: ['src/**/*.test.ts']
+		environment: "node",
+		include: ["src/**/*.test.ts"],
 	},
 	resolve: {
 		alias: {
-			'@vesta-cx/storage': resolve(__dirname, './src/index.ts')
-		}
-	}
+			"@vesta-cx/storage": resolve(
+				__dirname,
+				"./src/index.ts",
+			),
+		},
+	},
 });

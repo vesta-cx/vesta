@@ -1,5 +1,7 @@
+/** @format */
+
 /// <reference types="@cloudflare/workers-types" />
-import type { ListResult, StorageObject, StorageProvider } from './types.js';
+import type { ListResult, StorageObject, StorageProvider } from "./types.js";
 
 /**
  * R2 storage provider for Cloudflare Workers.
@@ -10,33 +12,46 @@ export class R2StorageProvider implements StorageProvider {
 	/** @param bucket - Workers R2Bucket binding (platform.env.AUDIO_BUCKET) */
 	constructor(private bucket: R2Bucket) {}
 
-	async list(
-		options?: { prefix?: string; limit?: number; cursor?: string }
-	): Promise<ListResult> {
+	async list(options?: {
+		prefix?: string;
+		limit?: number;
+		cursor?: string;
+	}): Promise<ListResult> {
 		const result = await this.bucket.list({
 			prefix: options?.prefix,
 			limit: options?.limit ?? 1000,
-			cursor: options?.cursor
+			cursor: options?.cursor,
 		});
-		const list = result as { objects: { key: string; size: number; uploaded?: Date }[]; truncated?: boolean; cursor?: string };
+		const list = result as {
+			objects: {
+				key: string;
+				size: number;
+				uploaded?: Date;
+			}[];
+			truncated?: boolean;
+			cursor?: string;
+		};
 		return {
 			objects: (list.objects ?? []).map((o) => ({
 				key: o.key,
 				size: o.size,
-				uploaded: o.uploaded ? new Date(o.uploaded) : new Date(0)
+				uploaded:
+					o.uploaded ?
+						new Date(o.uploaded)
+					:	new Date(0),
 			})),
 			truncated: list.truncated ?? false,
-			cursor: list.cursor
+			cursor: list.cursor,
 		};
 	}
 
 	async put(
 		key: string,
 		body: ReadableStream | ArrayBuffer | string,
-		contentType: string
+		contentType: string,
 	): Promise<void> {
 		await this.bucket.put(key, body, {
-			httpMetadata: { contentType }
+			httpMetadata: { contentType },
 		});
 	}
 
@@ -46,14 +61,16 @@ export class R2StorageProvider implements StorageProvider {
 
 		return {
 			body: object.body,
-			contentType: object.httpMetadata?.contentType ?? 'application/octet-stream',
-			size: object.size
+			contentType:
+				object.httpMetadata?.contentType ??
+				"application/octet-stream",
+			size: object.size,
 		};
 	}
 
 	async getSignedUrl(_key: string, _expiresIn: number): Promise<string> {
 		throw new Error(
-			'R2 does not support signed URLs from Workers. Use ephemeral stream tokens instead.'
+			"R2 does not support signed URLs from Workers. Use ephemeral stream tokens instead.",
 		);
 	}
 

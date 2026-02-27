@@ -1,0 +1,41 @@
+{
+  "name": "erato",
+  "version": "0.0.1",
+  "type": "module",
+  "scripts": {
+    "clean": "cleanc clean",
+    "dev:clean": "pnpm run clean && pnpm run dev",
+    "install:clean": "pnpm run clean && node -e \"try{require('fs').rmSync(require('path').join(process.cwd(),'node_modules'),{recursive:true,force:true})}catch(_){}\" && pnpm i",
+    "cf-typegen": "wrangler types --env-interface CloudflareBindings",
+    "db:generate": "pnpm --filter @vesta-cx/db db:generate",
+    "db:inspect:schema": "node ./scripts/db-inspect.mjs",
+    "db:inspect:tables": "node ./scripts/wrangler-versioned.mjs d1 execute DB --env dev --command \"SELECT name FROM sqlite_master WHERE type='table';\"",
+    "db:migrate": "pnpm run sync:api-version && node ./scripts/wrangler-versioned.mjs d1 migrations apply DB",
+    "db:migrate:local": "node ./scripts/wrangler-versioned.mjs d1 migrations apply DB --env dev",
+    "db:studio": "drizzle-kit studio",
+    "deploy": "pnpm run sync:api-version && node ./scripts/wrangler-versioned.mjs deploy",
+    "dev": "wrangler dev --env dev",
+    "format": "prettier --write .",
+    "sync:api-version": "node ./scripts/sync-api-version.mjs",
+    "test": "vitest run",
+    "test:coverage": "vitest run --coverage",
+    "test:watch": "vitest"
+  },
+  "dependencies": {
+    "@mia-cx/drizzle-query-factory": "workspace:*",
+    "@vesta-cx/db": "workspace:*",
+    "drizzle-orm": "^0.45.1",
+    "hono": "^4.12.3",
+    "zod": "^3.24.0"
+  },
+  "devDependencies": {
+    "@vitest/coverage-v8": "^4.0.18",
+    "@types/node": "^25.3.2",
+    "@vesta-cx/config": "workspace:*",
+    "drizzle-kit": "^0.31.8",
+    "prettier": "^3.8.1",
+    "semver": "^7.7.4",
+    "vitest": "^4.0.18",
+    "wrangler": "^4.69.0"
+  }
+}

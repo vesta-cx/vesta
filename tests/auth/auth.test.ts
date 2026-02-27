@@ -1,3 +1,5 @@
+/** @format */
+
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import {
 	getAuthorizationUrl,
@@ -23,8 +25,12 @@ describe("getAuthorizationUrl", () => {
 		const parsed = new URL(url);
 		expect(parsed.origin).toBe("https://api.workos.com");
 		expect(parsed.pathname).toBe("/user_management/authorize");
-		expect(parsed.searchParams.get("client_id")).toBe("client_test");
-		expect(parsed.searchParams.get("organization_id")).toBe("org_test");
+		expect(parsed.searchParams.get("client_id")).toBe(
+			"client_test",
+		);
+		expect(parsed.searchParams.get("organization_id")).toBe(
+			"org_test",
+		);
 		expect(parsed.searchParams.get("provider")).toBe("authkit");
 	});
 
@@ -82,7 +88,9 @@ describe("authenticateWithCode", () => {
 		};
 
 		vi.spyOn(globalThis, "fetch").mockResolvedValue(
-			new Response(JSON.stringify(mockResponse), { status: 200 }),
+			new Response(JSON.stringify(mockResponse), {
+				status: 200,
+			}),
 		);
 
 		const result = await authenticateWithCode({
@@ -100,9 +108,13 @@ describe("authenticateWithCode", () => {
 	it("should call the User Management authenticate endpoint", async () => {
 		expect.assertions(2);
 
-		const fetchSpy = vi.spyOn(globalThis, "fetch").mockResolvedValue(
-			new Response(JSON.stringify({ user: null }), { status: 401 }),
-		);
+		const fetchSpy = vi
+			.spyOn(globalThis, "fetch")
+			.mockResolvedValue(
+				new Response(JSON.stringify({ user: null }), {
+					status: 401,
+				}),
+			);
 
 		await authenticateWithCode({
 			code: "code",
@@ -138,7 +150,9 @@ describe("authenticateWithCode", () => {
 
 		vi.spyOn(globalThis, "fetch").mockResolvedValue(
 			new Response(
-				JSON.stringify({ user: { id: null, email: null } }),
+				JSON.stringify({
+					user: { id: null, email: null },
+				}),
 				{ status: 200 },
 			),
 		);
@@ -180,7 +194,10 @@ describe("session management", () => {
 			) => {
 				store.set(name, value);
 			},
-			delete: (name: string, _opts?: Record<string, unknown>) => {
+			delete: (
+				name: string,
+				_opts?: Record<string, unknown>,
+			) => {
 				store.delete(name);
 			},
 			_store: store,

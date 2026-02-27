@@ -1,189 +1,180 @@
+<!-- @format -->
+
 <!doctype html>
-<html lang="en" class="dark">
-	<head>
-		<meta charset="UTF-8" />
-		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-		<title>Erato API — Vesta</title>
-		<meta
-			name="description"
-			content="Versioned REST API for Vesta's data model." />
-		<script src="https://cdn.tailwindcss.com?plugins=typography"></script>
-		<style>
-			@font-face {
-				font-family: "Archivo";
-				src: url("/fonts/archivo-latin-400-normal.woff2") format("woff2");
-				font-weight: 400;
-				font-style: normal;
-			}
-			@font-face {
-				font-family: "Archivo";
-				src: url("/fonts/archivo-latin-500-normal.woff2") format("woff2");
-				font-weight: 500;
-				font-style: normal;
-			}
-			@font-face {
-				font-family: "Archivo";
-				src: url("/fonts/archivo-latin-600-normal.woff2") format("woff2");
-				font-weight: 600;
-				font-style: normal;
-			}
-			@font-face {
-				font-family: "JetBrains Mono";
-				src: url("/fonts/jetbrains-mono-latin-400-normal.woff2")
-					format("woff2");
-				font-weight: 400;
-				font-style: normal;
-			}
+<html
+        lang="en"
+        class="dark">
+        <head>
+                <meta charset="UTF-8" />
+                <meta
+                        name="viewport"
+                        content="width=device-width, initial-scale=1.0" />
+                <title>Erato API — Vesta</title>
+                <meta
+                        name="description"
+                        content="Versioned REST API for Vesta's data model." />
+                <script src="https://cdn.tailwindcss.com?plugins=typography"></script>
+                <style>
+                        @font-face {
+                                font-family: "Archivo";
+                                src: url("/fonts/archivo-latin-400-normal.woff2") format("woff2");
+                                font-weight: 400;
+                                font-style: normal;
+                        }
+                        @font-face {
+                                font-family: "Archivo";
+                                src: url("/fonts/archivo-latin-500-normal.woff2") format("woff2");
+                                font-weight: 500;
+                                font-style: normal;
+                        }
+                        @font-face {
+                                font-family: "Archivo";
+                                src: url("/fonts/archivo-latin-600-normal.woff2") format("woff2");
+                                font-weight: 600;
+                                font-style: normal;
+                        }
+                        @font-face {
+                                font-family: "JetBrains Mono";
+                                src: url("/fonts/jetbrains-mono-latin-400-normal.woff2") format("woff2");
+                                font-weight: 400;
+                                font-style: normal;
+                        }
 
-			:root {
-				--background: oklch(0.141 0.005 285.823);
-				--foreground: oklch(0.985 0 0);
-				--card: oklch(0.21 0.006 285.885);
-				--card-foreground: oklch(0.985 0 0);
-				--primary: oklch(0.92 0.004 286.32);
-				--primary-foreground: oklch(0.21 0.006 285.885);
-				--secondary: oklch(0.274 0.006 286.033);
-				--secondary-foreground: oklch(0.985 0 0);
-				--muted: oklch(0.274 0.006 286.033);
-				--muted-foreground: oklch(0.705 0.015 286.067);
-				--accent: oklch(0.274 0.006 286.033);
-				--accent-foreground: oklch(0.985 0 0);
-				--destructive: oklch(0.704 0.191 22.216);
-				--border: oklch(1 0 0 / 10%);
-				--input: oklch(1 0 0 / 15%);
-				--ring: oklch(0.552 0.016 285.938);
-				--chart-1: oklch(0.488 0.243 264.376);
-			}
-		</style>
-		<script>
-			tailwind.config = {
-				darkMode: "class",
-				theme: {
-					extend: {
-						colors: {
-							background: "var(--background)",
-							foreground: "var(--foreground)",
-							card: {
-								DEFAULT: "var(--card)",
-								foreground: "var(--card-foreground)",
-							},
-							primary: {
-								DEFAULT: "var(--primary)",
-								foreground: "var(--primary-foreground)",
-							},
-							secondary: {
-								DEFAULT: "var(--secondary)",
-								foreground: "var(--secondary-foreground)",
-							},
-							muted: {
-								DEFAULT: "var(--muted)",
-								foreground: "var(--muted-foreground)",
-							},
-							accent: {
-								DEFAULT: "var(--accent)",
-								foreground: "var(--accent-foreground)",
-							},
-							destructive: "var(--destructive)",
-							border: "var(--border)",
-							input: "var(--input)",
-							ring: "var(--ring)",
-							chart: {
-								1: "var(--chart-1)",
-							},
-						},
-						fontFamily: {
-							sans: [
-								"Archivo",
-								"system-ui",
-								"-apple-system",
-								"sans-serif",
-							],
-							mono: ["JetBrains Mono", "Fira Code", "monospace"],
-						},
-					},
-				},
-			};
-		</script>
-		<link
-			href="https://cdn.tailwindcss.com?plugins=typography"
-			rel="stylesheet" />
-	</head>
-	<body class="bg-background text-foreground font-sans antialiased">
-		<div
-			class="min-h-screen flex flex-col items-center justify-center px-6 py-16">
-			<main class="w-full max-w-lg space-y-8">
-				<header class="space-y-2">
-				<h1 class="text-3xl font-semibold tracking-tight">
-					Erato
-					<span class="text-foreground font-normal text-xl ml-1"
-						>API</span
-					>
-				</h1>
-					<p class="text-muted-foreground text-base">
-						Versioned REST API for the Vesta data model.
-					</p>
-				</header>
+                        :root {
+                                --background: oklch(0.141 0.005 285.823);
+                                --foreground: oklch(0.985 0 0);
+                                --card: oklch(0.21 0.006 285.885);
+                                --card-foreground: oklch(0.985 0 0);
+                                --primary: oklch(0.92 0.004 286.32);
+                                --primary-foreground: oklch(0.21 0.006 285.885);
+                                --secondary: oklch(0.274 0.006 286.033);
+                                --secondary-foreground: oklch(0.985 0 0);
+                                --muted: oklch(0.274 0.006 286.033);
+                                --muted-foreground: oklch(0.705 0.015 286.067);
+                                --accent: oklch(0.274 0.006 286.033);
+                                --accent-foreground: oklch(0.985 0 0);
+                                --destructive: oklch(0.704 0.191 22.216);
+                                --border: oklch(1 0 0 / 10%);
+                                --input: oklch(1 0 0 / 15%);
+                                --ring: oklch(0.552 0.016 285.938);
+                                --chart-1: oklch(0.488 0.243 264.376);
+                        }
+                </style>
+                <script>
+                        tailwind.config = {
+                                darkMode: "class",
+                                theme: {
+                                        extend: {
+                                                colors: {
+                                                        background: "var(--background)",
+                                                        foreground: "var(--foreground)",
+                                                        card: {
+                                                                DEFAULT: "var(--card)",
+                                                                foreground: "var(--card-foreground)",
+                                                        },
+                                                        primary: {
+                                                                DEFAULT: "var(--primary)",
+                                                                foreground: "var(--primary-foreground)",
+                                                        },
+                                                        secondary: {
+                                                                DEFAULT: "var(--secondary)",
+                                                                foreground: "var(--secondary-foreground)",
+                                                        },
+                                                        muted: {
+                                                                DEFAULT: "var(--muted)",
+                                                                foreground: "var(--muted-foreground)",
+                                                        },
+                                                        accent: {
+                                                                DEFAULT: "var(--accent)",
+                                                                foreground: "var(--accent-foreground)",
+                                                        },
+                                                        destructive: "var(--destructive)",
+                                                        border: "var(--border)",
+                                                        input: "var(--input)",
+                                                        ring: "var(--ring)",
+                                                        chart: {
+                                                                1: "var(--chart-1)",
+                                                        },
+                                                },
+                                                fontFamily: {
+                                                        sans: ["Archivo", "system-ui", "-apple-system", "sans-serif"],
+                                                        mono: ["JetBrains Mono", "Fira Code", "monospace"],
+                                                },
+                                        },
+                                },
+                        };
+                </script>
+                <link
+                        href="https://cdn.tailwindcss.com?plugins=typography"
+                        rel="stylesheet" />
+        </head>
+        <body class="bg-background text-foreground font-sans antialiased">
+                <div class="min-h-screen flex flex-col items-center justify-center px-6 py-16">
+                        <main class="w-full max-w-lg space-y-8">
+                                <header class="space-y-2">
+                                        <h1 class="text-3xl font-semibold tracking-tight">
+                                                Erato
+                                                <span class="text-foreground font-normal text-xl ml-1">API</span>
+                                        </h1>
+                                        <p class="text-muted-foreground text-base">
+                                                Versioned REST API for the Vesta data model.
+                                        </p>
+                                </header>
 
-				<section class="space-y-3">
-					<h2
-						class="text-xs font-medium uppercase tracking-wider text-muted-foreground">
-						Versions
-					</h2>
-					<a
-						href="/v0/health"
-						class="group flex items-center justify-between rounded-lg border border-border bg-card px-4 py-3 transition-colors hover:border-chart-1/40">
-						<div>
-							<span class="font-mono text-sm font-medium"
-								>v0</span
-							>
-							<span class="text-muted-foreground text-sm ml-2"
-								>Current</span
-							>
-						</div>
-						<span
-							class="text-muted-foreground group-hover:text-chart-1 transition-colors"
-							>&rarr;</span
-						>
-					</a>
-				</section>
+                                <section class="space-y-3">
+                                        <h2 class="text-xs font-medium uppercase tracking-wider text-muted-foreground">
+                                                Versions
+                                        </h2>
+                                        <a
+                                                href="/v0/health"
+                                                class="group flex items-center justify-between rounded-lg border border-border bg-card px-4 py-3 transition-colors hover:border-chart-1/40">
+                                                <div>
+                                                        <span class="font-mono text-sm font-medium">v0</span>
+                                                        <span class="text-muted-foreground text-sm ml-2">Current</span>
+                                                </div>
+                                                <span
+                                                        class="text-muted-foreground group-hover:text-chart-1 transition-colors"
+                                                        >&rarr;</span
+                                                >
+                                        </a>
+                                </section>
 
-				<section class="space-y-3">
-					<h2
-						class="text-xs font-medium uppercase tracking-wider text-muted-foreground">
-						Resources
-					</h2>
-					<div class="flex gap-4 text-sm">
-						<a
-							href="https://docs.vesta.cx/Projects/vesta/"
-							class="text-muted-foreground hover:text-foreground transition-colors"
-							rel="noopener noreferrer">
-							Documentation
-						</a>
-						<span class="text-border">·</span>
-						<a
-							href="/v0/health"
-							class="text-muted-foreground hover:text-foreground transition-colors">
-							Health check
-						</a>
-						<span class="text-border">·</span>
-						<a
-							href="https://github.com/vesta-cx/erato"
-							class="text-muted-foreground hover:text-foreground transition-colors"
-							rel="noopener noreferrer">
-							Source
-						</a>
-					</div>
-				</section>
-			</main>
+                                <section class="space-y-3">
+                                        <h2 class="text-xs font-medium uppercase tracking-wider text-muted-foreground">
+                                                Resources
+                                        </h2>
+                                        <div class="flex gap-4 text-sm">
+                                                <a
+                                                        href="https://docs.vesta.cx/Projects/vesta/"
+                                                        class="text-muted-foreground hover:text-foreground transition-colors"
+                                                        rel="noopener noreferrer">
+                                                        Documentation
+                                                </a>
+                                                <span class="text-border">·</span>
+                                                <a
+                                                        href="/v0/health"
+                                                        class="text-muted-foreground hover:text-foreground transition-colors">
+                                                        Health check
+                                                </a>
+                                                <span class="text-border">·</span>
+                                                <a
+                                                        href="https://github.com/vesta-cx/erato"
+                                                        class="text-muted-foreground hover:text-foreground transition-colors"
+                                                        rel="noopener noreferrer">
+                                                        Source
+                                                </a>
+                                        </div>
+                                </section>
+                        </main>
 
-			<footer class="mt-16 text-xs text-muted-foreground">
-				<a
-					href="https://vesta.cx"
-					class="hover:text-foreground transition-colors"
-					rel="noopener noreferrer">
-					vesta.cx
-				</a>
-			</footer>
-		</div>
-	</body>
+                        <footer class="mt-16 text-xs text-muted-foreground">
+                                <a
+                                        href="https://vesta.cx"
+                                        class="hover:text-foreground transition-colors"
+                                        rel="noopener noreferrer">
+                                        vesta.cx
+                                </a>
+                        </footer>
+                </div>
+        </body>
 </html>

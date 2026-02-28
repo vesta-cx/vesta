@@ -1,10 +1,17 @@
 {
   "name": "@vesta-cx/utils",
   "version": "1.0.0",
-  "description": "",
-  "keywords": [],
+  "description": "Shared utilities for Vesta: colors, easing, numbers, permissions, auth (WorkOS), cookies, CORS. ESM + CJS.",
+  "keywords": [
+    "vesta",
+    "utils",
+    "auth",
+    "cors",
+    "cookies",
+    "workos"
+  ],
   "license": "ISC",
-  "author": "",
+  "author": "vesta-cx",
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
@@ -65,5 +72,16 @@
       "optional": true
     }
   },
-  "packageManager": "pnpm@10.20.0"
+  "packageManager": "pnpm@10.20.0",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/vesta-cx/utils.git"
+  },
+  "homepage": "https://github.com/vesta-cx/utils#readme",
+  "bugs": {
+    "url": "https://github.com/vesta-cx/utils/issues"
+  },
+  "files": [
+    "dist"
+  ]
 }

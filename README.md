@@ -91,6 +91,7 @@ Once self-sustaining, decide based on user feedback and runway:
 - **Merch & Commerce** — Integrate Shopify (or Stripe) for selling merch, vinyl, digital downloads
 - **Advanced DQM** — Tools for managing metadata, royalty splits, compilations at scale
 - **Collaboration** — Version control for music projects (long-term vision)
+- **Federation** — Protocol adapters (ActivityPub, AT Protocol, others) so vesta feeds and collections can participate in the fediverse; our data model stays agnostic, adapters translate to each protocol. See [Federation Roadmap](apps/docs/content/projects/vesta/federation-roadmap.md).
 
 ---
 

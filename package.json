@@ -26,8 +26,8 @@
     "test:watch": "vitest"
   },
   "dependencies": {
-    "@mia-cx/drizzle-query-factory": "workspace:*",
-    "@vesta-cx/db": "workspace:*",
+    "@mia-cx/drizzle-query-factory": "^0.1.0",
+    "@vesta-cx/db": "^0.0.1",
     "drizzle-orm": "^0.45.1",
     "hono": "^4.12.3",
     "zod": "^3.24.0"

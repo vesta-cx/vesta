@@ -28,7 +28,7 @@
                     "binding": "DB",
                     "database_name": "vesta-db",
                     "database_id": "30d655ef-a360-403c-a6aa-7f5752d4f836",
-                    "migrations_dir": "../../packages/db/drizzle",
+                    "migrations_dir": "node_modules/@vesta-cx/db/drizzle",
                     "remote": true
                 }
             ],
@@ -47,7 +47,7 @@
                     "binding": "DB",
                     "database_name": "vesta-db-dev",
                     "database_id": "057f8953-4606-4e13-92e3-bf17a3f25ef9",
-                    "migrations_dir": "../../packages/db/drizzle"
+                    "migrations_dir": "node_modules/@vesta-cx/db/drizzle"
                 }
             ],
             "kv_namespaces": [
@@ -63,7 +63,7 @@
                     "binding": "DB",
                     "database_name": "vesta-db",
                     "database_id": "30d655ef-a360-403c-a6aa-7f5752d4f836",
-                    "migrations_dir": "../../packages/db/drizzle",
+                    "migrations_dir": "node_modules/@vesta-cx/db/drizzle",
                     "remote": true
                 }
             ],

@@ -1,0 +1,26 @@
+---
+title: Shared Packages — Publish to npm, Consume via Semver
+description: Own-repo packages are published to npm and consumed via semver; monorepo-only packages use workspace:*. Enables isolated app/package development.
+alwaysApply: true
+---
+
+# Shared Packages: npm Publish, Consume via Semver
+
+## Primary rule
+
+- **Own-repo packages** (submodules, e.g. `@vesta-cx/db`, `@vesta-cx/ui`, `@vesta-cx/utils`, `cleanc`, `@mia-cx/drizzle-query-factory`): publish to npm and list them in consumers with a **semver range** (e.g. `^1.0.0`).
+- **Monorepo-only packages** (e.g. `@vesta-cx/config`, `@vesta-cx/storage`): use `workspace:*` until the package has its own repo and is published.
+
+## When adding or changing dependencies
+
+- Dependency has its own repo → use a semver range that matches the published version (e.g. `"@vesta-cx/db": "^0.0.1"`).
+- Dependency is monorepo-only → use `workspace:*`.
+
+## Publishing
+
+- Publish own-repo packages to npm on release. Publish the package version to npm before or when updating consumer dependency ranges to that version.
+
+## Why
+
+- Isolated clones work: clone one app, run `pnpm i`, and get shared packages from npm.
+- In the monorepo, pnpm still prefers the local workspace version when it satisfies the semver range.

@@ -1,58 +1,51 @@
-# Svelte library
+# @vesta-cx/ui
 
-Everything you need to build a Svelte library, powered by [`sv`](https://npmjs.com/package/sv).
+Svelte 5 component library for Vesta: [shadcn-svelte](https://shadcn-svelte.com/)-based UI components, Bits-UI, design tokens (OKLCH, Tailwind v4), and layout primitives. Use in SvelteKit apps; extend, don’t rebuild.
 
-Read more about creating a library [in the docs](https://svelte.dev/docs/kit/packaging).
+## Install
 
-## Creating a project
-
-If you're seeing this, you've probably already done this step. Congrats!
-
-```sh
-# create a new project in the current directory
-npx sv create
-
-# create a new project in my-app
-npx sv create my-app
+```bash
+pnpm i @vesta-cx/ui
 ```
 
-## Developing
+Install peer dependencies if not already present (see your app’s stack):
 
-Once you've created a project and installed dependencies with `npm install` (or `pnpm install` or `yarn`), start a development server:
+- `svelte` ^5
+- `@sveltejs/kit` ^2
+- `@vesta-cx/utils` ^1.0.0
+- `bits-ui` ^2.14
+- `tailwindcss` ^4
+- Others as listed in `package.json` peerDependencies
 
-```sh
-npm run dev
+## Usage
 
-# or start the server and open the app in a new browser tab
-npm run dev -- --open
+### Import components
+
+```svelte
+<script>
+  import { Button } from "@vesta-cx/ui";
+  import { Card, CardHeader, CardTitle, CardContent } from "@vesta-cx/ui";
+</script>
+<Button>Click</Button>
+<Card>...</Card>
 ```
 
-Everything inside `src/lib` is part of your library, everything inside `src/routes` can be used as a showcase or preview app.
+### Subpaths
 
-## Building
+- `@vesta-cx/ui` — main component barrel
+- `@vesta-cx/ui/components/ui/*` — individual UI components
+- `@vesta-cx/ui/components/layout/*` — layout (header, footer, section, main)
+- `@vesta-cx/ui/components/utils/*` — theme toggle, cookie consent, etc.
+- `@vesta-cx/ui/styles/*` — SCSS design tokens (if your build supports it)
 
-To build your library:
+### Theming
 
-```sh
-npm pack
-```
+Theming is driven by `data-theme` (`light`, `dark`, `auto`) and OKLCH design tokens. See [shadcn-svelte theming](https://shadcn-svelte.com/docs/theming) and your app’s Tailwind config that extends the UI package tokens.
 
-To create a production version of your showcase app:
+### Building
 
-```sh
-npm run build
-```
+Consuming apps use the built `dist/`; the package must be built before use. In a monorepo run `pnpm --filter @vesta-cx/ui build` after changing the UI package.
 
-You can preview the production build with `npm run preview`.
+## License
 
-> To deploy your app, you may need to install an [adapter](https://svelte.dev/docs/kit/adapters) for your target environment.
-
-## Publishing
-
-Go into the `package.json` and give your package the desired name through the `"name"` option. Also consider adding a `"license"` field and point it to a `LICENSE` file which you can create from a template (one popular option is the [MIT license](https://opensource.org/license/mit/)).
-
-To publish your library to [npm](https://www.npmjs.com):
-
-```sh
-npm publish
-```
+ISC

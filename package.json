@@ -82,7 +82,7 @@
 	"peerDependencies": {
 		"@lucide/svelte": "^0.544.0",
 		"@sveltejs/kit": "^2.0.0",
-		"@vesta-cx/utils": "workspace:*",
+		"@vesta-cx/utils": "^1.0.0",
 		"bits-ui": "^2.14.2",
 		"layerchart": "^2.0.0-next.27",
 		"nanostores": "^1.0.0",
@@ -107,7 +107,7 @@
 		"@tanstack/table-core": "^8.21.3",
 		"@types/d3": "^7.4.3",
 		"@types/node": "^25.3.0",
-		"@vesta-cx/utils": "workspace:*",
+		"@vesta-cx/utils": "^1.0.0",
 		"@vitest/browser": "^4.0.18",
 		"@vitest/coverage-v8": "^4.0.18",
 		"bits-ui": "^2.16.2",
@@ -151,11 +151,26 @@
 		"wrangler": "^4.67.0"
 	},
 	"keywords": [
-		"svelte"
+		"svelte",
+		"vesta",
+		"shadcn-svelte",
+		"bits-ui",
+		"tailwind",
+		"components"
 	],
 	"dependencies": {
 		"@fontsource-variable/archivo": "^5.2.8",
 		"@fontsource/geist-sans": "^5.2.5",
 		"d3": "^7.9.0"
-	}
+	},
+	"description": "Svelte 5 component library for Vesta: shadcn-svelte, Bits-UI, OKLCH design tokens, layout. Use in SvelteKit; extend, do not rebuild.",
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/vesta-cx/ui.git"
+	},
+	"homepage": "https://github.com/vesta-cx/ui#readme",
+	"bugs": {
+		"url": "https://github.com/vesta-cx/ui/issues"
+	},
+	"author": "vesta-cx"
 }

@@ -1,12 +1,17 @@
 {
   "name": "@vesta-cx/config",
   "version": "1.0.0",
-  "private": true,
-  "description": "shared configs for the vesta monorepo",
+  "description": "Shared ESLint, Prettier, TypeScript, TailwindCSS, and lint-staged configs. Extend in your app or monorepo.",
   "keywords": [
     "config",
     "shared",
-    "monorepo"
+    "monorepo",
+    "eslint",
+    "prettier",
+    "typescript",
+    "tailwind",
+    "lint-staged",
+    "vesta"
   ],
   "license": "MIT",
   "author": "vesta",
@@ -137,5 +142,13 @@
   },
   "publishConfig": {
     "access": "public"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/vesta-cx/config.git"
+  },
+  "homepage": "https://github.com/vesta-cx/config#readme",
+  "bugs": {
+    "url": "https://github.com/vesta-cx/config/issues"
   }
 }

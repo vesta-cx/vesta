@@ -1,0 +1,13 @@
+# ESLint flat config side-effect safety
+
+When authoring shared ESLint flat configs in `packages/config`, do not import legacy config modules that execute side effects on import (for example, modules that call `@rushstack/eslint-patch`).
+
+Instead:
+
+- Convert required rules into first-party flat config modules in `src/eslint/`.
+- Depend directly on the plugins/parsers those rules need.
+- Keep runtime imports explicit in `tsup.config.ts` externals.
+
+## Why
+
+Side-effectful legacy config imports can break standalone consumers (outside the monorepo) because patch modules often assume ESLint invocation context.

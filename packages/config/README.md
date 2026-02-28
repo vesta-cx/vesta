@@ -32,6 +32,8 @@ import svelte from "@vesta-cx/config/eslint/svelte";
 export default [...base, ...svelte];
 ```
 
+The shared ESLint presets are implemented as first-party flat configs in this package (no runtime import of legacy style-guide modules), which keeps standalone consumers compatible.
+
 ### Prettier
 
 ```js

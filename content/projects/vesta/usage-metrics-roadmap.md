@@ -131,6 +131,6 @@ flowchart LR
 
 ## See Also
 
-- [Milestone 1 Roadmap](./milestones.md)
+- [Milestone 1 Roadmap (Blogging + Smart Links)](./milestones.md)
 - [Feature Catalog & Pricing Transparency](./feature-catalog.md)
 - [Feature Access & Gating](./feature-access-gating.md)

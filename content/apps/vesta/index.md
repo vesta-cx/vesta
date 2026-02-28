@@ -181,6 +181,6 @@ export async function canUseAdvancedAnalytics(creatorId: string) {
 
 - [erato](../erato) — Data layer & REST API
 - [db](../db) — Shared database schemas
-- [usage metrics roadmap](../../projects/vesta/usage-metrics-roadmap.md) — Analytics phases from PostHog-first to in-house
+- [Usage Metrics & Analytics Roadmap](../../projects/vesta/usage-metrics-roadmap.md) — Analytics phases from PostHog-first to in-house
 - [ui](../../../ui) — Component library
 - [utils](../../../utils) — Shared auth, storage, helpers

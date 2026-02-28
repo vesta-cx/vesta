@@ -100,5 +100,5 @@ The vesta design system must support extensive customization (colors, fonts, lay
 - [Modular Pricing & Weighted Discount Curve](./pricing-modular.md) — Modular pricing model and discount curve
 - [Usage Metrics & Analytics Roadmap](./usage-metrics-roadmap.md) — PostHog-first analytics path and long-term in-house migration
 - [Development Checklist (Phase 1)](./development-checklist.md) — PR guidelines for Milestone 1 development
-- [vesta app docs](../../apps/vesta/index.md) — vesta app docs
-- [Erato data layer docs](../../apps/erato/index.md) — Erato data layer docs
+- [vesta](../../apps/vesta/index.md) — vesta app docs
+- [Erato](../../apps/erato/index.md) — Erato data layer docs

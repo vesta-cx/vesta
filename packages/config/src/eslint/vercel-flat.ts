@@ -15,8 +15,6 @@ const importRecommended =
 		? [eslintPluginImport.flatConfigs.recommended]
 		: ([] as TSESLint.FlatConfig.ConfigArray);
 
-const importPlugin =
-	eslintPluginImport as unknown as TSESLint.FlatConfig.Plugin;
 const eslintCommentsPlugin =
 	eslintPluginEslintComments as unknown as TSESLint.FlatConfig.Plugin;
 const unicornPlugin =
@@ -36,7 +34,6 @@ export const vercelFlatCompat: TSESLint.FlatConfig.ConfigArray = [
 			"import/resolver": { node: {} },
 		},
 		plugins: {
-			import: importPlugin,
 			"eslint-comments": eslintCommentsPlugin,
 			unicorn: unicornPlugin,
 		},

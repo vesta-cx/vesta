@@ -1,0 +1,70 @@
+{
+  "name": "@mia-cx/clean",
+  "version": "1.0.0",
+  "description": "Clean build outputs and cache directories with Prettier-style config discovery and per-command support",
+  "keywords": [
+    "clean",
+    "build",
+    "cache",
+    "monorepo",
+    "prettier-style",
+    "config"
+  ],
+  "homepage": "https://github.com/vesta-cx/cleanc#readme",
+  "bugs": {
+    "url": "https://github.com/vesta-cx/cleanc/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/vesta-cx/cleanc.git"
+  },
+  "license": "MIT",
+  "author": "vesta",
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    },
+    "./schema": "./schema/cleanrc.schema.json"
+  },
+  "bin": {
+    "clean": "./dist/cli.js"
+  },
+  "files": [
+    "dist/**/*.?(d.)?([cm])[jt]s?(on?([c5]))",
+    "schema/cleanrc.schema.json"
+  ],
+  "scripts": {
+    "build": "tsup",
+    "build:clean": "pnpm run clean && pnpm run build",
+    "clean": "clean",
+    "dev": "tsup --watch",
+    "dev:clean": "pnpm run clean && pnpm run dev",
+    "format": "prettier --write .",
+    "install:clean": "pnpm run clean && node -e \"try{require('fs').rmSync(require('path').join(process.cwd(),'node_modules'),{recursive:true,force:true})}catch(_){}\" && pnpm i",
+    "lint": "prettier --check . && eslint .",
+    "prepublishOnly": "pnpm run build",
+    "test": "vitest run",
+    "test:coverage": "vitest run --coverage",
+    "test:watch": "vitest"
+  },
+  "dependencies": {
+    "cosmiconfig": "^9.0.0",
+    "rimraf": "^5.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "@vesta-cx/config": "^1.1.1",
+    "@vitest/coverage-v8": "^4.0.18",
+    "eslint": "^8.57.1",
+    "prettier": "^3.8.1",
+    "prettier-plugin-packagejson": "^2.5.12",
+    "tsup": "^8.5.1",
+    "vitest": "^4.0.18"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}

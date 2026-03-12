@@ -1,0 +1,87 @@
+{
+  "name": "@vesta-cx/utils",
+  "version": "1.0.0",
+  "description": "Shared utilities for Vesta: colors, easing, numbers, permissions, auth (WorkOS), cookies, CORS. ESM + CJS.",
+  "keywords": [
+    "vesta",
+    "utils",
+    "auth",
+    "cors",
+    "cookies",
+    "workos"
+  ],
+  "license": "ISC",
+  "author": "vesta-cx",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "require": "./dist/index.js",
+      "import": "./dist/index.js"
+    },
+    "./auth": {
+      "types": "./dist/auth/index.d.ts",
+      "require": "./dist/auth/index.js",
+      "import": "./dist/auth/index.js"
+    },
+    "./cookies": {
+      "types": "./dist/cookies/index.d.ts",
+      "require": "./dist/cookies/index.js",
+      "import": "./dist/cookies/index.js"
+    },
+    "./cors": {
+      "types": "./dist/cors/index.d.ts",
+      "require": "./dist/cors/index.js",
+      "import": "./dist/cors/index.js"
+    }
+  },
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "tsc",
+    "build:clean": "pnpm run clean && pnpm run build",
+    "clean": "cleanc clean",
+    "dev": "tsc --watch",
+    "dev:clean": "pnpm run clean && pnpm run dev",
+    "format": "prettier --write .",
+    "install:clean": "pnpm run clean && node -e \"try{require('fs').rmSync(require('path').join(process.cwd(),'node_modules'),{recursive:true,force:true})}catch(_){}\" && pnpm i",
+    "lint": "eslint .",
+    "test": "vitest run",
+    "test:coverage": "vitest run --coverage",
+    "test:watch": "vitest"
+  },
+  "dependencies": {
+    "@nanostores/persistent": "^1.3.3",
+    "iron-webcrypto": "^2.0.0",
+    "nanostores": "^1.1.0"
+  },
+  "devDependencies": {
+    "@sveltejs/kit": "^2.53.0",
+    "@types/node": "^25.3.0",
+    "@vesta-cx/config": "workspace:*",
+    "@vitest/coverage-v8": "^4.0.18",
+    "eslint": "^10.0.1",
+    "happy-dom": "^20.7.0",
+    "prettier": "^3.8.1",
+    "typescript": "^5.9.3",
+    "vitest": "^4.0.18"
+  },
+  "peerDependencies": {
+    "@sveltejs/kit": "^2.0.0"
+  },
+  "peerDependenciesMeta": {
+    "@sveltejs/kit": {
+      "optional": true
+    }
+  },
+  "packageManager": "pnpm@10.20.0",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/vesta-cx/utils.git"
+  },
+  "homepage": "https://github.com/vesta-cx/utils#readme",
+  "bugs": {
+    "url": "https://github.com/vesta-cx/utils/issues"
+  },
+  "files": [
+    "dist"
+  ]
+}

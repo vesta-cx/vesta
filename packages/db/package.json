@@ -1,0 +1,66 @@
+{
+  "name": "@vesta-cx/db",
+  "version": "0.0.1",
+  "description": "Shared Drizzle ORM schema and entity schemas for Vesta D1. Export-only; consumers create their own getDb(platform) factory.",
+  "keywords": [
+    "drizzle",
+    "drizzle-orm",
+    "d1",
+    "cloudflare",
+    "schema",
+    "vesta"
+  ],
+  "license": "ISC",
+  "author": "vesta-cx",
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./schema": {
+      "types": "./dist/schema/index.d.ts",
+      "import": "./dist/schema/index.js"
+    },
+    "./entity-schemas": {
+      "types": "./dist/entity-schemas/index.d.ts",
+      "import": "./dist/entity-schemas/index.js"
+    }
+  },
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "tsc",
+    "build:clean": "pnpm run clean && pnpm run build",
+    "clean": "cleanc clean",
+    "db:generate": "drizzle-kit generate",
+    "db:studio": "drizzle-kit studio",
+    "dev": "tsc --watch",
+    "dev:clean": "pnpm run clean && pnpm run dev",
+    "format": "prettier --write .",
+    "install:clean": "pnpm run clean && node -e \"try{require('fs').rmSync(require('path').join(process.cwd(),'node_modules'),{recursive:true,force:true})}catch(_){}\" && pnpm i",
+    "lint": "eslint ."
+  },
+  "dependencies": {
+    "drizzle-orm": "^0.45.1",
+    "zod": "^3.24.0"
+  },
+  "devDependencies": {
+    "drizzle-kit": "^0.31.8",
+    "prettier": "^3.8.1",
+    "typescript": "^5.9.3"
+  },
+  "packageManager": "pnpm@10.20.0",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/vesta-cx/db.git"
+  },
+  "homepage": "https://github.com/vesta-cx/db#readme",
+  "bugs": {
+    "url": "https://github.com/vesta-cx/db/issues"
+  },
+  "files": [
+    "dist",
+    "schema",
+    "drizzle"
+  ]
+}

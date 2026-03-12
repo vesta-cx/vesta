@@ -1,0 +1,17 @@
+PRIVATE_WORKOS_CLIENT_ID=client_xxxxxxxxxxxxxxxxxxxxxxxxxx
+PRIVATE_WORKOS_API_KEY=sk_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+PRIVATE_WORKOS_ORG_ID=org_xxxxxxxxxxxxxxxxxxxxxxxxxx
+PRIVATE_WORKOS_COOKIE_PASSWORD=<32+ char secret via openssl rand -base64 24>
+
+# Euterpe (raw FLAC transcoding). Run euterpe locally: pnpm --filter euterpe dev
+EUTERPE_URL=http://localhost:3000
+PRIVATE_EUTERPE_API_KEY=eut_xxx
+
+# CORS. Comma-separated origins allowed for cross-origin requests. Leave empty for same-origin only.
+# CORS_ORIGINS=https://sona.vesta.cx,https://www.vesta.cx
+
+# R2 S3 API (passed to euterpe so it can upload transcoded files). Create API token in Cloudflare R2 dashboard.
+PRIVATE_R2_ACCOUNT_ID=<cf account id>
+PRIVATE_R2_ACCESS_KEY_ID=<r2 api token id>
+PRIVATE_R2_SECRET_ACCESS_KEY=<r2 api token secret>
+PRIVATE_R2_BUCKET=vesta-sona-audio

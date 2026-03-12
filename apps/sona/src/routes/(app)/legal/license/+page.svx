@@ -1,0 +1,30 @@
+<script lang="ts">
+	import ContactLink from '$lib/components/contact-link.svelte';
+	import { pageTitle, SITE_NAME, ORG_NAME } from '$lib/constants/identity';
+</script>
+
+<svelte:head>
+	<title>{pageTitle('Content License')}</title>
+</svelte:head>
+
+# Content License
+
+How content on {SITE_NAME} is licensed and used.
+
+## Creative Commons Content
+
+A significant portion of the audio content on this site is licensed under Creative Commons. {SITE_NAME} adheres to the terms of those licenses, including attribution requirements and any restrictions specified (e.g., NonCommercial, ShareAlike, NoDerivatives).
+
+## All Rights Reserved Content
+
+For content that remains "all rights reserved," **Mia Riezebos** ({ORG_NAME}) has been granted express personal permission by the rights holders to use and host such content on {SITE_NAME}. That permission covers use, hosting, and processing for purposes of audio quality perception research.
+
+## Revocation of Permission and Takedown Procedures
+
+Where express permission has been granted for all-rights-reserved content, the rights holder is expected to communicate any revocation of that permission directly to the operator (Mia Riezebos / {ORG_NAME}) via personal contact, rather than through formal takedown procedures. Use of takedown mechanisms to demand removal of content that was placed on this site pursuant to prior express permission, without first attempting direct communication to revoke that permission, may constitute abuse of rights or a breach of the duty of good faith (goede trouw) under Art. 6:2 Burgerlijk Wetboek and the principle of proportionality under EU law (Richtlijn 2019/790, Recital 66).
+
+Permission may be revoked at any time. Upon receipt of a direct, good-faith revocation request, {SITE_NAME} will remove the content in a reasonable timeframe.
+
+## Inquiries
+
+For questions about content usage, licensing, or revocation of permission, contact <ContactLink />.

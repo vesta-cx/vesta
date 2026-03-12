@@ -1,0 +1,61 @@
+{
+	"$schema": "node_modules/wrangler/config-schema.json",
+	"name": "vesta_sona",
+	"main": "worker.ts",
+	"compatibility_date": "2026-02-12",
+	"compatibility_flags": ["nodejs_compat", "nodejs_als"],
+	"assets": {
+		"binding": "ASSETS",
+		"directory": ".svelte-kit/cloudflare"
+	},
+	"observability": {
+		"enabled": true
+	},
+	"routes": [
+		{
+			"pattern": "sona.vesta.cx",
+			"zone_name": "vesta.cx",
+			"custom_domain": true
+		}
+	],
+	"d1_databases": [
+		{
+			"binding": "DB",
+			"database_name": "vesta-sona-db",
+			"database_id": "edd90535-4d28-4d35-891a-9454c7509176",
+			"migrations_dir": "drizzle",
+			"remote": true
+		}
+	],
+	"r2_buckets": [
+		{
+			"bucket_name": "vesta-sona-audio",
+			"binding": "AUDIO_BUCKET",
+			"remote": true
+		}
+	],
+	"triggers": {
+		"crons": ["0 */6 * * *"]
+	},
+	"env": {
+		"dev": {
+			"name": "vesta_sona_dev",
+			"d1_databases": [
+				{
+					"binding": "DB",
+					"database_name": "vesta-sona-db-dev",
+					"database_id": "635e3d30-0b00-48dc-aaaa-e83d4a1372a4",
+					"migrations_dir": "drizzle",
+					"remote": true
+				}
+			],
+			"r2_buckets": [
+				{
+					"bucket_name": "vesta-sona-audio-dev",
+					"binding": "AUDIO_BUCKET",
+					"remote": true
+				}
+			]
+		}
+	}
+}

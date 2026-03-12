@@ -1,0 +1,12 @@
+<script lang="ts">
+	import ContactLink from '$lib/components/contact-link.svelte';
+	import { pageTitle, SITE_NAME } from '$lib/constants/identity';
+</script>
+
+<svelte:head>
+	<title>{pageTitle('Privacy Policy')}</title>
+</svelte:head>
+
+# Privacy Policy
+
+*To be added. For questions about how {SITE_NAME} handles your data, contact <ContactLink />.*

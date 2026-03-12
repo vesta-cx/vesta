@@ -1,0 +1,8 @@
+@import 'tailwindcss';
+@import 'tw-animate-css';
+@import '../node_modules/@vesta-cx/ui/src/lib/styles/theme.css';
+
+@source '../node_modules/@vesta-cx/ui/src/lib';
+
+@plugin '@tailwindcss/forms';
+@plugin '@tailwindcss/typography';

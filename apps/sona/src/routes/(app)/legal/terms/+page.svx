@@ -1,0 +1,12 @@
+<script lang="ts">
+	import ContactLink from '$lib/components/contact-link.svelte';
+	import { pageTitle, SITE_NAME } from '$lib/constants/identity';
+</script>
+
+<svelte:head>
+	<title>{pageTitle('Terms of Use')}</title>
+</svelte:head>
+
+# Terms of Use
+
+*To be added. For questions about use of {SITE_NAME}, contact <ContactLink />.*

@@ -99,21 +99,6 @@ LEFT JOIN posts p ON r.id = p.resource_id
 WHERE r.id = {resource_id}
 ```
 
-## Authors & Workspaces
-
-Resources are attributed to workspaces (artist profiles) via the `resource_authors` join table:
-
-```
-resource_authors table:
-resource_id          UUID foreign key → resources.id
-workspace_id         UUID foreign key → workspaces.id
-role                 string (e.g., 'composer', 'performer', 'engineer') optional
-added_at             timestamp
-primary key          (resource_id, workspace_id)
-```
-
-**Purpose:** A post can be authored by multiple workspaces (e.g., collaboration, remix credits). Query workspaces for a resource via this table.
-
 ## Status & Permissions
 
 **Status controls listing:**

@@ -116,7 +116,7 @@ Resource URL routes are retained for compatibility and backed by the same `exter
 | DELETE | `/collections/:id` | Required | `collections:write` (owner) | No          |
 
 Collections now use `status` (`LISTED` / `UNLISTED`) plus explicit permissions (`objectType=collection`, action-scoped checks).
-For follower-only behavior, clients can set static rules (`static:follower allow`, `static:user deny`, `static:guest deny`) and resolve effective visibility in the client/app permission layer.
+For follower-only behavior, clients can set static rules (`static:follower allow`, `static:authenticated deny`, `static:guest deny`) and resolve effective visibility in the client/app permission layer. (`authenticated` = any authenticated user.)
 
 ### Collection Items
 

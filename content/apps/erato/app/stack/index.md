@@ -11,11 +11,11 @@ This section captures key tech stack decisions for `apps/erato`.
 
 - [Runtime + API Layer](./runtime-api.md)
 - [Drizzle ORM](./drizzle.md)
-- [Shared Schema Package (`@vesta-cx/db`)](./vesta-cx-db.md)
+- [Shared Schema Package (@vesta-cx/db)](./vesta-cx-db.md)
 - [ID Strategy (NanoID)](./nanoid.md)
 - [Database Strategy (D1 vs PlanetScale)](./d1-vs-planetscale.md)
 
 ## Related
 
-- [Erato architecture & data access](../architecture.md)
-- [Erato API roadmap](../../roadmap.md)
+- [Erato Architecture & Data Access](../architecture.md)
+- [Erato API Roadmap](../../roadmap.md)

@@ -33,10 +33,10 @@ All schemas are defined in `packages/db/src/schema/*.ts` and re-exported by `pac
 
 Detailed model docs live under:
 
-- [packages/db model index](./model/index.md)
-- [Identity](./model/identity/users.md)
-- [Access](./model/access/permissions.md)
-- [Resources](./model/resources/resource.md)
+- [packages/db Data Model](./model/index.md)
+- [Users & Organizations (WorkOS-Managed)](./model/identity/users.md)
+- [Permissions](./model/access/permissions.md)
+- [Resource](./model/resources/resource.md)
 - [Collections](./model/collections/collections.md)
 - [Features](./model/features/features.md)
 - [Subscriptions](./model/subscriptions/subscriptions.md)
@@ -239,7 +239,7 @@ npm install @vesta-cx/db
 
 ## See Also
 
-- [erato](../../apps/erato/index.md) — Data layer API app (consumes this package)
+- [Erato](../../apps/erato/index.md) — Data layer API app (consumes this package)
 - [vesta](../../apps/vesta/index.md) — Main app (consumes this package)
 - [utils](../utils) — Shared auth, storage helpers
 - [Drizzle ORM Docs](https://orm.drizzle.team/)

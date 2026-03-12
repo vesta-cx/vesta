@@ -56,12 +56,20 @@ created_at           timestamp
 updated_at           timestamp
 ```
 
+## Subject–action–object semantics
+
+- **Subject** — The entity *attempting* to perform an action (user, team, or organization).
+- **Action** — The action being *attempted* (e.g. `resources:write`, `collections:read`). Stored as a slug referencing `permission_actions`.
+- **Object** — The entity to be *acted upon* (workspace, resource, organization, collection). Users can always edit their own user record; to let others manage a public presence, use a workspace.
+
+See [Data model concepts](../index.md#permission-vs-engagement-subject-action-object) for comparison with engagements.
+
 ## Subjects
 
 - **User** — Individual user account (highest precedence)
 - **Team** — Group of users; permissions inherited by all members (medium precedence)
 - **Organization** — Organization-level permissions inherited by members (low precedence)
-- **Static** — Audience subjects for client-side visibility contexts (`guest`, `user`, `follower`, `subscriber`)
+- **Static** — Audience subjects for client-side visibility contexts: `guest`, `authenticated`, `follower`, `subscriber`. **`authenticated`** means “any authenticated user” (not a specific user ID). Used for rules like “allow any logged-in user to read this collection.”
 
 ## Objects
 

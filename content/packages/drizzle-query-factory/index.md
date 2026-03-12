@@ -144,7 +144,7 @@ return listResponse(rows, total, query.limit, query.offset)
 
 ## How Erato Uses It
 
-Erato defines a `ListQueryConfig` per domain (in `src/services/*.ts`), then each list route calls `parseListQuery` and composes the result with auth conditions. See [Erato API routes](../../apps/erato/api-routes.md) for the full route map.
+Erato defines a `ListQueryConfig` per domain (in `src/services/*.ts`), then each list route calls `parseListQuery` and composes the result with auth conditions. See [Erato API Routes](../../apps/erato/api-routes.md) for the full route map.
 
 ## Install
 

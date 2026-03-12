@@ -63,6 +63,15 @@ This roadmap separates two products:
 - Org admin: org-wide rollups + workspace drill-down
 - Platform admin: global cross-org analytics
 
+### Read state (notifications, resources)
+
+**Read** status for notifications, resources, and other viewable items is tracked in **analytics / usage metrics**, not in the collections or engagements schema. The model:
+
+- Emit a **read** event when the user has actually viewed the item: e.g. `(user_id, read:engagements, { engagement_id, resource_id?, … }, timestamp)`.
+- **Unread** is inferred: an item is unread if there is no read event for that (user, engagement) with a timestamp **≥** the engagement’s `created_at`, or equivalently, the engagement is newer than the latest read event for that user/scope.
+
+Design the write path so that the **read event** is written only after the view is confirmed (e.g. after the notification/item is in view or the request to mark-as-read completes). Be mindful of **race conditions** between the user reading and the system writing the read event: e.g. duplicate or out-of-order writes, or writing “read” before the client has actually received and displayed the content. Use a stable idempotency key (e.g. `user_id` + `engagement_id` or `resource_id`) and a single “read at” timestamp so that last-write-wins or deduplication preserves a consistent unread inference.
+
 ## Migration Path: PostHog -> In-house
 
 ### Trigger conditions

@@ -14,8 +14,8 @@ Erato is the backend REST API service for the Data Layer of Vesta. It exposes st
 
 ## Architecture
 
-- [Erato architecture & data access](./app/architecture.md)
-- [Erato stack decisions](./app/stack/index.md)
+- [Erato Architecture & Data Access](./app/architecture.md)
+- [Erato Stack Decisions](./app/stack/index.md)
 
 ## Scope
 
@@ -31,15 +31,15 @@ Erato docs focus on API concerns:
 
 The canonical data model docs now live with the shared schema package:
 
-- [packages/db model index](../../packages/db/model/index.md)
+- [packages/db Data Model](../../packages/db/model/index.md)
 
 Schema/domain docs are maintained in `packages/db`:
 
-- [packages/db model index](../../packages/db/model/index.md)
-- [packages/db overview](../../packages/db/index.md)
+- [packages/db Data Model](../../packages/db/model/index.md)
+- [packages/db](../../packages/db/index.md)
 
 ## Next Steps
 
-- [Erato API roadmap](./roadmap.md)
-- [Erato architecture & data access](./app/architecture.md)
-- [Erato stack decisions](./app/stack/index.md)
+- [Erato API Roadmap](./roadmap.md)
+- [Erato Architecture & Data Access](./app/architecture.md)
+- [Erato Stack Decisions](./app/stack/index.md)

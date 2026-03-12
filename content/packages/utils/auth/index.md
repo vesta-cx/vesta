@@ -49,11 +49,11 @@ flowchart TD
 
 These docs mirror `packages/utils/src/auth` file structure:
 
-- `index.ts` → [`index-api.md`](./index-api.md)
-- `types.ts` → [`types.md`](./types.md)
-- `session.ts` → [`session.md`](./session.md)
-- `workos.ts` → [`workos.md`](./workos.md)
-- `handle.ts` → [`handle.md`](./handle.md)
+- `index.ts` → [auth/index.ts API](./index-api.md)
+- `types.ts` → [auth/types.ts](./types.md)
+- `session.ts` → [auth/session.ts](./session.md)
+- `workos.ts` → [auth/workos.ts](./workos.md)
+- `handle.ts` → [auth/handle.ts](./handle.md)
 
 ## App Integration Pattern
 

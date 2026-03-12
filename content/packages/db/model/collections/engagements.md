@@ -5,7 +5,13 @@ description: Generic engagement model for likes, comments, reposts, subscribes, 
 
 # Engagements
 
-Engagements is a generic subject-action-object model for user interactions with content. Like permissions, but for user behavior.
+Engagements are a subject–action–object model for **user interactions that already happened**. Unlike permissions (which govern what a subject *may* do), engagements record what a subject *did*.
+
+- **Subject** — The entity that *performed* the action (user or workspace only).
+- **Action** — The action that *was performed* (e.g. like, comment, repost, follow).
+- **Object** — The entity that *was acted upon* (resource, workspace, collection, or user). Teams and organizations are not public-facing and do not appear as engagement objects.
+
+See [packages/db Data Model](../index.md#permission-vs-engagement-subject-action-object) for comparison with permissions.
 
 ## Schema
 
@@ -46,32 +52,11 @@ Don't confuse these. The engagement is public (appears in feeds). The billing re
 
 Both populate feeds, but **subscribe is a stronger signal** because it's paid. Friends seeing "your pal subscribed to this creator" is powerful discovery.
 
-## Engagement Visibility & Filtering
+## Engagement visibility & filtering
 
-**All engagement visibility is optional** at two levels:
+In UI, a subject can define which engagement types are visible to their followers. In the Data Model, this just touches the permissions table for each respective static "engagement" collection.
 
-### Subject (Initiator) Control
-
-A workspace/user can define which engagement types are visible to their followers:
-
-- "Show my likes" ✓ / ✗
-- "Show my reposts" ✓ / ✗
-- "Show my comments" ✓ / ✗
-- "Show my subscribes" ✓ / ✗
-
-**Use case:** Artist wants to show off likes/endorsements but keep reposts private to avoid looking like they're just sharing others' work.
-
-### Follower (Consumer) Control
-
-A user can customize what they see from any collection item (workspace, user, resource):
-
-- Filter by action type: "Show me only [workspace X]'s subscribes, hide their reposts"
-- Filter by content type: "Show me [label X]'s song releases, but hide blog posts"
-- Per-subject granularity: "Follow [artist A] for songs only, [artist B] for everything"
-
-**Use case:** Follow a label for music but ignore their marketing posts. Follow a curator for specific genres but skip their reposts.
-
-This makes feeds highly personalized without creating separate "lists" — it's all in collections with flexible filtering.
+Visibility of engagements in feeds is controlled by **collection_item_filters** (see [Collections](./collections.md#collection-item-filters)): collection owners choose which **actions** (e.g. like, repost, comment) they see from each item in their collection. Subject (initiator) control and follower (consumer) control are both expressed via those filters.
 
 ## Comments (Sub-Model)
 
@@ -130,6 +115,16 @@ This makes all three queryable two ways:
 - **Collections table:** "What is user X following?" → Query user's "following" collection
 
 See [Collections](./collections.md) for collection implementation.
+
+## Indexes (TODO)
+
+The `engagements` table is heavily read for counts, existence checks, and feed queries. **TODO:** Add indexes to support:
+
+- Lookup by object: `(object_type, object_id, action)` for “how many likes on this resource?” and “who liked this?”
+- Lookup by subject: `(subject_type, subject_id, action, created_at)` for “user X’s recent likes” and feed construction
+- Existence: `(subject_type, subject_id, action, object_type, object_id)` for “did user X like resource Y?”
+
+Review query patterns in Erato/vesta before finalizing index list; consider composite indexes that match the most common filters and sort orders.
 
 ## Query Examples
 

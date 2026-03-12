@@ -54,6 +54,6 @@ Then route handlers query typed tables through that client.
 
 ## Related
 
-- [Erato index](../index.md)
-- [Erato stack decisions](./stack/index.md)
-- [packages/db model index](../../../packages/db/model/index.md)
+- [Erato](../index.md)
+- [Erato Stack Decisions](./stack/index.md)
+- [packages/db Data Model](../../../packages/db/model/index.md)

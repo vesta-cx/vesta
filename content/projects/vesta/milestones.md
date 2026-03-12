@@ -26,6 +26,7 @@ description: vesta Milestone 1 scope, feature tiers, and out-of-scope items
 - **Scheduled posts** — Creators can schedule posts to go live at specific times
 - **Basic analytics** — Post views, follower counts, engagement metrics (24h reporting)
 - **Usage metrics** (admin) — Monitor platform health and adoption
+- **Read state** — Read/unread for notifications, resources, etc. is tracked in analytics; unread is inferred from read-event timestamp vs engagement date. See [Usage Metrics & Analytics Roadmap](./usage-metrics-roadmap.md#read-state-notifications-resources).
 - **Smart collections UI/UX** — Guided creation of filtered collections (e.g., discographies, genre-specific playlists); auto-creates "template"/"example" collections and walks creators through organizing their content automatically with filtered collections.
 
 Roadmap detail: [Usage Metrics & Analytics Roadmap](./usage-metrics-roadmap.md)
@@ -42,13 +43,20 @@ Roadmap detail: [Usage Metrics & Analytics Roadmap](./usage-metrics-roadmap.md)
 
 ## Milestone 4+
 
+- **Workspace custom theming (agentic)** — MCP-backed pipeline with safe, constrained tools so creators can prompt AI to build themes, change layout, and customize components in ways that are safe to ship (no XSS, no arbitrary code). See [Workspace Custom Theming & Agentic Pipeline Roadmap](./workspace-theming-agentic-roadmap.md).
 - **Thread/conversation system** — Comment threading and conversations
 - **Resource version history** — Audit trail for post edits
 - **(Music) streaming & pre-order** — Host audio files, pre-order capabilities
 - **Collaboration tools** — Team commenting, draft workflows, role-based editing
 - **E-commerce** — Direct sales via Shopify integration or custom storefront
 - **Collections advanced** — Collaborative collections, cross-platform playlist syncing
+- **Messaging system (DMs, groups)** — Private conversations, group threads, participant controls, and moderation/safety tooling
 - **Mobile apps** — Native iOS/Android apps
+
+### Backlog / roadmap (identity & UX)
+
+- **User → workspace migration** — Allow a user who creates a workspace later to port: (1) resources and custom collections (change owner to the new workspace); (2) a subset of static collections — likes, reposts, following, followers — by **moving collection items** (do not change collection owner) into the workspace’s corresponding static collections. **Constraint:** Only allow this when the new workspace has **no existing followers**, to prevent gaming (e.g. importing a large following into a fresh workspace). Treat as a one-time migration flow.
+- **Context switcher ("act as")** — Let a user switch which identity they are acting as: their **user account** or any of their **workspaces**. Similar to Facebook “act as [Page]” or Instagram’s account switcher. Required for posting, curating, and managing as a workspace without logging in separately.
 
 ## Feature Tiers (Pricing & Gating)
 
@@ -73,7 +81,7 @@ Consult [Feature Catalog & Pricing Transparency](./feature-catalog.md) for the c
 
 ### Why REST, Not GraphQL (Milestone 1)?
 
-D1 bindings work best with minimal overhead. GraphQL adds query parsing, planning, and execution complexity that negates the latency advantage of direct database bindings. REST is simpler to deploy and reason about for Milestone 1.
+D1 bindings work best with minimal overhead. GraphQL adds query parsing, planning, and execution complexity that negates the latency advantage of direct database bindings. REST is simpler to deploy and reason about for Milestone 1. GraphQL’s schema/query + resolver pattern may be a better fit for collections, following feeds, and recursive structures, but we stick with REST for now because it’s easier to write.
 
 **GraphQL Deferred to Milestone 3+** when Erato becomes a separate HTTP service or targets a managed database (PlanetScale, Convex, SpaceTimeDB).
 
@@ -99,6 +107,8 @@ The vesta design system must support extensive customization (colors, fonts, lay
 - [Feature Access & Gating](./feature-access-gating.md) — Feature gating and access control
 - [Modular Pricing & Weighted Discount Curve](./pricing-modular.md) — Modular pricing model and discount curve
 - [Usage Metrics & Analytics Roadmap](./usage-metrics-roadmap.md) — PostHog-first analytics path and long-term in-house migration
+- [Federation Roadmap](./federation-roadmap.md) — Long-term plan for ActivityPub, AT Protocol, and other federation adapters
+- [Workspace Custom Theming & Agentic Pipeline Roadmap](./workspace-theming-agentic-roadmap.md) — AI-assisted workspace theming via MCP server with safe tools and constraints
 - [Development Checklist (Phase 1)](./development-checklist.md) — PR guidelines for Milestone 1 development
 - [vesta](../../apps/vesta/index.md) — vesta app docs
 - [Erato](../../apps/erato/index.md) — Erato data layer docs

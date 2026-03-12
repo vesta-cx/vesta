@@ -9,8 +9,8 @@ Before submitting a PR, verify all items below pass. These checks ensure consist
 
 ## Scope & Design
 
-- [ ] **Feature is Phase 1 scope.** Check [Milestone 1 scope](./milestones.md#milestone-1-scope). If not, open a backlog issue and defer.
-- [ ] **Pricing tier assigned.** See [Feature tiers](./milestones.md#feature-tiers-pricing--gating). Document in PR or code comments.
+- [ ] **Feature is Phase 1 scope.** Check [Milestone 1 Roadmap (Blogging + Smart Links)](./milestones.md#milestone-1-scope). If not, open a backlog issue and defer.
+- [ ] **Pricing tier assigned.** See [Milestone 1 Roadmap (Blogging + Smart Links)](./milestones.md#feature-tiers-pricing--gating). Document in PR or code comments.
 - [ ] **No duplicate work.** Did you check [sona](../../apps/sona/) for existing patterns (D1 setup, R2 storage, auth, cron)?
 
 ## Implementation

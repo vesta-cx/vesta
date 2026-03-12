@@ -1,0 +1,22 @@
+@use 'dark.scss';
+@use 'light.scss';
+
+[data-theme='dark'] {
+	@include dark.colors;
+}
+
+[data-theme='light'] {
+	@include light.colors;
+}
+
+@media (prefers-color-scheme: dark) {
+	[data-theme='auto'] {
+		@include dark.colors;
+	}
+}
+
+@media (prefers-color-scheme: light) {
+	[data-theme='auto'] {
+		@include light.colors;
+	}
+}

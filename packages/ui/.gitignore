@@ -1,0 +1,46 @@
+# Dependencies
+node_modules
+
+# Local env files
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+.env.*
+!.env.example
+!.env.test
+.dev.vars*
+!.dev.vars.example
+
+# Testing
+**/coverage
+test-results
+
+# Turbo
+.turbo
+
+# Build Outputs
+build
+dist
+.svelte-kit/
+.output
+out
+
+# Deployment
+.vercel
+.netlify
+.wrangler
+
+# IDE
+vite.config.js.timestamp-*
+vite.config.ts.timestamp-*
+
+# i18n
+src/lib/paraglide
+project.inlang/cache
+
+# OS
+.DS_Store
+Thumbs.db
+*.pem

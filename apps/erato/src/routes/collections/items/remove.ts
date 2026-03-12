@@ -6,7 +6,10 @@ import { requireAuth, requireScope, hasScope } from "../../../auth/helpers";
 import { getDB } from "../../../db";
 import { collections, collectionItems } from "../../../db/schema";
 import { forbidden, notFound } from "../../../lib/errors";
-import { isCollectionOwner } from "../../../services/collections";
+import {
+	isAutoCollection,
+	isCollectionOwner,
+} from "../../../services/collections";
 import type { AppEnv } from "../../../env";
 import type { RouteMetadata } from "../../../registry";
 
@@ -37,6 +40,12 @@ route.delete(
 			auth.subjectId,
 		);
 		if (!isAdmin && !isOwner) return forbidden(c);
+		if (!isAdmin && isAutoCollection(existing)) {
+			return forbidden(
+				c,
+				"Auto collections are server-managed. Admin scope is required.",
+			);
+		}
 
 		const [row] = await db
 			.delete(collectionItems)

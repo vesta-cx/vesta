@@ -37,9 +37,9 @@ route.post("/workspaces", async (c) => {
 				ownerId: input.ownerId,
 				avatarUrl: input.avatarUrl ?? null,
 				bannerUrl: input.bannerUrl ?? null,
-				visibility: (input.visibility ?? "public") as
-					| "public"
-					| "private",
+				status: (input.status ?? "LISTED") as
+					| "LISTED"
+					| "UNLISTED",
 			})
 			.returning();
 		return c.json(itemResponse(row!), 201);

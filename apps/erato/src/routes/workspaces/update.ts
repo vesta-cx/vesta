@@ -1,6 +1,6 @@
 /** @format */
 
-import { and, eq } from "drizzle-orm";
+import { eq } from "drizzle-orm";
 import { Hono } from "hono";
 import { itemResponse } from "@mia-cx/drizzle-query-factory";
 import { hasScope, requireAuth, requireScope } from "../../auth/helpers";
@@ -43,8 +43,7 @@ route.put("/workspaces/:id", async (c) => {
 		data.description = parsed.description;
 	if (parsed.avatarUrl !== undefined) data.avatarUrl = parsed.avatarUrl;
 	if (parsed.bannerUrl !== undefined) data.bannerUrl = parsed.bannerUrl;
-	if (parsed.visibility !== undefined)
-		data.visibility = parsed.visibility;
+	if (parsed.status !== undefined) data.status = parsed.status;
 
 	try {
 		const [row] = await db

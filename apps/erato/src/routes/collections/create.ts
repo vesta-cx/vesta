@@ -2,12 +2,15 @@
 
 import { Hono } from "hono";
 import { itemResponse } from "@mia-cx/drizzle-query-factory";
-import { requireAuth, requireScope } from "../../auth/helpers";
+import { hasScope, requireAuth, requireScope } from "../../auth/helpers";
 import { getDB } from "../../db";
 import { collections } from "../../db/schema";
-import { conflict } from "../../lib/errors";
+import { conflict, forbidden } from "../../lib/errors";
 import { parseBody, isResponse } from "../../lib/validation";
-import { createCollectionSchema } from "../../services/collections";
+import {
+	createCollectionSchema,
+	isAutoCollection,
+} from "../../services/collections";
 import type { AppEnv } from "../../env";
 import type { RouteMetadata } from "../../registry";
 
@@ -20,6 +23,14 @@ route.post("/collections", async (c) => {
 
 	const parsed = await parseBody(c, createCollectionSchema);
 	if (isResponse(parsed)) return parsed;
+
+	const isAdmin = hasScope(auth, "admin");
+	if (!isAdmin && isAutoCollection({ type: parsed.type ?? "manual" })) {
+		return forbidden(
+			c,
+			"Auto collections are server-managed. Admin scope is required.",
+		);
+	}
 
 	const db = getDB(c.env.DB);
 	try {

@@ -9,6 +9,7 @@ import { collections } from "../../db/schema";
 import { conflict, forbidden, notFound } from "../../lib/errors";
 import { parseBody, isResponse } from "../../lib/validation";
 import {
+	isAutoCollection,
 	isCollectionOwner,
 	updateCollectionSchema,
 } from "../../services/collections";
@@ -36,6 +37,35 @@ route.put("/collections/:id", async (c) => {
 	const isAdmin = hasScope(auth, "admin");
 	const isOwner = await isCollectionOwner(db, existing, auth.subjectId);
 	if (!isAdmin && !isOwner) return forbidden(c);
+	if (!isAdmin && isAutoCollection(existing)) {
+		return forbidden(
+			c,
+			"Auto collections are server-managed. Admin scope is required.",
+		);
+	}
+	if (!isAdmin && parsed.type === "auto") {
+		return forbidden(
+			c,
+			"Only admins can set collection type to auto.",
+		);
+	}
+	const nextType = parsed.type ?? existing.type;
+	const nextKind =
+		parsed.kind !== undefined ? parsed.kind : existing.kind;
+	if (nextType === "manual" && nextKind) {
+		return conflict(
+			c,
+			"Manual collections cannot have a kind.",
+			"kind",
+		);
+	}
+	if (nextType === "auto" && !nextKind) {
+		return conflict(
+			c,
+			"Auto collections require a kind.",
+			"kind",
+		);
+	}
 
 	try {
 		const [row] = await db

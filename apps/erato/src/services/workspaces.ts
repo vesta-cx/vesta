@@ -12,7 +12,7 @@ export const workspaceListConfig: ListQueryConfig = {
 	filters: {
 		owner_id: { column: workspaces.ownerId },
 		owner_type: { column: workspaces.ownerType },
-		visibility: { column: workspaces.visibility },
+		status: { column: workspaces.status },
 		slug: { column: workspaces.slug },
 	},
 	sortable: {
@@ -27,4 +27,4 @@ export const createWorkspaceSchema = workspaceCreateSchema;
 
 export const updateWorkspaceSchema = workspaceUpdateSchema;
 
-export const publicWorkspaceWhere = () => eq(workspaces.visibility, "public");
+export const listedWorkspaceWhere = () => eq(workspaces.status, "LISTED");

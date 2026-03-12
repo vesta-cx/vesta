@@ -1,11 +1,15 @@
 /** @format */
 
-import { sql } from "drizzle-orm";
+import { and, eq, exists, or, sql } from "drizzle-orm";
 import { Hono } from "hono";
 import { parseListQuery, listResponse } from "@mia-cx/drizzle-query-factory";
 import { hasScope, requireAuth } from "../../auth/helpers";
 import { getDB } from "../../db";
-import { workspaces } from "../../db/schema";
+import {
+	WORKSPACE_PERMISSION_ACTIONS,
+	permissions,
+	workspaces,
+} from "../../db/schema";
 import { forbidden } from "../../lib/errors";
 import { workspaceListConfig } from "../../services/workspaces";
 import type { AppEnv } from "../../env";
@@ -25,18 +29,63 @@ route.get("/workspaces", async (c) => {
 		return forbidden(c);
 	}
 
+	const ownerWhere =
+		auth.subjectType === "user" || auth.subjectType === "organization" ?
+			and(
+				eq(workspaces.ownerType, auth.subjectType),
+				eq(workspaces.ownerId, auth.subjectId),
+			)
+		:	undefined;
+
+	const permissionSubjectType =
+		auth.subjectType === "user" || auth.subjectType === "organization" ?
+			auth.subjectType
+		:	undefined;
+	const explicitAllowWhere =
+		permissionSubjectType ?
+			exists(
+				db
+					.select({ id: permissions.id })
+					.from(permissions)
+					.where(
+						and(
+							eq(
+								permissions.subjectType,
+								permissionSubjectType,
+							),
+							eq(permissions.subjectId, auth.subjectId),
+							eq(permissions.objectType, "workspace"),
+							eq(permissions.objectId, workspaces.id),
+							eq(
+								permissions.action,
+								WORKSPACE_PERMISSION_ACTIONS[0],
+							),
+							eq(permissions.value, "allow"),
+						),
+					),
+			)
+		:	sql`0`;
+
+	const authWhere =
+		ownerWhere ?
+			or(eq(workspaces.status, "LISTED"), explicitAllowWhere, ownerWhere)
+		:	or(eq(workspaces.status, "LISTED"), explicitAllowWhere);
+
+	const finalWhere =
+		query.where ? and(authWhere, query.where) : authWhere;
+
 	const [rows, countResult] = await Promise.all([
 		db
 			.select()
 			.from(workspaces)
-			.where(query.where)
+			.where(finalWhere)
 			.orderBy(query.orderBy)
 			.limit(query.limit)
 			.offset(query.offset),
 		db
 			.select({ total: sql<number>`count(*)` })
 			.from(workspaces)
-			.where(query.where),
+			.where(finalWhere),
 	]);
 	const total = countResult[0]?.total ?? 0;
 

@@ -12,7 +12,10 @@ import {
 } from "../../../db/schema";
 import { conflict, forbidden, notFound } from "../../../lib/errors";
 import { parseBody, isResponse, z } from "../../../lib/validation";
-import { isCollectionOwner } from "../../../services/collections";
+import {
+	isAutoCollection,
+	isCollectionOwner,
+} from "../../../services/collections";
 import type { AppEnv } from "../../../env";
 import type { RouteMetadata } from "../../../registry";
 
@@ -44,6 +47,12 @@ route.post("/collections/:collectionId/items", async (c) => {
 	const isAdmin = hasScope(auth, "admin");
 	const isOwner = await isCollectionOwner(db, existing, auth.subjectId);
 	if (!isAdmin && !isOwner) return forbidden(c);
+	if (!isAdmin && isAutoCollection(existing)) {
+		return forbidden(
+			c,
+			"Auto collections are server-managed. Admin scope is required.",
+		);
+	}
 
 	try {
 		const [row] = await db

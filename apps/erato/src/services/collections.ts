@@ -14,6 +14,7 @@ export const collectionListConfig: ListQueryConfig = {
 		owner_id: { column: collections.ownerId },
 		owner_type: { column: collections.ownerType },
 		type: { column: collections.type },
+		kind: { column: collections.kind },
 		status: { column: collections.status },
 	},
 	sortable: {
@@ -29,6 +30,10 @@ export const createCollectionSchema = collectionCreateSchema;
 export const updateCollectionSchema = collectionUpdateSchema;
 
 export const listedCollectionWhere = () => eq(collections.status, "LISTED");
+
+export const isAutoCollection = (collection: {
+	type: (typeof collections.$inferSelect)["type"];
+}) => collection.type === "auto";
 
 export const isCollectionOwner = async (
 	db: Database,

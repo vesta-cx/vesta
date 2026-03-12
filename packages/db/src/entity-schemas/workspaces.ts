@@ -1,7 +1,7 @@
 /** @format */
 
 import { z } from "zod";
-import { OWNER_TYPES, VISIBILITY_TYPES } from "../schema/types";
+import { OWNER_TYPES, WORKSPACE_STATUSES } from "../schema/types";
 
 export const workspaceCreateSchema = z.object({
 	name: z.string().min(1),
@@ -11,7 +11,7 @@ export const workspaceCreateSchema = z.object({
 	ownerId: z.string().min(1),
 	avatarUrl: z.string().url().nullable().optional(),
 	bannerUrl: z.string().url().nullable().optional(),
-	visibility: z.enum(VISIBILITY_TYPES).optional(),
+	status: z.enum(WORKSPACE_STATUSES).optional(),
 });
 
 export const workspaceUpdateSchema = z.object({
@@ -20,5 +20,5 @@ export const workspaceUpdateSchema = z.object({
 	description: z.string().nullable().optional(),
 	avatarUrl: z.string().url().nullable().optional(),
 	bannerUrl: z.string().url().nullable().optional(),
-	visibility: z.enum(VISIBILITY_TYPES).optional(),
+	status: z.enum(WORKSPACE_STATUSES).optional(),
 });

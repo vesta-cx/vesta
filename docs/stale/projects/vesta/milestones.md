@@ -3,6 +3,8 @@ title: Milestone 1 Roadmap (Blogging + Smart Links)
 description: vesta Milestone 1 scope, feature tiers, and out-of-scope items
 ---
 
+<!-- @format -->
+
 # Milestone 1 Roadmap: Blogging + Smart Links
 
 **Goal:** Get creators using vesta to announce releases and let fans find music with zero friction.
@@ -64,12 +66,12 @@ Assign every feature a tier **before coding**. This drives pricing and which fea
 
 Consult [Feature Catalog & Pricing Transparency](./feature-catalog.md) for the complete list of features with pricing and COO details.
 
-| Tier           | Features                                                                                      | Trial?        | Notes                                     |
-| -------------- | --------------------------------------------------------------------------------------------- | ------------- | ----------------------------------------- |
-| **Free**       | Profiles, posts, smart links, basic collections, user engagement (like/comment/repost/follow) | Yes, always   | Always-available tier; attracts users     |
-| **Basic**      | Custom domain, basic analytics (views, traffic source)                                        | No, paid-only | Entry paid tier; modest operational cost  |
-| **Pro**        | Advanced analytics (geography, device, conversion funnel), ad integrations                    | No, paid-only | For serious creators; higher compute cost |
-| **Enterprise** | Team accounts, high storage/bandwidth SLA, priority support                                   | No, paid-only | For labels/collectives; sales-driven      |
+| Tier | Features | Trial? | Notes |
+| --- | --- | --- | --- |
+| **Free** | Profiles, posts, smart links, basic collections, user engagement (like/comment/repost/follow) | Yes, always | Always-available tier; attracts users |
+| **Basic** | Custom domain, basic analytics (views, traffic source) | No, paid-only | Entry paid tier; modest operational cost |
+| **Pro** | Advanced analytics (geography, device, conversion funnel), ad integrations | No, paid-only | For serious creators; higher compute cost |
+| **Enterprise** | Team accounts, high storage/bandwidth SLA, priority support | No, paid-only | For labels/collectives; sales-driven |
 
 **When adding a feature:**
 

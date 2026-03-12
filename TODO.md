@@ -30,6 +30,8 @@ Epics and their sub-issues in priority order. Tackle epics top to bottom; within
 
 ## Task list (detailed)
 
+- [ ] **Add commit linting & husky** (#70) — Set up husky and commitlint to enforce conventional commits. Standardizes commit messages, improves changelog generation, prevents malformed commits. Part of Epic #36 (Infrastructure & tooling).
+
 - [ ] **Adopt `runListQuery` in medium/high-complexity Erato list routes** — Deferred to pre-v1 staging (no GitHub issue). These routes have extra logic (owner-scope joins, workspace membership checks, multi-table joins) that may benefit from the helper but need careful review:
   - Medium: `users/list.ts`, `workspaces/list.ts`, `collections/list.ts`, `teams/members/list.ts`, `collections/filters/list.ts`
   - High: `resources/list.ts`

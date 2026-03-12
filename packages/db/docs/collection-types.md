@@ -3,7 +3,7 @@
 Collections have two fields that govern behavior and semantics:
 
 - **`type`** — Behavioral category: who populates the collection, whether it is protected, how many can exist per owner.
-- **`kind`** — Semantic role: what the collection is *for*. Only relevant when `type === 'static'` (and in the future when `type === 'smart'`). Nullable for manual collections.
+- **`kind`** — Semantic role: what the collection is *for*. Required when `type === 'auto'`, null for manual collections.
 
 ---
 
@@ -11,17 +11,17 @@ Collections have two fields that govern behavior and semantics:
 
 | type      | Meaning | Created | Per owner | Deletable |
 | --------- | ------- | ------- | --------- | --------- |
-| **static** | System-defined; system-populated. | Automatically when a user or workspace is created. | Exactly one static collection **of each kind** per owner. | No. Cannot be deleted without deleting the owner (user or workspace). |
+| **auto**   | System-defined; system-populated; server-managed. | Automatically when a user or workspace is created. | Exactly one auto collection **of each kind** per owner. | No for non-admin routes. |
 | **manual** | User- or workspace-curated; owner explicitly adds/removes items. | When the owner creates a list. | Zero or more. | Yes. |
-| **smart**  | (Future) Algorithmic or system-curated; e.g. trending, recommended. | TBD. | TBD. | TBD. |
+| **smart**  | (Future) Algorithmic/system-curated layer (likely maps to `type='auto'` plus strategy metadata). | TBD. | TBD. | TBD. |
 
-So: for each owner there is **exactly one** static collection per semantic kind (resources, following, likes, etc.). Those static collections are created when the owner is created and cannot be deleted except by deleting the owner.
+So: for each owner there is **exactly one** auto collection per semantic kind (resources, following, likes, etc.). Those auto collections are server-managed.
 
 ---
 
 ## kind (semantic)
 
-**Relevant when `type === 'static'`** (and optionally when `type === 'smart'`). When `type === 'manual'`, `kind` is null.
+**Relevant when `type === 'auto'`**. When `type === 'manual'`, `kind` is null.
 
 | kind             | Meaning | Populated by | Resource visibility |
 | ---------------- | ------- | ------------ | ------------------- |
@@ -40,7 +40,7 @@ Manual collections (`type === 'manual'`) have no kind; the collection’s `name`
 
 ## Summary
 
-- **type** = `'static' | 'manual' | 'smart'` — behavioral; drives creation, protection, and deletion rules.
-- **kind** = `'resources' | 'following' | ... | 'notifications'` — semantic; required when type is static; null when type is manual.
-- Exactly one static collection of each kind per owner; created when the owner is created; cannot delete without deleting the owner.
-- “Static resources collection” = `type === 'static'` and `kind === 'resources'`. Use that when applying the [collection visibility and dashboard contract](./collection-visibility-and-dashboard-contract.md).
+- **type** = `'auto' | 'manual'` — behavioral; drives mutability and creation semantics.
+- **kind** = `'resources' | 'following' | ... | 'notifications'` — semantic; required when type is auto; null when type is manual.
+- Exactly one auto collection of each kind per owner; created/managed server-side.
+- “Auto resources collection” = `type === 'auto'` and `kind === 'resources'`. Use that when applying the [collection visibility and dashboard contract](./collection-visibility-and-dashboard-contract.md).

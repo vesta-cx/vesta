@@ -2,19 +2,19 @@
 
 This document defines required behavior for resource visibility in collections and for dashboard resource listing. Implementations (e.g. Erato, vesta app) must follow this contract.
 
-**Collection type and kind** are defined in [Collection type and kind](./collection-types.md). That doc defines `type` (static | manual | smart), `kind` (semantic role), lifecycle (exactly one static per kind per owner, created with owner, cannot delete without deleting owner), and which kind governs resource visibility.
+**Collection type and kind** are defined in [Collection type and kind](./collection-types.md). That doc defines `type` (`auto` | `manual`), `kind` (semantic role), lifecycle (exactly one auto per kind per owner), and which kind governs resource visibility.
 
 ---
 
 ## 1. Resource status and where it applies
 
-- **`resources.status`** (`LISTED` | `UNLISTED`) controls whether a resource appears in the **static resources collection** only.
-- **Static resources collection** — A collection with **`type === 'static'` and `kind === 'resources'`**. There is exactly one per owner (user or workspace). It represents the canonical “all resources” of that owner. See [Collection type and kind](./collection-types.md).
+- **`resources.status`** (`LISTED` | `UNLISTED`) controls whether a resource appears in the **auto resources collection** only.
+- **Auto resources collection** — A collection with **`type === 'auto'` and `kind === 'resources'`**. There is exactly one per owner (user or workspace). It represents the canonical “all resources” of that owner. See [Collection type and kind](./collection-types.md).
 - **Manual collection** — A collection with **`type === 'manual'`**. Items are explicitly added by the owner. `kind` is null. UNLISTED resources may appear.
 
 **Rules:**
 
-- In a **static resources collection** (`type === 'static'` and `kind === 'resources'`), a resource MUST be included only if `resources.status === 'LISTED'`. Resources with `status === 'UNLISTED'` MUST NOT appear there.
+- In an **auto resources collection** (`type === 'auto'` and `kind === 'resources'`), a resource MUST be included only if `resources.status === 'LISTED'`. Resources with `status === 'UNLISTED'` MUST NOT appear there.
 - In **manual collections** (`type === 'manual'`), a resource MAY appear regardless of `resources.status`. If the owner added the resource to the collection, it is shown (subject to permissions and collection visibility). So UNLISTED resources can still appear in manual collections.
 
 ---
@@ -31,18 +31,18 @@ When a collection **C** contains items of type `collection` (nested collections)
 **Rule:**
 
 - When deciding whether to show a resource that is reached through a chain of collections, determine the **origin collection** for that resource.
-  - If the origin collection has **`type === 'static'` and `kind === 'resources'`**, then `resources.status` applies: show the resource only if `status === 'LISTED'`.
+  - If the origin collection has **`type === 'auto'` and `kind === 'resources'`**, then `resources.status` applies: show the resource only if `status === 'LISTED'`.
   - If the origin collection has any other type or kind (e.g. `type === 'manual'` or `kind === 'following'`), the resource is visible in that chain regardless of `resources.status`.
 
 **Example:**
 
 - Resource R has `status: 'UNLISTED'`.
-- R is in Collection B, where B is the static resources collection of Owner 2 (`type === 'static'`, `kind === 'resources'`).
+- R is in Collection B, where B is the auto resources collection of Owner 2 (`type === 'auto'`, `kind === 'resources'`).
 - Collection B is in Collection A (e.g. following or manual) of Owner 2.
 - Collection A is in Collection Root (e.g. another user’s manual list).
 - When resolving whether R appears in Root: origin collection for R is B. B is static with kind resources → R is UNLISTED → R must **not** be listed in Root (and the chain is treated as hiding R).
 
-So visibility “trickles” from the resource’s origin collection: if that collection has `type === 'static'` and `kind === 'resources'`, respect LISTED/UNLISTED; otherwise include the resource in the chain.
+So visibility “trickles” from the resource’s origin collection: if that collection has `type === 'auto'` and `kind === 'resources'`, respect LISTED/UNLISTED; otherwise include the resource in the chain.
 
 ---
 
@@ -59,7 +59,7 @@ When the **dashboard** shows “my resources”, “my workspace’s resources�
 
 | Context | Behavior |
 |--------|----------|
-| Collection with `type === 'static'` and `kind === 'resources'` | Include resource only if `resources.status === 'LISTED'` |
+| Collection with `type === 'auto'` and `kind === 'resources'` | Include resource only if `resources.status === 'LISTED'` |
 | Collection with `type === 'manual'` (or other type/kind) | May include resource regardless of `resources.status` |
-| Chain (collections → … → resource) | Use origin collection: if static + kind resources ⇒ apply LISTED/UNLISTED; else ⇒ show |
+| Chain (collections → … → resource) | Use origin collection: if auto + kind resources ⇒ apply LISTED/UNLISTED; else ⇒ show |
 | Dashboard “my/workspace/org resources” | Read from `resources` table only; do not use `collection_items` |

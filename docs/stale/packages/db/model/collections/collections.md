@@ -27,8 +27,8 @@ owner_type           'user' | 'workspace'
 owner_id             string (WorkOS user/workspace ID)
 name                 string ("My Favorites", "Reposts", "Following", etc.)
 description          text (optional)
-type                 string ('resources' | 'following' | 'reposts' | 'likes' | 'comments' | 'bookmarks' | 'subscriptions' | 'notifications' | 'custom')
-is_protected         boolean (protected collections cannot be deleted without deleting account)
+type                 string ('auto' | 'manual')
+kind                 string ('resources' | 'following' | 'reposts' | 'likes' | 'comments' | 'bookmarks' | 'subscriptions' | 'notifications') nullable
 status               'LISTED' | 'UNLISTED'
 created_at           timestamp
 updated_at           timestamp
@@ -36,11 +36,11 @@ updated_at           timestamp
 
 **Collection type semantics** (canonical definitions live in `@vesta-cx/db` [collection types](https://github.com/vesta-cx/vesta/blob/main/packages/db/docs/collection-types.md)):
 
-- **Static types** (system-defined, at most one per owner, stored as rows): `resources`, `following`, `reposts`, `likes`, `bookmarks`, `subscriptions`, `comments`. Protected (users cannot delete). `resources` = canonical “all resources” of the owner; resource visibility there respects `resources.status` (LISTED only).
+- **Auto type** (system-defined, at most one per owner+kind, stored as rows): `type='auto'` with `kind` set to one of `resources`, `following`, `reposts`, `likes`, `bookmarks`, `subscriptions`, `comments`, `notifications`. Server-managed for non-admin callers. `resources` kind = canonical “all resources” of the owner; visibility there respects `resources.status` (LISTED only).
 - **Virtual (no collection row):** `notifications` — Inbox-style view (mentions, replies, etc.) backed by a **query on the `engagements` table**, not by a row in `collections` or `collection_items`. The product may present it as a "collection" in the UI, but there is no corresponding collection row.
-- **Manual type:** `custom` — user-created lists; items explicitly added; UNLISTED resources may appear.
+- **Manual type:** `type='manual'` with `kind=null` — user-created lists; items explicitly added; UNLISTED resources may appear.
 
-Users cannot delete protected (static) collections.
+Auto collections are server-managed for non-admin callers.
 
 ### Collection Items
 
@@ -91,12 +91,12 @@ primary key          (collection_id, item_type, item_id, engagement_action)
 
 Filters only apply to item types that can produce engagements (user, workspace, collection). Resources do not perform actions; filtering by action applies to what the collection owner sees from followed users/workspaces/collections.
 
-## Protected Collections
+## Auto Collections
 
-These are auto-created and auto-managed. Users cannot delete them (only via account deletion).
+These are auto-created and auto-managed. Non-admin callers cannot edit or delete them.
 
 
-| Type            | Created            | Auto-populated          |
+| Kind            | Created            | Auto-populated          |
 | --------------- | ------------------ | ----------------------- |
 | `following`     | On first follow    | Engagement: `follow`    |
 | `reposts`       | On first repost    | Engagement: `repost`    |
@@ -112,7 +112,7 @@ Visibility for any *stored* collection is determined by permissions + `collectio
 
 ## Phase 1 Scope
 
-- Users can create custom collections (type: `'custom'`)
+- Users can create manual collections (`type: 'manual'`, `kind: null`)
 - Users can view/follow other users' collections (appear in feed)
 - Protected collections auto-created on first engagement
 - Collections are read-only from non-owner (can view, can't edit)

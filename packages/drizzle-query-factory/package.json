@@ -1,0 +1,66 @@
+{
+  "name": "@mia-cx/drizzle-query-factory",
+  "version": "0.1.0",
+  "description": "Declarative, composable query param parser for Drizzle ORM. Converts URLSearchParams into typed Drizzle conditions, sorting, and pagination.",
+  "keywords": [
+    "drizzle",
+    "drizzle-orm",
+    "query-params",
+    "filter",
+    "pagination",
+    "sorting",
+    "rest-api"
+  ],
+  "license": "MIT",
+  "author": "mia-cx",
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    }
+  },
+  "main": "dist/index.cjs",
+  "module": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsup",
+    "build:clean": "pnpm run clean && pnpm run build",
+    "clean": "cleanc clean",
+    "dev": "tsup --watch",
+    "dev:clean": "pnpm run clean && pnpm run dev",
+    "format": "prettier --write .",
+    "install:clean": "pnpm run clean && node -e \"try{require('fs').rmSync(require('path').join(process.cwd(),'node_modules'),{recursive:true,force:true})}catch(_){}\" && pnpm i",
+    "lint": "eslint .",
+    "test": "vitest run",
+    "test:coverage": "vitest run --coverage",
+    "test:watch": "vitest"
+  },
+  "devDependencies": {
+    "@vesta-cx/config": "workspace:*",
+    "@vitest/coverage-v8": "^4.0.18",
+    "cleanc": "^0.1.0",
+    "drizzle-orm": "^0.45.1",
+    "tsup": "^8.5.1",
+    "typescript": "^5.9.3",
+    "vitest": "^4.0.18"
+  },
+  "peerDependencies": {
+    "drizzle-orm": ">=0.30.0"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/mia-cx/drizzle-query-factory.git"
+  },
+  "homepage": "https://github.com/mia-cx/drizzle-query-factory#readme",
+  "bugs": {
+    "url": "https://github.com/mia-cx/drizzle-query-factory/issues"
+  }
+}

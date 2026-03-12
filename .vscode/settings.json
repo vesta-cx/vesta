@@ -9,12 +9,12 @@
         "*.mdc": "markdown"
     },
     "files.exclude": {
-        "**/node_modules": true,
-        "**/.turbo": true,
-        "**/.wrangler": true,
+        "**/.git": true,
         "**/.svelte-kit": true,
+        "**/.turbo": true,
         "**/.vercel": true,
-        "**/.git": true
+        "**/.wrangler": true,
+        "**/node_modules": true
     },
     "explorer.fileNesting.enabled": true,
     "explorer.fileNesting.patterns": {

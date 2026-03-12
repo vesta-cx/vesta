@@ -1,6 +1,6 @@
 /** @format */
 
-import typescript from "config/lint-staged/typescript";
+import typescript from "@vesta-cx/config/lint-staged/typescript";
 
 export default {
 	...typescript,

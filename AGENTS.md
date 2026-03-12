@@ -79,7 +79,7 @@ Create rarely. Only when a specialized prompt with isolated context genuinely he
 
 ## 5. When generating commit messages
 
-Use conventional commits: `type(scope): subject`. Common types: `chore`, `feat`, `fix`, `docs`, `test`, `style`, `refactor`.
+Use conventional commits: `type(scope): subject`. Common types: `chore`, `feat`, `fix`, `docs`, `test`, `style`, `refactor`. Enforced by commitlint at commit time (see [commitlint.config.mjs](commitlint.config.mjs)).
 
 - **Subject**: present tense, under ~72 characters (e.g. "add feature" not "added feature").
 

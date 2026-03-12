@@ -1,0 +1,47 @@
+{
+  "name": "erato",
+  "version": "0.2.1",
+  "type": "module",
+  "scripts": {
+    "build": "pnpm run sync:fonts && pnpm run sync:api-version && node ./scripts/wrangler-versioned.mjs deploy --dry-run",
+    "cf-typegen": "wrangler types --env-interface CloudflareBindings",
+    "clean": "cleanc clean",
+    "db:generate": "pnpm --filter @vesta-cx/db db:generate",
+    "db:inspect:schema": "node ./scripts/db-inspect.mjs",
+    "db:inspect:tables": "node ./scripts/wrangler-versioned.mjs d1 execute DB --env dev --command \"SELECT name FROM sqlite_master WHERE type='table';\"",
+    "db:migrate": "pnpm run sync:api-version && node ./scripts/wrangler-versioned.mjs d1 migrations apply DB",
+    "db:migrate:local": "node ./scripts/wrangler-versioned.mjs d1 migrations apply DB --env dev",
+    "db:studio": "drizzle-kit studio",
+    "deploy": "pnpm run sync:api-version && node ./scripts/wrangler-versioned.mjs deploy",
+    "deploy:gateway": "pnpm run sync:fonts && wrangler deploy --env prod --minify",
+    "dev": "pnpm run sync:fonts && wrangler dev --env dev",
+    "dev:clean": "pnpm run clean && pnpm run dev",
+    "docs:scopes": "node ./scripts/generate-scopes-doc.mjs",
+    "format": "prettier --write .",
+    "install:clean": "pnpm run clean && node -e \"try{require('fs').rmSync(require('path').join(process.cwd(),'node_modules'),{recursive:true,force:true})}catch(_){}\" && pnpm i",
+    "sync:api-version": "node ./scripts/sync-api-version.mjs",
+    "sync:fonts": "node ./scripts/sync-fonts.mjs",
+    "test": "vitest run",
+    "test:coverage": "vitest run --coverage",
+    "test:watch": "vitest"
+  },
+  "dependencies": {
+    "@mia-cx/drizzle-query-factory": "^0.1.0",
+    "@vesta-cx/db": "^0.0.1",
+    "drizzle-orm": "^0.45.1",
+    "hono": "^4.12.3",
+    "zod": "^3.24.0"
+  },
+  "devDependencies": {
+    "@fontsource/archivo": "^5.2.8",
+    "@fontsource/jetbrains-mono": "^5.2.8",
+    "@types/node": "^25.3.2",
+    "@vesta-cx/config": "workspace:*",
+    "@vitest/coverage-v8": "^4.0.18",
+    "drizzle-kit": "^0.31.8",
+    "prettier": "^3.8.1",
+    "semver": "^7.7.4",
+    "vitest": "^4.0.18",
+    "wrangler": "^4.69.0"
+  }
+}

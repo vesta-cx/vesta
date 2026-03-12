@@ -1,0 +1,50 @@
+# Dependencies
+node_modules/
+.yarn/
+!.yarn/releases
+
+# Local env files
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+.dev.vars
+.dev.vars*
+!.dev.vars.example
+!.env.example
+
+# Testing
+**/coverage
+
+# Turbo
+.turbo
+
+# Build Outputs
+dist/
+build
+out
+
+# Wrangler
+.wrangler
+
+# IDE
+.vscode/*
+!.vscode/launch.json
+!.vscode/*.code-snippets
+.idea/workspace.xml
+.idea/usage.statistics.xml
+.idea/shelf
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# Misc
+.DS_Store
+*.pem

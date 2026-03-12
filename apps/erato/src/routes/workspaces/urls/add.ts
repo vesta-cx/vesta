@@ -1,0 +1,55 @@
+/** @format */
+
+import { Hono } from "hono";
+import { itemResponse } from "@mia-cx/drizzle-query-factory";
+import { requireAuth, requireScope } from "../../../auth/helpers";
+import { getDB } from "../../../db";
+import { externalLinks } from "../../../db/schema";
+import { conflict } from "../../../lib/errors";
+import { parseBody, isResponse } from "../../../lib/validation";
+import { addExternalLinkSchema } from "../../links/shared";
+import type { AppEnv } from "../../../env";
+import type { RouteMetadata } from "../../../registry";
+
+const route = new Hono<AppEnv>();
+
+route.post("/workspaces/:workspaceId/urls", async (c) => {
+	const auth = requireAuth(c.get("auth"));
+	requireScope(auth, "workspaces:write");
+
+	const parsed = await parseBody(c, addExternalLinkSchema);
+	if (isResponse(parsed)) return parsed;
+
+	const db = getDB(c.env.DB);
+	const workspaceId = c.req.param("workspaceId");
+
+	try {
+		const [row] = await db
+			.insert(externalLinks)
+			.values({
+				subjectType: "workspace",
+				subjectId: workspaceId,
+				...parsed,
+			})
+			.returning();
+		return c.json(itemResponse(row!), 201);
+	} catch (err) {
+		if (err instanceof Error && /UNIQUE/i.test(err.message)) {
+			return conflict(
+				c,
+				"URL at this position already exists",
+				"position",
+			);
+		}
+		throw err;
+	}
+});
+
+export default {
+	route,
+	method: "POST" as RouteMetadata["method"],
+	path: "/workspaces/:workspaceId/urls",
+	description: "Add URL to workspace",
+	auth_required: true,
+	scopes: ["workspaces:write"],
+};

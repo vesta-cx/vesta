@@ -9,7 +9,7 @@ Epics and their sub-issues in priority order. Tackle epics top to bottom; within
 ## Epics (in priority order)
 
 1. **#36** Epic: Infrastructure & tooling improvements  
-   - #55 → #56 → #57 → #58 *(#55 Flatten git tree is first on the docket.)*
+   - #55 → #56 → #57 → #58
 
 2. **#32** Epic: Database schema modernization & performance  
    - #38 → #39 → #40 → #41 → #42 → #43 → #44 → #45
@@ -40,7 +40,7 @@ Epics and their sub-issues in priority order. Tackle epics top to bottom; within
 
 - [ ] **Replace custom apiKeys in KV with WorkOS FGA** (#69) — WorkOS now offers Fine-Grained Authorization (FGA) for hierarchical, resource-scoped access control. Replace our current custom API key approach stored in KV with WorkOS's Authorization API. Enables automatic permission inheritance down resource hierarchy (org → workspace → project → app), real-time checks (<50ms p95), and IdP role mapping. Can adopt incrementally—no data migration required. See [WorkOS FGA docs](https://workos.com/docs/fga).
 
-- [>] **Revisit changesets and package versioning** (#56) — After the Erato full CRUD API plan is done, decide how to use the repo’s existing `@changesets/cli` for `@mia-cx/drizzle-query-factory` (and other publishable packages): cut a changeset, then publish; or document another flow (e.g. manual npm publish, CI on tag).
+- [>] **Defer changesets entirely; revisit package versioning post-MVP** (#56) — Changesets and package versioning are deferred until after MVP. Do not adopt or rely on `@changesets/cli` until we revisit; use manual version/publish or CI-on-tag if needed before then.
 
 - [>] **Move `drizzle-query-factory` docs to `mia-cx/docs`** (#54) — The detailed package documentation currently lives in `apps/docs/content/packages/drizzle-query-factory/`. Since `@mia-cx/drizzle-query-factory` is a standalone `@mia-cx` package, these docs should be migrated to the `mia-cx/docs` Quartz instance once that repo is set up.
 

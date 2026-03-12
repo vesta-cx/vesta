@@ -20,7 +20,7 @@ Checked the codebase for each roadmap issue. **Done** = implemented; **Partial**
 |---|--------|--------|------|
 | 36 | Epic: Infrastructure & tooling | — | Container. |
 | 55 | Flatten git tree: submodules → subtrees | **Done** | `.gittrees` present; `tools/scripts/push-subtrees.sh` exists. |
-| 56 | Revisit changesets and package versioning | **Partial** | `.changeset/config.json` exists; “revisit” = decide flow, not add. |
+| 56 | Revisit changesets and package versioning | **Frozen** | Deferred until post-MVP. No changeset workflow until then; status set to frozen on GitHub. |
 | 57 | Extract git shell helpers into @mia-cx package | **No** | No published package or extracted helpers in repo. |
 | 58 | Worker perf backlog | **No** | No shared cold-path/bundle/D1/caching implementation tracked in code. |
 

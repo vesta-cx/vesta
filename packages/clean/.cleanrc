@@ -1,0 +1,42 @@
+{
+  "include": [],
+  "exclude": [],
+  "report": "summary",
+  "commands": {
+    "node": {
+      "include": [
+        "node_modules"
+      ],
+      "tags": [
+        "dependencies"
+      ]
+    },
+    "vite": {
+      "include": [
+        "node_modules/.vite"
+      ],
+      "tags": [
+        "buildtool",
+        "cache"
+      ]
+    },
+    "pnpm-store": {
+      "include": [
+        ".pnpm-store"
+      ],
+      "tags": [
+        "package-manager",
+        "cache"
+      ]
+    },
+    "turbo": {
+      "include": [
+        ".turbo"
+      ],
+      "tags": [
+        "monorepo",
+        "cache"
+      ]
+    }
+  }
+}

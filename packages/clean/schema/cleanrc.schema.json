@@ -1,0 +1,98 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://vesta-cx.dev/schemas/cleanrc.schema.json",
+  "title": "clean configuration",
+  "type": "object",
+  "additionalProperties": false,
+  "$defs": {
+    "entry": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "include": { "type": "array", "items": { "type": "string" } },
+        "exclude": { "type": "array", "items": { "type": "string" } },
+        "tags": { "type": "array", "items": { "type": "string" } },
+        "enabled": { "type": "boolean" },
+        "mode": { "type": "string", "enum": ["delete", "contentsOnly"] },
+        "dryRun": { "type": "boolean" },
+        "confirm": { "type": "boolean" },
+        "interactive": { "type": "boolean" },
+        "verbose": { "type": "boolean" },
+        "ignoreErrors": { "type": "boolean" },
+        "force": { "type": "boolean" },
+        "strategy": { "type": "string", "enum": ["sequential", "parallel"] },
+        "cwd": { "type": "string" },
+        "report": { "type": "string", "enum": ["none", "summary", "json"] }
+      },
+      "required": ["include"]
+    }
+  },
+  "properties": {
+    "$schema": {
+      "type": "string",
+      "description": "Optional JSON Schema reference for editor IntelliSense."
+    },
+    "include": {
+      "type": "array",
+      "description": "Global include patterns. Applied on bare `clean`, and merged into named command runs.",
+      "items": { "type": "string" }
+    },
+    "exclude": {
+      "type": "array",
+      "description": "Global exclude patterns.",
+      "items": { "type": "string" }
+    },
+    "protect": {
+      "type": "array",
+      "description": "Deprecated alias for top-level `exclude`. Prefer `exclude`.",
+      "items": { "type": "string" }
+    },
+    "tags": {
+      "type": "array",
+      "description": "Optional default tags for global execution metadata.",
+      "items": { "type": "string" }
+    },
+    "enabled": { "type": "boolean" },
+    "mode": { "type": "string", "enum": ["delete", "contentsOnly"] },
+    "dryRun": { "type": "boolean" },
+    "confirm": { "type": "boolean" },
+    "interactive": { "type": "boolean" },
+    "verbose": { "type": "boolean" },
+    "ignoreErrors": { "type": "boolean" },
+    "force": { "type": "boolean" },
+    "strategy": { "type": "string", "enum": ["sequential", "parallel"] },
+    "cwd": { "type": "string" },
+    "report": { "type": "string", "enum": ["none", "summary", "json"] },
+    "commands": {
+      "type": "object",
+      "description": "Named command entries. Use `clean <command>` or `--tags` to select entries. Key `init` is reserved for the bootstrap command.",
+      "propertyNames": { "not": { "const": "init" } },
+      "additionalProperties": { "$ref": "#/$defs/entry" }
+    },
+    "dirs": {
+      "type": "array",
+      "description": "Deprecated legacy key. Migrate to top-level `include`.",
+      "items": { "type": "string" }
+    },
+    "clean": {
+      "type": "array",
+      "description": "Deprecated legacy key. Migrate to top-level `include`.",
+      "items": { "type": "string" }
+    },
+    "installClean": {
+      "type": "array",
+      "description": "Deprecated legacy key. Migrate to `commands.install.include`.",
+      "items": { "type": "string" }
+    },
+    "buildClean": {
+      "type": "array",
+      "description": "Deprecated legacy key. Migrate to `commands.build:clean.include`.",
+      "items": { "type": "string" }
+    },
+    "devClean": {
+      "type": "array",
+      "description": "Deprecated legacy key. Migrate to `commands.dev:clean.include`.",
+      "items": { "type": "string" }
+    }
+  }
+}

@@ -1,0 +1,10 @@
+**/.dist
+**/dist
+
+**/.tsup
+**/tsup
+**/.turbo
+
+**/coverage
+
+**/node_modules

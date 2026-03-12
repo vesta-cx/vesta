@@ -9,7 +9,7 @@ import {
 } from "drizzle-orm/sqlite-core";
 import { users } from "./users";
 import { resources } from "./resources";
-import { OWNER_TYPES, VISIBILITY_TYPES } from "./types";
+import { OWNER_TYPES, WORKSPACE_STATUSES } from "./types";
 
 export const workspaces = sqliteTable(
 	"workspaces",
@@ -24,9 +24,9 @@ export const workspaces = sqliteTable(
 		ownerId: text("owner_id").notNull(),
 		avatarUrl: text("avatar_url"),
 		bannerUrl: text("banner_url"),
-		visibility: text("visibility", { enum: VISIBILITY_TYPES })
+		status: text("status", { enum: WORKSPACE_STATUSES })
 			.notNull()
-			.default("public"),
+			.default("LISTED"),
 		createdAt: integer("created_at", { mode: "timestamp" })
 			.notNull()
 			.$defaultFn(() => new Date()),
@@ -39,7 +39,7 @@ export const workspaces = sqliteTable(
 			table.ownerType,
 			table.ownerId,
 		),
-		index("workspaces_visibility_idx").on(table.visibility),
+		index("workspaces_status_idx").on(table.status),
 	],
 );
 

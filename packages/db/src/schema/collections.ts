@@ -14,6 +14,12 @@ export const COLLECTION_OWNER_TYPES = ["user", "workspace"] as const;
 export type CollectionOwnerType = (typeof COLLECTION_OWNER_TYPES)[number];
 
 export const COLLECTION_TYPES = [
+	"auto",
+	"manual",
+] as const;
+export type CollectionType = (typeof COLLECTION_TYPES)[number];
+
+export const COLLECTION_KINDS = [
 	"resources",
 	"following",
 	"reposts",
@@ -22,9 +28,8 @@ export const COLLECTION_TYPES = [
 	"bookmarks",
 	"subscriptions",
 	"notifications",
-	"custom",
 ] as const;
-export type CollectionType = (typeof COLLECTION_TYPES)[number];
+export type CollectionKind = (typeof COLLECTION_KINDS)[number];
 
 export const COLLECTION_STATUSES = ["LISTED", "UNLISTED"] as const;
 export type CollectionStatus = (typeof COLLECTION_STATUSES)[number];
@@ -57,10 +62,8 @@ export const collections = sqliteTable(
 		description: text("description"),
 		type: text("type", { enum: COLLECTION_TYPES })
 			.notNull()
-			.default("custom"),
-		isProtected: integer("is_protected", { mode: "boolean" })
-			.notNull()
-			.default(false),
+			.default("manual"),
+		kind: text("kind", { enum: COLLECTION_KINDS }),
 		status: text("status", { enum: COLLECTION_STATUSES })
 			.notNull()
 			.default("LISTED"),
@@ -75,6 +78,13 @@ export const collections = sqliteTable(
 		index("collections_owner_idx").on(
 			table.ownerType,
 			table.ownerId,
+			table.createdAt,
+		),
+		index("collections_owner_type_kind_idx").on(
+			table.ownerType,
+			table.ownerId,
+			table.type,
+			table.kind,
 			table.createdAt,
 		),
 	],

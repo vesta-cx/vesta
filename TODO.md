@@ -8,29 +8,27 @@ Epics and their sub-issues in priority order. Tackle epics top to bottom; within
 
 ## Epics (in priority order)
 
-1. **#36** Epic: Infrastructure & tooling improvements  
+1. **#36** Epic: Infrastructure & tooling improvements
    - #55 → #56 → #57 → #58
 
-2. **#32** Epic: Database schema modernization & performance  
+2. **#32** Epic: Database schema modernization & performance
    - #38 → #39 → #40 → #41 → #42 → #43 → #44 → #45
 
-3. **#33** Epic: Test coverage & quality gates  
+3. **#33** Epic: Test coverage & quality gates
    - #46 → #47 → #48
 
-4. **#34** Epic: Comments & threading model migration  
+4. **#34** Epic: Comments & threading model migration
    - #49 → #50
 
-5. **#35** Epic: Documentation consolidation & accuracy  
+5. **#35** Epic: Documentation consolidation & accuracy
    - #51 → #52 → #53 → #54
 
-6. **#37** Epic: Erato API foundation  
+6. **#37** Epic: Erato API foundation
    - #59 → #60 → #61 → #62 → #63 → #64 → #65 → #66 → #67
 
 ---
 
 ## Task list (detailed)
-
-- [ ] **Add commit linting & husky** (#70) — Set up husky and commitlint to enforce conventional commits. Standardizes commit messages, improves changelog generation, prevents malformed commits. Part of Epic #36 (Infrastructure & tooling).
 
 - [ ] **Adopt `runListQuery` in medium/high-complexity Erato list routes** — Deferred to pre-v1 staging (no GitHub issue). These routes have extra logic (owner-scope joins, workspace membership checks, multi-table joins) that may benefit from the helper but need careful review:
   - Medium: `users/list.ts`, `workspaces/list.ts`, `collections/list.ts`, `teams/members/list.ts`, `collections/filters/list.ts`

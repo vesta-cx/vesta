@@ -26,8 +26,8 @@
     "test:watch": "vitest"
   },
   "dependencies": {
-    "@mia-cx/drizzle-query-factory": "^0.1.0",
-    "@vesta-cx/db": "^0.0.1",
+    "@mia-cx/drizzle-query-factory": "workspace:^",
+    "@vesta-cx/db": "workspace:^",
     "drizzle-orm": "^0.45.1",
     "hono": "^4.12.3",
     "zod": "^3.24.0"
@@ -36,7 +36,7 @@
     "@fontsource/archivo": "^5.2.8",
     "@fontsource/jetbrains-mono": "^5.2.8",
     "@types/node": "^25.3.2",
-    "@vesta-cx/config": "workspace:*",
+    "@vesta-cx/config": "workspace:^",
     "@vitest/coverage-v8": "^4.0.18",
     "drizzle-kit": "^0.31.8",
     "prettier": "^3.8.1",

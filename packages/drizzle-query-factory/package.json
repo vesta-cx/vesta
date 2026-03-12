@@ -41,9 +41,9 @@
     "test:watch": "vitest"
   },
   "devDependencies": {
-    "@vesta-cx/config": "workspace:*",
+    "@vesta-cx/config": "workspace:^",
     "@vitest/coverage-v8": "^4.0.18",
-    "cleanc": "^0.1.0",
+    "@mia-cx/clean": "^1.0.0",
     "drizzle-orm": "^0.45.1",
     "tsup": "^8.5.1",
     "typescript": "^5.9.3",

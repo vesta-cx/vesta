@@ -24,8 +24,8 @@
   "dependencies": {
     "@hono/node-server": "^1.19.0",
     "@libsql/client": "^0.17.0",
-    "@vesta-cx/storage": "workspace:*",
-    "@vesta-cx/utils": "^1.0.0",
+    "@vesta-cx/storage": "workspace:^",
+    "@vesta-cx/utils": "workspace:^",
     "drizzle-orm": "^0.45.1",
     "hono": "^4.12.1",
     "postgres": "^3.4.5"

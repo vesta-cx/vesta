@@ -2,8 +2,6 @@
 
 # TODO
 
-- [ ] **Flatten git tree** (#55) — Flatten submodules into the monorepo with `git subtree add` (deinit/remove each submodule first, then subtree add per repo) so full history lives in the monorepo. Optionally use `.gittrees` + push script to push subtrees back to separate remotes.
-
 ---
 
 Epics and their sub-issues in priority order. Tackle epics top to bottom; within each epic, sub-issues are ordered.

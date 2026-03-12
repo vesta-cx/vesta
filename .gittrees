@@ -37,8 +37,8 @@
 
 [subtree "packages/cleanc"]
 	path = packages/cleanc
-	remote = cleanc
-	url = https://github.com/vesta-cx/cleanc.git
+	remote = clean
+	url = https://github.com/mia-cx/clean.git
 	branch = main
 
 [subtree "packages/db"]

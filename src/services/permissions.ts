@@ -58,7 +58,7 @@ export const createPermissionSchema = z.object({
 			code: z.ZodIssueCode.custom,
 			path: ["subjectId"],
 			message:
-				"Invalid static subject id. Use guest, user, follower, or subscriber.",
+				"Invalid static subject id. Use guest, authenticated, follower, or subscriber.",
 		});
 	}
 });

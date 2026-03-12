@@ -1,0 +1,13 @@
+# @format
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: euterpe-config
+data:
+  PORT: "3000"
+  DATABASE_URL: "file:///data/euterpe.sqlite"
+  # Comma-separated media:kind workload tokens, e.g. audio:transcode,audio:analyze
+  EUTERPE_ALLOWED_WORKLOADS: "audio:transcode"
+  # EUTERPE_API_KEY(s) come from euterpe-secrets
+  # Storage is client-driven (passed per request)

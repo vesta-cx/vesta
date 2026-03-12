@@ -1,0 +1,30 @@
+# @format
+
+services:
+  euterpe:
+    build:
+      context: ../..
+      dockerfile: apps/euterpe/Dockerfile
+    ports:
+      - "3000:3000"
+    environment:
+      - PORT=3000
+      - DATABASE_URL=file:///data/euterpe.sqlite
+      - NODE_ENV=production
+    env_file:
+      - .env
+    volumes:
+      - euterpe-data:/data
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          'node -e
+          "fetch(''http://localhost:3000/health'').then(r=>r.ok?process.exit(0):process.exit(1)).catch(()=>process.exit(1))"',
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+volumes:
+  euterpe-data:

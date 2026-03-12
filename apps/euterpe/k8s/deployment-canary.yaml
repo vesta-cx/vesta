@@ -1,0 +1,49 @@
+# @format
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: euterpe-canary
+  labels:
+    app: euterpe-canary
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: euterpe-canary
+  template:
+    metadata:
+      labels:
+        app: euterpe-canary
+    spec:
+      containers:
+        - name: euterpe
+          image: euterpe:node-caged-canary
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 3000
+              name: http
+          envFrom:
+            - secretRef:
+                name: euterpe-secrets
+            - configMapRef:
+                name: euterpe-config
+          volumeMounts:
+            - name: data
+              mountPath: /data
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 3000
+            initialDelaySeconds: 10
+            periodSeconds: 10
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 3000
+            initialDelaySeconds: 5
+            periodSeconds: 5
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: euterpe-data

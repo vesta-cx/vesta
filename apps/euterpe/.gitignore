@@ -1,0 +1,37 @@
+# Dependencies
+node_modules
+
+# Local env files
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Testing
+**/coverage
+
+# Turbo
+.turbo
+
+# Build Outputs
+build
+dist
+
+# App-specific
+data/
+.euterpe-api-keys
+.euterpe-revoked-keys
+k8s/secret.yaml
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# Misc
+.DS_Store
+*.pem

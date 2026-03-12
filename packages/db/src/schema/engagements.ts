@@ -1,7 +1,12 @@
 /** @format */
 
 import { relations } from "drizzle-orm";
-import { integer, sqliteTable, text } from "drizzle-orm/sqlite-core";
+import {
+	index,
+	integer,
+	sqliteTable,
+	text,
+} from "drizzle-orm/sqlite-core";
 
 export const ENGAGEMENT_SUBJECT_TYPES = ["user", "workspace"] as const;
 export type EngagementSubjectType = (typeof ENGAGEMENT_SUBJECT_TYPES)[number];
@@ -28,23 +33,41 @@ export type EngagementObjectType = (typeof ENGAGEMENT_OBJECT_TYPES)[number];
 export const MENTION_TYPES = ["user", "workspace", "resource"] as const;
 export type MentionType = (typeof MENTION_TYPES)[number];
 
-export const engagements = sqliteTable("engagements", {
-	id: text("id")
-		.primaryKey()
-		.$defaultFn(() => crypto.randomUUID()),
-	subjectType: text("subject_type", {
-		enum: ENGAGEMENT_SUBJECT_TYPES,
-	}).notNull(),
-	subjectId: text("subject_id").notNull(),
-	action: text("action", { enum: ENGAGEMENT_ACTIONS }).notNull(),
-	objectType: text("object_type", {
-		enum: ENGAGEMENT_OBJECT_TYPES,
-	}).notNull(),
-	objectId: text("object_id").notNull(),
-	createdAt: integer("created_at", { mode: "timestamp" })
-		.notNull()
-		.$defaultFn(() => new Date()),
-});
+export const engagements = sqliteTable(
+	"engagements",
+	{
+		id: text("id")
+			.primaryKey()
+			.$defaultFn(() => crypto.randomUUID()),
+		subjectType: text("subject_type", {
+			enum: ENGAGEMENT_SUBJECT_TYPES,
+		}).notNull(),
+		subjectId: text("subject_id").notNull(),
+		action: text("action", { enum: ENGAGEMENT_ACTIONS }).notNull(),
+		objectType: text("object_type", {
+			enum: ENGAGEMENT_OBJECT_TYPES,
+		}).notNull(),
+		objectId: text("object_id").notNull(),
+		createdAt: integer("created_at", { mode: "timestamp" })
+			.notNull()
+			.$defaultFn(() => new Date()),
+	},
+	(table) => [
+		index("engagements_subject_idx").on(
+			table.subjectType,
+			table.subjectId,
+		),
+		index("engagements_object_idx").on(
+			table.objectType,
+			table.objectId,
+		),
+		index("engagements_subject_created_idx").on(
+			table.subjectType,
+			table.subjectId,
+			table.createdAt,
+		),
+	],
+);
 
 export const engagementComments = sqliteTable("engagement_comments", {
 	engagementId: text("engagement_id")

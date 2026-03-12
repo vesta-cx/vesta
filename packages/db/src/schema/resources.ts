@@ -2,6 +2,7 @@
 
 import { relations } from "drizzle-orm";
 import {
+	index,
 	integer,
 	primaryKey,
 	sqliteTable,
@@ -16,25 +17,35 @@ import {
 	AUTHOR_TYPES,
 } from "./types";
 
-export const resources = sqliteTable("resources", {
-	id: text("id")
-		.primaryKey()
-		.$defaultFn(() => crypto.randomUUID()),
-	ownerType: text("owner_type", { enum: OWNER_TYPES }).notNull(),
-	ownerId: text("owner_id").notNull(),
-	type: text("type", { enum: RESOURCE_TYPES }).notNull(),
-	title: text("title"),
-	excerpt: text("excerpt"),
-	status: text("status", { enum: RESOURCE_STATUSES })
-		.notNull()
-		.default("UNLISTED"),
-	createdAt: integer("created_at", { mode: "timestamp" })
-		.notNull()
-		.$defaultFn(() => new Date()),
-	updatedAt: integer("updated_at", { mode: "timestamp" })
-		.notNull()
-		.$defaultFn(() => new Date()),
-});
+export const resources = sqliteTable(
+	"resources",
+	{
+		id: text("id")
+			.primaryKey()
+			.$defaultFn(() => crypto.randomUUID()),
+		ownerType: text("owner_type", { enum: OWNER_TYPES }).notNull(),
+		ownerId: text("owner_id").notNull(),
+		type: text("type", { enum: RESOURCE_TYPES }).notNull(),
+		title: text("title"),
+		excerpt: text("excerpt"),
+		status: text("status", { enum: RESOURCE_STATUSES })
+			.notNull()
+			.default("UNLISTED"),
+		createdAt: integer("created_at", { mode: "timestamp" })
+			.notNull()
+			.$defaultFn(() => new Date()),
+		updatedAt: integer("updated_at", { mode: "timestamp" })
+			.notNull()
+			.$defaultFn(() => new Date()),
+	},
+	(table) => [
+		index("resources_owner_idx").on(
+			table.ownerType,
+			table.ownerId,
+			table.createdAt,
+		),
+	],
+);
 
 export const resourceAuthors = sqliteTable(
 	"resource_authors",

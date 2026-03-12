@@ -2,6 +2,7 @@
 
 import { relations } from "drizzle-orm";
 import {
+	index,
 	integer,
 	primaryKey,
 	sqliteTable,
@@ -42,32 +43,42 @@ export const ENGAGEMENT_FILTER_ACTIONS = [
 ] as const;
 export type EngagementFilterAction = (typeof ENGAGEMENT_FILTER_ACTIONS)[number];
 
-export const collections = sqliteTable("collections", {
-	id: text("id")
-		.primaryKey()
-		.$defaultFn(() => crypto.randomUUID()),
-	ownerType: text("owner_type", {
-		enum: COLLECTION_OWNER_TYPES,
-	}).notNull(),
-	ownerId: text("owner_id").notNull(),
-	name: text("name").notNull(),
-	description: text("description"),
-	type: text("type", { enum: COLLECTION_TYPES })
-		.notNull()
-		.default("custom"),
-	isProtected: integer("is_protected", { mode: "boolean" })
-		.notNull()
-		.default(false),
-	status: text("status", { enum: COLLECTION_STATUSES })
-		.notNull()
-		.default("LISTED"),
-	createdAt: integer("created_at", { mode: "timestamp" })
-		.notNull()
-		.$defaultFn(() => new Date()),
-	updatedAt: integer("updated_at", { mode: "timestamp" })
-		.notNull()
-		.$defaultFn(() => new Date()),
-});
+export const collections = sqliteTable(
+	"collections",
+	{
+		id: text("id")
+			.primaryKey()
+			.$defaultFn(() => crypto.randomUUID()),
+		ownerType: text("owner_type", {
+			enum: COLLECTION_OWNER_TYPES,
+		}).notNull(),
+		ownerId: text("owner_id").notNull(),
+		name: text("name").notNull(),
+		description: text("description"),
+		type: text("type", { enum: COLLECTION_TYPES })
+			.notNull()
+			.default("custom"),
+		isProtected: integer("is_protected", { mode: "boolean" })
+			.notNull()
+			.default(false),
+		status: text("status", { enum: COLLECTION_STATUSES })
+			.notNull()
+			.default("LISTED"),
+		createdAt: integer("created_at", { mode: "timestamp" })
+			.notNull()
+			.$defaultFn(() => new Date()),
+		updatedAt: integer("updated_at", { mode: "timestamp" })
+			.notNull()
+			.$defaultFn(() => new Date()),
+	},
+	(table) => [
+		index("collections_owner_idx").on(
+			table.ownerType,
+			table.ownerId,
+			table.createdAt,
+		),
+	],
+);
 
 export const collectionItems = sqliteTable(
 	"collection_items",
@@ -92,6 +103,10 @@ export const collectionItems = sqliteTable(
 				table.itemId,
 			],
 		}),
+		index("collection_items_collection_position_idx").on(
+			table.collectionId,
+			table.position,
+		),
 	],
 );
 

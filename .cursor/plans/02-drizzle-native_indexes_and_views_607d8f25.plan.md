@@ -1,6 +1,7 @@
 ---
 name: Drizzle-Native Indexes and Views
 overview: Add phase-1 hot indexes plus selected v0 read views directly in Drizzle schema definitions so future generated migrations include them automatically.
+# GitHub issues (epic #32): #39 indexes, #40 views, #41 migration cleanup.
 todos:
   - id: tests
     content: Build @vesta-cx/db and run apps/erato tests after index/view schema and migration updates
@@ -19,7 +20,7 @@ isProject: false
 
 # Drizzle-Native Indexes and Views
 
-## What will be implemented
+## What will be implemented (#39, #40)
 
 - Add only phase-1 (currently planned) indexes to schema table definitions (no medium-priority expansion).
 - Add selected SQL views in Drizzle schema:
@@ -30,7 +31,7 @@ isProject: false
   - `engagement_timeline_v0`
 - Ensure both indexes and views are declared in schema source so `drizzle-kit generate` can emit them.
 
-## Schema changes
+## Schema changes (#39)
 
 - Update table schemas with `index(...)` declarations in:
   - [packages/db/src/schema/resources.ts](/Users/mia/vesta-cx/vesta/packages/db/src/schema/resources.ts)
@@ -42,7 +43,7 @@ isProject: false
   - [packages/db/src/schema/teams.ts](/Users/mia/vesta-cx/vesta/packages/db/src/schema/teams.ts)
 - Keep `external_links_subject_idx` declared in schema file for parity with current migration.
 
-## View declarations
+## View declarations (#40)
 
 - Add a new view schema module (or extend existing schema modules) using Drizzle SQLite view APIs, defining:
   - `public_resources_v0` (`resources.status = 'LISTED'`)
@@ -52,7 +53,7 @@ isProject: false
   - `engagement_timeline_v0` (engagement read projection)
 - Export views from [packages/db/src/schema/index.ts](/Users/mia/vesta-cx/vesta/packages/db/src/schema/index.ts).
 
-## Migration alignment
+## Migration alignment (#41)
 
 - Run Drizzle generation via Erato config ([apps/erato/drizzle.config.ts](/Users/mia/vesta-cx/vesta/apps/erato/drizzle.config.ts)).
 - Reconcile generated migration with existing manual `0002_external_links.sql`:

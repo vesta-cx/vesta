@@ -1,6 +1,7 @@
 ---
 name: comments-model-status-threads
 overview: Plan a `packages/db`-first migration from engagement-backed comments to `status` resources with optional `parent_resource_id`, enabling threaded replies/comments while deferring Erato route implementation to a later phase.
+# GitHub issues (epic #34): #49 thread fields in schema, #50 db model docs.
 todos:
   - id: schema-changes
     content: Implement `packages/db` schema updates for status threading (`parent_resource_id` and any approved helper fields/indexes).
@@ -36,14 +37,14 @@ Adopt a unified comments/threading model where comments are `status` resources:
 
 This plan is `**packages/db` first. Erato route/service implementation is explicitly deferred.
 
-## Scope (Phase 1: `packages/db` only)
+## Scope (Phase 1: `packages/db` only) (#49, #50)
 
 - Update schema primitives in `[/Users/mia/vesta-cx/vesta/packages/db/src/schema/resources.ts](/Users/mia/vesta-cx/vesta/packages/db/src/schema/resources.ts)`
 - Add/adjust enum and type docs in `[/Users/mia/vesta-cx/vesta/packages/db/src/schema/types.ts](/Users/mia/vesta-cx/vesta/packages/db/src/schema/types.ts)`
 - Add migration(s) under `[/Users/mia/vesta-cx/vesta/packages/db/drizzle](/Users/mia/vesta-cx/vesta/packages/db/drizzle)`
-- Update schema docs in `[/Users/mia/vesta-cx/vesta/apps/docs/content/packages/db/model/resources/resource.md](/Users/mia/vesta-cx/vesta/apps/docs/content/packages/db/model/resources/resource.md)` and `[/Users/mia/vesta-cx/vesta/apps/docs/content/packages/db/model/collections/engagements.md](/Users/mia/vesta-cx/vesta/apps/docs/content/packages/db/model/collections/engagements.md)`
+- Update schema docs in `[/Users/mia/vesta-cx/vesta/apps/docs/content/packages/db/model/resources/resource.md](/Users/mia/vesta-cx/vesta/apps/docs/content/packages/db/model/resources/resource.md)` and `[/Users/mia/vesta-cx/vesta/apps/docs/content/packages/db/model/collections/engagements.md](/Users/mia/vesta-cx/vesta/apps/docs/content/packages/db/model/collections/engagements.md)` (#50)
 
-## Proposed Data Model Changes (`packages/db`)
+## Proposed Data Model Changes (`packages/db`) (#49)
 
 1. Add `parentResourceId` to `resources` (nullable self-reference to `resources.id`)
 2. Add optional thread helper fields for query performance (plan-level decision):

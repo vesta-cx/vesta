@@ -1,6 +1,7 @@
 ---
 name: improve-test-coverage
 overview: "Increase test coverage through a phased rollout: baseline measurement, package-level thresholds, targeted test additions, and CI gating. Focus on high-value packages first to improve confidence quickly without blocking development."
+# GitHub issues (epic #33): #46 baselines/thresholds, #47 targeted tests, #48 CI gate.
 todos:
   - id: baseline
     content: Capture current coverage baselines for priority packages and record by metric (lines/functions/branches/statements).
@@ -43,10 +44,10 @@ isProject: false
 
 ## Proposed Rollout
 
-1. **Baseline first (no breakage):** Run `test:coverage` in key packages and capture current percentages (lines/functions/branches/statements).
-2. **Set realistic package thresholds:** Add per-package `coverage.thresholds` at/just below current baseline (or a small floor such as 35-50% depending on package maturity), then ratchet up over time.
-3. **Prioritize high-impact test targets:** Add tests where risk is highest and logic is dense (route handlers/middleware, parsers, edge cases, error paths).
-4. **Add a monorepo coverage gate:** Wire `test`/`test:coverage` into Turbo so CI can run coverage checks predictably.
+1. **Baseline first (no breakage)** (#46): Run `test:coverage` in key packages and capture current percentages (lines/functions/branches/statements).
+2. **Set realistic package thresholds** (#46): Add per-package `coverage.thresholds` at/just below current baseline (or a small floor such as 35-50% depending on package maturity), then ratchet up over time.
+3. **Prioritize high-impact test targets** (#47): Add tests where risk is highest and logic is dense (route handlers/middleware, parsers, edge cases, error paths).
+4. **Add a monorepo coverage gate** (#48): Wire `test`/`test:coverage` into Turbo so CI can run coverage checks predictably.
 5. **Ratchet policy:** Increase thresholds in small steps (e.g., +3 to +5 points every sprint) instead of one aggressive jump.
 
 ## High-ROI Targets

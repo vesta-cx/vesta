@@ -1,0 +1,72 @@
+# Subtrees and their push targets. One table per subtree; key is a label (e.g. path).
+# path = prefix for `git subtree push --prefix=<path>` (must match subtree add prefix).
+# remote = Git remote name (created from url if missing).
+# url = remote URL; script adds this remote if the name does not exist.
+# branch = branch to push to on the remote.
+# Used by tools/scripts/push-subtrees.sh, pull-subtrees.sh, and add-subtrees.sh
+
+[subtree "apps/docs"]
+	path = apps/docs
+	remote = docs
+	url = https://github.com/vesta-cx/docs.git
+	branch = main
+
+[subtree "apps/erato"]
+	path = apps/erato
+	remote = erato
+	url = https://github.com/vesta-cx/erato.git
+	branch = main
+
+[subtree "apps/euterpe"]
+	path = apps/euterpe
+	remote = euterpe
+	url = https://github.com/vesta-cx/euterpe.git
+	branch = main
+
+[subtree "apps/sona"]
+	path = apps/sona
+	remote = sona
+	url = https://github.com/vesta-cx/sona.git
+	branch = main
+
+[subtree "apps/web"]
+	path = apps/web
+	remote = web
+	url = https://github.com/vesta-cx/web.git
+	branch = main
+
+[subtree "packages/cleanc"]
+	path = packages/cleanc
+	remote = cleanc
+	url = https://github.com/vesta-cx/cleanc.git
+	branch = main
+
+[subtree "packages/db"]
+	path = packages/db
+	remote = db
+	url = https://github.com/vesta-cx/db.git
+	branch = main
+
+[subtree "packages/drizzle-query-factory"]
+	path = packages/drizzle-query-factory
+	remote = drizzle-query-factory
+	url = https://github.com/mia-cx/drizzle-query-factory.git
+	branch = main
+
+[subtree "packages/ui"]
+	path = packages/ui
+	remote = ui
+	url = https://github.com/vesta-cx/ui.git
+	branch = main
+
+[subtree "packages/utils"]
+	path = packages/utils
+	remote = utils
+	url = https://github.com/vesta-cx/utils.git
+	branch = main
+
+[subtree "tools/scripts"]
+	path = tools/scripts
+	remote = scripts
+	url = https://github.com/vesta-cx/scripts.git
+	branch = main

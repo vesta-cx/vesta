@@ -35,8 +35,8 @@
 	url = https://github.com/vesta-cx/web.git
 	branch = main
 
-[subtree "packages/cleanc"]
-	path = packages/cleanc
+[subtree "packages/clean"]
+	path = packages/clean
 	remote = clean
 	url = https://github.com/mia-cx/clean.git
 	branch = main

@@ -5,12 +5,6 @@
 # branch = branch to push to on the remote.
 # Used by tools/scripts/push-subtrees.sh, pull-subtrees.sh, and add-subtrees.sh
 
-[subtree "apps/docs"]
-	path = apps/docs
-	remote = docs
-	url = https://github.com/vesta-cx/docs.git
-	branch = main
-
 [subtree "apps/erato"]
 	path = apps/erato
 	remote = erato

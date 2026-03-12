@@ -19,12 +19,14 @@ CREATE TABLE `workspaces` (
 	`owner_id` text NOT NULL,
 	`avatar_url` text,
 	`banner_url` text,
-	`visibility` text DEFAULT 'public' NOT NULL,
+	`status` text DEFAULT 'LISTED' NOT NULL,
 	`created_at` integer NOT NULL,
 	`updated_at` integer NOT NULL
 );
 --> statement-breakpoint
 CREATE UNIQUE INDEX `workspaces_slug_unique` ON `workspaces` (`slug`);--> statement-breakpoint
+CREATE INDEX `workspaces_owner_idx` ON `workspaces` (`owner_type`,`owner_id`);--> statement-breakpoint
+CREATE INDEX `workspaces_status_idx` ON `workspaces` (`status`);--> statement-breakpoint
 CREATE TABLE `resource_authors` (
 	`resource_id` text NOT NULL,
 	`author_type` text NOT NULL,
@@ -47,6 +49,7 @@ CREATE TABLE `resources` (
 	`updated_at` integer NOT NULL
 );
 --> statement-breakpoint
+CREATE INDEX `resources_owner_idx` ON `resources` (`owner_type`,`owner_id`,`created_at`);--> statement-breakpoint
 CREATE TABLE `posts` (
 	`resource_id` text PRIMARY KEY NOT NULL,
 	`body` text NOT NULL,
@@ -65,6 +68,18 @@ CREATE TABLE `resource_urls` (
 	`updated_at` integer NOT NULL,
 	PRIMARY KEY(`resource_id`, `position`),
 	FOREIGN KEY (`resource_id`) REFERENCES `resources`(`id`) ON UPDATE no action ON DELETE no action
+);
+--> statement-breakpoint
+CREATE TABLE `external_links` (
+	`subject_type` text NOT NULL,
+	`subject_id` text NOT NULL,
+	`name` text NOT NULL,
+	`url` text NOT NULL,
+	`icon` text,
+	`position` integer DEFAULT 0 NOT NULL,
+	`created_at` integer NOT NULL,
+	`updated_at` integer NOT NULL,
+	PRIMARY KEY(`subject_type`, `subject_id`, `position`)
 );
 --> statement-breakpoint
 CREATE TABLE `permission_actions` (
@@ -89,6 +104,9 @@ CREATE TABLE `permissions` (
 	FOREIGN KEY (`action`) REFERENCES `permission_actions`(`slug`) ON UPDATE no action ON DELETE no action
 );
 --> statement-breakpoint
+CREATE INDEX `permissions_subject_lookup_idx` ON `permissions` (`subject_type`,`subject_id`,`object_type`,`object_id`,`action`,`value`);--> statement-breakpoint
+CREATE INDEX `permissions_object_lookup_idx` ON `permissions` (`object_type`,`object_id`,`action`,`value`);--> statement-breakpoint
+CREATE INDEX `permissions_action_lookup_idx` ON `permissions` (`action`,`value`);--> statement-breakpoint
 CREATE TABLE `team_users` (
 	`team_id` text NOT NULL,
 	`user_id` text NOT NULL,
@@ -131,6 +149,9 @@ CREATE TABLE `engagements` (
 	`created_at` integer NOT NULL
 );
 --> statement-breakpoint
+CREATE INDEX `engagements_subject_idx` ON `engagements` (`subject_type`,`subject_id`);--> statement-breakpoint
+CREATE INDEX `engagements_object_idx` ON `engagements` (`object_type`,`object_id`);--> statement-breakpoint
+CREATE INDEX `engagements_subject_created_idx` ON `engagements` (`subject_type`,`subject_id`,`created_at`);--> statement-breakpoint
 CREATE TABLE `collection_item_filters` (
 	`collection_id` text NOT NULL,
 	`item_type` text NOT NULL,
@@ -151,27 +172,22 @@ CREATE TABLE `collection_items` (
 	FOREIGN KEY (`collection_id`) REFERENCES `collections`(`id`) ON UPDATE no action ON DELETE no action
 );
 --> statement-breakpoint
-CREATE TABLE `collection_visibility_settings` (
-	`collection_id` text NOT NULL,
-	`engagement_type` text NOT NULL,
-	`is_visible` integer DEFAULT true NOT NULL,
-	PRIMARY KEY(`collection_id`, `engagement_type`),
-	FOREIGN KEY (`collection_id`) REFERENCES `collections`(`id`) ON UPDATE no action ON DELETE no action
-);
---> statement-breakpoint
+CREATE INDEX `collection_items_collection_position_idx` ON `collection_items` (`collection_id`,`position`);--> statement-breakpoint
 CREATE TABLE `collections` (
 	`id` text PRIMARY KEY NOT NULL,
 	`owner_type` text NOT NULL,
 	`owner_id` text NOT NULL,
 	`name` text NOT NULL,
 	`description` text,
-	`type` text DEFAULT 'custom' NOT NULL,
-	`is_protected` integer DEFAULT false NOT NULL,
-	`visibility` text DEFAULT 'public' NOT NULL,
+	`type` text DEFAULT 'manual' NOT NULL,
+	`kind` text,
+	`status` text DEFAULT 'LISTED' NOT NULL,
 	`created_at` integer NOT NULL,
 	`updated_at` integer NOT NULL
 );
 --> statement-breakpoint
+CREATE INDEX `collections_owner_idx` ON `collections` (`owner_type`,`owner_id`,`created_at`);--> statement-breakpoint
+CREATE INDEX `collections_owner_type_kind_idx` ON `collections` (`owner_type`,`owner_id`,`type`,`kind`,`created_at`);--> statement-breakpoint
 CREATE TABLE `feature_presets` (
 	`name` text PRIMARY KEY NOT NULL,
 	`features` text NOT NULL,
@@ -226,4 +242,11 @@ CREATE TABLE `user_subscriptions` (
 	`is_active` integer DEFAULT false NOT NULL,
 	`created_at` integer NOT NULL,
 	`updated_at` integer NOT NULL
+);
+--> statement-breakpoint
+CREATE TABLE `organizations` (
+	`workos_org_id` text PRIMARY KEY NOT NULL,
+	`avatar_url` text,
+	`banner_url` text,
+	`theme_config` text
 );

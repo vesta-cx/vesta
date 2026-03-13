@@ -27,6 +27,17 @@ CREATE TABLE `workspaces` (
 CREATE UNIQUE INDEX `workspaces_slug_unique` ON `workspaces` (`slug`);--> statement-breakpoint
 CREATE INDEX `workspaces_owner_idx` ON `workspaces` (`owner_type`,`owner_id`);--> statement-breakpoint
 CREATE INDEX `workspaces_status_idx` ON `workspaces` (`status`);--> statement-breakpoint
+CREATE TABLE `resource_ancestors` (
+	`resource_id` text NOT NULL,
+	`ancestor_id` text NOT NULL,
+	`depth` integer NOT NULL,
+	PRIMARY KEY(`resource_id`, `ancestor_id`),
+	FOREIGN KEY (`resource_id`) REFERENCES `resources`(`id`) ON UPDATE no action ON DELETE no action,
+	FOREIGN KEY (`ancestor_id`) REFERENCES `resources`(`id`) ON UPDATE no action ON DELETE no action
+);
+--> statement-breakpoint
+CREATE INDEX `resource_ancestors_ancestor_depth_idx` ON `resource_ancestors` (`ancestor_id`,`depth`);--> statement-breakpoint
+CREATE INDEX `resource_ancestors_resource_idx` ON `resource_ancestors` (`resource_id`);--> statement-breakpoint
 CREATE TABLE `resource_authors` (
 	`resource_id` text NOT NULL,
 	`author_type` text NOT NULL,
@@ -37,6 +48,16 @@ CREATE TABLE `resource_authors` (
 	FOREIGN KEY (`resource_id`) REFERENCES `resources`(`id`) ON UPDATE no action ON DELETE no action
 );
 --> statement-breakpoint
+CREATE TABLE `resource_mentions` (
+	`resource_id` text NOT NULL,
+	`mentioned_type` text NOT NULL,
+	`mentioned_id` text NOT NULL,
+	`created_at` integer NOT NULL,
+	PRIMARY KEY(`resource_id`, `mentioned_type`, `mentioned_id`),
+	FOREIGN KEY (`resource_id`) REFERENCES `resources`(`id`) ON UPDATE no action ON DELETE no action
+);
+--> statement-breakpoint
+CREATE INDEX `resource_mentions_mentioned_idx` ON `resource_mentions` (`mentioned_type`,`mentioned_id`);--> statement-breakpoint
 CREATE TABLE `resources` (
 	`id` text PRIMARY KEY NOT NULL,
 	`owner_type` text NOT NULL,
@@ -44,12 +65,15 @@ CREATE TABLE `resources` (
 	`type` text NOT NULL,
 	`title` text,
 	`excerpt` text,
+	`parent_resource_id` text,
 	`status` text DEFAULT 'UNLISTED' NOT NULL,
 	`created_at` integer NOT NULL,
-	`updated_at` integer NOT NULL
+	`updated_at` integer NOT NULL,
+	FOREIGN KEY (`parent_resource_id`) REFERENCES `resources`(`id`) ON UPDATE no action ON DELETE no action
 );
 --> statement-breakpoint
 CREATE INDEX `resources_owner_idx` ON `resources` (`owner_type`,`owner_id`,`created_at`);--> statement-breakpoint
+CREATE INDEX `resources_parent_created_idx` ON `resources` (`parent_resource_id`,`created_at`);--> statement-breakpoint
 CREATE TABLE `posts` (
 	`resource_id` text PRIMARY KEY NOT NULL,
 	`body` text NOT NULL,
@@ -250,3 +274,8 @@ CREATE TABLE `organizations` (
 	`banner_url` text,
 	`theme_config` text
 );
+--> statement-breakpoint
+CREATE VIEW `engagement_timeline_v0` AS select "id", "subject_type", "subject_id", "action", "object_type", "object_id", "created_at" from "engagements";--> statement-breakpoint
+CREATE VIEW `public_collections_v0` AS select "id", "owner_type", "owner_id", "name", "description", "type", "kind", "status", "created_at", "updated_at" from "collections" where "collections"."status" = 'LISTED';--> statement-breakpoint
+CREATE VIEW `public_resources_v0` AS select "id", "owner_type", "owner_id", "type", "title", "excerpt", "parent_resource_id", "status", "created_at", "updated_at" from "resources" where "resources"."status" = 'LISTED';--> statement-breakpoint
+CREATE VIEW `public_workspaces_v0` AS select "id", "name", "slug", "description", "owner_type", "owner_id", "avatar_url", "banner_url", "status", "created_at", "updated_at" from "workspaces" where "workspaces"."status" = 'LISTED';

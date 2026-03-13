@@ -13,3 +13,4 @@ export * from "./engagements";
 export * from "./collections";
 export * from "./features";
 export * from "./organizations";
+export * from "./views";

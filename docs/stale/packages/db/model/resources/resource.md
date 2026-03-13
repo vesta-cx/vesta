@@ -3,6 +3,8 @@ title: Resource
 description: Generic creative work model (posts in Phase 1; songs, albums in future phases)
 ---
 
+<!-- @format -->
+
 # Resource
 
 A Resource is a creative work. In Phase 1, resources are posts, songs, albums. Later phases add artwork, etc.
@@ -19,9 +21,49 @@ owner_id             string (WorkOS user/org ID)
 type                 'post' | 'song' | 'album' | 'status' | ... (extensible)
 title                string (optional for status type)
 excerpt              string (160-320 chars, preview text for feeds)
+parent_resource_id   UUID nullable FK -> resources.id (direct parent for status threads)
 status               'LISTED' | 'UNLISTED'
 created_at           timestamp
 updated_at           timestamp
+```
+
+## Status Threading (Closure Table)
+
+Status-based comments use direct parent linkage on `resources` plus a closure table for recursive reads.
+
+```
+thread_parents:
+resource_id          UUID FK -> resources.id (descendant status)
+ancestor_id          UUID FK -> resources.id (any ancestor in chain)
+depth                integer (1 = direct parent, 2 = grandparent, ...)
+primary key          (resource_id, ancestor_id)
+indexes              (ancestor_id, depth), (resource_id)
+```
+
+### Write Materialization Rule
+
+When inserting a status with `parent_resource_id`:
+
+1. Query `thread_parents` where `resource_id = direct_parent_id` to fetch all ancestors.
+2. Copy those rows for the new resource with `depth + 1`.
+3. Insert one direct-parent row: `(new_resource_id, direct_parent_id, 1)`.
+
+Depth for the new resource is derivable as `COUNT(*)` (or `MAX(depth)`) for the new resource in `thread_parents`.
+
+### Query Patterns
+
+```sql
+-- All descendants under any resource (any depth)
+SELECT tp.resource_id
+FROM thread_parents tp
+WHERE tp.ancestor_id = {resource_id}
+ORDER BY tp.depth ASC;
+
+-- Direct replies only
+SELECT r.*
+FROM resources r
+WHERE r.parent_resource_id = {resource_id}
+ORDER BY r.created_at ASC;
 ```
 
 ## Authors (Users & Workspaces)

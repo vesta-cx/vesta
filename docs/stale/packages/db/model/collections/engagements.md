@@ -3,13 +3,15 @@ title: Engagements
 description: Generic engagement model for likes, comments, reposts, subscribes, mentions, bookmarks
 ---
 
+<!-- @format -->
+
 # Engagements
 
-Engagements are a subject–action–object model for **user interactions that already happened**. Unlike permissions (which govern what a subject *may* do), engagements record what a subject *did*.
+Engagements are a subject–action–object model for **user interactions that already happened**. Unlike permissions (which govern what a subject _may_ do), engagements record what a subject _did_.
 
-- **Subject** — The entity that *performed* the action (user or workspace only).
-- **Action** — The action that *was performed* (e.g. like, comment, repost, follow).
-- **Object** — The entity that *was acted upon* (resource, workspace, collection, or user). Teams and organizations are not public-facing and do not appear as engagement objects.
+- **Subject** — The entity that _performed_ the action (user or workspace only).
+- **Action** — The action that _was performed_ (e.g. like, comment, repost, follow).
+- **Object** — The entity that _was acted upon_ (resource, workspace, collection, or user). Teams and organizations are not public-facing and do not appear as engagement objects.
 
 See [packages/db Data Model](../index.md#permission-vs-engagement-subject-action-object) for comparison with permissions.
 
@@ -35,15 +37,15 @@ Don't confuse these. The engagement is public (appears in feeds). The billing re
 
 ## Actions
 
-| Action      | Meaning                                     | Side Effects                                                         | Feed Visible |
-| ----------- | ------------------------------------------- | -------------------------------------------------------------------- | ------------ |
-| `like`      | Subject liked a resource                    | Auto-add to subject's "likes" collection                             | Optional     |
-| `comment`   | Subject commented on a resource             | See engagement_comments table                                        | Optional     |
-| `repost`    | Subject reposted (shared) a resource        | Auto-add to subject's "reposts" collection                           | Optional     |
-| `follow`    | Subject followed a workspace/collection     | Auto-add to subject's "following" collection                         | Optional     |
-| `subscribe` | User subscribed to a workspace (paid)       | Auto-add to user's "subscriptions" collection, create billing record | Optional     |
-| `mention`   | Subject mentioned a resource/user/workspace | See engagement_mentions table (future: thread tracking)              | Optional     |
-| `bookmark`  | Subject bookmarked a resource               | Auto-add to subject's "bookmarks" collection                         | Optional     |
+| Action | Meaning | Side Effects | Feed Visible |
+| --- | --- | --- | --- |
+| `like` | Subject liked a resource | Auto-add to subject's "likes" collection | Optional |
+| `comment` | Subject commented on a resource | See engagement_comments table | Optional |
+| `repost` | Subject reposted (shared) a resource | Auto-add to subject's "reposts" collection | Optional |
+| `follow` | Subject followed a workspace/collection | Auto-add to subject's "following" collection | Optional |
+| `subscribe` | User subscribed to a workspace (paid) | Auto-add to user's "subscriptions" collection, create billing record | Optional |
+| `mention` | Subject mentioned a resource/user/workspace | See engagement_mentions table (future: thread tracking) | Optional |
+| `bookmark` | Subject bookmarked a resource | Auto-add to subject's "bookmarks" collection | Optional |
 
 ### Follow vs. Subscribe (Important Distinction)
 
@@ -58,9 +60,11 @@ In UI, a subject can define which engagement types are visible to their follower
 
 Visibility of engagements in feeds is controlled by **collection_item_filters** (see [Collections](./collections.md#collection-item-filters)): collection owners choose which **actions** (e.g. like, repost, comment) they see from each item in their collection. Subject (initiator) control and follower (consumer) control are both expressed via those filters.
 
-## Comments (Sub-Model)
+## Comments (Sub-Model, Legacy During Transition)
 
-For comments, store the text separately:
+Comment text currently exists in `engagement_comments`, but this is a transition path. The target model is status-based comments (`resources.type = 'status'`) with `parent_resource_id` + `thread_parents` for threading.
+
+Current legacy schema:
 
 ```
 engagement_comments:
@@ -69,7 +73,7 @@ text                 text (comment body)
 created_at           timestamp (inherited from engagement, but can duplicate for convenience)
 ```
 
-**Query pattern:**
+Legacy query pattern:
 
 ```sql
 SELECT e.*, ec.text FROM engagements e
@@ -77,6 +81,12 @@ JOIN engagement_comments ec ON e.id = ec.engagement_id
 WHERE e.action = 'comment' AND e.object_id = {resource_id}
 ORDER BY e.created_at DESC;
 ```
+
+### Transition note
+
+- Keep `engagement_comments` readable during migration and backfill.
+- New thread/comment modeling lives in `resources` (`status`) and `thread_parents`.
+- Non-comment engagement actions (`like`, `repost`, `bookmark`, etc.) remain in `engagements`.
 
 ## Mentions (Sub-Model)
 

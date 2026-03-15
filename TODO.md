@@ -4,44 +4,77 @@
 
 ---
 
-Epics and their sub-issues in priority order. Tackle epics top to bottom; within each epic, sub-issues are ordered.
+Current execution scope is the **Minimum Viable Product** milestone.
 
-## Epics (in priority order)
+## MVP Milestone
 
-1. **#36** Epic: Infrastructure & tooling improvements
-   - #55 → #56 → #57 → #58
+- Milestone: **#1** Minimum Viable Product
+- Parent epics:
+  - **#72** Epic: Backend MVP
+  - **#105** Epic: Frontend MVP
 
-2. **#32** Epic: Database schema modernization & performance
-   - #38 → #39 → #40 → #41 → #42 → #43 → #44 → #45
+## Backend MVP hierarchy
 
-3. **#33** Epic: Test coverage & quality gates
-   - #46 → #47 → #48
+- **#73** Epic: Backend Auth
+  - #92, #93
+- **#74** Epic: Backend API Foundation
+  - Existing: #59, #60, #61, #62, #64
+- **#75** Epic: Backend Permissions
+  - Existing: #45, #31
+- **#76** Epic: Backend DB Performance
+  - Existing: #39, #42
+- **#77** Epic: Backend Resources API
+  - Checklist-driven CRUD in issue body; integration follow-up #71
+- **#78** Epic: Backend Collections API (completed)
+- **#79** Epic: Backend Workspaces API (completed)
+- **#80** Epic: Backend Users API (completed)
+- **#81** Epic: Backend Organizations API (completed)
+- **#82** Epic: Backend Teams API (completed)
+- **#83** Epic: Backend Engagements API
+  - Checklist-driven CRUD in issue body; follow-up #43
+- **#84** Epic: Backend Permissions API (completed)
+- **#85** Epic: Backend Features API (completed)
+- **#86** Epic: Backend Subscriptions API (completed)
+- **#87** Epic: Backend Links API (completed)
+- **#88** Epic: Backend Workspace Profile Tabs
+  - #99 → #104
+- **#89** Epic: Backend Feed
+  - #94, #95
+- **#90** Epic: Backend Notifications
+  - #96
+- **#91** Epic: Backend Search
+  - #97, #98
 
-4. **#34** Epic: Comments & threading model migration
-   - #49 → #50
+## Frontend MVP hierarchy
 
-5. **#35** Epic: Documentation consolidation & accuracy
-   - #51 → #52 → #53 → #54
+- **#106** Epic: Frontend Auth
+  - #117, #118
+- **#107** Epic: Frontend Dashboard
+  - #119 → #128
+- **#108** Epic: Frontend Profiles
+  - #129 → #131
+- **#109** Epic: Frontend Resources
+  - #132 → #138
+- **#110** Epic: Frontend Collections
+  - #139 → #142
+- **#111** Epic: Frontend Home Feed and Explore
+  - #143 → #145
+- **#112** Epic: Frontend Notifications
+  - #146, #147
+- **#113** Epic: Frontend Search
+  - #148, #149
+- **#114** Epic: Frontend Permissions UI
+  - #150 → #152
+- **#115** Epic: Frontend Shared
+  - #153, #154
+- **#116** Epic: Frontend Stubs
+  - #155
 
-6. **#37** Epic: Erato API foundation
-   - #59 → #60 → #61 → #62 → #63 → #64 → #65 → #66 → #67
+## Deferred / Post-MVP
 
----
-
-## Task list (detailed)
-
-- [ ] **Adopt `runListQuery` in medium/high-complexity Erato list routes** — Deferred to pre-v1 staging (no GitHub issue). These routes have extra logic (owner-scope joins, workspace membership checks, multi-table joins) that may benefit from the helper but need careful review:
-  - Medium: `users/list.ts`, `workspaces/list.ts`, `collections/list.ts`, `teams/members/list.ts`, `collections/filters/list.ts`
-  - High: `resources/list.ts`
-
-- [ ] **Explore multi-facet resources model** — Explore only (no GitHub issue). Keep one `resources.type` for now, but revisit a future design where one resource can expose multiple facets/types (e.g. post + song + status) without duplicating core identity fields.
-
-- [ ] **Worker perf backlog (erato/sona/web)** (#58) — Track non-Node optimizations for Cloudflare Worker apps: reduce cold-path initialization, trim bundle/module graph, add D1 index/query review pass, and define caching strategy per hot route. Explicitly exclude Node pointer-compression work for Worker runtimes.
-
-- [ ] **Replace custom apiKeys in KV with WorkOS FGA** (#69) — WorkOS now offers Fine-Grained Authorization (FGA) for hierarchical, resource-scoped access control. Replace our current custom API key approach stored in KV with WorkOS's Authorization API. Enables automatic permission inheritance down resource hierarchy (org → workspace → project → app), real-time checks (<50ms p95), and IdP role mapping. Can adopt incrementally—no data migration required. See [WorkOS FGA docs](https://workos.com/docs/fga).
-
-- [>] **Defer changesets entirely; revisit package versioning post-MVP** (#56) — Changesets and package versioning are deferred until after MVP. Do not adopt or rely on `@changesets/cli` until we revisit; use manual version/publish or CI-on-tag if needed before then.
-
-- [>] **Move `drizzle-query-factory` docs to `mia-cx/docs`** (#54) — The detailed package documentation currently lives in `apps/docs/content/packages/drizzle-query-factory/`. Since `@mia-cx/drizzle-query-factory` is a standalone `@mia-cx` package, these docs should be migrated to the `mia-cx/docs` Quartz instance once that repo is set up.
-
-- [>] **Extract git shell helpers into publishable package** (#57) — Move the custom git aliases/functions from `~/.zshrc` (e.g. `gs`, `gpl`, `gsma`, `gcl`, `gsmrm`) into a dedicated `@mia-cx/` scoped repo/package so it can be versioned and reused across machines/projects.
+- #67 Messaging API (deferred)
+- #69 WorkOS FGA feature access (keep custom API keys for B2B lending)
+- #44 Read/unread analytics contract
+- #54 Move drizzle-query-factory docs to mia-cx/docs
+- #56 Revisit changesets/package versioning post-MVP
+- #57 Extract git shell helpers package

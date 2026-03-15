@@ -1,0 +1,320 @@
+name: Sprint Status Flow
+
+on:
+  schedule:
+    # Daily morning check; logic gates by weekday in configured timezone.
+    - cron: "0 8 * * *"
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: "Run mode: auto | sprint_start | sprint_end"
+        required: false
+        default: "auto"
+
+concurrency:
+  group: sprint-status-flow
+  cancel-in-progress: false
+
+jobs:
+  sync-sprint-status:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      issues: read
+      repository-projects: write
+    env:
+      PROJECT_ID: PVT_kwDODJIP084A5ALP
+      PROJECT_TIMEZONE: Europe/Amsterdam
+      FIELD_STATUS: Status
+      FIELD_SPRINT: Sprint
+      STATUS_NEW: "🆕 New"
+      STATUS_READY: "🔖 Ready"
+      STATUS_BACKLOG: "📋 Backlog"
+      STATUS_IN_PROGRESS: "🏗️ In Progress"
+      STATUS_IN_REVIEW: "👀 In Review"
+      STATUS_DONE: "✅ Done"
+    steps:
+      - name: Apply sprint status flow
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ github.token }}
+          script: |
+            const projectId = process.env.PROJECT_ID;
+            const tz = process.env.PROJECT_TIMEZONE;
+            const modeInput = (core.getInput("mode") || "auto").trim();
+
+            const fieldNames = {
+              status: process.env.FIELD_STATUS,
+              sprint: process.env.FIELD_SPRINT,
+            };
+            const statusNames = {
+              new: process.env.STATUS_NEW,
+              ready: process.env.STATUS_READY,
+              backlog: process.env.STATUS_BACKLOG,
+              inProgress: process.env.STATUS_IN_PROGRESS,
+              inReview: process.env.STATUS_IN_REVIEW,
+              done: process.env.STATUS_DONE,
+            };
+
+            const toYmd = (date, timezone) =>
+              new Intl.DateTimeFormat("en-CA", {
+                timeZone: timezone,
+                year: "numeric",
+                month: "2-digit",
+                day: "2-digit",
+              }).format(date);
+
+            const weekday = (date, timezone) =>
+              new Intl.DateTimeFormat("en-US", {
+                timeZone: timezone,
+                weekday: "short",
+              }).format(date);
+
+            const ymdToday = toYmd(new Date(), tz);
+            const dayShort = weekday(new Date(), tz);
+
+            let mode = "none";
+            if (modeInput === "sprint_start" || modeInput === "sprint_end") {
+              mode = modeInput;
+            } else if (modeInput === "auto") {
+              if (dayShort === "Fri") mode = "sprint_start";
+              if (dayShort === "Thu") mode = "sprint_end";
+            }
+
+            if (mode === "none") {
+              core.info(`No-op: weekday=${dayShort}, mode=${modeInput}, timezone=${tz}`);
+              return;
+            }
+
+            core.info(`Running mode=${mode}, date=${ymdToday}, timezone=${tz}`);
+
+            const projectQuery = `
+              query($projectId: ID!, $cursor: String) {
+                node(id: $projectId) {
+                  ... on ProjectV2 {
+                    id
+                    title
+                    fields(first: 50) {
+                      nodes {
+                        __typename
+                        ... on ProjectV2SingleSelectField {
+                          id
+                          name
+                          options { id name }
+                        }
+                        ... on ProjectV2IterationField {
+                          id
+                          name
+                          configuration {
+                            iterations {
+                              id
+                              title
+                              startDate
+                              duration
+                            }
+                          }
+                        }
+                      }
+                    }
+                    items(first: 100, after: $cursor) {
+                      pageInfo { hasNextPage endCursor }
+                      nodes {
+                        id
+                        content {
+                          __typename
+                          ... on Issue { id number title state url }
+                        }
+                        fieldValues(first: 30) {
+                          nodes {
+                            __typename
+                            ... on ProjectV2ItemFieldSingleSelectValue {
+                              field { ... on ProjectV2SingleSelectField { id name } }
+                              name
+                              optionId
+                            }
+                            ... on ProjectV2ItemFieldIterationValue {
+                              field { ... on ProjectV2IterationField { id name } }
+                              title
+                              iterationId
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            `;
+
+            let pageCursor = null;
+            let allItems = [];
+            let fields = null;
+
+            while (true) {
+              const result = await github.graphql(projectQuery, { projectId, cursor: pageCursor });
+              const project = result.node;
+              if (!project) throw new Error(`Project not found: ${projectId}`);
+              fields = fields || project.fields.nodes;
+              const page = project.items;
+              allItems.push(...page.nodes);
+              if (!page.pageInfo.hasNextPage) break;
+              pageCursor = page.pageInfo.endCursor;
+            }
+
+            const statusField = fields.find(
+              (f) => f.__typename === "ProjectV2SingleSelectField" && f.name === fieldNames.status,
+            );
+            const sprintField = fields.find(
+              (f) => f.__typename === "ProjectV2IterationField" && f.name === fieldNames.sprint,
+            );
+            if (!statusField) throw new Error(`Missing field: ${fieldNames.status}`);
+            if (!sprintField) throw new Error(`Missing field: ${fieldNames.sprint}`);
+
+            const statusOptionByName = new Map(statusField.options.map((o) => [o.name, o.id]));
+            const statusId = {
+              new: statusOptionByName.get(statusNames.new),
+              ready: statusOptionByName.get(statusNames.ready),
+              backlog: statusOptionByName.get(statusNames.backlog),
+              inProgress: statusOptionByName.get(statusNames.inProgress),
+              inReview: statusOptionByName.get(statusNames.inReview),
+              done: statusOptionByName.get(statusNames.done),
+            };
+            for (const [k, v] of Object.entries(statusId)) {
+              if (!v) throw new Error(`Missing status option '${k}' in field '${fieldNames.status}'`);
+            }
+
+            const iterations = sprintField.configuration?.iterations || [];
+            if (iterations.length === 0) {
+              core.warning("No sprint iterations configured; nothing to do.");
+              return;
+            }
+
+            const parseYmd = (s) => new Date(`${s}T00:00:00.000Z`);
+            const addDays = (d, n) => {
+              const x = new Date(d);
+              x.setUTCDate(x.getUTCDate() + n);
+              return x;
+            };
+            const inRange = (d, start, end) => d >= start && d <= end;
+
+            const todayUtc = parseYmd(ymdToday);
+            const iterationWithBounds = iterations
+              .map((it) => {
+                const start = parseYmd(it.startDate);
+                const end = addDays(start, it.duration - 1);
+                return { ...it, start, end };
+              })
+              .sort((a, b) => a.start - b.start);
+
+            const current = iterationWithBounds.find((it) => inRange(todayUtc, it.start, it.end));
+            if (!current) {
+              core.warning(`No active sprint for ${ymdToday}; nothing to do.`);
+              return;
+            }
+            const next = iterationWithBounds.find((it) => it.start > current.start) || null;
+
+            const readItemState = (item) => {
+              const values = item.fieldValues?.nodes || [];
+              let statusName = null;
+              let sprintIterationId = null;
+              for (const v of values) {
+                if (
+                  v.__typename === "ProjectV2ItemFieldSingleSelectValue" &&
+                  v.field?.name === fieldNames.status
+                ) {
+                  statusName = v.name;
+                }
+                if (
+                  v.__typename === "ProjectV2ItemFieldIterationValue" &&
+                  v.field?.name === fieldNames.sprint
+                ) {
+                  sprintIterationId = v.iterationId;
+                }
+              }
+              return { statusName, sprintIterationId };
+            };
+
+            const updateFieldMutation = `
+              mutation($projectId: ID!, $itemId: ID!, $fieldId: ID!, $value: ProjectV2FieldValue!) {
+                updateProjectV2ItemFieldValue(
+                  input: {
+                    projectId: $projectId
+                    itemId: $itemId
+                    fieldId: $fieldId
+                    value: $value
+                  }
+                ) {
+                  projectV2Item { id }
+                }
+              }
+            `;
+
+            let touched = 0;
+            let changedToReady = 0;
+            let movedCarryover = 0;
+            let changedToBacklog = 0;
+
+            for (const item of allItems) {
+              if (item.content?.__typename !== "Issue") continue;
+              const { statusName, sprintIterationId } = readItemState(item);
+              if (sprintIterationId !== current.id) continue;
+
+              if (mode === "sprint_start") {
+                if (statusName === statusNames.new) {
+                  await github.graphql(updateFieldMutation, {
+                    projectId,
+                    itemId: item.id,
+                    fieldId: statusField.id,
+                    value: { singleSelectOptionId: statusId.ready },
+                  });
+                  changedToReady += 1;
+                  touched += 1;
+                }
+              }
+
+              if (mode === "sprint_end" && next) {
+                if (statusName === statusNames.done || statusName === statusNames.inReview) {
+                  continue;
+                }
+
+                await github.graphql(updateFieldMutation, {
+                  projectId,
+                  itemId: item.id,
+                  fieldId: sprintField.id,
+                  value: { iterationId: next.id },
+                });
+                movedCarryover += 1;
+                touched += 1;
+
+                const notActivelyWorked =
+                  statusName === statusNames.new ||
+                  statusName === statusNames.ready ||
+                  statusName === statusNames.backlog;
+                if (notActivelyWorked) {
+                  await github.graphql(updateFieldMutation, {
+                    projectId,
+                    itemId: item.id,
+                    fieldId: statusField.id,
+                    value: { singleSelectOptionId: statusId.backlog },
+                  });
+                  changedToBacklog += 1;
+                  touched += 1;
+                }
+              }
+            }
+
+            core.info(
+              JSON.stringify(
+                {
+                  mode,
+                  currentSprint: current.title,
+                  nextSprint: next?.title ?? null,
+                  touched,
+                  changedToReady,
+                  movedCarryover,
+                  changedToBacklog,
+                },
+                null,
+                2,
+              ),
+            );

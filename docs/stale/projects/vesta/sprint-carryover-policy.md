@@ -20,7 +20,7 @@
 
 ### Status (source of truth for execution state)
 
-- `🆕 New`: Created, not triaged.
+- `🆕 New`: Just created; not yet triaged.
 - `🔖 Ready`: Triaged, scoped, and ready to start.
 - `🏗️ In Progress`: Actively being implemented.
 - `👀 In Review`: Implementation complete; awaiting review/verification.
@@ -29,13 +29,13 @@
 
 ### Priority (source of truth for urgency)
 
-- `🧱 Epic`: Root parent coordination items.
-- `‼️ Urgent`: MVP-critical blockers.
-- `⚡️ High`: Important MVP work for current/next sprint.
+- `🧱 Epic`: Top-level parent issue coordinating a workstream.
+- `‼️ Urgent`: Critical blockers; execute immediately.
+- `⚡️ High`: Highly important; schedule in the current/next sprint.
 - `⭐️ Medium`: Important but can follow high-priority blockers.
-- `🍃 Low`: Nice-to-have work.
-- `🧊 Frozen`: Intentionally paused / out of MVP scope.
-- `❔ Needs assessment`: Not yet scoped.
+- `🍃 Low`: Nice-to-have; do after core flows are stable.
+- `🧊 Frozen`: Intentionally paused or out of scope for current roadmap.
+- `❔ Needs assessment`: Needs scoping/clarification before prioritization.
 
 ## Carryover Definition
 

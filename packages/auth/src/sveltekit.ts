@@ -37,15 +37,7 @@ export interface CompleteSvelteKitLoginInput {
 	url?: URL;
 }
 
-const sessionCookieOptions = (maxAge: number, secure?: boolean) => ({
-	path: "/",
-	httpOnly: true,
-	sameSite: "lax" as const,
-	maxAge,
-	...(secure ? { secure: true } : {}),
-});
-
-const oauthStateCookieOptions = (maxAge: number, secure?: boolean) => ({
+const cookieOptions = (maxAge: number, secure?: boolean) => ({
 	path: "/",
 	httpOnly: true,
 	sameSite: "lax" as const,
@@ -65,11 +57,7 @@ export const commitSealedSession = (
 	maxAge = DEFAULT_SESSION_MAX_AGE,
 	secure?: boolean,
 ): void => {
-	cookies.set(
-		cookieName,
-		sealedSession,
-		sessionCookieOptions(maxAge, secure),
-	);
+	cookies.set(cookieName, sealedSession, cookieOptions(maxAge, secure));
 };
 
 export const clearSealedSession = (
@@ -93,7 +81,7 @@ export const commitOAuthState = (
 	maxAge = DEFAULT_OAUTH_STATE_MAX_AGE,
 	secure?: boolean,
 ): void => {
-	cookies.set(cookieName, state, oauthStateCookieOptions(maxAge, secure));
+	cookies.set(cookieName, state, cookieOptions(maxAge, secure));
 };
 
 export const clearOAuthState = (

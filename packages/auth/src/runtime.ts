@@ -196,7 +196,7 @@ const makeRetryEffect = <T>(
 		Effect.catch((error: AuthError) => {
 			if (
 				!isRetryableAuthError(error) ||
-				attempt >= config.retryAttempts
+				attempt > config.retryAttempts
 			) {
 				return Effect.fail(error);
 			}
@@ -639,7 +639,7 @@ export const createAuthRuntimeFromEnv = (
 					env.PRIVATE_WORKOS_ORG_ID,
 			}
 		:	{}),
-		...(options?.retryAttempts ?
+		...(options?.retryAttempts !== undefined ?
 			{ retryAttempts: options.retryAttempts }
 		:	{}),
 		...(options?.retryBaseDelayMs ?

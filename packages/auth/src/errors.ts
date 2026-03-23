@@ -83,3 +83,10 @@ export const normalizeAuthError = (
 export const isRetryableAuthError = (
 	error: unknown,
 ): error is RetryableAuthError => error instanceof RetryableAuthError;
+
+export const isExpectedAuthenticationFailure = (
+	error: unknown,
+): error is AuthError =>
+	error instanceof AuthError &&
+	error.operation === "authenticateWithCode" &&
+	(error.status === 400 || error.status === 401 || error.status === 403);

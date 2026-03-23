@@ -2,6 +2,7 @@
 
 import { describe, expect, it } from "vitest";
 import {
+	isExpectedAuthenticationFailure,
 	RetryableAuthError,
 	TerminalAuthError,
 	normalizeAuthError,
@@ -25,5 +26,19 @@ describe("normalizeAuthError", () => {
 		});
 
 		expect(normalized).toBeInstanceOf(RetryableAuthError);
+	});
+
+	it("recognizes expected authentication failures", () => {
+		expect(
+			isExpectedAuthenticationFailure(
+				new TerminalAuthError(
+					"invalid code",
+					"authenticateWithCode",
+					{
+						status: 401,
+					},
+				),
+			),
+		).toBe(true);
 	});
 });

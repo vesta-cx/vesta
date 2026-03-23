@@ -3,6 +3,7 @@
 import { describe, expect, it, vi } from "vitest";
 import {
 	createAuthRuntime,
+	createAuthRuntimeFromEnv,
 	type AuthTransport,
 	type AuthTransportSession,
 	type AuthSessionWithoutMemberships,
@@ -159,6 +160,75 @@ describe("createAuthRuntime", () => {
 				code: "bad_code",
 			}),
 		).rejects.toBeInstanceOf(TerminalAuthError);
+		expect(authenticateWithCode).toHaveBeenCalledTimes(1);
+	});
+
+	it("treats retryAttempts as the number of retries", async () => {
+		let attempts = 0;
+		const authenticateWithCode = vi.fn(async () => {
+			attempts += 1;
+			if (attempts <= 2) {
+				throw new RetryableAuthError(
+					"temporary failure",
+					"authenticateWithCode",
+				);
+			}
+
+			return {
+				sealedSession: "sealed_session",
+				session: baseSession(),
+			};
+		});
+
+		const runtime = createAuthRuntime({
+			clientId: "client_123",
+			apiKey: "sk_test",
+			cookiePassword:
+				"test-password-that-is-at-least-32-chars-long!!",
+			transport: createTransport({
+				authenticateWithCode,
+			}),
+			retryAttempts: 1,
+			retryBaseDelayMs: 1,
+		});
+
+		await expect(
+			runtime.authenticateWithCode({
+				code: "retry_once",
+			}),
+		).rejects.toBeInstanceOf(RetryableAuthError);
+		expect(authenticateWithCode).toHaveBeenCalledTimes(2);
+	});
+
+	it("preserves retryAttempts=0 from env options", async () => {
+		const authenticateWithCode = vi.fn(async () => {
+			throw new RetryableAuthError(
+				"temporary failure",
+				"authenticateWithCode",
+			);
+		});
+
+		const runtime = createAuthRuntimeFromEnv(
+			{
+				PRIVATE_WORKOS_CLIENT_ID: "client_123",
+				PRIVATE_WORKOS_API_KEY: "sk_test",
+				PRIVATE_WORKOS_COOKIE_PASSWORD:
+					"test-password-that-is-at-least-32-chars-long!!",
+			},
+			{
+				retryAttempts: 0,
+				retryBaseDelayMs: 1,
+				transport: createTransport({
+					authenticateWithCode,
+				}),
+			},
+		);
+
+		await expect(
+			runtime.authenticateWithCode({
+				code: "no_retry",
+			}),
+		).rejects.toBeInstanceOf(RetryableAuthError);
 		expect(authenticateWithCode).toHaveBeenCalledTimes(1);
 	});
 

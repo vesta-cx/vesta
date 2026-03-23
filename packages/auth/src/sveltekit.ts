@@ -8,7 +8,13 @@ import {
 	DEFAULT_OAUTH_STATE_MAX_AGE,
 	DEFAULT_SESSION_MAX_AGE,
 } from "./constants.js";
-import type { AuthProvisioningAdapter, AuthSession } from "./types.js";
+import { TerminalAuthError } from "./errors.js";
+import type {
+	AuthProvisioningAdapter,
+	AuthSession,
+	AuthSessionFailureReason,
+	AuthSessionResult,
+} from "./types.js";
 import type { AuthRuntime } from "./runtime.js";
 
 export interface SvelteKitAuthHandleConfig {
@@ -37,7 +43,17 @@ export interface CompleteSvelteKitLoginInput {
 	url?: URL;
 }
 
-const sessionCookieOptions = (maxAge: number, secure?: boolean) => ({
+export interface AuthenticateSvelteKitSessionInput {
+	runtime: AuthRuntime;
+	cookies: Cookies;
+	cookieName?: string;
+	clearInvalidCookie?: boolean;
+	preferredOrganizationId?: string;
+	resolveMemberships?: boolean;
+	provisioningAdapter?: AuthProvisioningAdapter;
+}
+
+const cookieOptions = (maxAge: number, secure?: boolean) => ({
 	path: "/",
 	httpOnly: true,
 	sameSite: "lax" as const,
@@ -45,13 +61,21 @@ const sessionCookieOptions = (maxAge: number, secure?: boolean) => ({
 	...(secure ? { secure: true } : {}),
 });
 
-const oauthStateCookieOptions = (maxAge: number, secure?: boolean) => ({
-	path: "/",
-	httpOnly: true,
-	sameSite: "lax" as const,
-	maxAge,
-	...(secure ? { secure: true } : {}),
+const unauthenticatedSession = (
+	reason: AuthSessionFailureReason,
+): AuthSessionResult => ({
+	authenticated: false,
+	refreshed: false,
+	reason,
+	sealedSession: null,
+	session: null,
 });
+
+const isRecoverableLoadSessionError = (
+	error: unknown,
+): error is TerminalAuthError =>
+	error instanceof TerminalAuthError &&
+	error.operation === "loadSealedSession";
 
 export const readSessionCookie = (
 	cookies: Cookies,
@@ -65,11 +89,7 @@ export const commitSealedSession = (
 	maxAge = DEFAULT_SESSION_MAX_AGE,
 	secure?: boolean,
 ): void => {
-	cookies.set(
-		cookieName,
-		sealedSession,
-		sessionCookieOptions(maxAge, secure),
-	);
+	cookies.set(cookieName, sealedSession, cookieOptions(maxAge, secure));
 };
 
 export const clearSealedSession = (
@@ -93,7 +113,7 @@ export const commitOAuthState = (
 	maxAge = DEFAULT_OAUTH_STATE_MAX_AGE,
 	secure?: boolean,
 ): void => {
-	cookies.set(cookieName, state, oauthStateCookieOptions(maxAge, secure));
+	cookies.set(cookieName, state, cookieOptions(maxAge, secure));
 };
 
 export const clearOAuthState = (
@@ -134,6 +154,43 @@ export const completeSvelteKitLogin = async (
 	return exchange.session;
 };
 
+export const authenticateSvelteKitSession = async (
+	input: AuthenticateSvelteKitSessionInput,
+): Promise<AuthSessionResult> => {
+	const cookieName = input.cookieName ?? DEFAULT_AUTH_COOKIE_NAME;
+
+	try {
+		return await input.runtime.authenticateSealedSession({
+			sealedSession: readSessionCookie(
+				input.cookies,
+				cookieName,
+			),
+			resolveMemberships: input.resolveMemberships ?? false,
+			...(input.preferredOrganizationId ?
+				{
+					preferredOrganizationId:
+						input.preferredOrganizationId,
+				}
+			:	{}),
+			...(input.provisioningAdapter ?
+				{
+					provisioningAdapter:
+						input.provisioningAdapter,
+				}
+			:	{}),
+		});
+	} catch (error) {
+		if (isRecoverableLoadSessionError(error)) {
+			if (input.clearInvalidCookie !== false) {
+				clearSealedSession(input.cookies, cookieName);
+			}
+			return unauthenticatedSession("invalid_session");
+		}
+
+		throw error;
+	}
+};
+
 export const getRequestMetadata = (
 	request: Request,
 ): {
@@ -160,8 +217,11 @@ export const createAuthHandle = (config: SvelteKitAuthHandleConfig): Handle => {
 		const existing = readSessionCookie(event.cookies, cookieName);
 		let session: AuthSession | null = null;
 
-		const result = await config.runtime.authenticateSealedSession({
-			sealedSession: existing,
+		const result = await authenticateSvelteKitSession({
+			runtime: config.runtime,
+			cookies: event.cookies,
+			cookieName,
+			clearInvalidCookie: false,
 			resolveMemberships: config.resolveMemberships ?? false,
 			...(config.preferredOrganizationId ?
 				{

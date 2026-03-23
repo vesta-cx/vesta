@@ -1,7 +1,7 @@
 /** @format */
 
 import { redirect } from '@sveltejs/kit';
-import { commitOAuthState, createOAuthState, readSessionCookie } from '@vesta-cx/auth';
+import { authenticateSvelteKitSession, commitOAuthState, createOAuthState } from '@vesta-cx/auth';
 import { createWebAuthRuntime } from '$lib/server/auth';
 import type { PageServerLoad } from './$types';
 
@@ -11,9 +11,7 @@ export const load: PageServerLoad = async ({ cookies, platform, url }) => {
 	}
 
 	const runtime = createWebAuthRuntime(platform);
-	const existingSession = await runtime.authenticateSealedSession({
-		sealedSession: readSessionCookie(cookies)
-	});
+	const existingSession = await authenticateSvelteKitSession({ runtime, cookies });
 
 	if (existingSession.authenticated) {
 		redirect(302, '/');

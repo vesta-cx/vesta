@@ -1,5 +1,5 @@
 import { redirect } from '@sveltejs/kit';
-import { commitOAuthState, createOAuthState, readSessionCookie } from '@vesta-cx/auth';
+import { authenticateSvelteKitSession, commitOAuthState, createOAuthState } from '@vesta-cx/auth';
 import { createSonaAuthRuntime } from '$lib/server/auth';
 import type { PageServerLoad } from './$types';
 
@@ -7,9 +7,7 @@ export const load: PageServerLoad = async ({ cookies, platform, url }) => {
 	if (!platform) return { error: 'Platform not available' };
 
 	const runtime = createSonaAuthRuntime(platform);
-	const existingSession = await runtime.authenticateSealedSession({
-		sealedSession: readSessionCookie(cookies)
-	});
+	const existingSession = await authenticateSvelteKitSession({ runtime, cookies });
 	if (existingSession.authenticated) redirect(302, '/admin');
 
 	const state = createOAuthState();

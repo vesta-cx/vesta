@@ -3,6 +3,7 @@
 import type { Cookies } from "@sveltejs/kit";
 import { describe, expect, it, vi } from "vitest";
 import {
+	authenticateSvelteKitSession,
 	commitOAuthState,
 	commitSealedSession,
 	createAuthHandle,
@@ -10,6 +11,7 @@ import {
 	getRequestMetadata,
 	readOAuthState,
 } from "../src/sveltekit.js";
+import { TerminalAuthError } from "../src/errors.js";
 
 const createMockCookies = (initial: Record<string, string> = {}) => {
 	const values = new Map(Object.entries(initial));
@@ -153,6 +155,38 @@ describe("oauth state cookies", () => {
 });
 
 describe("createAuthHandle", () => {
+	it("treats corrupted sealed sessions as unauthenticated and clears the cookie", async () => {
+		const { cookies, deletions } = createMockCookies({
+			session: "sealed_existing",
+		});
+
+		const result = await authenticateSvelteKitSession({
+			cookies,
+			runtime: {
+				authenticateSealedSession: async () => {
+					throw new TerminalAuthError(
+						"failed to decrypt session",
+						"loadSealedSession",
+					);
+				},
+			} as never,
+		});
+
+		expect(result).toEqual({
+			authenticated: false,
+			refreshed: false,
+			reason: "invalid_session",
+			sealedSession: null,
+			session: null,
+		});
+		expect(deletions).toEqual([
+			{
+				name: "session",
+				options: { path: "/" },
+			},
+		]);
+	});
+
 	it("rethrows unexpected session errors without clearing the cookie", async () => {
 		const { cookies, deletions } = createMockCookies({
 			session: "sealed_existing",

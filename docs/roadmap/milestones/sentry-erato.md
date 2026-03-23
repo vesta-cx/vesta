@@ -8,7 +8,7 @@ url: https://docs.sentry.io/platforms/javascript/guides/cloudflare/frameworks/ho
 
 # Hono on Cloudflare | Sentry for Cloudflare
 
-> The DSN for Erato is "https://065c9002a41d814ecde22df9fc96b090@o4511052391186432.ingest.de.sentry.io/4511052396888144". Figure out whether this can be hardcoded or should be put in an ENV in cloudflare.
+> Configure the Erato Sentry DSN via a Cloudflare environment variable such as `<ERATO_SENTRY_DSN>`. Set it with `wrangler secret put ERATO_SENTRY_DSN` or in the Cloudflare dashboard, then read it from `env` at runtime instead of committing the real DSN to source control.
 
 ##### Community Middleware Deprecation
 
@@ -129,7 +129,7 @@ If you're currently using the `@hono/sentry` middleware, migrate to the official
 
 ```javascript
 // New approach using official Sentry SDK
-import { Hono } from 'hono';
+import { Env, Hono } from 'hono';
 import * as Sentry from '@sentry/cloudflare';
 
 const app = new Hono();

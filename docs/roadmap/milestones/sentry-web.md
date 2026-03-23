@@ -8,7 +8,7 @@ url: https://docs.sentry.io/platforms/javascript/guides/cloudflare/frameworks/sv
 
 # SvelteKit on Cloudflare | Sentry for Cloudflare
 
-> The DSN for Web is "https://828cc2e3841ed14340517bd46881cd09@o4511052391186432.ingest.de.sentry.io/4511052435947600". Figure out whether this can be hardcoded or should be put in an ENV in cloudflare.
+> Configure the web app Sentry DSN via a deployment environment variable such as `SENTRY_DSN` in Cloudflare, using `wrangler secret put SENTRY_DSN` locally or the Cloudflare dashboard in hosted environments. Keep the checked-in examples on placeholders, not real DSN values.
 
 ## [Prerequisites](https://docs.sentry.io/platforms/javascript/guides/cloudflare/frameworks/sveltekit.md#prerequisites)
 
@@ -308,11 +308,7 @@ To verify that Sentry captures errors and creates issues in your Sentry project,
 
 <button
   type="button"
-  onclick="
-    {
-      throwTestError;
-    }
-  ">
+  on:click="{throwTestError}">
   Throw error
 </button>
 ```
@@ -361,11 +357,7 @@ Next, update your test button to call this route and throw an error if the respo
 
 <button
   type="button"
-  onclick="
-    {
-      throwTestError;
-    }
-  ">
+  on:click="{throwTestError}">
   Throw error with trace
 </button>
 ```

@@ -198,4 +198,21 @@ describe("resolveShortLink", () => {
 			expect(result.reason).toBe("invalid_record");
 		}
 	});
+
+	it("returns a normalized slug for invalid slug input", async () => {
+		const kv = createMockKV();
+
+		const result = await resolveShortLink({
+			slug: "  Bad/Slug  ",
+			kv,
+			requestUrl: "https://vst.cx/bad/slug",
+			canonicalOrigin: "https://vesta.cx",
+		});
+
+		expect(result).toEqual({
+			type: "not_found",
+			slug: "bad/slug",
+			reason: "invalid_slug",
+		});
+	});
 });

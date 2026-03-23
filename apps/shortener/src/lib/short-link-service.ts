@@ -150,7 +150,7 @@ export const resolveShortLink = async ({
 	if (!normalizedSlug) {
 		return {
 			type: "not_found",
-			slug,
+			slug: rawSlug,
 			reason: "invalid_slug",
 		};
 	}

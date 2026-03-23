@@ -27,6 +27,7 @@
   },
   "dependencies": {
     "@mia-cx/drizzle-query-factory": "workspace:^",
+    "@vesta-cx/auth": "workspace:^",
     "@vesta-cx/db": "workspace:^",
     "drizzle-orm": "^0.45.1",
     "hono": "^4.12.3",

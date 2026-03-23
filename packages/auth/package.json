@@ -1,38 +1,30 @@
 {
-  "name": "@vesta-cx/utils",
-  "version": "1.0.0",
-  "description": "Shared utilities for Vesta: colors, easing, numbers, permissions, cookies, and CORS. ESM + CJS.",
+  "name": "@vesta-cx/auth",
+  "version": "0.0.1",
+  "description": "Shared WorkOS auth runtime for Vesta apps with Effect-powered retries, SvelteKit helpers, and provisioning adapters.",
   "keywords": [
     "vesta",
-    "utils",
-    "cors",
-    "cookies"
+    "auth",
+    "workos",
+    "effect",
+    "sveltekit",
+    "cloudflare"
   ],
-  "homepage": "https://github.com/vesta-cx/utils#readme",
+  "homepage": "https://github.com/vesta-cx/auth#readme",
   "bugs": {
-    "url": "https://github.com/vesta-cx/utils/issues"
+    "url": "https://github.com/vesta-cx/auth/issues"
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/vesta-cx/utils.git"
+    "url": "https://github.com/vesta-cx/auth.git"
   },
   "license": "ISC",
   "author": "vesta-cx",
+  "type": "module",
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
-      "require": "./dist/index.js",
       "import": "./dist/index.js"
-    },
-    "./cookies": {
-      "types": "./dist/cookies/index.d.ts",
-      "require": "./dist/cookies/index.js",
-      "import": "./dist/cookies/index.js"
-    },
-    "./cors": {
-      "types": "./dist/cors/index.d.ts",
-      "require": "./dist/cors/index.js",
-      "import": "./dist/cors/index.js"
     }
   },
   "main": "dist/index.js",
@@ -53,8 +45,10 @@
     "test:watch": "vitest"
   },
   "dependencies": {
-    "@nanostores/persistent": "^1.3.3",
-    "nanostores": "^1.1.0"
+    "@vesta-cx/db": "workspace:^",
+    "@workos-inc/node": "^8.9.0",
+    "drizzle-orm": "^0.45.1",
+    "effect": "^4.0.0-beta.37"
   },
   "devDependencies": {
     "@sveltejs/kit": "^2.53.0",
@@ -62,7 +56,6 @@
     "@vesta-cx/config": "workspace:*",
     "@vitest/coverage-v8": "^4.0.18",
     "eslint": "^10.0.1",
-    "happy-dom": "^20.7.0",
     "prettier": "^3.8.1",
     "typescript": "^5.9.3",
     "vitest": "^4.0.18"
@@ -75,5 +68,5 @@
       "optional": true
     }
   },
-  "packageManager": "pnpm@10.20.0"
+  "packageManager": "pnpm@10.32.1"
 }

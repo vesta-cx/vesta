@@ -87,6 +87,27 @@ describe("buildRedirectLocation", () => {
 		);
 		expect(result.success).toBe(false);
 	});
+
+	it("rejects invalid canonical origins without throwing", () => {
+		expect(() =>
+			buildRedirectLocation(
+				validRecord,
+				"https://vst.cx/daybreak",
+				"vesta.cx",
+			),
+		).not.toThrow();
+
+		const result = buildRedirectLocation(
+			validRecord,
+			"https://vst.cx/daybreak",
+			"vesta.cx",
+		);
+
+		expect(result).toEqual({
+			success: false,
+			error: "Invalid URL",
+		});
+	});
 });
 
 describe("resolveShortLink", () => {

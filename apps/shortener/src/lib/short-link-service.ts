@@ -89,7 +89,18 @@ export const buildRedirectLocation = (
 	requestUrl: string | URL,
 	canonicalOrigin: string,
 ): { success: true; location: string } | { success: false; error: string } => {
-	const canonical = new URL(canonicalOrigin);
+	let canonical: URL;
+	try {
+		canonical = new URL(canonicalOrigin);
+	} catch (error) {
+		return {
+			success: false,
+			error:
+				error instanceof Error ?
+					error.message
+				:	"Canonical origin URL is invalid",
+		};
+	}
 	const request = new URL(requestUrl);
 
 	let destination: URL;

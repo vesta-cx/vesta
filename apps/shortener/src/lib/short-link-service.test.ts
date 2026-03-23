@@ -41,6 +41,21 @@ describe("normalizeSlug", () => {
 		expect(normalizeSlug("bad/slug")).toBeNull();
 		expect(normalizeSlug("bad slug")).toBeNull();
 	});
+
+	it("rejects empty slugs", () => {
+		expect(normalizeSlug("")).toBeNull();
+		expect(normalizeSlug("   ")).toBeNull();
+	});
+
+	it("rejects slugs longer than the 63 character limit", () => {
+		expect(normalizeSlug("a".repeat(63))).toBe("a".repeat(63));
+		expect(normalizeSlug("a".repeat(64))).toBeNull();
+	});
+
+	it("rejects unicode slugs", () => {
+		expect(normalizeSlug("mañana")).toBeNull();
+		expect(normalizeSlug("slug🚀")).toBeNull();
+	});
 });
 
 describe("parseShortLinkRecord", () => {

@@ -80,6 +80,7 @@ describe("shortener app", () => {
 		);
 
 		expect(response.status).toBe(404);
+		expect(await response.text()).toBe("Short URL not found");
 	});
 
 	it("returns 404 for reserved slug probes", async () => {
@@ -97,5 +98,6 @@ describe("shortener app", () => {
 		);
 
 		expect(response.status).toBe(404);
+		expect(await response.text()).toBe("Short URL not found");
 	});
 });

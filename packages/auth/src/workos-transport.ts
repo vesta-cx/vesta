@@ -113,6 +113,9 @@ const readRoleSlug = (record: Record<string, unknown>): string | null => {
 	return readString(role, "slug");
 };
 
+const isAuthMembershipStatus = (value: string): value is AuthMembershipStatus =>
+	value === "active" || value === "inactive" || value === "pending";
+
 const bindMethod = <TArgs extends unknown[], TReturn>(
 	target: Record<string, unknown>,
 	key: string,
@@ -219,11 +222,11 @@ const toAuthOrganizationMembership = (
 			"organizationName",
 			"organization_name",
 		]),
-		status:
-			(readString(
-				record,
-				"status",
-			) as AuthMembershipStatus | null) ?? "active",
+		status: (() => {
+			const status = readString(record, "status");
+			return status && isAuthMembershipStatus(status) ? status
+				:	"active";
+		})(),
 		directoryManaged:
 			readFirstBoolean(record, [
 				"directoryManaged",

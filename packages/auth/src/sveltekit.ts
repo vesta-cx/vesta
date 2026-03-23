@@ -160,46 +160,38 @@ export const createAuthHandle = (config: SvelteKitAuthHandleConfig): Handle => {
 		const existing = readSessionCookie(event.cookies, cookieName);
 		let session: AuthSession | null = null;
 
-		try {
-			const result =
-				await config.runtime.authenticateSealedSession({
-					sealedSession: existing,
-					resolveMemberships:
-						config.resolveMemberships ??
-						false,
-					...(config.preferredOrganizationId ?
-						{
-							preferredOrganizationId:
-								config.preferredOrganizationId,
-						}
-					:	{}),
-					...(config.provisioningAdapter ?
-						{
-							provisioningAdapter:
-								config.provisioningAdapter,
-						}
-					:	{}),
-				});
-
-			if (result.authenticated) {
-				session = result.session;
-
-				if (result.refreshed && result.sealedSession) {
-					const secure =
-						event.url.protocol === "https:";
-					commitSealedSession(
-						event.cookies,
-						result.sealedSession,
-						cookieName,
-						sessionMaxAge,
-						secure,
-					);
+		const result = await config.runtime.authenticateSealedSession({
+			sealedSession: existing,
+			resolveMemberships: config.resolveMemberships ?? false,
+			...(config.preferredOrganizationId ?
+				{
+					preferredOrganizationId:
+						config.preferredOrganizationId,
 				}
-			} else if (existing) {
-				clearSealedSession(event.cookies, cookieName);
+			:	{}),
+			...(config.provisioningAdapter ?
+				{
+					provisioningAdapter:
+						config.provisioningAdapter,
+				}
+			:	{}),
+		});
+
+		if (result.authenticated) {
+			session = result.session;
+
+			if (result.refreshed && result.sealedSession) {
+				const secure = event.url.protocol === "https:";
+				commitSealedSession(
+					event.cookies,
+					result.sealedSession,
+					cookieName,
+					sessionMaxAge,
+					secure,
+				);
 			}
-		} catch (error) {
-			throw error;
+		} else if (existing) {
+			clearSealedSession(event.cookies, cookieName);
 		}
 
 		(

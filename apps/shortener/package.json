@@ -7,7 +7,7 @@
     "build": "pnpm run check-types",
     "cf-typegen": "wrangler types --env-interface CloudflareBindings",
     "check-types": "tsc --noEmit",
-    "clean": "clean clean",
+    "clean": "cleanc clean",
     "deploy": "wrangler deploy --env prod",
     "dev": "wrangler dev --env dev",
     "format": "prettier --write .",

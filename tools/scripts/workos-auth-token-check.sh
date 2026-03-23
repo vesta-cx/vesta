@@ -3,6 +3,8 @@ set -euo pipefail
 
 WORKOS_BASE_URL="https://api.workos.com/user_management/authenticate"
 DEFAULT_ORG_NAME="${WORKOS_DEFAULT_ORG_NAME:-vesta}"
+CURL_CONNECT_TIMEOUT_SECONDS=10
+CURL_MAX_TIME_SECONDS=30
 
 read -rp "WorkOS client ID: " WORKOS_CLIENT_ID
 read -rsp "WorkOS staging API key: " WORKOS_API_KEY
@@ -15,10 +17,43 @@ WORKOS_ORG_NAME="${WORKOS_ORG_NAME:-$DEFAULT_ORG_NAME}"
 
 authenticate() {
   local payload="$1"
+  local response_file http_status
 
-  curl -sS "$WORKOS_BASE_URL" \
-    -H "Content-Type: application/json" \
-    -d "$payload"
+  response_file="$(mktemp)"
+
+  http_status="$(
+    curl -sS \
+      --connect-timeout "$CURL_CONNECT_TIMEOUT_SECONDS" \
+      --max-time "$CURL_MAX_TIME_SECONDS" \
+      --output "$response_file" \
+      --write-out "%{http_code}" \
+      "$WORKOS_BASE_URL" \
+      -H "Content-Type: application/json" \
+      -d "$payload"
+  )" || {
+    local curl_exit_code=$?
+    rm -f "$response_file"
+    echo "Authentication request failed before a response was received." >&2
+    return "$curl_exit_code"
+  }
+
+  if [[ ! "$http_status" =~ ^2[0-9][0-9]$ ]]; then
+    echo "Authentication request failed with HTTP ${http_status}." >&2
+    if jq -e . <"$response_file" >/dev/null 2>&1; then
+      jq 'del(.access_token, .refresh_token, .pending_authentication_token)' <"$response_file" >&2
+    else
+      echo "(response body omitted because it was not valid JSON)" >&2
+    fi
+    rm -f "$response_file"
+    return 1
+  fi
+
+  cat "$response_file"
+  rm -f "$response_file"
+}
+
+print_redacted_auth_json() {
+  jq 'del(.access_token, .refresh_token, .pending_authentication_token)'
 }
 
 AUTH_JSON="$(
@@ -40,8 +75,8 @@ AUTH_JSON="$(
 )"
 
 echo
-echo "=== Raw initial auth response ==="
-echo "$AUTH_JSON" | jq .
+echo "=== Initial auth response (redacted) ==="
+echo "$AUTH_JSON" | print_redacted_auth_json
 
 AUTH_CODE="$(echo "$AUTH_JSON" | jq -r '.code // empty')"
 
@@ -86,8 +121,8 @@ if [ "$AUTH_CODE" = "organization_selection_required" ]; then
   )"
 
   echo
-  echo "=== Raw organization-selection auth response ==="
-  echo "$AUTH_JSON" | jq .
+  echo "=== Organization-selection auth response (redacted) ==="
+  echo "$AUTH_JSON" | print_redacted_auth_json
 fi
 
 ACCESS_TOKEN="$(echo "$AUTH_JSON" | jq -r '.access_token')"
@@ -97,24 +132,6 @@ if [ "$ACCESS_TOKEN" = "null" ] || [ -z "$ACCESS_TOKEN" ]; then
   echo "No access_token returned."
   exit 1
 fi
-
-echo
-echo "=== Decoded access token payload (NOT signature-verified) ==="
-ACCESS_TOKEN="$ACCESS_TOKEN" python3 - <<'PY'
-import base64
-import json
-import os
-
-token = os.environ["ACCESS_TOKEN"]
-parts = token.split(".")
-if len(parts) != 3:
-    raise SystemExit("access_token is not a JWT")
-
-payload = parts[1]
-payload += "=" * (-len(payload) % 4)
-decoded = base64.urlsafe_b64decode(payload.encode("utf-8"))
-print(json.dumps(json.loads(decoded), indent=2))
-PY
 
 echo
 echo "=== Claims of interest ==="

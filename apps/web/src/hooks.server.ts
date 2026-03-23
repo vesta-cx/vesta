@@ -1,6 +1,6 @@
 import type { Handle } from '@sveltejs/kit';
 import { createAuthHandle } from '@vesta-cx/auth';
-import { createWebAuthRuntime, createWebProvisioningAdapter } from '$lib/server/auth';
+import { createWebAuthRuntime } from '$lib/server/auth';
 import { paraglideMiddleware } from '$lib/paraglide/server';
 
 const handleParaglide: Handle = ({ event, resolve }) =>
@@ -20,13 +20,12 @@ export const handle: Handle = async ({ event, resolve }) => {
 
 	const handleAuth = createAuthHandle({
 		runtime: createWebAuthRuntime(event.platform),
-		protectedPaths: [],
-		provisioningAdapter: createWebProvisioningAdapter(event.platform)
+		protectedPaths: []
 	});
 
 	return handleAuth({
 		event,
-		resolve: (eventWithAuth, options) =>
+		resolve: (eventWithAuth) =>
 			handleParaglide({
 				event: eventWithAuth,
 				resolve: (finalEvent, finalOptions) => resolve(finalEvent, finalOptions)

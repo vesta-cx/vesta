@@ -9,6 +9,7 @@ export interface AuthUser {
 	lastName: string | null;
 	emailVerified: boolean;
 	profilePictureUrl: string | null;
+	organizationId: string | null;
 	createdAt: string;
 	updatedAt: string;
 }

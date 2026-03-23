@@ -39,6 +39,7 @@ export const load: PageServerLoad = async ({ url, cookies, platform, request }) 
 			runtime,
 			cookies,
 			code,
+			url,
 			provisioningAdapter: createWebProvisioningAdapter(platform),
 			...(ipAddress ? { ipAddress } : {}),
 			...(userAgent ? { userAgent } : {})

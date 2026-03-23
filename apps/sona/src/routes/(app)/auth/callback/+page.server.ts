@@ -37,6 +37,7 @@ export const load: PageServerLoad = async ({ url, cookies, platform, request }) 
 			runtime,
 			cookies,
 			code,
+			url,
 			...(ipAddress ? { ipAddress } : {}),
 			...(userAgent ? { userAgent } : {})
 		});

@@ -48,6 +48,8 @@ Create or update a slug in dev:
 pnpm --filter shortener exec wrangler kv key put --binding SHORT_LINKS "daybreak" '{"destinationUrl":"https://vesta.cx/daybreak/new-release","targetType":"release","targetId":"rel_123","workspaceSlug":"daybreak","updatedAt":"2026-03-23T00:00:00.000Z"}' --env dev --remote
 ```
 
+Reserved probe slugs like `health`, `favicon.ico`, `robots.txt`, and `sitemap.xml` are hard-404s. Do not seed KV entries for them; choose an alternate slug instead.
+
 Read a slug in dev:
 
 ```bash

@@ -9,14 +9,18 @@ const handleLogout: RequestHandler = async ({ cookies, platform, url }) => {
 	const runtime = platform ? createWebAuthRuntime(platform) : null;
 	let workosLogoutUrl: string | null = null;
 
-	if (runtime) {
-		workosLogoutUrl = await runtime.getLogoutUrl({
-			sealedSession: readSessionCookie(cookies),
-			returnTo: url.origin
-		});
+	try {
+		if (runtime) {
+			workosLogoutUrl = await runtime.getLogoutUrl({
+				sealedSession: readSessionCookie(cookies),
+				returnTo: url.origin
+			});
+		}
+	} catch {
+		workosLogoutUrl = null;
+	} finally {
+		clearSealedSession(cookies);
 	}
-
-	clearSealedSession(cookies);
 	redirect(302, workosLogoutUrl ?? '/');
 };
 

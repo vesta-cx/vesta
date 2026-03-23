@@ -127,18 +127,11 @@ export const workos = {
 			id: string,
 		): Promise<WorkOSUser> => {
 			const transport = getTransport(apiKey);
-			const [user, memberships] = await Promise.all([
-				transport.getUser({ userId: id }),
-				transport.listOrganizationMemberships({
-					userId: id,
-					statuses: ["active"],
-				}),
-			]);
+			const user = await transport.getUser({ userId: id });
 
 			return toWorkOSUser({
 				user,
-				organizationId:
-					memberships[0]?.organizationId ?? null,
+				organizationId: null,
 			});
 		},
 	},

@@ -1,5 +1,5 @@
 import { redirect } from '@sveltejs/kit';
-import { readSessionCookie } from '@vesta-cx/auth';
+import { commitOAuthState, createOAuthState, readSessionCookie } from '@vesta-cx/auth';
 import { createSonaAuthRuntime } from '$lib/server/auth';
 import type { PageServerLoad } from './$types';
 
@@ -12,8 +12,12 @@ export const load: PageServerLoad = async ({ cookies, platform, url }) => {
 	});
 	if (existingSession.authenticated) redirect(302, '/admin');
 
+	const state = createOAuthState();
+	commitOAuthState(cookies, state);
+
 	const authUrl = runtime.getAuthorizationUrl({
-		redirectUri: `${url.origin}/auth/callback`
+		redirectUri: `${url.origin}/auth/callback`,
+		state
 	});
 
 	redirect(302, authUrl);

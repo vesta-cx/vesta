@@ -1,7 +1,7 @@
 /** @format */
 
 import { redirect } from '@sveltejs/kit';
-import { readSessionCookie } from '@vesta-cx/auth';
+import { commitOAuthState, createOAuthState, readSessionCookie } from '@vesta-cx/auth';
 import { createWebAuthRuntime } from '$lib/server/auth';
 import type { PageServerLoad } from './$types';
 
@@ -19,8 +19,12 @@ export const load: PageServerLoad = async ({ cookies, platform, url }) => {
 		redirect(302, '/');
 	}
 
+	const state = createOAuthState();
+	commitOAuthState(cookies, state);
+
 	const authUrl = runtime.getAuthorizationUrl({
-		redirectUri: `${url.origin}/auth/callback`
+		redirectUri: `${url.origin}/auth/callback`,
+		state
 	});
 
 	redirect(302, authUrl);

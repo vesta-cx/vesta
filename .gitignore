@@ -39,5 +39,6 @@ yarn-error.log*
 
 # AI-generated agent reports (local reference only)
 agent-reports/
+.references/
 
 apps/old-stuff/

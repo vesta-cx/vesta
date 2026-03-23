@@ -7,10 +7,18 @@ export const load: PageServerLoad = async ({ cookies, platform, url }) => {
 	if (!platform) return { error: 'Platform not available' };
 
 	const runtime = createSonaAuthRuntime(platform);
-	const existingSession = await runtime.authenticateSealedSession({
-		sealedSession: readSessionCookie(cookies)
-	});
-	if (existingSession.authenticated) redirect(302, '/admin');
+	let authenticated = false;
+
+	try {
+		const existingSession = await runtime.authenticateSealedSession({
+			sealedSession: readSessionCookie(cookies)
+		});
+		authenticated = existingSession.authenticated;
+	} catch {
+		authenticated = false;
+	}
+
+	if (authenticated) redirect(302, '/admin');
 
 	const state = createOAuthState();
 	commitOAuthState(cookies, state, undefined, undefined, url.protocol === 'https:');

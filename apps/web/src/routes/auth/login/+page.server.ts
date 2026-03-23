@@ -11,11 +11,18 @@ export const load: PageServerLoad = async ({ cookies, platform, url }) => {
 	}
 
 	const runtime = createWebAuthRuntime(platform);
-	const existingSession = await runtime.authenticateSealedSession({
-		sealedSession: readSessionCookie(cookies)
-	});
+	let authenticated = false;
 
-	if (existingSession.authenticated) {
+	try {
+		const existingSession = await runtime.authenticateSealedSession({
+			sealedSession: readSessionCookie(cookies)
+		});
+		authenticated = existingSession.authenticated;
+	} catch {
+		authenticated = false;
+	}
+
+	if (authenticated) {
 		redirect(302, '/');
 	}
 

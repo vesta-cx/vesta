@@ -2,7 +2,7 @@
 
 import { z } from "zod";
 
-export const DEFAULT_RESERVED_SLUGS = new Set([
+export const DEFAULT_RESERVED_SLUGS: ReadonlySet<string> = new Set([
 	"health",
 	"favicon.ico",
 	"robots.txt",
@@ -45,7 +45,7 @@ type ResolveShortLinkArgs = {
 	kv: KVNamespace;
 	requestUrl: string | URL;
 	canonicalOrigin: string;
-	reservedSlugs?: Set<string>;
+	reservedSlugs?: ReadonlySet<string>;
 };
 
 const normalizeRawSlug = (slug: string) => slug.trim().toLowerCase();
@@ -156,11 +156,20 @@ export const resolveShortLink = async ({
 	}
 
 	const rawValue = await kv.get(normalizedSlug);
-	if (!rawValue) {
+	if (rawValue === null) {
 		return {
 			type: "not_found",
 			slug: normalizedSlug,
 			reason: "missing",
+		};
+	}
+
+	if (rawValue === "") {
+		return {
+			type: "not_found",
+			slug: normalizedSlug,
+			reason: "invalid_record",
+			details: "KV value is empty",
 		};
 	}
 

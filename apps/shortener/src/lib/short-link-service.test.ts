@@ -199,6 +199,26 @@ describe("resolveShortLink", () => {
 		}
 	});
 
+	it("treats empty KV values as invalid records", async () => {
+		const kv = createMockKV({
+			daybreak: "",
+		});
+
+		const result = await resolveShortLink({
+			slug: "daybreak",
+			kv,
+			requestUrl: "https://vst.cx/daybreak",
+			canonicalOrigin: "https://vesta.cx",
+		});
+
+		expect(result).toEqual({
+			type: "not_found",
+			slug: "daybreak",
+			reason: "invalid_record",
+			details: "KV value is empty",
+		});
+	});
+
 	it("returns a normalized slug for invalid slug input", async () => {
 		const kv = createMockKV();
 

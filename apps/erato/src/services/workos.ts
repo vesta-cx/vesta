@@ -29,7 +29,18 @@ type WorkOSListResponse<T> = {
 	};
 };
 
-const getTransport = (apiKey: string) => createWorkOSTransport({ apiKey });
+const transportCache = new Map<
+	string,
+	ReturnType<typeof createWorkOSTransport>
+>();
+const getTransport = (apiKey: string) => {
+	let transport = transportCache.get(apiKey);
+	if (!transport) {
+		transport = createWorkOSTransport({ apiKey });
+		transportCache.set(apiKey, transport);
+	}
+	return transport;
+};
 
 const toWorkOSOrganization = (
 	organization: Awaited<
@@ -131,7 +142,7 @@ export const workos = {
 
 			return toWorkOSUser({
 				user,
-				organizationId: null,
+				organizationId: user.organizationId ?? null,
 			});
 		},
 	},

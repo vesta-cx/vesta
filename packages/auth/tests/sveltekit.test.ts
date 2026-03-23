@@ -82,7 +82,7 @@ describe("getRequestMetadata", () => {
 });
 
 describe("oauth state cookies", () => {
-	it("stores and clears the auth state without forcing secure cookies", () => {
+	it("stores and clears the auth state; secure flag only when requested", () => {
 		const { cookies, sets, deletions } = createMockCookies();
 
 		commitOAuthState(cookies, "state_123");
@@ -104,7 +104,24 @@ describe("oauth state cookies", () => {
 		});
 	});
 
-	it("commits the sealed session without forcing secure cookies", () => {
+	it("sets secure flag when secure: true", () => {
+		const { cookies, sets } = createMockCookies();
+		commitOAuthState(
+			cookies,
+			"state_123",
+			undefined,
+			undefined,
+			true,
+		);
+		expect(sets[0]?.options).toMatchObject({
+			httpOnly: true,
+			sameSite: "lax",
+			path: "/",
+			secure: true,
+		});
+	});
+
+	it("commits the sealed session; secure flag only when requested", () => {
 		const { cookies, sets } = createMockCookies();
 
 		commitSealedSession(cookies, "sealed_123");
@@ -115,6 +132,23 @@ describe("oauth state cookies", () => {
 			path: "/",
 		});
 		expect(sets[0]?.options).not.toHaveProperty("secure");
+	});
+
+	it("sets secure flag on session cookie when secure: true", () => {
+		const { cookies, sets } = createMockCookies();
+		commitSealedSession(
+			cookies,
+			"sealed_123",
+			undefined,
+			undefined,
+			true,
+		);
+		expect(sets[0]?.options).toMatchObject({
+			httpOnly: true,
+			sameSite: "lax",
+			path: "/",
+			secure: true,
+		});
 	});
 });
 

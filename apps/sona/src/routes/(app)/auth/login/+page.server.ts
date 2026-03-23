@@ -13,7 +13,7 @@ export const load: PageServerLoad = async ({ cookies, platform, url }) => {
 	if (existingSession.authenticated) redirect(302, '/admin');
 
 	const state = createOAuthState();
-	commitOAuthState(cookies, state);
+	commitOAuthState(cookies, state, undefined, undefined, url.protocol === 'https:');
 
 	const authUrl = runtime.getAuthorizationUrl({
 		redirectUri: `${url.origin}/auth/callback`,

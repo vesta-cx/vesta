@@ -33,20 +33,24 @@ export interface CompleteSvelteKitLoginInput {
 	provisioningAdapter?: AuthProvisioningAdapter;
 	ipAddress?: string;
 	userAgent?: string;
+	/** Request URL; used to set secure flag when protocol is https. */
+	url?: URL;
 }
 
-const sessionCookieOptions = (maxAge: number) => ({
+const sessionCookieOptions = (maxAge: number, secure?: boolean) => ({
 	path: "/",
 	httpOnly: true,
 	sameSite: "lax" as const,
 	maxAge,
+	...(secure ? { secure: true } : {}),
 });
 
-const oauthStateCookieOptions = (maxAge: number) => ({
+const oauthStateCookieOptions = (maxAge: number, secure?: boolean) => ({
 	path: "/",
 	httpOnly: true,
 	sameSite: "lax" as const,
 	maxAge,
+	...(secure ? { secure: true } : {}),
 });
 
 export const readSessionCookie = (
@@ -59,8 +63,13 @@ export const commitSealedSession = (
 	sealedSession: string,
 	cookieName = DEFAULT_AUTH_COOKIE_NAME,
 	maxAge = DEFAULT_SESSION_MAX_AGE,
+	secure?: boolean,
 ): void => {
-	cookies.set(cookieName, sealedSession, sessionCookieOptions(maxAge));
+	cookies.set(
+		cookieName,
+		sealedSession,
+		sessionCookieOptions(maxAge, secure),
+	);
 };
 
 export const clearSealedSession = (
@@ -82,8 +91,9 @@ export const commitOAuthState = (
 	state: string,
 	cookieName = DEFAULT_OAUTH_STATE_COOKIE_NAME,
 	maxAge = DEFAULT_OAUTH_STATE_MAX_AGE,
+	secure?: boolean,
 ): void => {
-	cookies.set(cookieName, state, oauthStateCookieOptions(maxAge));
+	cookies.set(cookieName, state, oauthStateCookieOptions(maxAge, secure));
 };
 
 export const clearOAuthState = (
@@ -112,11 +122,13 @@ export const completeSvelteKitLogin = async (
 		:	{}),
 	});
 
+	const secure = input.url?.protocol === "https:";
 	commitSealedSession(
 		input.cookies,
 		exchange.sealedSession,
 		input.cookieName,
 		input.sessionMaxAge,
+		secure,
 	);
 
 	return exchange.session;
@@ -173,11 +185,14 @@ export const createAuthHandle = (config: SvelteKitAuthHandleConfig): Handle => {
 				session = result.session;
 
 				if (result.refreshed && result.sealedSession) {
+					const secure =
+						event.url.protocol === "https:";
 					commitSealedSession(
 						event.cookies,
 						result.sealedSession,
 						cookieName,
 						sessionMaxAge,
+						secure,
 					);
 				}
 			} else if (existing) {

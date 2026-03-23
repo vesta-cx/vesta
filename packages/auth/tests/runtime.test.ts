@@ -53,6 +53,7 @@ const createTransport = (
 		lastName: "Example",
 		emailVerified: true,
 		profilePictureUrl: null,
+		organizationId: "org_primary",
 		createdAt: "2026-03-23T00:00:00.000Z",
 		updatedAt: "2026-03-23T00:00:00.000Z",
 	}),

@@ -166,6 +166,10 @@ const toAuthUser = (value: unknown): AuthUser => {
 			"profilePictureUrl",
 			"profile_picture_url",
 		]),
+		organizationId: readFirstString(record, [
+			"organizationId",
+			"organization_id",
+		]),
 		createdAt: requireFirstString("toAuthUser", record, [
 			"createdAt",
 			"created_at",

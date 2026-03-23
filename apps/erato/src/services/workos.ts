@@ -1,6 +1,6 @@
 /** @format */
 
-const WORKOS_BASE_URL = "https://api.workos.com";
+import { createWorkOSTransport } from "@vesta-cx/auth";
 
 export type WorkOSOrganization = {
 	id: string;
@@ -15,7 +15,7 @@ export type WorkOSUser = {
 	email: string;
 	first_name: string | null;
 	last_name: string | null;
-	organization_id: string;
+	organization_id: string | null;
 	created_at: string;
 	updated_at: string;
 	object: "user";
@@ -29,18 +29,33 @@ type WorkOSListResponse<T> = {
 	};
 };
 
-const headers = (apiKey: string) => ({
-	"Authorization": `Bearer ${apiKey}`,
-	"Content-Type": "application/json",
+const getTransport = (apiKey: string) => createWorkOSTransport({ apiKey });
+
+const toWorkOSOrganization = (
+	organization: Awaited<
+		ReturnType<ReturnType<typeof getTransport>["getOrganization"]>
+	>,
+): WorkOSOrganization => ({
+	id: organization.id,
+	name: organization.name,
+	created_at: organization.createdAt,
+	updated_at: organization.updatedAt,
+	object: "organization",
 });
 
-const handleResponse = async <T>(res: Response): Promise<T> => {
-	if (!res.ok) {
-		const body = await res.text().catch(() => "");
-		throw new Error(`WorkOS API error ${res.status}: ${body}`);
-	}
-	return res.json() as Promise<T>;
-};
+const toWorkOSUser = (input: {
+	user: Awaited<ReturnType<ReturnType<typeof getTransport>["getUser"]>>;
+	organizationId: string | null;
+}): WorkOSUser => ({
+	id: input.user.id,
+	email: input.user.email,
+	first_name: input.user.firstName,
+	last_name: input.user.lastName,
+	organization_id: input.organizationId,
+	created_at: input.user.createdAt,
+	updated_at: input.user.updatedAt,
+	object: "user",
+});
 
 export const workos = {
 	organizations: {
@@ -48,13 +63,10 @@ export const workos = {
 			apiKey: string,
 			id: string,
 		): Promise<WorkOSOrganization> =>
-			handleResponse(
-				await fetch(
-					`${WORKOS_BASE_URL}/organizations/${id}`,
-					{
-						headers: headers(apiKey),
-					},
-				),
+			toWorkOSOrganization(
+				await getTransport(apiKey).getOrganization({
+					organizationId: id,
+				}),
 			),
 
 		list: async (
@@ -65,35 +77,27 @@ export const workos = {
 				after?: string;
 			},
 		): Promise<WorkOSListResponse<WorkOSOrganization>> => {
-			const url = new URL(`${WORKOS_BASE_URL}/organizations`);
-			if (params?.limit)
-				url.searchParams.set(
-					"limit",
-					String(params.limit),
+			const result =
+				await getTransport(apiKey).listOrganizations(
+					params,
 				);
-			if (params?.before)
-				url.searchParams.set("before", params.before);
-			if (params?.after)
-				url.searchParams.set("after", params.after);
-			return handleResponse(
-				await fetch(url.toString(), {
-					headers: headers(apiKey),
-				}),
-			);
+
+			return {
+				data: result.data.map(toWorkOSOrganization),
+				list_metadata: {
+					before: result.before,
+					after: result.after,
+				},
+			};
 		},
 
 		create: async (
 			apiKey: string,
 			data: { name: string },
 		): Promise<WorkOSOrganization> =>
-			handleResponse(
-				await fetch(
-					`${WORKOS_BASE_URL}/organizations`,
-					{
-						method: "POST",
-						headers: headers(apiKey),
-						body: JSON.stringify(data),
-					},
+			toWorkOSOrganization(
+				await getTransport(apiKey).createOrganization(
+					data,
 				),
 			),
 
@@ -102,40 +106,40 @@ export const workos = {
 			id: string,
 			data: { name?: string },
 		): Promise<WorkOSOrganization> =>
-			handleResponse(
-				await fetch(
-					`${WORKOS_BASE_URL}/organizations/${id}`,
-					{
-						method: "PUT",
-						headers: headers(apiKey),
-						body: JSON.stringify(data),
-					},
-				),
+			toWorkOSOrganization(
+				await getTransport(apiKey).updateOrganization({
+					organizationId: id,
+					...(data.name ?
+						{ name: data.name }
+					:	{}),
+				}),
 			),
 
-		delete: async (apiKey: string, id: string): Promise<void> => {
-			const res = await fetch(
-				`${WORKOS_BASE_URL}/organizations/${id}`,
-				{
-					method: "DELETE",
-					headers: headers(apiKey),
-				},
-			);
-			if (!res.ok) {
-				const body = await res.text().catch(() => "");
-				throw new Error(
-					`WorkOS API error ${res.status}: ${body}`,
-				);
-			}
-		},
+		delete: async (apiKey: string, id: string): Promise<void> =>
+			getTransport(apiKey).deleteOrganization({
+				organizationId: id,
+			}),
 	},
 
 	users: {
-		get: async (apiKey: string, id: string): Promise<WorkOSUser> =>
-			handleResponse(
-				await fetch(`${WORKOS_BASE_URL}/users/${id}`, {
-					headers: headers(apiKey),
+		get: async (
+			apiKey: string,
+			id: string,
+		): Promise<WorkOSUser> => {
+			const transport = getTransport(apiKey);
+			const [user, memberships] = await Promise.all([
+				transport.getUser({ userId: id }),
+				transport.listOrganizationMemberships({
+					userId: id,
+					statuses: ["active"],
 				}),
-			),
+			]);
+
+			return toWorkOSUser({
+				user,
+				organizationId:
+					memberships[0]?.organizationId ?? null,
+			});
+		},
 	},
 };

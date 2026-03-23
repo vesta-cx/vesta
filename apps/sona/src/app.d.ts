@@ -27,7 +27,7 @@ declare global {
 		}
 		// interface Error {}
 		interface Locals {
-			session: import('@vesta-cx/utils/auth').AuthSession | null;
+			session: import('@vesta-cx/auth').AuthSession | null;
 		}
 		// interface PageData {}
 		// interface PageState {}

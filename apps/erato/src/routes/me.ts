@@ -20,7 +20,7 @@ const mergeUserResponse = (
 	email: workosUser.email,
 	firstName: workosUser.first_name,
 	lastName: workosUser.last_name,
-	organizationId: workosUser.organization_id,
+	organizationId: extension?.organizationId ?? workosUser.organization_id,
 	displayName: extension?.displayName ?? null,
 	avatarUrl: extension?.avatarUrl ?? null,
 	bio: extension?.bio ?? null,

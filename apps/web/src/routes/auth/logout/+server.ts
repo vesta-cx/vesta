@@ -1,10 +1,12 @@
+/** @format */
+
 import { redirect } from '@sveltejs/kit';
 import { clearSealedSession, readSessionCookie } from '@vesta-cx/auth';
-import { createSonaAuthRuntime } from '$lib/server/auth';
+import { createWebAuthRuntime } from '$lib/server/auth';
 import type { RequestHandler } from './$types';
 
 const handleLogout: RequestHandler = async ({ cookies, platform, url }) => {
-	const runtime = platform ? createSonaAuthRuntime(platform) : null;
+	const runtime = platform ? createWebAuthRuntime(platform) : null;
 	let workosLogoutUrl: string | null = null;
 
 	if (runtime) {
@@ -15,7 +17,6 @@ const handleLogout: RequestHandler = async ({ cookies, platform, url }) => {
 	}
 
 	clearSealedSession(cookies);
-
 	redirect(302, workosLogoutUrl ?? '/');
 };
 

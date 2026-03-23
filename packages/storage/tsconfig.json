@@ -1,5 +1,5 @@
 {
-    "extends": "config/typescript/node20",
+    "extends": "@vesta-cx/config/typescript/node20",
     "compilerOptions": {
         "rootDir": "src",
         "outDir": "dist",

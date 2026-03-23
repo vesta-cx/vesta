@@ -96,10 +96,17 @@ export const getRequestMetadata = (
 ): {
 	ipAddress: string | undefined;
 	userAgent: string | undefined;
-} => ({
-	ipAddress: undefined,
-	userAgent: request.headers.get("user-agent") ?? undefined,
-});
+} => {
+	const ipAddress =
+		request.headers.get("cf-connecting-ip") ??
+		request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ??
+		undefined;
+
+	return {
+		ipAddress,
+		userAgent: request.headers.get("user-agent") ?? undefined,
+	};
+};
 
 export const createAuthHandle = (config: SvelteKitAuthHandleConfig): Handle => {
 	const loginPath = config.loginPath ?? DEFAULT_LOGIN_PATH;

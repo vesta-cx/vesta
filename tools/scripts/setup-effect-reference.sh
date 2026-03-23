@@ -17,8 +17,11 @@ else
   git --git-dir="$BARE_REPO_DIR" fetch origin --prune
 fi
 
-if [ ! -e "$WORKTREE_DIR/.git" ] && [ ! -f "$WORKTREE_DIR/.git" ]; then
-  git --git-dir="$BARE_REPO_DIR" worktree add -B "$LOCAL_BRANCH" "$WORKTREE_DIR" "$UPSTREAM_REF"
+if [ -e "$WORKTREE_DIR" ]; then
+  git --git-dir="$BARE_REPO_DIR" worktree remove --force "$WORKTREE_DIR" 2>/dev/null || rm -rf "$WORKTREE_DIR"
 fi
+
+git --git-dir="$BARE_REPO_DIR" worktree prune
+git --git-dir="$BARE_REPO_DIR" worktree add -B "$LOCAL_BRANCH" "$WORKTREE_DIR" "$UPSTREAM_REF"
 
 git -C "$WORKTREE_DIR" rev-parse HEAD

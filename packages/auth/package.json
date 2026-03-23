@@ -10,13 +10,13 @@
     "sveltekit",
     "cloudflare"
   ],
-  "homepage": "https://github.com/vesta-cx/auth#readme",
+  "homepage": "https://github.com/vesta-cx/vesta/tree/main/packages/auth#readme",
   "bugs": {
-    "url": "https://github.com/vesta-cx/auth/issues"
+    "url": "https://github.com/vesta-cx/vesta/issues"
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/vesta-cx/auth.git"
+    "url": "https://github.com/vesta-cx/vesta.git"
   },
   "license": "ISC",
   "author": "vesta-cx",

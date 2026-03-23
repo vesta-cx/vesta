@@ -1,9 +1,13 @@
 ---
 title: auth/index.ts API
-description: Re-export surface for @vesta-cx/utils/auth
+description: Archived re-export surface for the retired @vesta-cx/utils/auth package
 ---
 
-# `index.ts` API
+<!-- @format -->
+
+## `index.ts` API
+
+> Archived note: `@vesta-cx/utils/auth` has been retired. Current shared auth exports come from `@vesta-cx/auth`.
 
 Source: `packages/utils/src/auth/index.ts`
 
@@ -41,5 +45,5 @@ import {
   getSession,
   clearSession,
   getLogoutUrl,
-} from "@vesta-cx/utils/auth"
+} from "@vesta-cx/utils/auth";
 ```

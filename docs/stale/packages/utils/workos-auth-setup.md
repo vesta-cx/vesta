@@ -1,6 +1,10 @@
+<!-- @format -->
+
 # WorkOS Auth Setup
 
-## Shared Auth Package (`@vesta-cx/utils/auth`)
+> Archived note: `@vesta-cx/utils/auth` has been retired. Use `@vesta-cx/auth` for current shared auth runtime, SvelteKit helpers, and provisioning integration.
+
+## Retired Shared Auth Package (`@vesta-cx/utils/auth`)
 
 - **`createAuthHandle(config)`** — SvelteKit `Handle` factory. Hydrates `event.locals.session` on every request, enforces auth on `protectedPaths`. Compose via `sequence()`.
 - **`createSession`, `getSession`, `clearSession`** — iron-webcrypto sealed cookie management.

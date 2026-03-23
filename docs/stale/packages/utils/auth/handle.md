@@ -1,9 +1,13 @@
 ---
 title: auth/handle.ts
-description: SvelteKit handle factory for session hydration and protected-route enforcement
+description: Archived SvelteKit handle notes for the retired @vesta-cx/utils/auth package
 ---
 
-# `handle.ts`
+<!-- @format -->
+
+## `handle.ts`
+
+> Archived note: `@vesta-cx/utils/auth` has been retired. Use `@vesta-cx/auth` for current SvelteKit auth helpers.
 
 Source: `packages/utils/src/auth/handle.ts`
 
@@ -53,12 +57,12 @@ The helper intentionally returns a raw redirect `Response` (instead of SvelteKit
 Typical usage in `hooks.server.ts`:
 
 ```ts
-import { createAuthHandle } from "@vesta-cx/utils/auth"
+import { createAuthHandle } from "@vesta-cx/utils/auth";
 
 const handleAuth = createAuthHandle({
   protectedPaths: ["/admin"],
   loginPath: "/auth/login",
-})
+});
 ```
 
 Then compose with other handles (`sequence()` or manual composition).

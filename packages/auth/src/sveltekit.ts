@@ -4,6 +4,8 @@ import type { Cookies, Handle } from "@sveltejs/kit";
 import {
 	DEFAULT_AUTH_COOKIE_NAME,
 	DEFAULT_LOGIN_PATH,
+	DEFAULT_OAUTH_STATE_COOKIE_NAME,
+	DEFAULT_OAUTH_STATE_MAX_AGE,
 	DEFAULT_SESSION_MAX_AGE,
 } from "./constants.js";
 import type { AuthProvisioningAdapter, AuthSession } from "./types.js";
@@ -36,7 +38,13 @@ export interface CompleteSvelteKitLoginInput {
 const sessionCookieOptions = (maxAge: number) => ({
 	path: "/",
 	httpOnly: true,
-	secure: true,
+	sameSite: "lax" as const,
+	maxAge,
+});
+
+const oauthStateCookieOptions = (maxAge: number) => ({
+	path: "/",
+	httpOnly: true,
 	sameSite: "lax" as const,
 	maxAge,
 });
@@ -58,6 +66,29 @@ export const commitSealedSession = (
 export const clearSealedSession = (
 	cookies: Cookies,
 	cookieName = DEFAULT_AUTH_COOKIE_NAME,
+): void => {
+	cookies.delete(cookieName, { path: "/" });
+};
+
+export const createOAuthState = (): string => crypto.randomUUID();
+
+export const readOAuthState = (
+	cookies: Cookies,
+	cookieName = DEFAULT_OAUTH_STATE_COOKIE_NAME,
+): string | undefined => cookies.get(cookieName);
+
+export const commitOAuthState = (
+	cookies: Cookies,
+	state: string,
+	cookieName = DEFAULT_OAUTH_STATE_COOKIE_NAME,
+	maxAge = DEFAULT_OAUTH_STATE_MAX_AGE,
+): void => {
+	cookies.set(cookieName, state, oauthStateCookieOptions(maxAge));
+};
+
+export const clearOAuthState = (
+	cookies: Cookies,
+	cookieName = DEFAULT_OAUTH_STATE_COOKIE_NAME,
 ): void => {
 	cookies.delete(cookieName, { path: "/" });
 };
@@ -152,10 +183,8 @@ export const createAuthHandle = (config: SvelteKitAuthHandleConfig): Handle => {
 			} else if (existing) {
 				clearSealedSession(event.cookies, cookieName);
 			}
-		} catch {
-			if (existing) {
-				clearSealedSession(event.cookies, cookieName);
-			}
+		} catch (error) {
+			throw error;
 		}
 
 		(

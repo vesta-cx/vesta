@@ -67,7 +67,7 @@ export const normalizeAuthError = (
 			error.message
 		:	`Auth operation failed: ${String(error)}`;
 
-	if (status === 429 || status === undefined || status >= 500) {
+	if (status === 429 || (typeof status === "number" && status >= 500)) {
 		return new RetryableAuthError(message, operation, {
 			cause: error,
 			status,

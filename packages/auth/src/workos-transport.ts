@@ -31,6 +31,22 @@ const readString = (
 	return typeof value === "string" ? value : null;
 };
 
+const missingFieldError = (mapper: string, field: string): Error =>
+	new Error(`${mapper}: missing required field "${field}"`);
+
+const requireString = (
+	mapper: string,
+	record: Record<string, unknown>,
+	key: string,
+): string => {
+	const value = readString(record, key);
+	if (!value) {
+		throw missingFieldError(mapper, key);
+	}
+
+	return value;
+};
+
 const readBoolean = (
 	record: Record<string, unknown>,
 	key: string,
@@ -49,6 +65,19 @@ const readFirstString = (
 	}
 
 	return null;
+};
+
+const requireFirstString = (
+	mapper: string,
+	record: Record<string, unknown>,
+	keys: string[],
+): string => {
+	const value = readFirstString(record, keys);
+	if (!value) {
+		throw missingFieldError(mapper, keys.join('" or "'));
+	}
+
+	return value;
 };
 
 const readFirstBoolean = (
@@ -124,8 +153,8 @@ const toAuthUser = (value: unknown): AuthUser => {
 	const record = asRecord(value);
 
 	return {
-		id: readString(record, "id") ?? "",
-		email: readString(record, "email") ?? "",
+		id: requireString("toAuthUser", record, "id"),
+		email: requireString("toAuthUser", record, "email"),
 		firstName: readFirstString(record, ["firstName", "first_name"]),
 		lastName: readFirstString(record, ["lastName", "last_name"]),
 		emailVerified:
@@ -137,12 +166,14 @@ const toAuthUser = (value: unknown): AuthUser => {
 			"profilePictureUrl",
 			"profile_picture_url",
 		]),
-		createdAt:
-			readFirstString(record, ["createdAt", "created_at"]) ??
-			"",
-		updatedAt:
-			readFirstString(record, ["updatedAt", "updated_at"]) ??
-			"",
+		createdAt: requireFirstString("toAuthUser", record, [
+			"createdAt",
+			"created_at",
+		]),
+		updatedAt: requireFirstString("toAuthUser", record, [
+			"updatedAt",
+			"updated_at",
+		]),
 	};
 };
 
@@ -150,14 +181,16 @@ const toAuthOrganization = (value: unknown): AuthOrganization => {
 	const record = asRecord(value);
 
 	return {
-		id: readString(record, "id") ?? "",
-		name: readString(record, "name") ?? "",
-		createdAt:
-			readFirstString(record, ["createdAt", "created_at"]) ??
-			"",
-		updatedAt:
-			readFirstString(record, ["updatedAt", "updated_at"]) ??
-			"",
+		id: requireString("toAuthOrganization", record, "id"),
+		name: requireString("toAuthOrganization", record, "name"),
+		createdAt: requireFirstString("toAuthOrganization", record, [
+			"createdAt",
+			"created_at",
+		]),
+		updatedAt: requireFirstString("toAuthOrganization", record, [
+			"updatedAt",
+			"updated_at",
+		]),
 	};
 };
 
@@ -167,13 +200,17 @@ const toAuthOrganizationMembership = (
 	const record = asRecord(value);
 
 	return {
-		id: readString(record, "id") ?? "",
-		userId: readFirstString(record, ["userId", "user_id"]) ?? "",
-		organizationId:
-			readFirstString(record, [
-				"organizationId",
-				"organization_id",
-			]) ?? "",
+		id: requireString("toAuthOrganizationMembership", record, "id"),
+		userId: requireFirstString(
+			"toAuthOrganizationMembership",
+			record,
+			["userId", "user_id"],
+		),
+		organizationId: requireFirstString(
+			"toAuthOrganizationMembership",
+			record,
+			["organizationId", "organization_id"],
+		),
 		organizationName: readFirstString(record, [
 			"organizationName",
 			"organization_name",
@@ -189,12 +226,16 @@ const toAuthOrganizationMembership = (
 				"directory_managed",
 			]) ?? false,
 		roleSlug: readRoleSlug(record),
-		createdAt:
-			readFirstString(record, ["createdAt", "created_at"]) ??
-			"",
-		updatedAt:
-			readFirstString(record, ["updatedAt", "updated_at"]) ??
-			"",
+		createdAt: requireFirstString(
+			"toAuthOrganizationMembership",
+			record,
+			["createdAt", "created_at"],
+		),
+		updatedAt: requireFirstString(
+			"toAuthOrganizationMembership",
+			record,
+			["updatedAt", "updated_at"],
+		),
 	};
 };
 
@@ -203,9 +244,7 @@ const toAuthSession = (value: unknown): AuthSessionWithoutMemberships => {
 	const user = toAuthUser(record.user);
 
 	return {
-		sessionId:
-			readFirstString(record, ["sessionId", "session_id"]) ??
-			null,
+		sessionId: readFirstString(record, ["sessionId", "session_id"]),
 		userId: user.id,
 		email: user.email,
 		firstName: user.firstName,
@@ -247,10 +286,11 @@ const toRefreshResult = (value: unknown): AuthTransportSessionRefreshResult => {
 	if (record.authenticated === true) {
 		return {
 			authenticated: true,
-			sealedSession:
-				readString(record, "sealedSession") ??
-				readString(record, "sealed_session") ??
-				"",
+			sealedSession: requireFirstString(
+				"toRefreshResult",
+				record,
+				["sealedSession", "sealed_session"],
+			),
 			session: toAuthSession(record),
 		};
 	}
@@ -350,13 +390,11 @@ export const createWorkOSTransport = (config: {
 			);
 
 			return {
-				sealedSession:
-					readString(response, "sealedSession") ??
-					readString(
-						response,
-						"sealed_session",
-					) ??
-					"",
+				sealedSession: requireFirstString(
+					"authenticateWithCode",
+					response,
+					["sealedSession", "sealed_session"],
+				),
 				session: toAuthSession(response),
 			};
 		},

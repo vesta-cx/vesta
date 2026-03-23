@@ -162,7 +162,7 @@ export interface AuthTransportSessionAuthentication {
 
 export interface AuthTransportSessionAuthenticationFailure {
 	authenticated: false;
-	reason: AuthSessionFailureReason | string;
+	reason: AuthSessionFailureReason;
 }
 
 export type AuthTransportSessionAuthenticateResult =
@@ -177,7 +177,7 @@ export interface AuthTransportSessionRefresh {
 
 export interface AuthTransportSessionRefreshFailure {
 	authenticated: false;
-	reason: AuthSessionFailureReason | string;
+	reason: AuthSessionFailureReason;
 }
 
 export type AuthTransportSessionRefreshResult =

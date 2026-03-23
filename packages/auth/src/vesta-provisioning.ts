@@ -22,10 +22,7 @@ interface VestaProvisioningDb {
 	};
 	insert(table: typeof organizations): {
 		values(value: typeof organizations.$inferInsert): {
-			onConflictDoUpdate(input: {
-				target: typeof organizations.workosOrgId;
-				set: Partial<typeof organizations.$inferInsert>;
-			}): OrganizationUpsertQuery;
+			onConflictDoNothing(): OrganizationUpsertQuery;
 		};
 	};
 }
@@ -93,10 +90,7 @@ export const createVestaProvisioningAdapter = (input: {
 				.values({
 					workosOrgId: organizationId,
 				})
-				.onConflictDoUpdate({
-					target: organizations.workosOrgId,
-					set: {},
-				});
+				.onConflictDoNothing();
 		}
 
 		await input.db

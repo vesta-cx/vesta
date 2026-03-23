@@ -210,7 +210,8 @@ const makeRetryEffect = <T>(
 
 			return Effect.sleep(
 				Duration.millis(
-					config.retryBaseDelayMs * attempt,
+					config.retryBaseDelayMs *
+						2 ** (attempt - 1),
 				),
 			).pipe(
 				Effect.flatMap(() =>

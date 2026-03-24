@@ -4,14 +4,16 @@ import type { Cookies } from "@sveltejs/kit";
 import { describe, expect, it, vi } from "vitest";
 import {
 	authenticateSvelteKitSession,
+	clearOAuthState,
 	commitOAuthState,
 	commitSealedSession,
 	createAuthHandle,
-	clearOAuthState,
 	getRequestMetadata,
+	isExpectedAuthenticationFailure,
 	readOAuthState,
 } from "../src/sveltekit.js";
 import { TerminalAuthError } from "../src/errors.js";
+import { createVestaProvisioningAdapter } from "../src/vesta-provisioning.js";
 
 const createMockCookies = (initial: Record<string, string> = {}) => {
 	const values = new Map(Object.entries(initial));
@@ -69,7 +71,7 @@ describe("getRequestMetadata", () => {
 		});
 	});
 
-	it("falls back to the first forwarded-for address", () => {
+	it("does not trust forwarded-for by default", () => {
 		const request = new Request("https://example.com", {
 			headers: {
 				"X-Forwarded-For": "203.0.113.11, 198.51.100.7",
@@ -77,9 +79,60 @@ describe("getRequestMetadata", () => {
 		});
 
 		expect(getRequestMetadata(request)).toEqual({
+			ipAddress: undefined,
+			userAgent: undefined,
+		});
+	});
+
+	it("can opt in to the first forwarded-for address", () => {
+		const request = new Request("https://example.com", {
+			headers: {
+				"X-Forwarded-For": "203.0.113.11, 198.51.100.7",
+			},
+		});
+
+		expect(
+			getRequestMetadata(request, {
+				trustForwardedFor: true,
+			}),
+		).toEqual({
 			ipAddress: "203.0.113.11",
 			userAgent: undefined,
 		});
+	});
+});
+
+describe("isExpectedAuthenticationFailure", () => {
+	it("treats real provisioning failures as expected auth failures", async () => {
+		const adapter = createVestaProvisioningAdapter({
+			db: {} as never,
+		});
+
+		let thrown: unknown;
+		try {
+			await adapter.provision({
+				session: {
+					sessionId: "sess_123",
+					userId: "user_123",
+					email: "mia@example.com",
+					firstName: "Mia",
+					lastName: "Example",
+					emailVerified: true,
+					profilePictureUrl: null,
+					organizationId: null,
+					roleSlug: null,
+					permissions: [],
+					entitlements: [],
+					memberships: [],
+				},
+			});
+		} catch (error) {
+			thrown = error;
+		}
+
+		expect(thrown).toBeInstanceOf(TerminalAuthError);
+		expect((thrown as TerminalAuthError).status).toBe(401);
+		expect(isExpectedAuthenticationFailure(thrown)).toBe(true);
 	});
 });
 

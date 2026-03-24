@@ -1,18 +1,13 @@
 import { redirect, error } from '@sveltejs/kit';
 import {
-	AuthError,
 	clearOAuthState,
 	completeSvelteKitLogin,
 	getRequestMetadata,
+	isExpectedAuthenticationFailure,
 	readOAuthState
 } from '@vesta-cx/auth';
 import { createSonaAuthRuntime } from '$lib/server/auth';
 import type { PageServerLoad } from './$types';
-
-const isExpectedAuthenticationFailure = (input: unknown): input is AuthError =>
-	input instanceof AuthError &&
-	input.operation === 'authenticateWithCode' &&
-	(input.status === 400 || input.status === 401 || input.status === 403);
 
 export const load: PageServerLoad = async ({ url, cookies, platform, request }) => {
 	if (!platform) throw error(500, 'Platform not available');

@@ -8,7 +8,7 @@ import {
 	DEFAULT_OAUTH_STATE_MAX_AGE,
 	DEFAULT_SESSION_MAX_AGE,
 } from "./constants.js";
-import { TerminalAuthError } from "./errors.js";
+import { AuthError, TerminalAuthError } from "./errors.js";
 import type {
 	AuthProvisioningAdapter,
 	AuthSession,
@@ -76,6 +76,14 @@ const isRecoverableLoadSessionError = (
 ): error is TerminalAuthError =>
 	error instanceof TerminalAuthError &&
 	error.operation === "loadSealedSession";
+
+export const isExpectedAuthenticationFailure = (
+	input: unknown,
+): input is AuthError =>
+	input instanceof AuthError &&
+	(input.operation === "authenticateWithCode" ||
+		input.operation === "provision") &&
+	(input.status === 400 || input.status === 401 || input.status === 403);
 
 const normalizeProtectedPath = (path: string): string =>
 	path === "/" ? "/" : path.replace(/\/+$/, "");
@@ -209,13 +217,23 @@ export const authenticateSvelteKitSession = async (
 
 export const getRequestMetadata = (
 	request: Request,
+	options?: {
+		trustForwardedFor?: boolean;
+	},
 ): {
 	ipAddress: string | undefined;
 	userAgent: string | undefined;
 } => {
+	const forwardedFor =
+		options?.trustForwardedFor ?
+			request.headers
+				.get("x-forwarded-for")
+				?.split(",")[0]
+				?.trim() || undefined
+		:	undefined;
 	const ipAddress =
 		request.headers.get("cf-connecting-ip") ??
-		request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ??
+		forwardedFor ??
 		undefined;
 
 	return {

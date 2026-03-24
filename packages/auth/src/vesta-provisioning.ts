@@ -67,6 +67,7 @@ const resolveActiveOrganizationId = (
 		throw new TerminalAuthError(
 			"Provisioning requires an active organization context",
 			"provision",
+			{ status: 401 },
 		);
 	}
 

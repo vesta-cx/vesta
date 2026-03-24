@@ -76,8 +76,8 @@
 		<Sidebar.Group>
 			<Sidebar.GroupLabel>{SITE_NAME}</Sidebar.GroupLabel>
 			<Sidebar.Menu>
-				{#each navItems as item}
-					{#snippet linkChild({ props })}
+				{#each navItems as item (item.href)}
+					{#snippet linkChild({ props }: { props?: Record<string, unknown> })}
 						<a href={item.href} {...props}>
 							<item.icon />
 							<span>{item.label}</span>
@@ -100,7 +100,7 @@
 			<Sidebar.MenuItem>
 				<DropdownMenu.Root>
 					<DropdownMenu.Trigger>
-						{#snippet child({ props })}
+						{#snippet child({ props }: { props?: Record<string, unknown> })}
 							<Sidebar.MenuButton
 								size="lg"
 								class="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
@@ -142,14 +142,20 @@
 						</DropdownMenu.Label>
 						<DropdownMenu.Separator />
 						<DropdownMenu.Item>
-							<a
-								href="/auth/logout"
-								data-sveltekit-reload
-								class="flex w-full cursor-pointer items-center gap-2 no-underline"
+							<form
+								method="POST"
+								action="/auth/logout"
+								class="w-full"
 							>
-								<LogOutIcon class="size-4" />
-								Log out
-							</a>
+								<button
+									type="submit"
+									data-sveltekit-reload
+									class="flex w-full cursor-pointer items-center gap-2"
+								>
+									<LogOutIcon class="size-4" />
+									Log out
+								</button>
+							</form>
 						</DropdownMenu.Item>
 						<DropdownMenu.Separator />
 						<DropdownMenu.Item

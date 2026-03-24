@@ -24,5 +24,4 @@ const handleLogout: RequestHandler = async ({ cookies, platform, url }) => {
 	redirect(302, workosLogoutUrl ?? '/');
 };
 
-export const GET = handleLogout;
 export const POST = handleLogout;

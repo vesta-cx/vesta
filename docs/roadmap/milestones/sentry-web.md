@@ -315,7 +315,7 @@ To verify that Sentry captures errors and creates issues in your Sentry project,
 
 Open the page `sentry-example` in a browser and click the button to trigger a frontend error.
 
-##### Important
+#### Important
 
 Errors triggered from within your browser's developer tools (like the browser console) are sandboxed, so they will not trigger Sentry's error monitoring.
 
@@ -394,8 +394,8 @@ Now, head over to your project on [Sentry.io](https://sentry.io) to view the col
 Need help locating the captured errors in your Sentry project?
 
 1. Open the [**Issues**](https://sentry.io/issues) page and select an error from the issues list to view the full details and context of this error. For more details, see this [interactive walkthrough](https://docs.sentry.io/product/sentry-basics/integrate-frontend/generate-first-error.md#ui-walkthrough).
-2. Open the [**Traces**](https://sentry.io/explore/traces) page and select a trace to reveal more information about each span, its duration, and any errors. For an interactive UI walkthrough, click [here](https://docs.sentry.io/product/sentry-basics/distributed-tracing/generate-first-error.md#ui-walkthrough).
-3. Open the [**Logs**](https://sentry.io/explore/logs) page and filter by service, environment, or search keywords to view log entries from your application. For an interactive UI walkthrough, click [here](https://docs.sentry.io/product/explore/logs.md#overview).
+2. Open the [**Traces**](https://sentry.io/explore/traces) page and select a trace to reveal more information about each span, its duration, and any errors. For an interactive UI walkthrough, see the [Traces interactive UI walkthrough](https://docs.sentry.io/product/sentry-basics/distributed-tracing/generate-first-error.md#ui-walkthrough).
+3. Open the [**Logs**](https://sentry.io/explore/logs) page and filter by service, environment, or search keywords to view log entries from your application. For an interactive UI walkthrough, see the [Logs interactive UI walkthrough](https://docs.sentry.io/product/explore/logs.md#overview).
 
 ## [Next Steps](https://docs.sentry.io/platforms/javascript/guides/cloudflare/frameworks/sveltekit.md#next-steps)
 

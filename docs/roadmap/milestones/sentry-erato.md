@@ -10,7 +10,7 @@ url: https://docs.sentry.io/platforms/javascript/guides/cloudflare/frameworks/ho
 
 > Configure the Erato Sentry DSN via a Cloudflare environment variable such as `<ERATO_SENTRY_DSN>`. Set it with `wrangler secret put ERATO_SENTRY_DSN` or in the Cloudflare dashboard, then read it from `env` at runtime instead of committing the real DSN to source control.
 
-##### Community Middleware Deprecation
+## Community Middleware Deprecation
 
 The community-maintained `@hono/sentry` middleware that uses `toucan-js` has been deprecated in favor of using `@sentry/cloudflare` directly. If you're currently using the `@hono/sentry` middleware with `toucan-js`, you should migrate to `@sentry/cloudflare` directly as shown in this guide.
 

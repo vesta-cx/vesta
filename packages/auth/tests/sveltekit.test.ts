@@ -217,4 +217,34 @@ describe("createAuthHandle", () => {
 		expect(deletions).toHaveLength(0);
 		expect(resolve).not.toHaveBeenCalled();
 	});
+
+	it("matches protected paths on segment boundaries only", async () => {
+		const { cookies } = createMockCookies();
+		const resolve = vi.fn(async () => new Response("ok"));
+		const handle = createAuthHandle({
+			runtime: {
+				authenticateSealedSession: async () => ({
+					authenticated: false,
+					refreshed: false,
+					reason: "no_session_cookie_provided",
+					sealedSession: null,
+					session: null,
+				}),
+			} as never,
+			protectedPaths: ["/dash"],
+		});
+
+		const response = await handle({
+			event: {
+				cookies,
+				locals: {},
+				url: new URL("https://example.com/dashboard"),
+			} as never,
+			resolve,
+		});
+
+		expect(resolve).toHaveBeenCalledOnce();
+		expect(response).toBeInstanceOf(Response);
+		expect(response.status).toBe(200);
+	});
 });

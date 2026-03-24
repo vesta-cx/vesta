@@ -1,13 +1,13 @@
 /** @format */
 
-import { redirect } from '@sveltejs/kit';
+import { error, redirect } from '@sveltejs/kit';
 import { authenticateSvelteKitSession, commitOAuthState, createOAuthState } from '@vesta-cx/auth';
 import { createWebAuthRuntime } from '$lib/server/auth';
 import type { PageServerLoad } from './$types';
 
 export const load: PageServerLoad = async ({ cookies, platform, url }) => {
 	if (!platform) {
-		return { error: 'Platform not available' };
+		throw error(500, 'Platform not available');
 	}
 
 	const runtime = createWebAuthRuntime(platform);

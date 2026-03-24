@@ -77,6 +77,22 @@ const isRecoverableLoadSessionError = (
 	error instanceof TerminalAuthError &&
 	error.operation === "loadSealedSession";
 
+const normalizeProtectedPath = (path: string): string =>
+	path === "/" ? "/" : path.replace(/\/+$/, "");
+
+const matchesProtectedPath = (
+	pathname: string,
+	protectedPath: string,
+): boolean => {
+	const normalizedProtectedPath = normalizeProtectedPath(protectedPath);
+
+	return (
+		normalizedProtectedPath === "/" ||
+		pathname === normalizedProtectedPath ||
+		pathname.startsWith(`${normalizedProtectedPath}/`)
+	);
+};
+
 export const readSessionCookie = (
 	cookies: Cookies,
 	cookieName = DEFAULT_AUTH_COOKIE_NAME,
@@ -261,7 +277,7 @@ export const createAuthHandle = (config: SvelteKitAuthHandleConfig): Handle => {
 		).session = session;
 
 		const isProtected = config.protectedPaths.some((path) =>
-			event.url.pathname.startsWith(path),
+			matchesProtectedPath(event.url.pathname, path),
 		);
 
 		if (isProtected && !session) {

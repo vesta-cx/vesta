@@ -16,10 +16,11 @@ read -rp "Preferred organization name [${DEFAULT_ORG_NAME}]: " WORKOS_ORG_NAME
 WORKOS_ORG_NAME="${WORKOS_ORG_NAME:-$DEFAULT_ORG_NAME}"
 
 authenticate() {
-  local payload="$1"
-  local response_file http_status
-
+  local payload_file response_file http_status
+  payload_file="$(mktemp)"
   response_file="$(mktemp)"
+
+  cat >"$payload_file"
 
   http_status="$(
     curl -sS \
@@ -29,9 +30,10 @@ authenticate() {
       --write-out "%{http_code}" \
       "$WORKOS_BASE_URL" \
       -H "Content-Type: application/json" \
-      -d "$payload"
+      --data-binary "@$payload_file"
   )" || {
     local curl_exit_code=$?
+    rm -f "$payload_file"
     rm -f "$response_file"
     echo "Authentication request failed before a response was received." >&2
     return "$curl_exit_code"
@@ -44,11 +46,13 @@ authenticate() {
     else
       echo "(response body omitted because it was not valid JSON)" >&2
     fi
+    rm -f "$payload_file"
     rm -f "$response_file"
     return 1
   fi
 
   cat "$response_file"
+  rm -f "$payload_file"
   rm -f "$response_file"
 }
 
@@ -57,21 +61,19 @@ print_redacted_auth_json() {
 }
 
 AUTH_JSON="$(
-  authenticate "$(
-    jq -n \
-      --arg client_id "$WORKOS_CLIENT_ID" \
-      --arg client_secret "$WORKOS_API_KEY" \
-      --arg email "$WORKOS_EMAIL" \
-      --arg password "$WORKOS_PASSWORD" \
-      '{
-        client_id: $client_id,
-        client_secret: $client_secret,
-        grant_type: "password",
-        email: $email,
-        password: $password,
-        user_agent: "curl/workos-token-check"
-      }'
-  )"
+  jq -n \
+    --arg client_id "$WORKOS_CLIENT_ID" \
+    --arg client_secret "$WORKOS_API_KEY" \
+    --arg email "$WORKOS_EMAIL" \
+    --arg password "$WORKOS_PASSWORD" \
+    '{
+      client_id: $client_id,
+      client_secret: $client_secret,
+      grant_type: "password",
+      email: $email,
+      password: $password,
+      user_agent: "curl/workos-token-check"
+    }' | authenticate
 )"
 
 echo
@@ -103,21 +105,19 @@ if [ "$AUTH_CODE" = "organization_selection_required" ]; then
   echo "Using organization '${WORKOS_ORG_NAME}' (${SELECTED_ORG_ID})"
 
   AUTH_JSON="$(
-    authenticate "$(
-      jq -n \
-        --arg client_id "$WORKOS_CLIENT_ID" \
-        --arg client_secret "$WORKOS_API_KEY" \
-        --arg pending_authentication_token "$PENDING_AUTHENTICATION_TOKEN" \
-        --arg organization_id "$SELECTED_ORG_ID" \
-        '{
-          client_id: $client_id,
-          client_secret: $client_secret,
-          grant_type: "urn:workos:oauth:grant-type:organization-selection",
-          pending_authentication_token: $pending_authentication_token,
-          organization_id: $organization_id,
-          user_agent: "curl/workos-token-check"
-        }'
-    )"
+    jq -n \
+      --arg client_id "$WORKOS_CLIENT_ID" \
+      --arg client_secret "$WORKOS_API_KEY" \
+      --arg pending_authentication_token "$PENDING_AUTHENTICATION_TOKEN" \
+      --arg organization_id "$SELECTED_ORG_ID" \
+      '{
+        client_id: $client_id,
+        client_secret: $client_secret,
+        grant_type: "urn:workos:oauth:grant-type:organization-selection",
+        pending_authentication_token: $pending_authentication_token,
+        organization_id: $organization_id,
+        user_agent: "curl/workos-token-check"
+      }' | authenticate
   )"
 
   echo

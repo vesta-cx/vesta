@@ -163,6 +163,15 @@ All vesta apps must use these packages. **No local component libraries. No local
 - **Storage:** R2 for cover art, profile images
 - **Auth:** WorkOS via `@vesta-cx/utils`
 
+#### `apps/shortener` (Dedicated Short URL Worker)
+
+- **Purpose:** Resolve `vst.cx/<slug>` links and redirect them to canonical `vesta.cx` destinations
+- **Routes:**
+  - `/health` — Worker health check
+  - `/:slug` — Public short-link redirect
+- **Storage:** Cloudflare KV (`SHORT_LINKS`) for phase-1 slug records
+- **Auth:** None for the public read surface; publishing comes later via `apps/web`
+
 #### `apps/vesta-admin` (Creator Dashboard, separated if needed)
 
 - **Purpose:** Advanced tooling (analytics, link management, bulk operations)
@@ -368,6 +377,7 @@ vesta-cx/vesta/
 │   ├── docs/              (Quartz site, Obsidian vault)
 │   ├── sona/              (Reference: quality survey app)
 │   ├── euterpe/           (Reference: audio transcoding)
+│   ├── shortener/         (Dedicated short-link Worker for vst.cx)
 │   └── vesta/             (Main public app — Phase 1+)
 ├── packages/
 │   ├── ui/                (shadcn-svelte, shared components)

@@ -1,0 +1,42 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "vesta-shortener",
+  "main": "src/index.ts",
+  "compatibility_date": "2026-03-23",
+  "observability": {
+    "enabled": true
+  },
+  "env": {
+    "prod": {
+      "routes": [
+        {
+          "pattern": "vst.cx",
+          "zone_name": "vst.cx",
+          "custom_domain": true
+        }
+      ],
+      "kv_namespaces": [
+        {
+          "binding": "SHORT_LINKS",
+          "id": "TODO_SET_SHORT_LINKS_KV_ID",
+          "remote": true
+        }
+      ],
+      "vars": {
+        "CANONICAL_ORIGIN": "https://vesta.cx"
+      }
+    },
+    "dev": {
+      "name": "vesta-shortener-dev",
+      "kv_namespaces": [
+        {
+          "binding": "SHORT_LINKS",
+          "id": "TODO_SET_SHORT_LINKS_KV_DEV_ID"
+        }
+      ],
+      "vars": {
+        "CANONICAL_ORIGIN": "https://vesta.cx"
+      }
+    }
+  }
+}

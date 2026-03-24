@@ -162,6 +162,34 @@ describe("createAuthRuntime", () => {
 		expect(authenticateWithCode).toHaveBeenCalledTimes(1);
 	});
 
+	it("treats retryAttempts as the number of retries", async () => {
+		const authenticateWithCode = vi.fn(async () => {
+			throw new RetryableAuthError(
+				"temporary failure",
+				"authenticateWithCode",
+			);
+		});
+
+		const runtime = createAuthRuntime({
+			clientId: "client_123",
+			apiKey: "sk_test",
+			cookiePassword:
+				"test-password-that-is-at-least-32-chars-long!!",
+			transport: createTransport({
+				authenticateWithCode,
+			}),
+			retryAttempts: 1,
+			retryBaseDelayMs: 1,
+		});
+
+		await expect(
+			runtime.authenticateWithCode({
+				code: "retry_once",
+			}),
+		).rejects.toBeInstanceOf(RetryableAuthError);
+		expect(authenticateWithCode).toHaveBeenCalledTimes(2);
+	});
+
 	it("applies the provisioning adapter after a successful exchange", async () => {
 		const provision = vi.fn(async () => ({
 			activeOrganizationId: "org_provisioned",

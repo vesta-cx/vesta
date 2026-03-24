@@ -187,7 +187,7 @@ const makeRetryEffect = <T>(
 	},
 	operation: string,
 	run: () => Promise<T>,
-	attempt = 1,
+	retryCount = 0,
 ): Effect.Effect<T, AuthError> =>
 	Effect.tryPromise({
 		try: run,
@@ -196,7 +196,7 @@ const makeRetryEffect = <T>(
 		Effect.catch((error: AuthError) => {
 			if (
 				!isRetryableAuthError(error) ||
-				attempt >= config.retryAttempts
+				retryCount >= config.retryAttempts
 			) {
 				return Effect.fail(error);
 			}
@@ -204,14 +204,14 @@ const makeRetryEffect = <T>(
 			config.observer?.({
 				type: "auth.retry",
 				operation,
-				attempt,
+				attempt: retryCount + 1,
 				detail: error.message,
 			});
 
 			return Effect.sleep(
 				Duration.millis(
 					config.retryBaseDelayMs *
-						2 ** (attempt - 1),
+						2 ** retryCount,
 				),
 			).pipe(
 				Effect.flatMap(() =>
@@ -219,7 +219,7 @@ const makeRetryEffect = <T>(
 						config,
 						operation,
 						run,
-						attempt + 1,
+						retryCount + 1,
 					),
 				),
 			);

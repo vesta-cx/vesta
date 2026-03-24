@@ -24,3 +24,5 @@ Shared WorkOS auth runtime for Vesta apps.
 - This package uses `@workos-inc/node` directly.
 - Session cookies use the WorkOS sealed-session model rather than the legacy custom cookie payload.
 - The local Effect source reference lives in `.references/effect-v4-beta/` and is for read-only implementation context only.
+- The broader stack reference pack lives under `.references/` too: `workos-node`, `hono`, `sveltekit`, and `drizzle-orm`.
+- Run `pnpm references` from the repo root to refresh the local-only worktrees without adding them to git.

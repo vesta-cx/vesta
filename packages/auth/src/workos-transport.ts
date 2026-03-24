@@ -136,6 +136,20 @@ const readMembershipStatus = (
 	return status;
 };
 
+const isAutoPaginatable = <T>(
+	value: unknown,
+): value is {
+	data: T[];
+	autoPagination: () => Promise<T[]>;
+} => {
+	const record = asRecord(value);
+
+	return (
+		Array.isArray(record.data) &&
+		typeof record.autoPagination === "function"
+	);
+};
+
 const bindMethod = <TArgs extends unknown[], TReturn>(
 	target: Record<string, unknown>,
 	key: string,
@@ -599,18 +613,21 @@ export const createWorkOSTransport = (config: {
 				Promise<unknown>
 			>(client.userManagement, "listOrganizationMemberships");
 
-			const response = asRecord(
-				await listOrganizationMemberships({
-					...(userId ? { userId } : {}),
-					...(organizationId ?
-						{ organizationId }
-					:	{}),
-					...(statuses ? { statuses } : {}),
-				}),
-			);
+			const response = await listOrganizationMemberships({
+				...(userId ? { userId } : {}),
+				...(organizationId ? { organizationId } : {}),
+				...(statuses ? { statuses } : {}),
+			});
 
-			return Array.isArray(response.data) ?
-					response.data.map(
+			if (isAutoPaginatable<unknown>(response)) {
+				return (await response.autoPagination()).map(
+					toAuthOrganizationMembership,
+				);
+			}
+
+			const record = asRecord(response);
+			return Array.isArray(record.data) ?
+					record.data.map(
 						toAuthOrganizationMembership,
 					)
 				:	[];

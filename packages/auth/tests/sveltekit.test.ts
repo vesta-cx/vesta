@@ -9,6 +9,7 @@ import {
 	createAuthHandle,
 	clearOAuthState,
 	getRequestMetadata,
+	matchesProtectedPath,
 	readOAuthState,
 } from "../src/sveltekit.js";
 import { TerminalAuthError } from "../src/errors.js";
@@ -155,6 +156,16 @@ describe("oauth state cookies", () => {
 });
 
 describe("createAuthHandle", () => {
+	it("matches protected paths only on segment boundaries", () => {
+		expect(matchesProtectedPath("/admin", "/admin")).toBe(true);
+		expect(matchesProtectedPath("/admin/settings", "/admin")).toBe(
+			true,
+		);
+		expect(matchesProtectedPath("/adminstuff", "/admin")).toBe(
+			false,
+		);
+	});
+
 	it("treats corrupted sealed sessions as unauthenticated and clears the cookie", async () => {
 		const { cookies, deletions } = createMockCookies({
 			session: "sealed_existing",

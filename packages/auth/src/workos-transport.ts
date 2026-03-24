@@ -106,7 +106,11 @@ const readStringArray = (
 };
 
 const readRoleSlug = (record: Record<string, unknown>): string | null => {
-	const direct = readFirstString(record, ["roleSlug", "role_slug"]);
+	const direct = readFirstString(record, [
+		"roleSlug",
+		"role_slug",
+		"role",
+	]);
 	if (direct) return direct;
 
 	const role = asRecord(record.role);
@@ -359,6 +363,28 @@ export const createWorkOSTransport = (config: {
 		return config.clientId;
 	};
 
+	const loadSealedSessionRecord = async (input: {
+		sealedSession: string | undefined;
+		cookiePassword: string;
+	}) => {
+		const loadSealedSession = bindMethod<
+			[
+				{
+					sessionData: string | undefined;
+					cookiePassword: string;
+				},
+			],
+			Promise<unknown>
+		>(client.userManagement, "loadSealedSession");
+
+		return asRecord(
+			await loadSealedSession({
+				sessionData: input.sealedSession,
+				cookiePassword: input.cookiePassword,
+			}),
+		);
+	};
+
 	return {
 		getAuthorizationUrl: (input: AuthAuthorizationUrlInput) => {
 			const getAuthorizationUrl = bindMethod<
@@ -426,13 +452,32 @@ export const createWorkOSTransport = (config: {
 				}),
 			);
 
+			const sealedSession = requireFirstString(
+				"authenticateWithCode",
+				response,
+				["sealedSession", "sealed_session"],
+			);
+			const loadedSession = await loadSealedSessionRecord({
+				sealedSession,
+				cookiePassword,
+			});
+			const authenticate = bindMethod<[], Promise<unknown>>(
+				loadedSession,
+				"authenticate",
+			);
+			const authenticated = toAuthenticateResult(
+				await authenticate(),
+			);
+
+			if (!authenticated.authenticated) {
+				throw new Error(
+					`authenticateWithCode: sealed session authentication failed with reason "${authenticated.reason}"`,
+				);
+			}
+
 			return {
-				sealedSession: requireFirstString(
-					"authenticateWithCode",
-					response,
-					["sealedSession", "sealed_session"],
-				),
-				session: toAuthSession(response),
+				sealedSession,
+				session: authenticated.session,
 			};
 		},
 
@@ -440,22 +485,10 @@ export const createWorkOSTransport = (config: {
 			sealedSession,
 			cookiePassword,
 		}): Promise<AuthTransportSession> => {
-			const loadSealedSession = bindMethod<
-				[
-					{
-						sessionData: string | undefined;
-						cookiePassword: string;
-					},
-				],
-				Promise<unknown>
-			>(client.userManagement, "loadSealedSession");
-
-			const loadedSession = asRecord(
-				await loadSealedSession({
-					sessionData: sealedSession,
-					cookiePassword,
-				}),
-			);
+			const loadedSession = await loadSealedSessionRecord({
+				sealedSession,
+				cookiePassword,
+			});
 
 			const authenticate = bindMethod<[], Promise<unknown>>(
 				loadedSession,

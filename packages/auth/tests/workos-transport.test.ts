@@ -3,12 +3,16 @@
 import { describe, expect, it, vi } from "vitest";
 
 const listOrganizationMembershipsMock = vi.fn();
+const authenticateWithCodeMock = vi.fn();
+const loadSealedSessionMock = vi.fn();
 
 vi.mock("@workos-inc/node", () => ({
 	WorkOS: class {
 		userManagement = {
 			listOrganizationMemberships:
 				listOrganizationMembershipsMock,
+			authenticateWithCode: authenticateWithCodeMock,
+			loadSealedSession: loadSealedSessionMock,
 		};
 
 		organizations = {};
@@ -20,6 +24,63 @@ vi.mock("@workos-inc/node", () => ({
 import { createWorkOSTransport } from "../src/workos-transport.js";
 
 describe("createWorkOSTransport", () => {
+	it("hydrates login sessions from the sealed session claims", async () => {
+		authenticateWithCodeMock.mockResolvedValueOnce({
+			user: {
+				id: "user_123",
+				email: "mia@example.com",
+				first_name: "Mia",
+				last_name: "Example",
+				email_verified: true,
+				created_at: "2026-03-24T00:00:00.000Z",
+				updated_at: "2026-03-24T00:00:00.000Z",
+			},
+			sealed_session: "sealed_123",
+			access_token: "access_123",
+		});
+		loadSealedSessionMock.mockResolvedValueOnce({
+			authenticate: async () => ({
+				authenticated: true,
+				session_id: "sess_123",
+				organization_id: "org_123",
+				role: "member",
+				permissions: ["posts:create"],
+				entitlements: ["audit-logs"],
+				user: {
+					id: "user_123",
+					email: "mia@example.com",
+					first_name: "Mia",
+					last_name: "Example",
+					email_verified: true,
+					created_at: "2026-03-24T00:00:00.000Z",
+					updated_at: "2026-03-24T00:00:00.000Z",
+				},
+			}),
+		});
+
+		const transport = createWorkOSTransport({
+			apiKey: "sk_test",
+			clientId: "client_123",
+		});
+
+		await expect(
+			transport.authenticateWithCode({
+				code: "code_123",
+				cookiePassword:
+					"test-password-that-is-at-least-32-chars-long!!",
+			}),
+		).resolves.toEqual({
+			sealedSession: "sealed_123",
+			session: expect.objectContaining({
+				sessionId: "sess_123",
+				organizationId: "org_123",
+				roleSlug: "member",
+				permissions: ["posts:create"],
+				entitlements: ["audit-logs"],
+			}),
+		});
+	});
+
 	it("auto-paginates organization memberships before mapping them", async () => {
 		const autoPagination = vi.fn(async () => [
 			{

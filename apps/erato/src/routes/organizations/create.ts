@@ -5,7 +5,7 @@ import { itemResponse } from "@mia-cx/drizzle-query-factory";
 import { requireAuth, requireScope } from "../../auth/helpers";
 import { getDB } from "../../db";
 import { organizations } from "../../db/schema";
-import { workos } from "../../services/workos";
+import { createWorkOSTransport } from "@vesta-cx/auth";
 import {
 	createOrganizationSchema,
 	mergeOrgResponse,
@@ -27,10 +27,9 @@ route.post("/organizations", async (c) => {
 
 	let workosOrg;
 	try {
-		workosOrg = await workos.organizations.create(
-			c.env.WORKOS_API_KEY,
-			{ name: parsed.name },
-		);
+		workosOrg = await createWorkOSTransport({
+			apiKey: c.env.WORKOS_API_KEY,
+		}).createOrganization({ name: parsed.name });
 	} catch (err) {
 		return singleError(
 			c,

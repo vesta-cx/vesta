@@ -1,5 +1,7 @@
 /** @format */
 
+import type { AuthSession } from "@vesta-cx/auth";
+
 export type GuestAuth = { type: "guest" };
 
 export const API_KEY_SUBJECT_TYPES = [
@@ -17,7 +19,15 @@ export type ApiKeyAuth = {
 	scopes: string[];
 };
 
-export type AuthContext = GuestAuth | ApiKeyAuth;
+export type SessionAuth = {
+	type: "session";
+	subjectType: "user";
+	subjectId: string;
+	scopes: string[];
+	session: AuthSession;
+};
+
+export type AuthContext = GuestAuth | ApiKeyAuth | SessionAuth;
 
 export type ApiKeyMeta = {
 	subjectType: ApiKeySubjectType;

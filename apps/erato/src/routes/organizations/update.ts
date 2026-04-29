@@ -6,7 +6,7 @@ import { itemResponse } from "@mia-cx/drizzle-query-factory";
 import { requireAuth, requireScope } from "../../auth/helpers";
 import { getDB } from "../../db";
 import { organizations } from "../../db/schema";
-import { workos } from "../../services/workos";
+import { createWorkOSTransport } from "@vesta-cx/auth";
 import {
 	updateOrganizationSchema,
 	splitUpdateFields,
@@ -35,17 +35,22 @@ route.put("/organizations/:id", async (c) => {
 
 	let workosOrg;
 	try {
+		const workosTransport = createWorkOSTransport({
+			apiKey: c.env.WORKOS_API_KEY,
+		});
 		workosOrg =
 			hasWorkosChanges ?
-				await workos.organizations.update(
-					c.env.WORKOS_API_KEY,
-					id,
-					workosFields as { name?: string },
-				)
-			:	await workos.organizations.get(
-					c.env.WORKOS_API_KEY,
-					id,
-				);
+				await workosTransport.updateOrganization({
+					organizationId: id,
+					...(workosFields.name ?
+						{
+							name: workosFields.name as string,
+						}
+					:	{}),
+				})
+			:	await workosTransport.getOrganization({
+					organizationId: id,
+				});
 	} catch {
 		return notFound(c, "Organization");
 	}

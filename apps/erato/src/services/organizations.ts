@@ -3,7 +3,7 @@
 import { eq } from "drizzle-orm";
 import { organizations } from "../db/schema";
 import { z } from "../lib/validation";
-import type { WorkOSOrganization } from "./workos";
+import type { AuthOrganization } from "@vesta-cx/auth";
 import type { Database } from "../db";
 
 export const createOrganizationSchema = z.object({
@@ -56,7 +56,7 @@ export const splitUpdateFields = (
 };
 
 export const mergeOrgResponse = (
-	workosOrg: WorkOSOrganization,
+	workosOrg: AuthOrganization,
 	extension?: typeof organizations.$inferSelect | null,
 ) => ({
 	id: workosOrg.id,
@@ -64,8 +64,8 @@ export const mergeOrgResponse = (
 	avatarUrl: extension?.avatarUrl ?? null,
 	bannerUrl: extension?.bannerUrl ?? null,
 	themeConfig: extension?.themeConfig ?? null,
-	createdAt: workosOrg.created_at,
-	updatedAt: workosOrg.updated_at,
+	createdAt: workosOrg.createdAt,
+	updatedAt: workosOrg.updatedAt,
 });
 
 export const getOrCreateExtension = async (

@@ -1,13 +1,35 @@
 /** @format */
 
-import { describe, it, expect, beforeEach } from "vitest";
+import { describe, it, expect, beforeEach, vi } from "vitest";
 import { Hono } from "hono";
+
+const {
+	authenticateSealedSession,
+	createEratoAuthRuntime,
+	createEratoProvisioningAdapter,
+} = vi.hoisted(() => ({
+	authenticateSealedSession: vi.fn(),
+	createEratoAuthRuntime: vi.fn(),
+	createEratoProvisioningAdapter: vi.fn(),
+}));
+
+vi.mock("./runtime", () => ({
+	createEratoAuthRuntime,
+	createEratoProvisioningAdapter,
+}));
+
 import { authMiddleware } from "./middleware";
 import { hashApiKey } from "./helpers";
 import type { ApiKeyMeta } from "./types";
 
 type TestEnv = {
-	Bindings: { KV: KVNamespace };
+	Bindings: {
+		DB: D1Database;
+		KV: KVNamespace;
+		WORKOS_API_KEY: string;
+		WORKOS_CLIENT_ID: string;
+		WORKOS_COOKIE_PASSWORD: string;
+	};
 	Variables: { auth: unknown };
 };
 
@@ -36,10 +58,82 @@ const makeRequest = (
 	kv: KVNamespace,
 	headers?: Record<string, string>,
 ) => {
-	return app.request("/test", { headers }, { KV: kv });
+	return app.request(
+		"/test",
+		{ headers },
+		{
+			DB: {} as D1Database,
+			KV: kv,
+			WORKOS_API_KEY: "sk_test",
+			WORKOS_CLIENT_ID: "client_test",
+			WORKOS_COOKIE_PASSWORD:
+				"password-that-is-at-least-32-chars",
+		},
+	);
 };
 
 describe("auth middleware", () => {
+	beforeEach(() => {
+		vi.clearAllMocks();
+		createEratoAuthRuntime.mockReturnValue({
+			authenticateSealedSession,
+		});
+		createEratoProvisioningAdapter.mockReturnValue({
+			provision: vi.fn(),
+		});
+		authenticateSealedSession.mockResolvedValue({
+			authenticated: false,
+			refreshed: false,
+			reason: "missing_session",
+			sealedSession: null,
+			session: null,
+		});
+	});
+	describe("sealed session path", () => {
+		it("sets session auth and provisions when session cookie is valid", async () => {
+			authenticateSealedSession.mockResolvedValue({
+				authenticated: true,
+				refreshed: false,
+				reason: null,
+				sealedSession: "sealed_session",
+				session: {
+					sessionId: "session_123",
+					userId: "user_123",
+					email: "mia@example.com",
+					firstName: "Mia",
+					lastName: "Example",
+					emailVerified: true,
+					profilePictureUrl: null,
+					organizationId: "org_123",
+					roleSlug: null,
+					permissions: ["users:read"],
+					entitlements: [],
+					memberships: [],
+				},
+			});
+			const kv = createMockKV();
+			const { app } = buildApp(kv);
+
+			const res = await makeRequest(app, kv, {
+				Cookie: "session=sealed_session",
+			});
+			expect(res.status).toBe(200);
+
+			const body = await res.json();
+			expect(body).toMatchObject({
+				type: "session",
+				subjectType: "user",
+				subjectId: "user_123",
+				scopes: ["users:read"],
+			});
+			expect(authenticateSealedSession).toHaveBeenCalledWith({
+				sealedSession: "sealed_session",
+				resolveMemberships: true,
+				provisioningAdapter: expect.any(Object),
+			});
+		});
+	});
+
 	describe("no key (guest path)", () => {
 		it("sets guest auth when no Authorization header", async () => {
 			const kv = createMockKV();

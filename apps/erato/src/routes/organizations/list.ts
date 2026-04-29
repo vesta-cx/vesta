@@ -5,7 +5,7 @@ import { Hono } from "hono";
 import { requireAuth, requireScope } from "../../auth/helpers";
 import { getDB } from "../../db";
 import { organizations } from "../../db/schema";
-import { workos } from "../../services/workos";
+import { createWorkOSTransport } from "@vesta-cx/auth";
 import { mergeOrgResponse } from "../../services/organizations";
 import type { AppEnv } from "../../env";
 import type { RouteMetadata } from "../../registry";
@@ -22,10 +22,9 @@ route.get("/organizations", async (c) => {
 	const after = url.searchParams.get("after") ?? undefined;
 	const before = url.searchParams.get("before") ?? undefined;
 
-	const workosResult = await workos.organizations.list(
-		c.env.WORKOS_API_KEY,
-		{ limit, after, before },
-	);
+	const workosResult = await createWorkOSTransport({
+		apiKey: c.env.WORKOS_API_KEY,
+	}).listOrganizations({ limit, after, before });
 
 	const db = getDB(c.env.DB);
 	const orgIds = workosResult.data.map((o) => o.id);
@@ -53,7 +52,10 @@ route.get("/organizations", async (c) => {
 
 	return c.json({
 		data,
-		list_metadata: workosResult.list_metadata,
+		list_metadata: {
+			before: workosResult.before,
+			after: workosResult.after,
+		},
 	});
 });
 

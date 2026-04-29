@@ -3,6 +3,7 @@
 import { Hono } from "hono";
 import { API_BASE_PATH } from "./config/api-version";
 import type { AppEnv } from "./env";
+import { browserAuthRoutes } from "./auth/browser";
 import { authMiddleware } from "./auth/middleware";
 import { routeRegistry, type RouteMetadata } from "./registry";
 import { corsMiddleware } from "./lib/cors";
@@ -41,6 +42,7 @@ routeRegistry.push({
 	scopes: healthExport.scopes,
 });
 app.route(API_BASE_PATH, healthExport.route);
+app.route(API_BASE_PATH, browserAuthRoutes);
 
 // Auth-protected API router
 const api = new Hono<AppEnv>();

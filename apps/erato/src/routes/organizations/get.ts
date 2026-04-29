@@ -4,7 +4,7 @@ import { Hono } from "hono";
 import { requireAuth, requireScope } from "../../auth/helpers";
 import { getDB } from "../../db";
 import { itemResponse } from "@mia-cx/drizzle-query-factory";
-import { workos } from "../../services/workos";
+import { createWorkOSTransport } from "@vesta-cx/auth";
 import {
 	mergeOrgResponse,
 	getOrCreateExtension,
@@ -24,10 +24,9 @@ route.get("/organizations/:id", async (c) => {
 
 	let workosOrg;
 	try {
-		workosOrg = await workos.organizations.get(
-			c.env.WORKOS_API_KEY,
-			id,
-		);
+		workosOrg = await createWorkOSTransport({
+			apiKey: c.env.WORKOS_API_KEY,
+		}).getOrganization({ organizationId: id });
 	} catch {
 		return notFound(c, "Organization");
 	}

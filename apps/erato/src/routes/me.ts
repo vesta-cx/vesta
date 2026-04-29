@@ -3,47 +3,55 @@
 import { eq } from "drizzle-orm";
 import { Hono } from "hono";
 import { itemResponse } from "@mia-cx/drizzle-query-factory";
-import { requireAuth } from "../auth/helpers";
+import { isAuthenticated, requireAuth } from "../auth/helpers";
+import { startBrowserLogin } from "../auth/browser";
 import { getDB } from "../db";
 import { users, workspaces, organizations } from "../db/schema";
-import { workos, type WorkOSUser } from "../services/workos";
+import { createWorkOSTransport, type AuthUser } from "@vesta-cx/auth";
 import { mergeOrgResponse } from "../services/organizations";
 import { notFound } from "../lib/errors";
 import type { AppEnv } from "../env";
 import type { RouteMetadata } from "../registry";
 
 const mergeUserResponse = (
-	workosUser: WorkOSUser,
+	workosUser: AuthUser,
 	extension?: typeof users.$inferSelect | null,
 ) => ({
 	id: workosUser.id,
 	email: workosUser.email,
-	firstName: workosUser.first_name,
-	lastName: workosUser.last_name,
-	organizationId: extension?.organizationId ?? workosUser.organization_id,
+	firstName: workosUser.firstName,
+	lastName: workosUser.lastName,
+	organizationId: extension?.organizationId ?? workosUser.organizationId,
 	displayName: extension?.displayName ?? null,
 	avatarUrl: extension?.avatarUrl ?? null,
 	bio: extension?.bio ?? null,
 	themeConfig: extension?.themeConfig ?? null,
-	createdAt: extension?.createdAt ?? workosUser.created_at,
-	updatedAt: extension?.updatedAt ?? workosUser.updated_at,
+	createdAt: extension?.createdAt ?? workosUser.createdAt,
+	updatedAt: extension?.updatedAt ?? workosUser.updatedAt,
 });
 
 const route = new Hono<AppEnv>();
 
 route.get("/me", async (c) => {
-	const auth = requireAuth(c.get("auth"));
+	const currentAuth = c.get("auth");
+	if (!isAuthenticated(currentAuth)) {
+		return startBrowserLogin(c);
+	}
+
+	const auth = requireAuth(currentAuth);
 
 	const { subjectType, subjectId } = auth;
 	const db = getDB(c.env.DB);
+	const workosTransport = createWorkOSTransport({
+		apiKey: c.env.WORKOS_API_KEY,
+	});
 
 	if (subjectType === "user") {
 		let workosUser;
 		try {
-			workosUser = await workos.users.get(
-				c.env.WORKOS_API_KEY,
-				subjectId,
-			);
+			workosUser = await workosTransport.getUser({
+				userId: subjectId,
+			});
 		} catch {
 			return notFound(c, "User");
 		}
@@ -60,10 +68,9 @@ route.get("/me", async (c) => {
 	if (subjectType === "organization") {
 		let workosOrg;
 		try {
-			workosOrg = await workos.organizations.get(
-				c.env.WORKOS_API_KEY,
-				subjectId,
-			);
+			workosOrg = await workosTransport.getOrganization({
+				organizationId: subjectId,
+			});
 		} catch {
 			return notFound(c, "Organization");
 		}

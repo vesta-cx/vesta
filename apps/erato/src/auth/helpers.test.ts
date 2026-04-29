@@ -30,6 +30,26 @@ const multiScope: AuthContext = {
 	subjectId: "user_02",
 	scopes: ["resources:read", "resources:write"],
 };
+const sessionUser: AuthContext = {
+	type: "session",
+	subjectType: "user",
+	subjectId: "user_session",
+	scopes: ["users:read"],
+	session: {
+		sessionId: "session_123",
+		userId: "user_session",
+		email: "mia@example.com",
+		firstName: "Mia",
+		lastName: "Example",
+		emailVerified: true,
+		profilePictureUrl: null,
+		organizationId: "org_123",
+		roleSlug: null,
+		permissions: ["users:read"],
+		entitlements: [],
+		memberships: [],
+	},
+};
 
 describe("hashApiKey", () => {
 	it("returns a 64-char hex string", async () => {
@@ -58,6 +78,10 @@ describe("isAuthenticated", () => {
 	it("returns true for apikey", () => {
 		expect(isAuthenticated(readUser)).toBe(true);
 	});
+
+	it("returns true for sealed sessions", () => {
+		expect(isAuthenticated(sessionUser)).toBe(true);
+	});
 });
 
 describe("requireAuth", () => {
@@ -74,6 +98,12 @@ describe("requireAuth", () => {
 		const result = requireAuth(readUser);
 		expect(result.type).toBe("apikey");
 		expect(result.subjectId).toBe("user_01");
+	});
+
+	it("returns SessionAuth for authenticated browser sessions", () => {
+		const result = requireAuth(sessionUser);
+		expect(result.type).toBe("session");
+		expect(result.subjectId).toBe("user_session");
 	});
 });
 
@@ -101,6 +131,11 @@ describe("hasScope", () => {
 		expect(hasScope(multiScope, "resources:read")).toBe(true);
 		expect(hasScope(multiScope, "resources:write")).toBe(true);
 		expect(hasScope(multiScope, "workspaces:read")).toBe(false);
+	});
+
+	it("checks sealed session scopes", () => {
+		expect(hasScope(sessionUser, "users:read")).toBe(true);
+		expect(hasScope(sessionUser, "users:write")).toBe(false);
 	});
 });
 

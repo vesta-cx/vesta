@@ -77,6 +77,8 @@ WorkOS integration requires these secrets in Wrangler config:
 
 - `WORKOS_API_KEY` — WorkOS API key
 - `WORKOS_CLIENT_ID` — WorkOS client ID
+- `WORKOS_COOKIE_PASSWORD` — WorkOS sealed-session cookie password shared with browser login surfaces
+- `WORKOS_ORG_ID` — Optional default organization fallback for provisioning
 
 ## API Reference
 

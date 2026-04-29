@@ -5,8 +5,8 @@ import { Hono } from "hono";
 import { requireAuth, requireScope } from "../../auth/helpers";
 import { getDB } from "../../db";
 import { organizations } from "../../db/schema";
-import { workos } from "../../services/workos";
-import { notFound, singleError } from "../../lib/errors";
+import { createWorkOSTransport } from "@vesta-cx/auth";
+import { notFound } from "../../lib/errors";
 import type { AppEnv } from "../../env";
 import type { RouteMetadata } from "../../registry";
 
@@ -20,7 +20,9 @@ route.delete("/organizations/:id", async (c) => {
 	const id = c.req.param("id");
 
 	try {
-		await workos.organizations.delete(c.env.WORKOS_API_KEY, id);
+		await createWorkOSTransport({
+			apiKey: c.env.WORKOS_API_KEY,
+		}).deleteOrganization({ organizationId: id });
 	} catch {
 		return notFound(c, "Organization");
 	}

@@ -7,14 +7,13 @@ import {
 	splitUpdateFields,
 	mergeOrgResponse,
 } from "./organizations";
-import type { WorkOSOrganization } from "./workos";
+import type { AuthOrganization } from "@vesta-cx/auth";
 
-const mockWorkOSOrg: WorkOSOrganization = {
+const mockWorkOSOrg: AuthOrganization = {
 	id: "org_01",
 	name: "Test Org",
-	created_at: "2025-01-01T00:00:00Z",
-	updated_at: "2025-06-01T00:00:00Z",
-	object: "organization",
+	createdAt: "2025-01-01T00:00:00Z",
+	updatedAt: "2025-06-01T00:00:00Z",
 };
 
 describe("splitUpdateFields", () => {

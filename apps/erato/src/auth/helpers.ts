@@ -1,7 +1,7 @@
 /** @format */
 
 import { HTTPException } from "hono/http-exception";
-import type { ApiKeyAuth, AuthContext } from "./types";
+import type { ApiKeyAuth, AuthContext, SessionAuth } from "./types";
 
 export const hashApiKey = async (raw: string): Promise<string> => {
 	const encoded = new TextEncoder().encode(raw);
@@ -11,10 +11,12 @@ export const hashApiKey = async (raw: string): Promise<string> => {
 		.join("");
 };
 
-export const isAuthenticated = (auth: AuthContext): auth is ApiKeyAuth =>
-	auth.type === "apikey";
+export const isAuthenticated = (
+	auth: AuthContext,
+): auth is ApiKeyAuth | SessionAuth =>
+	auth.type === "apikey" || auth.type === "session";
 
-export const requireAuth = (auth: AuthContext): ApiKeyAuth => {
+export const requireAuth = (auth: AuthContext): ApiKeyAuth | SessionAuth => {
 	if (!isAuthenticated(auth)) {
 		throw new HTTPException(401, {
 			message: "Authentication required",

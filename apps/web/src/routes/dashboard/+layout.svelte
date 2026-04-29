@@ -2,11 +2,10 @@
 	import { browser } from '$app/environment';
 	import { page } from '$app/state';
 	import * as Breadcrumb from '@vesta-cx/ui/components/ui/breadcrumb';
-	import { Button } from '@vesta-cx/ui/components/ui/button';
 	import { Separator } from '@vesta-cx/ui/components/ui/separator';
 	import * as Sidebar from '@vesta-cx/ui/components/ui/sidebar';
-	import SidebarClassic from '$lib/components/dashboard/sidebar-classic.svelte';
-	import { creatorNav } from '$lib/components/dashboard/data';
+	import DashboardSidebar from '$lib/components/dashboard/sidebar.svelte';
+	import { dashboardNav } from '$lib/components/dashboard/data';
 
 	let { children } = $props();
 
@@ -14,13 +13,13 @@
 
 	const breadcrumbs = $derived(
 		segments.length === 0
-			? [{ title: 'Overview', href: '/dashboard' }]
+			? [{ title: 'Analytics', href: '/dashboard' }]
 			: segments.map((segment, index) => {
 					const href = '/dashboard/' + segments.slice(0, index + 1).join('/');
-					const navMatch = creatorNav.find(
+					const navMatch = dashboardNav.find(
 						(item) => item.href === href || item.items?.some((sub) => sub.href === href)
 					);
-					const subMatch = creatorNav
+					const subMatch = dashboardNav
 						.flatMap((item) => item.items ?? [])
 						.find((sub) => sub.href === href);
 					const title =
@@ -34,10 +33,10 @@
 
 {#if browser}
 	<Sidebar.Provider>
-		<SidebarClassic />
+		<DashboardSidebar />
 		<Sidebar.Inset>
 			<header
-				class="sticky top-0 z-10 flex h-14 shrink-0 items-center gap-2 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60"
+				class="sticky top-0 z-10 flex h-14 shrink-0 items-center gap-2 transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-12"
 			>
 				<div class="flex w-full items-center gap-2 px-4">
 					<Sidebar.Trigger class="-ms-1" />
@@ -52,17 +51,13 @@
 								<Breadcrumb.Item>
 									{#if index === breadcrumbs.length - 1}
 										<Breadcrumb.Page>{crumb.title}</Breadcrumb.Page>
-									{:else}
+								{:else}
 										<Breadcrumb.Link href={crumb.href}>{crumb.title}</Breadcrumb.Link>
 									{/if}
 								</Breadcrumb.Item>
 							{/each}
 						</Breadcrumb.List>
 					</Breadcrumb.Root>
-					<div class="ms-auto flex items-center gap-2">
-						<Button variant="ghost" size="sm" href="/dashboard-2">Label view</Button>
-						<Button variant="ghost" size="sm" href="/dashboard-3">Cockpit</Button>
-					</div>
 				</div>
 			</header>
 			<div class="flex flex-1 flex-col gap-6 p-4 md:p-6">

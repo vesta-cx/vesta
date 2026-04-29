@@ -1,25 +1,53 @@
-<script lang="ts" module>
-	import type { Component } from 'svelte';
-
-	export type Workspace = {
-		name: string;
-		plan: string;
-		logo: Component;
-	};
-</script>
-
 <script lang="ts">
 	import * as DropdownMenu from '@vesta-cx/ui/components/ui/dropdown-menu';
 	import * as Sidebar from '@vesta-cx/ui/components/ui/sidebar';
 	import { useSidebar } from '@vesta-cx/ui/components/ui/sidebar';
 	import ChevronsUpDownIcon from '@lucide/svelte/icons/chevrons-up-down';
 	import PlusIcon from '@lucide/svelte/icons/plus';
+	import SettingsIcon from '@lucide/svelte/icons/settings';
+	import {
+		dashboardOrganizations,
+		workspaceSettingsHref,
+		type Organization,
+		type Workspace
+	} from './data.js';
 
-	let { workspaces }: { workspaces: Workspace[] } = $props();
+	let {
+		workspaces,
+		active = $bindable(),
+		onSelect
+	}: {
+		workspaces: Workspace[];
+		active: Workspace;
+		onSelect?: (workspace: Workspace) => void;
+	} = $props();
 
 	const sidebar = useSidebar();
-	let activeIndex = $state(0);
-	const active = $derived(workspaces[activeIndex] ?? workspaces[0]);
+
+	type Group = { label: string; organization: Organization | null; items: Workspace[] };
+
+	const groups: Group[] = $derived.by(() => {
+		const personal = workspaces.filter((w) => w.organizationId === null);
+		const orgGroups = dashboardOrganizations
+			.map((org) => ({
+				label: org.name,
+				organization: org,
+				items: workspaces.filter((w) => w.organizationId === org.id)
+			}))
+			.filter((group) => group.items.length > 0);
+
+		return [
+			...(personal.length > 0
+				? [{ label: 'Personal', organization: null, items: personal }]
+				: []),
+			...orgGroups
+		];
+	});
+
+	const select = (workspace: Workspace) => {
+		active = workspace;
+		onSelect?.(workspace);
+	};
 </script>
 
 <Sidebar.Menu>
@@ -39,34 +67,80 @@
 						</div>
 						<div class="grid min-w-0 flex-1 text-start text-sm leading-tight">
 							<span class="truncate font-medium">{active.name}</span>
-							<span class="truncate text-xs text-muted-foreground">{active.plan}</span>
+							<span class="truncate text-xs text-muted-foreground">{active.subtitle}</span>
 						</div>
 						<ChevronsUpDownIcon class="ms-auto size-4" />
 					</Sidebar.MenuButton>
 				{/snippet}
 			</DropdownMenu.Trigger>
 			<DropdownMenu.Content
-				class="w-(--bits-dropdown-menu-anchor-width) min-w-56 rounded-lg"
+				class="w-(--bits-dropdown-menu-anchor-width) min-w-72 rounded-lg p-1"
 				align="start"
 				side={sidebar.isMobile ? 'bottom' : 'right'}
 				sideOffset={4}
 			>
-				<DropdownMenu.Label class="text-xs text-muted-foreground">Workspaces</DropdownMenu.Label>
-				{#each workspaces as workspace, index (workspace.name)}
-					<DropdownMenu.Item onSelect={() => (activeIndex = index)} class="gap-2 p-2">
-						<div class="flex size-6 items-center justify-center rounded-md border">
-							<workspace.logo class="size-3.5" />
-						</div>
-						<span class="truncate">{workspace.name}</span>
-						<DropdownMenu.Shortcut>⌘{index + 1}</DropdownMenu.Shortcut>
-					</DropdownMenu.Item>
+				{#each groups as group, groupIndex (group.label)}
+					<DropdownMenu.Group>
+						<DropdownMenu.Label class="text-xs text-muted-foreground">
+							{group.label}
+						</DropdownMenu.Label>
+						{#each group.items as workspace (workspace.id)}
+							<DropdownMenu.Item
+								class="group/workspace gap-2 p-2 pe-1.5"
+								onSelect={() => select(workspace)}
+							>
+								<div class="flex size-6 items-center justify-center rounded-md border">
+									<workspace.logo class="size-3.5 shrink-0" />
+								</div>
+								<div class="grid min-w-0 flex-1 leading-tight">
+									<span class="truncate text-sm">{workspace.name}</span>
+									<span class="truncate text-xs text-muted-foreground">
+										{workspace.subtitle}
+									</span>
+								</div>
+								{#if workspace.id === active.id}
+									<span
+										class="me-1 size-1.5 rounded-full bg-foreground"
+										aria-label="Active workspace"
+									></span>
+								{/if}
+								<a
+									href={workspaceSettingsHref(workspace.id)}
+									class="flex size-7 items-center justify-center rounded-md text-muted-foreground opacity-0 transition-opacity hover:bg-accent hover:text-foreground focus-visible:opacity-100 group-hover/workspace:opacity-100 group-focus-within/workspace:opacity-100"
+									aria-label="Open {workspace.name} settings"
+									onclick={(event) => event.stopPropagation()}
+								>
+									<SettingsIcon class="size-3.5" />
+								</a>
+							</DropdownMenu.Item>
+						{/each}
+					</DropdownMenu.Group>
+					{#if groupIndex < groups.length - 1}
+						<DropdownMenu.Separator />
+					{/if}
 				{/each}
+
 				<DropdownMenu.Separator />
+
 				<DropdownMenu.Item class="gap-2 p-2">
 					<div class="flex size-6 items-center justify-center rounded-md border bg-transparent">
-						<PlusIcon class="size-4" />
+						<PlusIcon class="size-3.5" />
 					</div>
-					<span class="font-medium text-muted-foreground">New workspace</span>
+					<span class="text-sm font-medium text-muted-foreground">New workspace</span>
+				</DropdownMenu.Item>
+				<DropdownMenu.Item class="gap-2 p-2">
+					{#snippet child({ props }: { props?: Record<string, unknown> })}
+						<a href="/dashboard/organizations" {...props}>
+							<div
+								class="flex size-6 items-center justify-center rounded-md border bg-transparent"
+							>
+								<SettingsIcon class="size-3.5" />
+							</div>
+							<span class="text-sm font-medium text-muted-foreground">
+								Manage organizations
+							</span>
+						</a>
+					{/snippet}
 				</DropdownMenu.Item>
 			</DropdownMenu.Content>
 		</DropdownMenu.Root>

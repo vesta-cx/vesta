@@ -1,7 +1,7 @@
 <script lang="ts" module>
 	const stats = [
 		{ label: 'Smart-link clicks · 30d', value: '4,287', helper: '+18% vs prev. 30d' },
-		{ label: 'Pre-saves', value: 612, helper: 'Tidewater EP · live' },
+		{ label: 'Pre-saves · open', value: 612, helper: 'Tidewater EP · live' },
 		{ label: 'New followers · 30d', value: 134, helper: 'Across linked profiles' },
 		{ label: 'Workspace health', value: '88%', helper: 'Bio + links + cover art' }
 	];
@@ -31,7 +31,6 @@
 	import { Button } from '@vesta-cx/ui/components/ui/button';
 	import * as Card from '@vesta-cx/ui/components/ui/card';
 	import * as StatCard from '@vesta-cx/ui/components/ui/stat-card';
-	import LinkIcon from '@lucide/svelte/icons/link';
 	import MegaphoneIcon from '@lucide/svelte/icons/megaphone';
 	import MusicIcon from '@lucide/svelte/icons/music';
 </script>
@@ -49,7 +48,7 @@
 				<Card.Title>Smart-link routing · last 30 days</Card.Title>
 				<Card.Description>Where fans land when they hit your release page.</Card.Description>
 			</div>
-			<Button size="sm" variant="outline" href="/dashboard/insights">View insights</Button>
+			<Button size="sm" variant="outline" href="/dashboard/community">View community</Button>
 		</Card.Header>
 		<Card.Content class="grid gap-3">
 			{#each platformPerformance as platform (platform.name)}
@@ -79,82 +78,50 @@
 		<Card.Content class="grid gap-2">
 			{#each upcoming as release (release.title)}
 				<a
-					href="/dashboard/releases"
+					href="/dashboard/resources/releases"
 					class="flex items-start justify-between gap-3 rounded-lg border p-3 transition-colors hover:bg-muted/50"
 				>
 					<div class="min-w-0">
 						<p class="truncate text-sm font-medium">{release.title}</p>
 						<p class="text-xs text-muted-foreground">{release.subtitle}</p>
 					</div>
-					<span class="shrink-0 text-xs font-medium text-muted-foreground">
-						{release.when}
-					</span>
+					<span class="shrink-0 text-xs font-medium text-muted-foreground">{release.when}</span>
 				</a>
 			{/each}
-			<Button size="sm" class="mt-1 justify-start gap-2" variant="outline" href="/dashboard/releases">
-				<MusicIcon class="size-4" />
-				Plan a release
+			<Button
+				size="sm"
+				class="mt-1 justify-start gap-2"
+				variant="outline"
+				href="/dashboard/resources/releases"
+			>
+				<MusicIcon class="size-4" /> Plan a release
 			</Button>
 		</Card.Content>
 	</Card.Root>
 </div>
 
-<div class="grid gap-4 md:grid-cols-2">
-	<Card.Root>
-		<Card.Header class="flex flex-row items-center justify-between gap-4">
-			<div class="space-y-1">
-				<Card.Title>Drafts &amp; scheduled posts</Card.Title>
-				<Card.Description>Campaign content awaiting publish.</Card.Description>
-			</div>
-			<Button size="sm" href="/dashboard/posts">
-				<MegaphoneIcon class="size-4" /> New post
-			</Button>
-		</Card.Header>
-		<Card.Content class="grid gap-2">
-			{#each drafts as draft (draft.title)}
-				<a
-					href="/dashboard/posts"
-					class="flex items-center justify-between gap-3 rounded-lg border p-3 transition-colors hover:bg-muted/50"
-				>
-					<div class="min-w-0">
-						<p class="truncate text-sm font-medium">{draft.title}</p>
-						<p class="text-xs text-muted-foreground">{draft.updated}</p>
-					</div>
-					<Badge variant="secondary">{draft.status}</Badge>
-				</a>
-			{/each}
-		</Card.Content>
-	</Card.Root>
-
-	<Card.Root>
-		<Card.Header>
-			<Card.Title>Bring your existing presence in</Card.Title>
-			<Card.Description>
-				Migration shouldn't require tearing down what already works.
-			</Card.Description>
-		</Card.Header>
-		<Card.Content class="grid gap-2 text-sm">
+<Card.Root>
+	<Card.Header class="flex flex-row items-center justify-between gap-4">
+		<div class="space-y-1">
+			<Card.Title>Drafts &amp; scheduled posts</Card.Title>
+			<Card.Description>Campaign content awaiting publish.</Card.Description>
+		</div>
+		<Button size="sm" href="/dashboard/resources/posts">
+			<MegaphoneIcon class="size-4" /> New post
+		</Button>
+	</Card.Header>
+	<Card.Content class="grid gap-2">
+		{#each drafts as draft (draft.title)}
 			<a
-				href="/dashboard/imports"
-				class="flex items-center justify-between gap-3 rounded-lg border p-3 hover:bg-muted/50"
+				href="/dashboard/resources/posts"
+				class="flex items-center justify-between gap-3 rounded-lg border p-3 transition-colors hover:bg-muted/50"
 			>
-				<span>Import a Linktree / Linkfire profile</span>
-				<LinkIcon class="size-4 text-muted-foreground" />
+				<div class="min-w-0">
+					<p class="truncate text-sm font-medium">{draft.title}</p>
+					<p class="text-xs text-muted-foreground">{draft.updated}</p>
+				</div>
+				<Badge variant="secondary">{draft.status}</Badge>
 			</a>
-			<a
-				href="/dashboard/imports"
-				class="flex items-center justify-between gap-3 rounded-lg border p-3 hover:bg-muted/50"
-			>
-				<span>Connect Spotify / Apple Music for Artists</span>
-				<MusicIcon class="size-4 text-muted-foreground" />
-			</a>
-			<a
-				href="/dashboard/imports"
-				class="flex items-center justify-between gap-3 rounded-lg border p-3 hover:bg-muted/50"
-			>
-				<span>Mirror an existing release page</span>
-				<MegaphoneIcon class="size-4 text-muted-foreground" />
-			</a>
-		</Card.Content>
-	</Card.Root>
-</div>
+		{/each}
+	</Card.Content>
+</Card.Root>

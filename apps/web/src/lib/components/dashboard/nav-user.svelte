@@ -11,11 +11,11 @@
 	import * as DropdownMenu from '@vesta-cx/ui/components/ui/dropdown-menu';
 	import * as Sidebar from '@vesta-cx/ui/components/ui/sidebar';
 	import { useSidebar } from '@vesta-cx/ui/components/ui/sidebar';
-	import BadgeCheckIcon from '@lucide/svelte/icons/badge-check';
-	import BellIcon from '@lucide/svelte/icons/bell';
 	import ChevronsUpDownIcon from '@lucide/svelte/icons/chevrons-up-down';
 	import CreditCardIcon from '@lucide/svelte/icons/credit-card';
+	import HelpCircleIcon from '@lucide/svelte/icons/help-circle';
 	import LogOutIcon from '@lucide/svelte/icons/log-out';
+	import UserRoundIcon from '@lucide/svelte/icons/user-round';
 
 	let { user }: { user: DashboardUser } = $props();
 
@@ -78,16 +78,16 @@
 				<DropdownMenu.Separator />
 				<DropdownMenu.Group>
 					<DropdownMenu.Item>
-						<BadgeCheckIcon />
-						Account
+						<UserRoundIcon />
+						Profile
 					</DropdownMenu.Item>
 					<DropdownMenu.Item>
 						<CreditCardIcon />
 						Billing
 					</DropdownMenu.Item>
 					<DropdownMenu.Item>
-						<BellIcon />
-						Notifications
+						<HelpCircleIcon />
+						Help &amp; support
 					</DropdownMenu.Item>
 				</DropdownMenu.Group>
 				<DropdownMenu.Separator />

@@ -1,9 +1,9 @@
 <script lang="ts">
-	import OverviewCreator from '$lib/components/dashboard/overview-creator.svelte';
+	import Overview from '$lib/components/dashboard/overview.svelte';
 </script>
 
 <svelte:head>
-	<title>Dashboard · Vesta</title>
+	<title>Analytics · Vesta</title>
 </svelte:head>
 
-<OverviewCreator />
+<Overview />

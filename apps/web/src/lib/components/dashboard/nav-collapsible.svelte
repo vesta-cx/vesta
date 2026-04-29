@@ -19,15 +19,20 @@
 
 	let { label, items }: { label: string; items: NavItem[] } = $props();
 
-	const isActive = (href: string) =>
-		href === '/' ? page.url.pathname === '/' : page.url.pathname.startsWith(href);
+	// Items with sub-routes match by prefix; leaf items must match exactly so
+	// the dashboard root (Analytics) doesn't stay highlighted everywhere.
+	const isActive = (item: NavItem) =>
+		item.items?.length
+			? page.url.pathname === item.href ||
+				page.url.pathname.startsWith(`${item.href}/`)
+			: page.url.pathname === item.href;
 </script>
 
 <Sidebar.Group>
 	<Sidebar.GroupLabel>{label}</Sidebar.GroupLabel>
 	<Sidebar.Menu>
 		{#each items as item (item.title)}
-			{@const open = isActive(item.href)}
+			{@const open = isActive(item)}
 			{#if item.items?.length}
 				<Collapsible.Root {open} class="group/collapsible">
 					{#snippet child({ props }: { props?: Record<string, unknown> })}
@@ -36,7 +41,7 @@
 								{#snippet child({ props: triggerProps }: { props?: Record<string, unknown> })}
 									<Sidebar.MenuButton
 										tooltipContent={item.title}
-										isActive={isActive(item.href)}
+										isActive={isActive(item)}
 										{...triggerProps}
 									>
 										<item.icon />
@@ -67,7 +72,7 @@
 				</Collapsible.Root>
 			{:else}
 				<Sidebar.MenuItem>
-					<Sidebar.MenuButton tooltipContent={item.title} isActive={isActive(item.href)}>
+					<Sidebar.MenuButton tooltipContent={item.title} isActive={isActive(item)}>
 						{#snippet child({ props }: { props?: Record<string, unknown> })}
 							<a href={item.href} {...props}>
 								<item.icon />

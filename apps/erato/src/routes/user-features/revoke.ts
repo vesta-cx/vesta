@@ -2,36 +2,23 @@
 
 import { and, eq } from "drizzle-orm";
 import { Hono } from "hono";
-import { requireAuth, hasScope } from "../../auth/helpers";
+import { requireAuth, requireScope } from "../../auth/helpers";
+import { ADMIN_SCOPE } from "../../auth/types";
 import { getDB } from "../../db";
 import { userFeatures } from "../../db/schema";
-import { forbidden, notFound } from "../../lib/errors";
+import { notFound } from "../../lib/errors";
 import type { AppEnv } from "../../env";
 import type { RouteMetadata } from "../../registry";
 
 const route = new Hono<AppEnv>();
+const PATH = "/users/:userId/features/:slug" as const;
 
-route.delete("/users/:userId/features/:slug", async (c) => {
+route.delete(PATH, async (c) => {
 	const auth = requireAuth(c.get("auth"));
-	if (!hasScope(auth, "admin")) return forbidden(c);
+	requireScope(auth, ADMIN_SCOPE);
 
-	const userId = c.req.param("userId");
-	const slug = c.req.param("slug");
-	const db = getDB(c.env.DB);
-
-	const [existing] = await db
-		.select()
-		.from(userFeatures)
-		.where(
-			and(
-				eq(userFeatures.userId, userId),
-				eq(userFeatures.featureSlug, slug),
-			),
-		)
-		.limit(1);
-	if (!existing) return notFound(c, "User feature");
-
-	const [row] = await db
+	const { userId, slug } = c.req.param();
+	const [row] = await getDB(c.env.DB)
 		.delete(userFeatures)
 		.where(
 			and(
@@ -47,9 +34,9 @@ route.delete("/users/:userId/features/:slug", async (c) => {
 
 export default {
 	route,
-	method: "DELETE" as RouteMetadata["method"],
-	path: "/users/:userId/features/:slug",
+	method: "DELETE" satisfies RouteMetadata["method"],
+	path: PATH,
 	description: "Revoke feature from user",
 	auth_required: true,
-	scopes: ["admin"],
+	scopes: [ADMIN_SCOPE],
 };

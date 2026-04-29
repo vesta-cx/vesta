@@ -1,7 +1,7 @@
 /** @format */
 
 import type { ListQueryConfig } from "@mia-cx/drizzle-query-factory";
-import { teams } from "../db/schema";
+import { teamUsers, teams } from "../db/schema";
 import { z } from "../lib/validation";
 
 export const teamListConfig: ListQueryConfig = {
@@ -18,12 +18,27 @@ export const teamListConfig: ListQueryConfig = {
 	defaultSort: { key: "created_at", dir: "desc" },
 };
 
+export const teamMemberListConfig: ListQueryConfig = {
+	filters: {
+		user_id: { column: teamUsers.userId },
+	},
+	sortable: {
+		user_id: teamUsers.userId,
+	},
+	defaultSort: { key: "user_id", dir: "asc" },
+};
+
 export const createTeamSchema = z.object({
-	name: z.string().min(1),
+	name: z.string().min(1).max(255),
 	ownerId: z.string().min(1),
 	organizationId: z.string().min(1),
 });
 
+// ownerId and organizationId are immutable after creation.
 export const updateTeamSchema = z.object({
-	name: z.string().min(1).optional(),
+	name: z.string().min(1).max(255).optional(),
+});
+
+export const addMemberSchema = z.object({
+	userId: z.string().min(1),
 });

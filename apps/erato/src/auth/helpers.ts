@@ -1,7 +1,8 @@
 /** @format */
 
 import { HTTPException } from "hono/http-exception";
-import type { ApiKeyAuth, AuthContext } from "./types";
+import type { ApiKeyAuth, AuthContext, Scope, SessionAuth } from "./types";
+import { ADMIN_SCOPE } from "./types";
 
 export const hashApiKey = async (raw: string): Promise<string> => {
 	const encoded = new TextEncoder().encode(raw);
@@ -11,10 +12,12 @@ export const hashApiKey = async (raw: string): Promise<string> => {
 		.join("");
 };
 
-export const isAuthenticated = (auth: AuthContext): auth is ApiKeyAuth =>
-	auth.type === "apikey";
+export const isAuthenticated = (
+	auth: AuthContext,
+): auth is ApiKeyAuth | SessionAuth =>
+	auth.type === "apikey" || auth.type === "session";
 
-export const requireAuth = (auth: AuthContext): ApiKeyAuth => {
+export const requireAuth = (auth: AuthContext): ApiKeyAuth | SessionAuth => {
 	if (!isAuthenticated(auth)) {
 		throw new HTTPException(401, {
 			message: "Authentication required",
@@ -23,17 +26,17 @@ export const requireAuth = (auth: AuthContext): ApiKeyAuth => {
 	return auth;
 };
 
-/** True if apikey with matching scope or admin. Returns false for guests. */
-export const hasScope = (auth: AuthContext, scope: string): boolean => {
+/** True if authenticated with matching scope or admin. Returns false for guests. */
+export const hasScope = (auth: AuthContext, scope: Scope): boolean => {
 	if (!isAuthenticated(auth)) return false;
-	return auth.scopes.includes("admin") || auth.scopes.includes(scope);
+	return auth.scopes.includes(ADMIN_SCOPE) || auth.scopes.includes(scope);
 };
 
 /**
  * Throws 403 if scope not present. For public-read endpoints that allow
  * guests, branch on isAuthenticated() first rather than calling this.
  */
-export const requireScope = (auth: AuthContext, scope: string): void => {
+export const requireScope = (auth: AuthContext, scope: Scope): void => {
 	if (!hasScope(auth, scope)) {
 		throw new HTTPException(403, {
 			message: "Forbidden: insufficient scope",
@@ -41,6 +44,8 @@ export const requireScope = (auth: AuthContext, scope: string): void => {
 	}
 };
 
-/** Maps HTTP method to the scope suffix: GET -> "read", everything else -> "write". */
+/** Maps HTTP method to scope suffix: GET/HEAD -> "read", everything else -> "write". */
 export const scopeForMethod = (method: string): "read" | "write" =>
-	method.toUpperCase() === "GET" ? "read" : "write";
+	method.toUpperCase() === "GET" || method.toUpperCase() === "HEAD" ?
+		"read"
+	:	"write";

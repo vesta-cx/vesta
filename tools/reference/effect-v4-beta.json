@@ -1,0 +1,15 @@
+{
+    "package": "effect",
+    "packageVersion": "4.0.0-beta.37",
+    "repository": "https://github.com/Effect-TS/effect-smol.git",
+    "repositoryDirectory": "packages/effect",
+    "localBareRepoPath": ".references/effect-smol.git",
+    "localWorktreePath": ".references/effect-v4-beta",
+    "localBranch": "effect-v4-beta-reference",
+    "upstreamRef": "main",
+    "pinnedCommit": "66a0494ed75cd12f2721dcbb1d8a072e3d9e14b6",
+    "notes": [
+        "The upstream repository does not expose a dedicated beta branch or a matching 4.0.0-beta.37 tag.",
+        "Use the local worktree as source-reference context, and keep the installed package in node_modules as the exact published beta surface."
+    ]
+}

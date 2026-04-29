@@ -7,13 +7,16 @@ import {
 	type ListQueryConfig,
 } from "@mia-cx/drizzle-query-factory";
 import { hasScope, requireAuth } from "../../../auth/helpers";
+import { ADMIN_SCOPE } from "../../../auth/types";
 import { getDB } from "../../../db";
 import { resourceAuthors } from "../../../db/schema";
-import { forbidden } from "../../../lib/errors";
+import { forbidden, notFound } from "../../../lib/errors";
+import { canReadResource } from "../../../services/resources";
 import type { AppEnv } from "../../../env";
 import type { RouteMetadata } from "../../../registry";
 
 const route = new Hono<AppEnv>();
+const PATH = "/resources/:resourceId/authors" as const;
 
 const authorListConfig: ListQueryConfig = {
 	filters: {
@@ -27,21 +30,24 @@ const authorListConfig: ListQueryConfig = {
 	defaultSort: { key: "author_id", dir: "asc" },
 };
 
-route.get("/resources/:resourceId/authors", async (c) => {
+route.get(PATH, async (c) => {
 	const auth = requireAuth(c.get("auth"));
-	if (!hasScope(auth, "resources:read")) {
-		return forbidden(c);
+	if (!hasScope(auth, "resources:read")) return forbidden(c);
+
+	const db = getDB(c.env.DB);
+	const resourceId = c.req.param("resourceId");
+	if (!(await canReadResource(db, auth, resourceId))) {
+		return notFound(c, "Resource");
 	}
 
 	const envelope = await runListQuery({
-		db: getDB(c.env.DB),
+		db,
 		table: resourceAuthors,
-		input: new URL(c.req.url).searchParams,
-		config: authorListConfig,
-		baseWhere: eq(
-			resourceAuthors.resourceId,
-			c.req.param("resourceId"),
+		input: new URLSearchParams(
+			c.req.query() as Record<string, string>,
 		),
+		config: authorListConfig,
+		baseWhere: eq(resourceAuthors.resourceId, resourceId),
 		mode: "envelope",
 	});
 	return c.json(envelope);
@@ -49,9 +55,10 @@ route.get("/resources/:resourceId/authors", async (c) => {
 
 export default {
 	route,
-	method: "GET" as RouteMetadata["method"],
-	path: "/resources/:resourceId/authors",
+	method: "GET" satisfies RouteMetadata["method"],
+	path: PATH,
 	description: "List resource authors",
 	auth_required: true,
 	scopes: ["resources:read"],
+	scopes_any: [ADMIN_SCOPE, "resources:read"],
 };

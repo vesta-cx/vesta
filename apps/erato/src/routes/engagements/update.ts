@@ -4,67 +4,43 @@ import { eq } from "drizzle-orm";
 import { Hono } from "hono";
 import { itemResponse } from "@mia-cx/drizzle-query-factory";
 import { requireAuth, requireScope } from "../../auth/helpers";
+import { ADMIN_SCOPE } from "../../auth/types";
 import { getDB } from "../../db";
 import {
 	engagementComments,
 	engagementMentions,
 	engagements,
 } from "../../db/schema";
-import { parseBody, isResponse } from "../../lib/validation";
 import { notFound } from "../../lib/errors";
-import { z } from "../../lib/validation";
+import { parseBody, isResponse } from "../../lib/validation";
+import { updateEngagementSchema } from "../../services/engagements";
 import type { AppEnv } from "../../env";
 import type { RouteMetadata } from "../../registry";
 
-const updateEngagementSchema = z.object({
-	comment: z
-		.object({
-			text: z.string().min(1),
-		})
-		.nullable()
-		.optional(),
-	mention: z
-		.object({
-			mentionedType: z.string().min(1),
-			mentionedId: z.string().min(1),
-		})
-		.nullable()
-		.optional(),
-});
-
 const route = new Hono<AppEnv>();
+const PATH = "/engagements/:id" as const;
 
-route.put("/engagements/:id", async (c) => {
+route.put(PATH, async (c) => {
 	const id = c.req.param("id");
 	const auth = requireAuth(c.get("auth"));
-
 	requireScope(auth, "engagements:write");
 
 	const parsed = await parseBody(c, updateEngagementSchema);
 	if (isResponse(parsed)) return parsed;
 
 	const db = getDB(c.env.DB);
+	const payload = await db.transaction(async (tx) => {
+		const [existing] = await tx
+			.select()
+			.from(engagements)
+			.where(eq(engagements.id, id))
+			.limit(1);
+		if (!existing) return null;
 
-	const [existing] = await db
-		.select()
-		.from(engagements)
-		.where(eq(engagements.id, id));
-	if (!existing) return notFound(c, "Engagement");
-
-	if (parsed.comment !== undefined) {
-		if (parsed.comment === null) {
-			await db
-				.delete(engagementComments)
-				.where(eq(engagementComments.engagementId, id));
-		} else {
-			const [existingComment] = await db
-				.select()
-				.from(engagementComments)
-				.where(eq(engagementComments.engagementId, id));
-			if (existingComment) {
-				await db
-					.update(engagementComments)
-					.set({ text: parsed.comment.text })
+		if (parsed.comment !== undefined) {
+			if (parsed.comment === null) {
+				await tx
+					.delete(engagementComments)
 					.where(
 						eq(
 							engagementComments.engagementId,
@@ -72,35 +48,26 @@ route.put("/engagements/:id", async (c) => {
 						),
 					);
 			} else {
-				await db.insert(engagementComments).values({
-					engagementId: id,
-					text: parsed.comment.text,
-				});
+				await tx
+					.insert(engagementComments)
+					.values({
+						engagementId: id,
+						text: parsed.comment.text,
+					})
+					.onConflictDoUpdate({
+						target: engagementComments.engagementId,
+						set: {
+							text: parsed.comment
+								.text,
+						},
+					});
 			}
 		}
-	}
 
-	if (parsed.mention !== undefined) {
-		if (parsed.mention === null) {
-			await db
-				.delete(engagementMentions)
-				.where(eq(engagementMentions.engagementId, id));
-		} else {
-			const mentionValues = {
-				mentionedType: parsed.mention.mentionedType as
-					| "user"
-					| "workspace"
-					| "resource",
-				mentionedId: parsed.mention.mentionedId,
-			};
-			const [existingMention] = await db
-				.select()
-				.from(engagementMentions)
-				.where(eq(engagementMentions.engagementId, id));
-			if (existingMention) {
-				await db
-					.update(engagementMentions)
-					.set(mentionValues)
+		if (parsed.mention !== undefined) {
+			if (parsed.mention === null) {
+				await tx
+					.delete(engagementMentions)
 					.where(
 						eq(
 							engagementMentions.engagementId,
@@ -108,43 +75,50 @@ route.put("/engagements/:id", async (c) => {
 						),
 					);
 			} else {
-				await db.insert(engagementMentions).values({
-					engagementId: id,
-					...mentionValues,
-				});
+				await tx
+					.insert(engagementMentions)
+					.values({
+						engagementId: id,
+						...parsed.mention,
+					})
+					.onConflictDoUpdate({
+						target: engagementMentions.engagementId,
+						set: parsed.mention,
+					});
 			}
 		}
-	}
 
-	const [engagement] = await db
-		.select()
-		.from(engagements)
-		.where(eq(engagements.id, id));
+		const [comment, mention] = await Promise.all([
+			tx
+				.select()
+				.from(engagementComments)
+				.where(eq(engagementComments.engagementId, id))
+				.limit(1),
+			tx
+				.select()
+				.from(engagementMentions)
+				.where(eq(engagementMentions.engagementId, id))
+				.limit(1),
+		]);
 
-	const [comment] = await db
-		.select()
-		.from(engagementComments)
-		.where(eq(engagementComments.engagementId, id));
+		return {
+			...existing,
+			comment: comment[0] ?? null,
+			mention: mention[0] ?? null,
+		};
+	});
 
-	const [mention] = await db
-		.select()
-		.from(engagementMentions)
-		.where(eq(engagementMentions.engagementId, id));
-
-	return c.json(
-		itemResponse({
-			...engagement,
-			comment: comment ?? null,
-			mention: mention ?? null,
-		}),
-	);
+	return payload ?
+			c.json(itemResponse(payload))
+		:	notFound(c, "Engagement");
 });
 
 export default {
 	route,
-	method: "PUT" as RouteMetadata["method"],
-	path: "/engagements/:id",
+	method: "PUT" satisfies RouteMetadata["method"],
+	path: PATH,
 	description: "Update engagement",
 	auth_required: true,
 	scopes: ["engagements:write"],
+	scopes_any: [ADMIN_SCOPE, "engagements:write"],
 };

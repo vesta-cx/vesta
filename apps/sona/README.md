@@ -7,7 +7,7 @@ An A/B audio comparison survey app to determine which audio codecs and bitrates 
 - **SvelteKit** on **Cloudflare Workers** via `@sveltejs/adapter-cloudflare`
 - **Cloudflare D1** (SQLite) for database, **Drizzle ORM** for queries
 - **Cloudflare R2** for audio file storage
-- **WorkOS AuthKit** for admin authentication via `@vesta-cx/utils/auth` (shared, hook-based)
+- **WorkOS AuthKit** for admin authentication via `@vesta-cx/auth` (shared, hook-based)
 - **Bradley-Terry model** for statistical codec ranking
 - **Cron Trigger** (every 15 min) for aggregated result snapshots
 

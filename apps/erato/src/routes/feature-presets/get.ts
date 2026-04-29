@@ -3,37 +3,42 @@
 import { itemResponse } from "@mia-cx/drizzle-query-factory";
 import { eq } from "drizzle-orm";
 import { Hono } from "hono";
-import { hasScope, isAuthenticated, requireAuth } from "../../auth/helpers";
+import { requireAuth, requireScope } from "../../auth/helpers";
+import { ADMIN_SCOPE } from "../../auth/types";
 import { getDB } from "../../db";
 import { featurePresets } from "../../db/schema";
+import { notFound } from "../../lib/errors";
 import type { AppEnv } from "../../env";
-import { forbidden, notFound } from "../../lib/errors";
 import type { RouteMetadata } from "../../registry";
 
 const route = new Hono<AppEnv>();
+const PATH = "/feature-presets/:name" as const;
 
-route.get("/feature-presets/:name", async (c) => {
+route.get(PATH, async (c) => {
 	const auth = requireAuth(c.get("auth"));
-	if (!hasScope(auth, "features:read")) {
-		return forbidden(c);
-	}
+	requireScope(auth, "features:read");
 
-	const name = c.req.param("name");
-	const db = getDB(c.env.DB);
-
-	const [row] = await db
-		.select()
+	const [row] = await getDB(c.env.DB)
+		.select({
+			name: featurePresets.name,
+			features: featurePresets.features,
+			description: featurePresets.description,
+			displayOrder: featurePresets.displayOrder,
+			createdAt: featurePresets.createdAt,
+			updatedAt: featurePresets.updatedAt,
+		})
 		.from(featurePresets)
-		.where(eq(featurePresets.name, name))
+		.where(eq(featurePresets.name, c.req.param("name")))
 		.limit(1);
 	return row ? c.json(itemResponse(row)) : notFound(c, "Feature preset");
 });
 
 export default {
 	route,
-	method: "GET" as RouteMetadata["method"],
-	path: "/feature-presets/:name",
+	method: "GET" satisfies RouteMetadata["method"],
+	path: PATH,
 	description: "Get feature preset by name",
 	auth_required: true,
 	scopes: ["features:read"],
+	scopes_any: [ADMIN_SCOPE, "features:read"],
 };

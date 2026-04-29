@@ -2,60 +2,54 @@
 
 import { and, eq, sql } from "drizzle-orm";
 import { Hono } from "hono";
-import {
-	parseListQuery,
-	listResponse,
-	type ListQueryConfig,
-} from "@mia-cx/drizzle-query-factory";
-import { hasScope, requireAuth } from "../../../auth/helpers";
+import { parseListQuery, listResponse } from "@mia-cx/drizzle-query-factory";
+import { hasScope, requireAuth, requireScope } from "../../../auth/helpers";
+import { ADMIN_SCOPE } from "../../../auth/types";
 import { getDB } from "../../../db";
 import { teamUsers, teams } from "../../../db/schema";
 import { forbidden, notFound } from "../../../lib/errors";
+import { teamMemberListConfig } from "../../../services/teams";
 import type { AppEnv } from "../../../env";
 import type { RouteMetadata } from "../../../registry";
 
 const route = new Hono<AppEnv>();
+const PATH = "/teams/:teamId/members" as const;
+const countAll = sql<string | number>`count(*)`;
 
-const teamMemberListConfig: ListQueryConfig = {
-	filters: {
-		user_id: { column: teamUsers.userId },
-	},
-	sortable: {
-		user_id: teamUsers.userId,
-	},
-	defaultSort: { key: "user_id", dir: "asc" },
-};
-
-route.get("/teams/:teamId/members", async (c) => {
+route.get(PATH, async (c) => {
 	const teamId = c.req.param("teamId");
 	const auth = requireAuth(c.get("auth"));
-	if (!hasScope(auth, "teams:read")) return forbidden(c);
+	requireScope(auth, "teams:read");
 
 	const db = getDB(c.env.DB);
-
 	const [team] = await db
-		.select()
+		.select({ ownerId: teams.ownerId })
 		.from(teams)
-		.where(eq(teams.id, teamId));
+		.where(eq(teams.id, teamId))
+		.limit(1);
 	if (!team) return notFound(c, "Team");
 
-	const isAdmin = hasScope(auth, "admin");
+	const isAdmin = hasScope(auth, ADMIN_SCOPE);
 	const isOwner = team.ownerId === auth.subjectId;
-	const [membership] = await db
-		.select()
-		.from(teamUsers)
-		.where(
-			and(
-				eq(teamUsers.teamId, teamId),
-				eq(teamUsers.userId, auth.subjectId),
-			),
-		);
-	const isMember = !!membership;
+	let isMember = false;
+	if (!isAdmin && !isOwner) {
+		const [membership] = await db
+			.select({ userId: teamUsers.userId })
+			.from(teamUsers)
+			.where(
+				and(
+					eq(teamUsers.teamId, teamId),
+					eq(teamUsers.userId, auth.subjectId),
+				),
+			)
+			.limit(1);
+		isMember = Boolean(membership);
+	}
 
 	if (!isAdmin && !isOwner && !isMember) return forbidden(c);
 
 	const query = parseListQuery(
-		new URL(c.req.url).searchParams,
+		new URLSearchParams(c.req.query() as Record<string, string>),
 		teamMemberListConfig,
 	);
 	const authWhere = eq(teamUsers.teamId, teamId);
@@ -70,7 +64,7 @@ route.get("/teams/:teamId/members", async (c) => {
 			.limit(query.limit)
 			.offset(query.offset),
 		db
-			.select({ total: sql<number>`count(*)` })
+			.select({ total: countAll })
 			.from(teamUsers)
 			.where(whereClause),
 	]);
@@ -78,7 +72,7 @@ route.get("/teams/:teamId/members", async (c) => {
 	return c.json(
 		listResponse(
 			rows,
-			countResult[0]?.total ?? 0,
+			Number(countResult[0]?.total ?? 0),
 			query.limit,
 			query.offset,
 		),
@@ -87,9 +81,10 @@ route.get("/teams/:teamId/members", async (c) => {
 
 export default {
 	route,
-	method: "GET" as RouteMetadata["method"],
-	path: "/teams/:teamId/members",
+	method: "GET" satisfies RouteMetadata["method"],
+	path: PATH,
 	description: "List team members",
 	auth_required: true,
 	scopes: ["teams:read"],
+	scopes_any: [ADMIN_SCOPE, "teams:read"],
 };

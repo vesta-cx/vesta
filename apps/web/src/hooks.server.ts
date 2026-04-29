@@ -1,4 +1,6 @@
 import type { Handle } from '@sveltejs/kit';
+import { createAuthHandle } from '@vesta-cx/auth';
+import { createWebAuthRuntime } from '$lib/server/auth';
 import { paraglideMiddleware } from '$lib/paraglide/server';
 
 const handleParaglide: Handle = ({ event, resolve }) =>
@@ -10,4 +12,23 @@ const handleParaglide: Handle = ({ event, resolve }) =>
 		});
 	});
 
-export const handle: Handle = handleParaglide;
+export const handle: Handle = async ({ event, resolve }) => {
+	if (!event.platform) {
+		(event.locals as { session: App.Locals['session'] }).session = null;
+		return handleParaglide({ event, resolve });
+	}
+
+	const handleAuth = createAuthHandle({
+		runtime: createWebAuthRuntime(event.platform),
+		protectedPaths: []
+	});
+
+	return handleAuth({
+		event,
+		resolve: (eventWithAuth) =>
+			handleParaglide({
+				event: eventWithAuth,
+				resolve: (finalEvent, finalOptions) => resolve(finalEvent, finalOptions)
+			})
+	});
+};

@@ -1,0 +1,44 @@
+{
+    "references": [
+        {
+            "name": "workos-node",
+            "repository": "https://github.com/workos/workos-node.git",
+            "localBareRepoPath": ".references/workos-node.git",
+            "localWorktreePath": ".references/workos-node",
+            "localBranch": "workos-node-reference",
+            "upstreamRef": "main",
+            "pinnedCommit": "5e52f6c72b503873f92b57b941e6b587d6e1c872"
+        },
+        {
+            "name": "hono",
+            "repository": "https://github.com/honojs/hono.git",
+            "localBareRepoPath": ".references/hono.git",
+            "localWorktreePath": ".references/hono",
+            "localBranch": "hono-reference",
+            "upstreamRef": "main",
+            "pinnedCommit": "e1ae0eb0f5a2dc1001895523016db02141972695"
+        },
+        {
+            "name": "sveltekit",
+            "repository": "https://github.com/sveltejs/kit.git",
+            "localBareRepoPath": ".references/sveltekit.git",
+            "localWorktreePath": ".references/sveltekit",
+            "localBranch": "sveltekit-reference",
+            "upstreamRef": "main",
+            "pinnedCommit": "9de9b2c1da11355f91f767022a3f1d9a221c7650"
+        },
+        {
+            "name": "drizzle-orm",
+            "repository": "https://github.com/drizzle-team/drizzle-orm.git",
+            "localBareRepoPath": ".references/drizzle-orm.git",
+            "localWorktreePath": ".references/drizzle-orm",
+            "localBranch": "drizzle-orm-reference",
+            "upstreamRef": "main",
+            "pinnedCommit": "4aa6ecfee4b4728dadf6f77f071a149878a3c6c0"
+        }
+    ],
+    "notes": [
+        "Use the local worktrees as read-only source references for auth, web, and DB work.",
+        "Keep the published npm packages in node_modules as the runtime source of truth; the worktrees are for implementation context."
+    ]
+}

@@ -11,10 +11,10 @@ import type { AppEnv } from "../../env";
 import type { RouteMetadata } from "../../registry";
 
 const route = new Hono<AppEnv>();
+const PATH = "/permission-actions/:slug" as const;
 
-route.get("/permission-actions/:slug", async (c) => {
+route.get(PATH, async (c) => {
 	const auth = requireAuth(c.get("auth"));
-
 	requireScope(auth, "permissions:read");
 
 	const slug = c.req.param("slug");
@@ -33,8 +33,8 @@ route.get("/permission-actions/:slug", async (c) => {
 
 export default {
 	route,
-	method: "GET" as RouteMetadata["method"],
-	path: "/permission-actions/:slug",
+	method: "GET" satisfies RouteMetadata["method"],
+	path: PATH,
 	description: "Get permission action by slug",
 	auth_required: true,
 	scopes: ["permissions:read"],

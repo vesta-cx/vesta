@@ -4,17 +4,30 @@ import { eq } from "drizzle-orm";
 import { Hono } from "hono";
 import { itemResponse } from "@mia-cx/drizzle-query-factory";
 import { requireAuth, requireScope, hasScope } from "../../auth/helpers";
+import { ADMIN_SCOPE, type AuthContext } from "../../auth/types";
 import { getDB } from "../../db";
 import { permissions } from "../../db/schema";
 import { conflict, forbidden, notFound } from "../../lib/errors";
+import { isUniqueConstraintError } from "../../lib/db-helpers";
 import { parseBody, isResponse } from "../../lib/validation";
 import { updatePermissionSchema } from "../../services/permissions";
 import type { AppEnv } from "../../env";
 import type { RouteMetadata } from "../../registry";
 
 const route = new Hono<AppEnv>();
+const PATH = "/permissions/:id" as const;
+type PermissionRow = typeof permissions.$inferSelect;
 
-route.put("/permissions/:id", async (c) => {
+const canUpdatePermission = (auth: AuthContext, permission: PermissionRow) => {
+	if (hasScope(auth, ADMIN_SCOPE)) return true;
+	if (auth.type === "guest") return false;
+	return (
+		permission.subjectType === auth.subjectType &&
+		permission.subjectId === auth.subjectId
+	);
+};
+
+route.put(PATH, async (c) => {
 	const auth = requireAuth(c.get("auth"));
 	requireScope(auth, "permissions:write");
 
@@ -29,17 +42,7 @@ route.put("/permissions/:id", async (c) => {
 		.where(eq(permissions.id, id))
 		.limit(1);
 	if (!existing) return notFound(c, "Permission");
-
-	const isAdmin = hasScope(auth, "admin");
-	const isSubject =
-		existing.subjectType === auth.subjectType &&
-		existing.subjectId === auth.subjectId;
-	const canManageCollectionPermission =
-		existing.objectType === "collection" &&
-		hasScope(auth, "collections:write");
-	if (!isAdmin && !isSubject && !canManageCollectionPermission) {
-		return forbidden(c);
-	}
+	if (!canUpdatePermission(auth, existing)) return forbidden(c);
 
 	try {
 		const [row] = await db
@@ -47,21 +50,22 @@ route.put("/permissions/:id", async (c) => {
 			.set({ ...parsed, updatedAt: new Date() })
 			.where(eq(permissions.id, id))
 			.returning();
-		return row ?
-				c.json(itemResponse(row))
-			:	notFound(c, "Permission");
+		if (!row)
+			throw new Error(
+				`Permission disappeared during update: ${id}`,
+			);
+		return c.json(itemResponse(row));
 	} catch (err) {
-		if (err instanceof Error && /UNIQUE/i.test(err.message)) {
+		if (isUniqueConstraintError(err))
 			return conflict(c, "Conflict on update");
-		}
 		throw err;
 	}
 });
 
 export default {
 	route,
-	method: "PUT" as RouteMetadata["method"],
-	path: "/permissions/:id",
+	method: "PUT" satisfies RouteMetadata["method"],
+	path: PATH,
 	description: "Update permission",
 	auth_required: true,
 	scopes: ["permissions:write"],

@@ -6,9 +6,15 @@ alwaysApply: false
 
 # WorkOS on Cloudflare Workers
 
-The official `@workos/authkit-sveltekit` SDK does not work on Cloudflare Workers (relies on `process.env` and Node.js crypto). Use the **WorkOS REST API** via `@vesta-cx/utils/auth`.
+`@vesta-cx/utils/auth` has been retired.
 
-All auth logic lives in `packages/utils/src/auth/`. Apps import from `@vesta-cx/utils/auth`.
+All shared auth logic belongs in `@vesta-cx/auth`, using `workos-node` (including its `workerd` export) plus shared transport/runtime boundaries.
+
+When touching existing auth flows:
+
+- Add or update auth behavior in `@vesta-cx/auth`, not `packages/utils`.
+- Keep Cloudflare Workers as a first-class runtime; do not assume Node-only auth helpers.
+- Do not reintroduce thin fetch wrappers around WorkOS endpoints unless the shared auth package explicitly needs a transport seam for testing or retries.
 
 ## Cloudflare Adapter Typing Gotcha
 

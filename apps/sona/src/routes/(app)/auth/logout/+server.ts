@@ -1,28 +1,26 @@
 import { redirect } from '@sveltejs/kit';
-import { clearSession, getSession, getLogoutUrl } from '@vesta-cx/utils/auth';
+import { clearSealedSession, readSessionCookie } from '@vesta-cx/auth';
+import { createSonaAuthRuntime } from '$lib/server/auth';
 import type { RequestHandler } from './$types';
 
 const handleLogout: RequestHandler = async ({ cookies, platform, url }) => {
-	const cookiePassword = platform?.env?.PRIVATE_WORKOS_COOKIE_PASSWORD;
+	const runtime = platform ? createSonaAuthRuntime(platform) : null;
 	let workosLogoutUrl: string | null = null;
 
-	// Try to build the WorkOS logout URL before clearing the session
-	if (cookiePassword) {
-		const session = await getSession(cookies, cookiePassword);
-		if (session?.accessToken) {
-			workosLogoutUrl = getLogoutUrl({
-				accessToken: session.accessToken,
+	try {
+		if (runtime) {
+			workosLogoutUrl = await runtime.getLogoutUrl({
+				sealedSession: readSessionCookie(cookies),
 				returnTo: url.origin
 			});
 		}
+	} catch {
+		workosLogoutUrl = null;
+	} finally {
+		clearSealedSession(cookies);
 	}
 
-	// Always clear the local session cookie
-	clearSession(cookies);
-
-	// Redirect through WorkOS to end the SSO session, or fall back to home
 	redirect(302, workosLogoutUrl ?? '/');
 };
 
-export const GET = handleLogout;
 export const POST = handleLogout;

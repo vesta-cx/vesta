@@ -2,24 +2,27 @@
 
 import { Hono } from "hono";
 import { runListQuery } from "@mia-cx/drizzle-query-factory";
-import { hasScope, requireAuth } from "../../auth/helpers";
+import { requireAuth, requireScope } from "../../auth/helpers";
+import { ADMIN_SCOPE } from "../../auth/types";
 import { getDB } from "../../db";
 import { teams } from "../../db/schema";
-import { forbidden } from "../../lib/errors";
 import { teamListConfig } from "../../services/teams";
 import type { AppEnv } from "../../env";
 import type { RouteMetadata } from "../../registry";
 
 const route = new Hono<AppEnv>();
+const PATH = "/teams" as const;
 
-route.get("/teams", async (c) => {
+route.get(PATH, async (c) => {
 	const auth = requireAuth(c.get("auth"));
-	if (!hasScope(auth, "teams:read")) return forbidden(c);
+	requireScope(auth, "teams:read");
 
 	const envelope = await runListQuery({
 		db: getDB(c.env.DB),
 		table: teams,
-		input: new URL(c.req.url).searchParams,
+		input: new URLSearchParams(
+			c.req.query() as Record<string, string>,
+		),
 		config: teamListConfig,
 		mode: "envelope",
 	});
@@ -28,9 +31,10 @@ route.get("/teams", async (c) => {
 
 export default {
 	route,
-	method: "GET" as RouteMetadata["method"],
-	path: "/teams",
+	method: "GET" satisfies RouteMetadata["method"],
+	path: PATH,
 	description: "List teams",
 	auth_required: true,
 	scopes: ["teams:read"],
+	scopes_any: [ADMIN_SCOPE, "teams:read"],
 };

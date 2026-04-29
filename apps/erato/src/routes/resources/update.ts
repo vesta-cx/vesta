@@ -1,65 +1,54 @@
 /** @format */
 
-import { and, eq } from "drizzle-orm";
 import { Hono } from "hono";
 import { itemResponse } from "@mia-cx/drizzle-query-factory";
-import { requireAuth, requireScope, hasScope } from "../../auth/helpers";
+import { requireAuth, requireScope } from "../../auth/helpers";
+import { ADMIN_SCOPE } from "../../auth/types";
 import { getDB } from "../../db";
 import { resources } from "../../db/schema";
-import { conflict, forbidden, notFound } from "../../lib/errors";
+import { isUniqueConstraintError } from "../../lib/db-helpers";
+import { conflict, notFound } from "../../lib/errors";
 import { parseBody, isResponse } from "../../lib/validation";
-import { updateResourceSchema } from "../../services/resources";
+import {
+	resourceMutationWhere,
+	updateResourceSchema,
+} from "../../services/resources";
 import type { AppEnv } from "../../env";
 import type { RouteMetadata } from "../../registry";
 
 const route = new Hono<AppEnv>();
+const PATH = "/resources/:id" as const;
 
-route.put("/resources/:id", async (c) => {
+route.put(PATH, async (c) => {
 	const auth = requireAuth(c.get("auth"));
-
 	requireScope(auth, "resources:write");
 
 	const id = c.req.param("id");
 	const parsed = await parseBody(c, updateResourceSchema);
 	if (isResponse(parsed)) return parsed;
 
-	const db = getDB(c.env.DB);
-
-	const isAdmin = hasScope(auth, "admin");
-	const where =
-		isAdmin ?
-			eq(resources.id, id)
-		:	and(
-				eq(resources.id, id),
-				eq(
-					resources.ownerId,
-					(auth as { subjectId: string })
-						.subjectId,
-				),
-			);
-
 	try {
-		const [row] = await db
+		const [row] = await getDB(c.env.DB)
 			.update(resources)
-			.set({ ...parsed, updatedAt: new Date() } as any)
-			.where(where)
+			.set({ ...parsed, updatedAt: new Date() })
+			.where(resourceMutationWhere(auth, id))
 			.returning();
 		return row ?
 				c.json(itemResponse(row))
 			:	notFound(c, "Resource");
 	} catch (err) {
-		if (err instanceof Error && /UNIQUE/i.test(err.message)) {
+		if (isUniqueConstraintError(err))
 			return conflict(c, "Conflict on update");
-		}
 		throw err;
 	}
 });
 
 export default {
 	route,
-	method: "PUT" as RouteMetadata["method"],
-	path: "/resources/:id",
+	method: "PUT" satisfies RouteMetadata["method"],
+	path: PATH,
 	description: "Update resource",
 	auth_required: true,
 	scopes: ["resources:write"],
+	scopes_any: [ADMIN_SCOPE, "resources:write"],
 };

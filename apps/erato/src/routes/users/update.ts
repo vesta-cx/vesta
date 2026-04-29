@@ -3,6 +3,7 @@
 import { eq } from "drizzle-orm";
 import { Hono } from "hono";
 import { itemResponse } from "@mia-cx/drizzle-query-factory";
+import { ADMIN_SCOPE } from "../../auth/types";
 import { requireAuth, hasScope } from "../../auth/helpers";
 import { getDB } from "../../db";
 import { users } from "../../db/schema";
@@ -13,22 +14,16 @@ import type { AppEnv } from "../../env";
 import type { RouteMetadata } from "../../registry";
 
 const route = new Hono<AppEnv>();
+const PATH = "/users/:id" as const;
 
-route.put("/users/:id", async (c) => {
+route.put(PATH, async (c) => {
 	const id = c.req.param("id");
 	const auth = requireAuth(c.get("auth"));
-
 	const isSelf = auth.subjectId === id;
-	const isAdmin = hasScope(auth, "admin");
+	const isAdmin = hasScope(auth, ADMIN_SCOPE);
 
-	if (!isSelf && !isAdmin) {
-		return forbidden(c);
-	}
-
-	if (!isAdmin) {
-		const hasWrite = auth.scopes.includes("users:write");
-		if (!hasWrite) return forbidden(c);
-	}
+	if (!isSelf && !isAdmin) return forbidden(c);
+	if (!isAdmin && !hasScope(auth, "users:write")) return forbidden(c);
 
 	const parsed = await parseBody(c, updateUserSchema);
 	if (isResponse(parsed)) return parsed;
@@ -46,9 +41,9 @@ route.put("/users/:id", async (c) => {
 
 export default {
 	route,
-	method: "PUT" as RouteMetadata["method"],
-	path: "/users/:id",
+	method: "PUT" satisfies RouteMetadata["method"],
+	path: PATH,
 	description: "Update user",
 	auth_required: true,
-	scopes: ["users:write"],
+	scopes_any: [ADMIN_SCOPE, "users:write"],
 };

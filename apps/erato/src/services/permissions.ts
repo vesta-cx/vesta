@@ -12,6 +12,8 @@ import {
 } from "../db/schema";
 import { z } from "../lib/validation";
 
+const STATIC_SUBJECT_TYPE = "static" satisfies (typeof SUBJECT_TYPES)[number];
+
 export const permissionListConfig: ListQueryConfig = {
 	filters: {
 		subject_type: { column: permissions.subjectType },
@@ -40,28 +42,29 @@ export const permissionActionListConfig: ListQueryConfig = {
 	defaultSort: { key: "created_at", dir: "desc" },
 };
 
-export const createPermissionSchema = z.object({
-	subjectType: z.enum(SUBJECT_TYPES),
-	subjectId: z.string().min(1),
-	objectType: z.enum(OBJECT_TYPES),
-	objectId: z.string().min(1),
-	action: z.string().min(1),
-	value: z.enum(PERMISSION_VALUES).optional(),
-}).superRefine((value, ctx) => {
-	if (
-		value.subjectType === "static" &&
-		!(STATIC_SUBJECT_IDS as readonly string[]).includes(
-			value.subjectId,
-		)
-	) {
-		ctx.addIssue({
-			code: z.ZodIssueCode.custom,
-			path: ["subjectId"],
-			message:
-				"Invalid static subject id. Use guest, authenticated, follower, or subscriber.",
-		});
-	}
-});
+export const createPermissionSchema = z
+	.object({
+		subjectType: z.enum(SUBJECT_TYPES),
+		subjectId: z.string().min(1),
+		objectType: z.enum(OBJECT_TYPES),
+		objectId: z.string().min(1),
+		action: z.string().min(1),
+		value: z.enum(PERMISSION_VALUES).optional(),
+	})
+	.superRefine((data, ctx) => {
+		if (
+			data.subjectType === STATIC_SUBJECT_TYPE &&
+			!(STATIC_SUBJECT_IDS as readonly string[]).includes(
+				data.subjectId,
+			)
+		) {
+			ctx.addIssue({
+				code: z.ZodIssueCode.custom,
+				path: ["subjectId"],
+				message: `Invalid static subject id. Must be one of: ${STATIC_SUBJECT_IDS.join(", ")}.`,
+			});
+		}
+	});
 
 export const updatePermissionSchema = z.object({
 	value: z.enum(PERMISSION_VALUES),

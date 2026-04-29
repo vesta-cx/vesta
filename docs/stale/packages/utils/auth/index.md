@@ -1,11 +1,15 @@
 ---
 title: Auth Flow (How, Why, Implementation)
-description: High-level architecture and low-level implementation details for @vesta-cx/utils/auth
+description: Archived notes for the retired @vesta-cx/utils/auth package
 ---
 
-# Auth Flow (How, Why, Implementation)
+<!-- @format -->
 
-This document explains how authentication works in vesta today using `@vesta-cx/utils/auth`, starting at a high level and then moving into implementation details.
+## Auth Flow (How, Why, Implementation)
+
+> Archived note: `@vesta-cx/utils/auth` has been retired. Current auth work lives in `@vesta-cx/auth`.
+
+This document explains how authentication used to work in vesta using `@vesta-cx/utils/auth`, starting at a high level and then moving into implementation details.
 
 ## High-Level Overview (How + Why)
 

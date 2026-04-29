@@ -3,34 +3,35 @@
 import { Hono } from "hono";
 import { itemResponse } from "@mia-cx/drizzle-query-factory";
 import { requireAuth, requireScope } from "../../auth/helpers";
+import { createEratoWorkOSTransport } from "../../auth/runtime";
 import { getDB } from "../../db";
 import { organizations } from "../../db/schema";
-import { workos } from "../../services/workos";
+import { expectOne } from "../../lib/db-helpers";
+import { singleError } from "../../lib/errors";
+import { parseBody, isResponse } from "../../lib/validation";
 import {
 	createOrganizationSchema,
 	mergeOrgResponse,
 } from "../../services/organizations";
-import { parseBody, isResponse } from "../../lib/validation";
-import { singleError } from "../../lib/errors";
 import type { AppEnv } from "../../env";
 import type { RouteMetadata } from "../../registry";
 
 const route = new Hono<AppEnv>();
+const PATH = "/organizations" as const;
 
-route.post("/organizations", async (c) => {
+route.post(PATH, async (c) => {
 	const auth = requireAuth(c.get("auth"));
-
 	requireScope(auth, "organizations:write");
 
 	const parsed = await parseBody(c, createOrganizationSchema);
 	if (isResponse(parsed)) return parsed;
 
+	const workosTransport = createEratoWorkOSTransport(c.env);
 	let workosOrg;
 	try {
-		workosOrg = await workos.organizations.create(
-			c.env.WORKOS_API_KEY,
-			{ name: parsed.name },
-		);
+		workosOrg = await workosTransport.createOrganization({
+			name: parsed.name,
+		});
 	} catch (err) {
 		return singleError(
 			c,
@@ -40,7 +41,6 @@ route.post("/organizations", async (c) => {
 		);
 	}
 
-	const db = getDB(c.env.DB);
 	const hasLocalFields =
 		parsed.avatarUrl !== undefined ||
 		parsed.bannerUrl !== undefined ||
@@ -49,7 +49,7 @@ route.post("/organizations", async (c) => {
 	let extension = null;
 	if (hasLocalFields) {
 		try {
-			const [row] = await db
+			const rows = await getDB(c.env.DB)
 				.insert(organizations)
 				.values({
 					workosOrgId: workosOrg.id,
@@ -58,12 +58,25 @@ route.post("/organizations", async (c) => {
 					themeConfig: parsed.themeConfig ?? null,
 				})
 				.returning();
-			extension = row ?? null;
+			extension = expectOne(
+				rows,
+				"Organization extension insert",
+			);
 		} catch (err) {
+			await workosTransport
+				.deleteOrganization({
+					organizationId: workosOrg.id,
+				})
+				.catch((rollbackError) => {
+					console.error(
+						"Failed to roll back WorkOS organization after local extension write failed",
+						rollbackError,
+					);
+				});
 			return singleError(
 				c,
 				500,
-				`Organization created on WorkOS (${workosOrg.id}) but failed to save local extensions. Retry with PUT /organizations/${workosOrg.id}.`,
+				`Organization created on WorkOS (${workosOrg.id}) but failed to save local extensions.`,
 				"PARTIAL_WRITE",
 			);
 		}
@@ -77,8 +90,8 @@ route.post("/organizations", async (c) => {
 
 export default {
 	route,
-	method: "POST" as RouteMetadata["method"],
-	path: "/organizations",
+	method: "POST" satisfies RouteMetadata["method"],
+	path: PATH,
 	description: "Create organization",
 	auth_required: true,
 	scopes: ["organizations:write"],

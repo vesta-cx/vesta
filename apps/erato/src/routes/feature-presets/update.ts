@@ -3,35 +3,30 @@
 import { eq } from "drizzle-orm";
 import { Hono } from "hono";
 import { itemResponse } from "@mia-cx/drizzle-query-factory";
-import { requireAuth, hasScope } from "../../auth/helpers";
+import { requireAuth, requireScope } from "../../auth/helpers";
+import { ADMIN_SCOPE } from "../../auth/types";
 import { getDB } from "../../db";
 import { featurePresets } from "../../db/schema";
-import { conflict, forbidden, notFound } from "../../lib/errors";
+import { isUniqueConstraintError } from "../../lib/db-helpers";
+import { conflict, notFound } from "../../lib/errors";
 import { parseBody, isResponse } from "../../lib/validation";
 import { updateFeaturePresetSchema } from "../../services/features";
 import type { AppEnv } from "../../env";
 import type { RouteMetadata } from "../../registry";
 
 const route = new Hono<AppEnv>();
+const PATH = "/feature-presets/:name" as const;
 
-route.put("/feature-presets/:name", async (c) => {
+route.put(PATH, async (c) => {
 	const auth = requireAuth(c.get("auth"));
-	if (!hasScope(auth, "admin")) return forbidden(c);
+	requireScope(auth, ADMIN_SCOPE);
 
 	const name = c.req.param("name");
 	const parsed = await parseBody(c, updateFeaturePresetSchema);
 	if (isResponse(parsed)) return parsed;
 
-	const db = getDB(c.env.DB);
-	const [existing] = await db
-		.select()
-		.from(featurePresets)
-		.where(eq(featurePresets.name, name))
-		.limit(1);
-	if (!existing) return notFound(c, "Feature preset");
-
 	try {
-		const [row] = await db
+		const [row] = await getDB(c.env.DB)
 			.update(featurePresets)
 			.set({ ...parsed, updatedAt: new Date() })
 			.where(eq(featurePresets.name, name))
@@ -40,18 +35,17 @@ route.put("/feature-presets/:name", async (c) => {
 				c.json(itemResponse(row))
 			:	notFound(c, "Feature preset");
 	} catch (err) {
-		if (err instanceof Error && /UNIQUE/i.test(err.message)) {
+		if (isUniqueConstraintError(err))
 			return conflict(c, "Conflict on update");
-		}
 		throw err;
 	}
 });
 
 export default {
 	route,
-	method: "PUT" as RouteMetadata["method"],
-	path: "/feature-presets/:name",
+	method: "PUT" satisfies RouteMetadata["method"],
+	path: PATH,
 	description: "Update feature preset",
 	auth_required: true,
-	scopes: ["admin"],
+	scopes: [ADMIN_SCOPE],
 };

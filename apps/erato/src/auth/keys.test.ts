@@ -7,6 +7,7 @@ import {
 	revokeApiKey,
 	getApiKeyMeta,
 } from "./keys";
+import { parseApiKeyMeta } from "./types";
 
 const createMockKV = (): KVNamespace => {
 	const store = new Map<string, { value: string; expiration?: number }>();
@@ -98,6 +99,37 @@ describe("storeApiKey + getApiKeyMeta round-trip", () => {
 		const meta = await getApiKeyMeta(kv, rawKey);
 		expect(meta).not.toBeNull();
 		expect(meta!.expiresAt).toBe(futureDate);
+	});
+
+	it("rejects already-expired keys", async () => {
+		const rawKey = generateApiKey();
+		const pastDate = new Date(Date.now() - 1000).toISOString();
+
+		await expect(
+			storeApiKey(kv, rawKey, {
+				subjectType: "organization",
+				subjectId: "org_expired",
+				scopes: ["resources:read"],
+				expiresAt: pastDate,
+			}),
+		).rejects.toThrow("Cannot store an already-expired API key");
+		expect(await getApiKeyMeta(kv, rawKey)).toBeNull();
+	});
+});
+
+describe("parseApiKeyMeta", () => {
+	it("rejects unknown scopes", () => {
+		expect(
+			parseApiKeyMeta(
+				JSON.stringify({
+					subjectType: "user",
+					subjectId: "user_123",
+					scopes: ["users:read", "made-up:scope"],
+					createdAt: new Date().toISOString(),
+					expiresAt: null,
+				}),
+			),
+		).toBeNull();
 	});
 });
 

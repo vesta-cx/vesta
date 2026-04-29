@@ -1,15 +1,21 @@
 {
   "name": "@vesta-cx/utils",
   "version": "1.0.0",
-  "description": "Shared utilities for Vesta: colors, easing, numbers, permissions, auth (WorkOS), cookies, CORS. ESM + CJS.",
+  "description": "Shared utilities for Vesta: colors, easing, numbers, permissions, cookies, and CORS. ESM + CJS.",
   "keywords": [
     "vesta",
     "utils",
-    "auth",
     "cors",
-    "cookies",
-    "workos"
+    "cookies"
   ],
+  "homepage": "https://github.com/vesta-cx/utils#readme",
+  "bugs": {
+    "url": "https://github.com/vesta-cx/utils/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/vesta-cx/utils.git"
+  },
   "license": "ISC",
   "author": "vesta-cx",
   "exports": {
@@ -17,11 +23,6 @@
       "types": "./dist/index.d.ts",
       "require": "./dist/index.js",
       "import": "./dist/index.js"
-    },
-    "./auth": {
-      "types": "./dist/auth/index.d.ts",
-      "require": "./dist/auth/index.js",
-      "import": "./dist/auth/index.js"
     },
     "./cookies": {
       "types": "./dist/cookies/index.d.ts",
@@ -35,6 +36,9 @@
     }
   },
   "main": "dist/index.js",
+  "files": [
+    "dist"
+  ],
   "scripts": {
     "build": "tsc",
     "build:clean": "pnpm run clean && pnpm run build",
@@ -50,7 +54,6 @@
   },
   "dependencies": {
     "@nanostores/persistent": "^1.3.3",
-    "iron-webcrypto": "^2.0.0",
     "nanostores": "^1.1.0"
   },
   "devDependencies": {
@@ -72,16 +75,5 @@
       "optional": true
     }
   },
-  "packageManager": "pnpm@10.20.0",
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/vesta-cx/utils.git"
-  },
-  "homepage": "https://github.com/vesta-cx/utils#readme",
-  "bugs": {
-    "url": "https://github.com/vesta-cx/utils/issues"
-  },
-  "files": [
-    "dist"
-  ]
+  "packageManager": "pnpm@10.32.1+sha512.a706938f0e89ac1456b6563eab4edf1d1faf3368d1191fc5c59790e96dc918e4456ab2e67d613de1043d2e8c81f87303e6b40d4ffeca9df15ef1ad567348f2be"
 }

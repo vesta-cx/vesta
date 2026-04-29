@@ -1,35 +1,50 @@
 import { redirect, error } from '@sveltejs/kit';
-import { authenticateWithCode, createSession } from '@vesta-cx/utils/auth';
+import {
+	clearOAuthState,
+	completeSvelteKitLogin,
+	getRequestMetadata,
+	isExpectedAuthenticationFailure,
+	readOAuthState
+} from '@vesta-cx/auth';
+import { createSonaAuthRuntime } from '$lib/server/auth';
 import type { PageServerLoad } from './$types';
 
-export const load: PageServerLoad = async ({ url, cookies, platform }) => {
-	if (!platform) return error(500, 'Platform not available');
+export const load: PageServerLoad = async ({ url, cookies, platform, request }) => {
+	if (!platform) throw error(500, 'Platform not available');
 
 	const code = url.searchParams.get('code');
-	if (!code) return error(400, 'Missing authorization code');
+	if (!code) throw error(400, 'Missing authorization code');
 
-	const result = await authenticateWithCode({
-		code,
-		clientId: platform.env.PRIVATE_WORKOS_CLIENT_ID,
-		apiKey: platform.env.PRIVATE_WORKOS_API_KEY
+	const state = url.searchParams.get('state');
+	const expectedState = readOAuthState(cookies);
+	if (!state || !expectedState || state !== expectedState) {
+		clearOAuthState(cookies);
+		throw error(400, 'Invalid or missing state');
+	}
+
+	clearOAuthState(cookies);
+
+	const runtime = createSonaAuthRuntime(platform);
+	const { ipAddress, userAgent } = getRequestMetadata(request, {
+		trustCloudflare: true
 	});
 
-	if (!result) return error(401, 'Authentication failed');
+	try {
+		await completeSvelteKitLogin({
+			runtime,
+			cookies,
+			code,
+			url,
+			...(ipAddress ? { ipAddress } : {}),
+			...(userAgent ? { userAgent } : {})
+		});
+	} catch (input) {
+		if (isExpectedAuthenticationFailure(input)) {
+			throw error(401, 'Authentication failed');
+		}
 
-	await createSession(
-		cookies,
-		{
-			userId: result.user.id,
-			email: result.user.email,
-			organizationId: result.organizationId ?? platform.env.PRIVATE_WORKOS_ORG_ID,
-			firstName: result.user.first_name ?? undefined,
-			lastName: result.user.last_name ?? undefined,
-			profilePictureUrl: result.user.profile_picture_url ?? undefined,
-			accessToken: result.accessToken,
-			refreshToken: result.refreshToken
-		},
-		platform.env.PRIVATE_WORKOS_COOKIE_PASSWORD
-	);
+		throw input;
+	}
 
 	redirect(302, '/admin');
 };

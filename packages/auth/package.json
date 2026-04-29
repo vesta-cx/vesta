@@ -1,0 +1,70 @@
+{
+  "name": "@vesta-cx/auth",
+  "version": "0.0.1",
+  "description": "Shared WorkOS auth runtime for Vesta apps with Effect-powered retries, SvelteKit helpers, and provisioning adapters.",
+  "keywords": [
+    "vesta",
+    "auth",
+    "workos",
+    "effect",
+    "sveltekit",
+    "cloudflare"
+  ],
+  "homepage": "https://github.com/vesta-cx/vesta/tree/main/packages/auth#readme",
+  "bugs": {
+    "url": "https://github.com/vesta-cx/vesta/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/vesta-cx/vesta.git"
+  },
+  "license": "ISC",
+  "author": "vesta-cx",
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "main": "dist/index.js",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "build:clean": "pnpm run clean && pnpm run build",
+    "clean": "cleanc clean",
+    "dev": "tsc --watch",
+    "dev:clean": "pnpm run clean && pnpm run dev",
+    "format": "prettier --write .",
+    "install:clean": "pnpm run clean && node -e \"try{require('fs').rmSync(require('path').join(process.cwd(),'node_modules'),{recursive:true,force:true})}catch(_){}\" && pnpm i",
+    "lint": "eslint .",
+    "test": "vitest run",
+    "test:coverage": "vitest run --coverage",
+    "test:watch": "vitest"
+  },
+  "dependencies": {
+    "@workos-inc/node": "^8.9.0",
+    "effect": "^4.0.0-beta.37"
+  },
+  "devDependencies": {
+    "@sveltejs/kit": "^2.53.0",
+    "@types/node": "^25.3.0",
+    "@vesta-cx/config": "workspace:*",
+    "@vitest/coverage-v8": "^4.0.18",
+    "eslint": "^10.0.1",
+    "prettier": "^3.8.1",
+    "typescript": "^5.9.3",
+    "vitest": "^4.0.18"
+  },
+  "peerDependencies": {
+    "@sveltejs/kit": "^2.0.0"
+  },
+  "peerDependenciesMeta": {
+    "@sveltejs/kit": {
+      "optional": true
+    }
+  },
+  "packageManager": "pnpm@10.32.1"
+}

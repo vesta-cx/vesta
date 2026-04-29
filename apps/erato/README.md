@@ -77,6 +77,20 @@ WorkOS integration requires these secrets in Wrangler config:
 
 - `WORKOS_API_KEY` — WorkOS API key
 - `WORKOS_CLIENT_ID` — WorkOS client ID
+- `WORKOS_COOKIE_PASSWORD` — WorkOS sealed-session cookie password shared with browser login surfaces
+- `WORKOS_ORG_ID` — Optional default organization fallback for provisioning
+
+## Local DB Smoke Test
+
+Run the opt-in smoke test against an already-running local Erato instance after applying migrations:
+
+```sh
+pnpm --filter erato db:migrate:local
+# in another shell: pnpm --filter erato dev
+pnpm --filter erato test:db:smoke
+```
+
+The smoke test provisions a short-lived admin API key in local Wrangler KV, calls Erato over HTTP/fetch at `http://localhost:8787/v0`, exercises representative CRUD paths, and cleans up through API calls. Override the target with `ERATO_SMOKE_BASE_URL`; keep it pointed at local/dev instances only.
 
 ## API Reference
 

@@ -1,19 +1,21 @@
 import { redirect } from '@sveltejs/kit';
-import { getAuthorizationUrl, getSession } from '@vesta-cx/utils/auth';
+import { authenticateSvelteKitSession, commitOAuthState, createOAuthState } from '@vesta-cx/auth';
+import { createSonaAuthRuntime } from '$lib/server/auth';
 import type { PageServerLoad } from './$types';
 
 export const load: PageServerLoad = async ({ cookies, platform, url }) => {
 	if (!platform) return { error: 'Platform not available' };
 
-	// Already logged in?
-	const session = await getSession(cookies, platform.env.PRIVATE_WORKOS_COOKIE_PASSWORD);
-	if (session) redirect(302, '/admin');
+	const runtime = createSonaAuthRuntime(platform);
+	const existingSession = await authenticateSvelteKitSession({ runtime, cookies });
+	if (existingSession.authenticated) redirect(302, '/admin');
 
-	const redirectUri = `${url.origin}/auth/callback`;
-	const authUrl = getAuthorizationUrl({
-		clientId: platform.env.PRIVATE_WORKOS_CLIENT_ID,
-		redirectUri,
-		organizationId: platform.env.PRIVATE_WORKOS_ORG_ID
+	const state = createOAuthState();
+	commitOAuthState(cookies, state, { secure: url.protocol === 'https:' });
+
+	const authUrl = runtime.getAuthorizationUrl({
+		redirectUri: `${url.origin}/auth/callback`,
+		state
 	});
 
 	redirect(302, authUrl);

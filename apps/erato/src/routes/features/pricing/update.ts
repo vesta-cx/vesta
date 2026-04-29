@@ -3,67 +3,52 @@
 import { eq } from "drizzle-orm";
 import { Hono } from "hono";
 import { itemResponse } from "@mia-cx/drizzle-query-factory";
-import { requireAuth, hasScope } from "../../../auth/helpers";
+import { requireAuth, requireScope } from "../../../auth/helpers";
+import { ADMIN_SCOPE } from "../../../auth/types";
 import { getDB } from "../../../db";
 import { featurePricing, features } from "../../../db/schema";
-import { forbidden, notFound } from "../../../lib/errors";
+import { expectOne } from "../../../lib/db-helpers";
+import { notFound } from "../../../lib/errors";
 import { parseBody, isResponse } from "../../../lib/validation";
 import { updateFeaturePricingSchema } from "../../../services/features";
 import type { AppEnv } from "../../../env";
 import type { RouteMetadata } from "../../../registry";
 
 const route = new Hono<AppEnv>();
+const PATH = "/features/:slug/pricing" as const;
 
-route.put("/features/:slug/pricing", async (c) => {
+route.put(PATH, async (c) => {
 	const auth = requireAuth(c.get("auth"));
-	if (!hasScope(auth, "admin")) return forbidden(c);
+	requireScope(auth, ADMIN_SCOPE);
 
 	const slug = c.req.param("slug");
 	const parsed = await parseBody(c, updateFeaturePricingSchema);
 	if (isResponse(parsed)) return parsed;
 
 	const db = getDB(c.env.DB);
-
 	const [existingFeature] = await db
-		.select()
+		.select({ slug: features.slug })
 		.from(features)
 		.where(eq(features.slug, slug))
 		.limit(1);
 	if (!existingFeature) return notFound(c, "Feature");
 
-	const [existing] = await db
-		.select()
-		.from(featurePricing)
-		.where(eq(featurePricing.featureSlug, slug))
-		.limit(1);
-
-	if (existing) {
-		const [row] = await db
-			.update(featurePricing)
-			.set({ ...parsed, updatedAt: new Date() })
-			.where(eq(featurePricing.featureSlug, slug))
-			.returning();
-		return row ?
-				c.json(itemResponse(row))
-			:	notFound(c, "Feature pricing");
-	}
-
-	const [row] = await db
+	const rows = await db
 		.insert(featurePricing)
-		.values({
-			featureSlug: slug,
-			basePriceCents: parsed.basePriceCents,
-			costOfOperation: parsed.costOfOperation,
+		.values({ featureSlug: slug, ...parsed })
+		.onConflictDoUpdate({
+			target: featurePricing.featureSlug,
+			set: { ...parsed, updatedAt: new Date() },
 		})
 		.returning();
-	return row ? c.json(itemResponse(row)) : notFound(c, "Feature pricing");
+	return c.json(itemResponse(expectOne(rows, "Feature pricing upsert")));
 });
 
 export default {
 	route,
-	method: "PUT" as RouteMetadata["method"],
-	path: "/features/:slug/pricing",
+	method: "PUT" satisfies RouteMetadata["method"],
+	path: PATH,
 	description: "Update feature pricing",
 	auth_required: true,
-	scopes: ["admin"],
+	scopes: [ADMIN_SCOPE],
 };

@@ -5,45 +5,37 @@ import { Hono } from "hono";
 import { hasScope, requireAuth } from "../../auth/helpers";
 import { getDB } from "../../db";
 import { externalLinks } from "../../db/schema";
-import { forbidden, notFound, singleError } from "../../lib/errors";
+import { forbidden, notFound } from "../../lib/errors";
 import {
-	externalLinkSubjectTypeSchema,
+	parsePositionParam,
+	parseSubjectType,
 	scopeForSubjectType,
 } from "./shared";
 import type { AppEnv } from "../../env";
 import type { RouteMetadata } from "../../registry";
 
 const route = new Hono<AppEnv>();
+const PATH = "/links/:subjectType/:subjectId/:position" as const;
 
-route.delete("/links/:subjectType/:subjectId/:position", async (c) => {
+route.delete(PATH, async (c) => {
 	const auth = requireAuth(c.get("auth"));
-	const subjectTypeParsed = externalLinkSubjectTypeSchema.safeParse(
-		c.req.param("subjectType"),
-	);
-	if (!subjectTypeParsed.success) {
-		return singleError(
-			c,
-			422,
-			"Invalid subjectType. Use 'resource' or 'workspace'.",
-			"VALIDATION_ERROR",
-			"subjectType",
-		);
-	}
+	const subjectType = parseSubjectType(c);
+	if (subjectType instanceof Response) return subjectType;
 
-	const writeScope = scopeForSubjectType(subjectTypeParsed.data, "write");
-	if (!hasScope(auth, writeScope)) {
-		return forbidden(c);
-	}
+	const writeScope = scopeForSubjectType(subjectType, "write");
+	if (!hasScope(auth, writeScope)) return forbidden(c);
+
+	const position = parsePositionParam(c);
+	if (position instanceof Response) return position;
 
 	const db = getDB(c.env.DB);
 	const subjectId = c.req.param("subjectId");
-	const position = parseInt(c.req.param("position"), 10);
 
 	const [row] = await db
 		.delete(externalLinks)
 		.where(
 			and(
-				eq(externalLinks.subjectType, subjectTypeParsed.data),
+				eq(externalLinks.subjectType, subjectType),
 				eq(externalLinks.subjectId, subjectId),
 				eq(externalLinks.position, position),
 			),
@@ -56,9 +48,9 @@ route.delete("/links/:subjectType/:subjectId/:position", async (c) => {
 
 export default {
 	route,
-	method: "DELETE" as RouteMetadata["method"],
-	path: "/links/:subjectType/:subjectId/:position",
+	method: "DELETE" satisfies RouteMetadata["method"],
+	path: PATH,
 	description: "Remove external link from a subject",
 	auth_required: true,
-	scopes: ["resources:write", "workspaces:write"],
+	scopes_any: ["resources:write", "workspaces:write"],
 };

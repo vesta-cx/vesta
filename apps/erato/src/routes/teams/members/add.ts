@@ -1,23 +1,23 @@
 /** @format */
 
-import { and, eq } from "drizzle-orm";
+import { eq } from "drizzle-orm";
 import { Hono } from "hono";
 import { itemResponse } from "@mia-cx/drizzle-query-factory";
 import { hasScope, requireAuth, requireScope } from "../../../auth/helpers";
+import { ADMIN_SCOPE } from "../../../auth/types";
 import { getDB } from "../../../db";
 import { teamUsers, teams } from "../../../db/schema";
+import { expectOne, isUniqueConstraintError } from "../../../lib/db-helpers";
 import { conflict, forbidden, notFound } from "../../../lib/errors";
-import { parseBody, isResponse, z } from "../../../lib/validation";
+import { parseBody, isResponse } from "../../../lib/validation";
+import { addMemberSchema } from "../../../services/teams";
 import type { AppEnv } from "../../../env";
 import type { RouteMetadata } from "../../../registry";
 
-const addMemberSchema = z.object({
-	userId: z.string().min(1),
-});
-
 const route = new Hono<AppEnv>();
+const PATH = "/teams/:teamId/members" as const;
 
-route.post("/teams/:teamId/members", async (c) => {
+route.post(PATH, async (c) => {
 	const teamId = c.req.param("teamId");
 	const auth = requireAuth(c.get("auth"));
 	requireScope(auth, "teams:write");
@@ -26,36 +26,39 @@ route.post("/teams/:teamId/members", async (c) => {
 	if (isResponse(parsed)) return parsed;
 
 	const db = getDB(c.env.DB);
-
 	const [team] = await db
-		.select()
+		.select({ ownerId: teams.ownerId })
 		.from(teams)
-		.where(eq(teams.id, teamId));
+		.where(eq(teams.id, teamId))
+		.limit(1);
 	if (!team) return notFound(c, "Team");
 
-	const isAdmin = hasScope(auth, "admin");
-	const isOwner = team.ownerId === auth.subjectId;
-	if (!isAdmin && !isOwner) return forbidden(c);
+	if (!hasScope(auth, ADMIN_SCOPE) && team.ownerId !== auth.subjectId) {
+		return forbidden(c);
+	}
 
 	try {
-		const [row] = await db
+		const rows = await db
 			.insert(teamUsers)
 			.values({ teamId, userId: parsed.userId })
 			.returning();
-		return c.json(itemResponse(row!), 201);
+		return c.json(
+			itemResponse(expectOne(rows, "Team member insert")),
+			201,
+		);
 	} catch (err) {
-		if (err instanceof Error && /UNIQUE/i.test(err.message)) {
+		if (isUniqueConstraintError(err))
 			return conflict(c, "User already in team");
-		}
 		throw err;
 	}
 });
 
 export default {
 	route,
-	method: "POST" as RouteMetadata["method"],
-	path: "/teams/:teamId/members",
+	method: "POST" satisfies RouteMetadata["method"],
+	path: PATH,
 	description: "Add member to team",
 	auth_required: true,
 	scopes: ["teams:write"],
+	scopes_any: [ADMIN_SCOPE, "teams:write"],
 };

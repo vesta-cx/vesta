@@ -7,6 +7,7 @@ import {
 	text,
 	uniqueIndex,
 } from "drizzle-orm/sqlite-core";
+import type { WorkloadToken } from "../types/contracts.js";
 
 export const inboxJobs = sqliteTable(
 	"inbox",
@@ -48,20 +49,8 @@ export const inboxJobs = sqliteTable(
 		sourceKey: text("source_key").notNull(),
 		filename: text("filename").notNull(),
 		uploadPrefix: text("upload_prefix").notNull(),
-		workloadType: text("workload_type", {
-			enum: [
-				"audio:transcode",
-				"audio:analyze",
-				"image:transcode",
-				"image:thumbnail",
-				"image:optimize",
-				"video:transcode",
-				"video:analyze",
-				"video:thumbnail",
-				"document:validate",
-				"other:other",
-			],
-		})
+		workloadType: text("workload_type")
+			.$type<WorkloadToken>()
 			.notNull()
 			.default("audio:transcode"),
 		transcodeConfigJson: text("transcode_config_json").notNull(),

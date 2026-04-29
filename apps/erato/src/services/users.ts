@@ -1,6 +1,5 @@
 /** @format */
 
-import { eq, type SQL } from "drizzle-orm";
 import type { ListQueryConfig } from "@mia-cx/drizzle-query-factory";
 import {
 	userCreateSchema,
@@ -33,5 +32,3 @@ export const PUBLIC_USER_FIELDS = {
 	bio: users.bio,
 	createdAt: users.createdAt,
 } as const;
-
-export const publicProfileWhere = (): SQL | undefined => undefined;

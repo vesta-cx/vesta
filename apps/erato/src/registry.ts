@@ -1,23 +1,53 @@
 /** @format */
 
-import type { Hono } from "hono";
-import type { AppEnv } from "./env";
+import type { Scope } from "./auth/types";
 
 export type RouteMetadata = {
 	method: "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
 	path: string;
 	description: string;
+	/** Documentation-only; runtime auth is enforced imperatively by route handlers. */
 	auth_required: boolean;
-	scopes?: string[];
+	/** Documentation-only scopes that are all required when the route has a single authorization path. */
+	scopes?: readonly Scope[];
+	/** Documentation-only scopes where any one grants access; use for conditional subject-type policies. */
+	scopes_any?: readonly Scope[];
 };
 
-export const routeRegistry: RouteMetadata[] = [];
+export type RouteMetadataInput = Omit<
+	RouteMetadata,
+	"description" | "auth_required"
+> &
+	Partial<Pick<RouteMetadata, "description" | "auth_required">>;
 
-export const registerRoute = (
-	app: Hono<AppEnv>,
-	router: Hono<AppEnv>,
-	metadata: RouteMetadata,
-) => {
-	routeRegistry.push(metadata);
-	app.route("", router);
+const registry: RouteMetadata[] = [];
+
+export const routeRegistry: readonly RouteMetadata[] = registry;
+
+/** Records route metadata once, applying default description/auth values and rejecting duplicates. */
+export const recordRouteMetadata = (
+	input: RouteMetadataInput,
+): RouteMetadata => {
+	const metadata: RouteMetadata = {
+		method: input.method,
+		path: input.path,
+		description: input.description ?? `Route: ${input.path}`,
+		auth_required: input.auth_required ?? true,
+		...(input.scopes ? { scopes: input.scopes } : {}),
+		...(input.scopes_any ? { scopes_any: input.scopes_any } : {}),
+	};
+
+	const existing = registry.find(
+		(route) =>
+			route.method === metadata.method &&
+			route.path === metadata.path,
+	);
+	if (existing) {
+		throw new Error(
+			`Duplicate route metadata: ${metadata.method} ${metadata.path}`,
+		);
+	}
+
+	registry.push(metadata);
+	return metadata;
 };

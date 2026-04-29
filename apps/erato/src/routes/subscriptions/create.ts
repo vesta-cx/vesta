@@ -2,33 +2,38 @@
 
 import { Hono } from "hono";
 import { itemResponse } from "@mia-cx/drizzle-query-factory";
-import { requireAuth, hasScope } from "../../auth/helpers";
+import { requireAuth, requireScope } from "../../auth/helpers";
+import { ADMIN_SCOPE } from "../../auth/types";
 import { getDB } from "../../db";
 import { userSubscriptions } from "../../db/schema";
-import { conflict, forbidden } from "../../lib/errors";
+import { expectOne, isUniqueConstraintError } from "../../lib/db-helpers";
+import { conflict } from "../../lib/errors";
 import { parseBody, isResponse } from "../../lib/validation";
 import { createSubscriptionSchema } from "../../services/subscriptions";
 import type { AppEnv } from "../../env";
 import type { RouteMetadata } from "../../registry";
 
 const route = new Hono<AppEnv>();
+const PATH = "/subscriptions" as const;
 
-route.post("/subscriptions", async (c) => {
+route.post(PATH, async (c) => {
 	const auth = requireAuth(c.get("auth"));
-	if (!hasScope(auth, "admin")) return forbidden(c);
+	requireScope(auth, ADMIN_SCOPE);
 
 	const parsed = await parseBody(c, createSubscriptionSchema);
 	if (isResponse(parsed)) return parsed;
 
-	const db = getDB(c.env.DB);
 	try {
-		const [row] = await db
+		const rows = await getDB(c.env.DB)
 			.insert(userSubscriptions)
-			.values(parsed as any)
+			.values(parsed)
 			.returning();
-		return c.json(itemResponse(row!), 201);
+		return c.json(
+			itemResponse(expectOne(rows, "Subscription insert")),
+			201,
+		);
 	} catch (err) {
-		if (err instanceof Error && /UNIQUE/i.test(err.message)) {
+		if (isUniqueConstraintError(err)) {
 			return conflict(c, "Subscription already exists");
 		}
 		throw err;
@@ -37,9 +42,9 @@ route.post("/subscriptions", async (c) => {
 
 export default {
 	route,
-	method: "POST" as RouteMetadata["method"],
-	path: "/subscriptions",
-	description: "Create subscription",
+	method: "POST" satisfies RouteMetadata["method"],
+	path: PATH,
+	description: "Create a new user subscription (admin only)",
 	auth_required: true,
-	scopes: ["admin"],
+	scopes: [ADMIN_SCOPE],
 };

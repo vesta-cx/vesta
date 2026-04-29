@@ -3,29 +3,47 @@
 import { inArray } from "drizzle-orm";
 import { Hono } from "hono";
 import { requireAuth, requireScope } from "../../auth/helpers";
+import { createEratoWorkOSTransport } from "../../auth/runtime";
 import { getDB } from "../../db";
 import { organizations } from "../../db/schema";
-import { workos } from "../../services/workos";
+import { singleError } from "../../lib/errors";
 import { mergeOrgResponse } from "../../services/organizations";
 import type { AppEnv } from "../../env";
 import type { RouteMetadata } from "../../registry";
 
 const route = new Hono<AppEnv>();
+const PATH = "/organizations" as const;
+const DEFAULT_PAGE_SIZE = 20;
+const MAX_PAGE_SIZE = 100;
 
-route.get("/organizations", async (c) => {
+const parseLimit = (value: string | undefined) => {
+	if (!value) return DEFAULT_PAGE_SIZE;
+	const limit = Number(value);
+	return Number.isInteger(limit) && limit > 0 && limit <= MAX_PAGE_SIZE ?
+			limit
+		:	null;
+};
+
+route.get(PATH, async (c) => {
 	const auth = requireAuth(c.get("auth"));
-
 	requireScope(auth, "organizations:read");
 
-	const url = new URL(c.req.url);
-	const limit = Number(url.searchParams.get("limit")) || 20;
-	const after = url.searchParams.get("after") ?? undefined;
-	const before = url.searchParams.get("before") ?? undefined;
+	const limit = parseLimit(c.req.query("limit"));
+	if (limit === null) {
+		return singleError(
+			c,
+			422,
+			`limit must be an integer between 1 and ${MAX_PAGE_SIZE}`,
+			"VALIDATION_ERROR",
+			"limit",
+		);
+	}
+	const after = c.req.query("after") || undefined;
+	const before = c.req.query("before") || undefined;
 
-	const workosResult = await workos.organizations.list(
-		c.env.WORKOS_API_KEY,
-		{ limit, after, before },
-	);
+	const workosResult = await createEratoWorkOSTransport(
+		c.env,
+	).listOrganizations({ limit, after, before });
 
 	const db = getDB(c.env.DB);
 	const orgIds = workosResult.data.map((o) => o.id);
@@ -53,14 +71,17 @@ route.get("/organizations", async (c) => {
 
 	return c.json({
 		data,
-		list_metadata: workosResult.list_metadata,
+		list_metadata: {
+			before: workosResult.before,
+			after: workosResult.after,
+		},
 	});
 });
 
 export default {
 	route,
-	method: "GET" as RouteMetadata["method"],
-	path: "/organizations",
+	method: "GET" satisfies RouteMetadata["method"],
+	path: PATH,
 	description: "List organizations",
 	auth_required: true,
 	scopes: ["organizations:read"],

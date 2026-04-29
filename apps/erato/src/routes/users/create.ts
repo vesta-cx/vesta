@@ -2,38 +2,37 @@
 
 import { Hono } from "hono";
 import { itemResponse } from "@mia-cx/drizzle-query-factory";
-import { requireAuth, hasScope } from "../../auth/helpers";
+import { ADMIN_SCOPE } from "../../auth/types";
+import { requireAuth, requireScope } from "../../auth/helpers";
 import { getDB } from "../../db";
 import { users } from "../../db/schema";
-import { conflict, forbidden } from "../../lib/errors";
+import { conflict } from "../../lib/errors";
+import { expectOne, isUniqueConstraintError } from "../../lib/db-helpers";
 import { parseBody, isResponse } from "../../lib/validation";
 import { createUserSchema } from "../../services/users";
 import type { AppEnv } from "../../env";
 import type { RouteMetadata } from "../../registry";
 
 const route = new Hono<AppEnv>();
+const PATH = "/users" as const;
 
-route.post("/users", async (c) => {
+route.post(PATH, async (c) => {
 	const auth = requireAuth(c.get("auth"));
-	if (!hasScope(auth, "admin")) {
-		return forbidden(c, "Forbidden: admin scope required");
-	}
+	requireScope(auth, ADMIN_SCOPE);
 
 	const parsed = await parseBody(c, createUserSchema);
 	if (isResponse(parsed)) return parsed;
 
 	const db = getDB(c.env.DB);
 	try {
-		const [row] = await db.insert(users).values(parsed).returning();
-		return c.json(itemResponse(row!), 201);
+		const rows = await db.insert(users).values(parsed).returning();
+		return c.json(
+			itemResponse(expectOne(rows, "User insert")),
+			201,
+		);
 	} catch (err) {
-		const msg = err instanceof Error ? err.message : "";
-		if (/UNIQUE|unique constraint/i.test(msg)) {
-			return conflict(
-				c,
-				"User already exists",
-				"workosUserId",
-			);
+		if (isUniqueConstraintError(err)) {
+			return conflict(c, "User already exists");
 		}
 		throw err;
 	}
@@ -41,9 +40,9 @@ route.post("/users", async (c) => {
 
 export default {
 	route,
-	method: "POST" as RouteMetadata["method"],
-	path: "/users",
+	method: "POST" satisfies RouteMetadata["method"],
+	path: PATH,
 	description: "Create user (admin only)",
 	auth_required: true,
-	scopes: ["admin"],
+	scopes: [ADMIN_SCOPE],
 };

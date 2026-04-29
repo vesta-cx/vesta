@@ -6,10 +6,11 @@ import { itemResponse } from "@mia-cx/drizzle-query-factory";
 import { hasScope, requireAuth } from "../../auth/helpers";
 import { getDB } from "../../db";
 import { externalLinks } from "../../db/schema";
-import { forbidden, notFound, singleError } from "../../lib/errors";
+import { forbidden, notFound } from "../../lib/errors";
 import { parseBody, isResponse } from "../../lib/validation";
 import {
-	externalLinkSubjectTypeSchema,
+	parsePositionParam,
+	parseSubjectType,
 	scopeForSubjectType,
 	updateExternalLinkSchema,
 } from "./shared";
@@ -17,40 +18,31 @@ import type { AppEnv } from "../../env";
 import type { RouteMetadata } from "../../registry";
 
 const route = new Hono<AppEnv>();
+const PATH = "/links/:subjectType/:subjectId/:position" as const;
 
-route.put("/links/:subjectType/:subjectId/:position", async (c) => {
+route.put(PATH, async (c) => {
 	const auth = requireAuth(c.get("auth"));
-	const subjectTypeParsed = externalLinkSubjectTypeSchema.safeParse(
-		c.req.param("subjectType"),
-	);
-	if (!subjectTypeParsed.success) {
-		return singleError(
-			c,
-			422,
-			"Invalid subjectType. Use 'resource' or 'workspace'.",
-			"VALIDATION_ERROR",
-			"subjectType",
-		);
-	}
+	const subjectType = parseSubjectType(c);
+	if (subjectType instanceof Response) return subjectType;
 
-	const writeScope = scopeForSubjectType(subjectTypeParsed.data, "write");
-	if (!hasScope(auth, writeScope)) {
-		return forbidden(c);
-	}
+	const writeScope = scopeForSubjectType(subjectType, "write");
+	if (!hasScope(auth, writeScope)) return forbidden(c);
 
 	const parsed = await parseBody(c, updateExternalLinkSchema);
 	if (isResponse(parsed)) return parsed;
 
+	const position = parsePositionParam(c);
+	if (position instanceof Response) return position;
+
 	const db = getDB(c.env.DB);
 	const subjectId = c.req.param("subjectId");
-	const position = parseInt(c.req.param("position"), 10);
 
 	const [row] = await db
 		.update(externalLinks)
 		.set({ ...parsed, updatedAt: new Date() })
 		.where(
 			and(
-				eq(externalLinks.subjectType, subjectTypeParsed.data),
+				eq(externalLinks.subjectType, subjectType),
 				eq(externalLinks.subjectId, subjectId),
 				eq(externalLinks.position, position),
 			),
@@ -62,9 +54,9 @@ route.put("/links/:subjectType/:subjectId/:position", async (c) => {
 
 export default {
 	route,
-	method: "PUT" as RouteMetadata["method"],
-	path: "/links/:subjectType/:subjectId/:position",
+	method: "PUT" satisfies RouteMetadata["method"],
+	path: PATH,
 	description: "Update external link for a subject",
 	auth_required: true,
-	scopes: ["resources:write", "workspaces:write"],
+	scopes_any: ["resources:write", "workspaces:write"],
 };

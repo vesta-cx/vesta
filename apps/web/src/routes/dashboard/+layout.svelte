@@ -6,7 +6,7 @@
 	import { Separator } from '@vesta-cx/ui/components/ui/separator';
 	import * as Sidebar from '@vesta-cx/ui/components/ui/sidebar';
 	import SidebarClassic from '$lib/components/dashboard/sidebar-classic.svelte';
-	import { primaryNav } from '$lib/components/dashboard/data';
+	import { creatorNav } from '$lib/components/dashboard/data';
 
 	let { children } = $props();
 
@@ -17,10 +17,10 @@
 			? [{ title: 'Overview', href: '/dashboard' }]
 			: segments.map((segment, index) => {
 					const href = '/dashboard/' + segments.slice(0, index + 1).join('/');
-					const navMatch = primaryNav.find(
+					const navMatch = creatorNav.find(
 						(item) => item.href === href || item.items?.some((sub) => sub.href === href)
 					);
-					const subMatch = primaryNav
+					const subMatch = creatorNav
 						.flatMap((item) => item.items ?? [])
 						.find((sub) => sub.href === href);
 					const title =
@@ -60,7 +60,8 @@
 						</Breadcrumb.List>
 					</Breadcrumb.Root>
 					<div class="ms-auto flex items-center gap-2">
-						<Button variant="ghost" size="sm" href="/dashboard-2">View variant B</Button>
+						<Button variant="ghost" size="sm" href="/dashboard-2">Label view</Button>
+						<Button variant="ghost" size="sm" href="/dashboard-3">Cockpit</Button>
 					</div>
 				</div>
 			</header>

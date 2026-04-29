@@ -1,19 +1,18 @@
 <script lang="ts">
 	import * as Sidebar from '@vesta-cx/ui/components/ui/sidebar';
 	import {
+		creatorNav,
 		dashboardUser,
 		dashboardWorkspaces,
-		primaryNav,
-		secondaryNav
+		utilityNav
 	} from './data.js';
 	import NavCollapsible from './nav-collapsible.svelte';
 	import NavSecondary from './nav-secondary.svelte';
 	import NavUser from './nav-user.svelte';
 	import WorkspaceSwitcher from './workspace-switcher.svelte';
 
-	// Variant A: shadcn sidebar-07 — workspace switcher + collapsible nav + user menu.
-	// Settings/help live under a single "Workspace" group, no separate secondary rail.
-	const workspaceGroup = secondaryNav.slice(0, 3);
+	// Variant A — solo creator. Sidebar-07 shape, optimised for one artist
+	// running their own releases. Workspace switcher = artist project.
 </script>
 
 <Sidebar.Root collapsible="icon">
@@ -22,8 +21,8 @@
 	</Sidebar.Header>
 
 	<Sidebar.Content>
-		<NavCollapsible label="Workspace" items={primaryNav} />
-		<NavSecondary items={workspaceGroup} class="mt-auto" />
+		<NavCollapsible label="Release marketing" items={creatorNav} />
+		<NavSecondary items={utilityNav.slice(0, 3)} class="mt-auto" />
 	</Sidebar.Content>
 
 	<Sidebar.Footer>

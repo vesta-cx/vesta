@@ -5,13 +5,13 @@
 	import { Button } from '@vesta-cx/ui/components/ui/button';
 	import { Separator } from '@vesta-cx/ui/components/ui/separator';
 	import * as Sidebar from '@vesta-cx/ui/components/ui/sidebar';
-	import SidebarOrg from '$lib/components/dashboard/sidebar-org.svelte';
+	import SidebarCockpit from '$lib/components/dashboard/sidebar-cockpit.svelte';
 
 	let { children } = $props();
 
 	const title = $derived(
-		page.url.pathname === '/dashboard-2'
-			? 'Overview'
+		page.url.pathname === '/dashboard-3'
+			? 'Now playing'
 			: page.url.pathname
 					.split('/')
 					.filter(Boolean)
@@ -22,11 +22,11 @@
 </script>
 
 {#if browser}
-	<Sidebar.Provider>
-		<SidebarOrg />
+	<Sidebar.Provider style="--sidebar-width: 17rem;">
+		<SidebarCockpit />
 		<Sidebar.Inset>
 			<header
-				class="flex h-14 shrink-0 items-center gap-2 transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-12"
+				class="sticky top-0 z-10 flex h-14 shrink-0 items-center gap-2 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60"
 			>
 				<div class="flex w-full items-center gap-2 px-4">
 					<Sidebar.Trigger class="-ms-1" />
@@ -34,7 +34,7 @@
 					<Breadcrumb.Root>
 						<Breadcrumb.List>
 							<Breadcrumb.Item class="hidden md:block">
-								<Breadcrumb.Link href="/dashboard-2">Dashboard</Breadcrumb.Link>
+								<Breadcrumb.Link href="/dashboard-3">Cockpit</Breadcrumb.Link>
 							</Breadcrumb.Item>
 							<Breadcrumb.Separator class="hidden md:block" />
 							<Breadcrumb.Item>
@@ -43,8 +43,7 @@
 						</Breadcrumb.List>
 					</Breadcrumb.Root>
 					<div class="ms-auto flex items-center gap-2">
-						<Button variant="ghost" size="sm" href="/dashboard">Creator view</Button>
-						<Button variant="ghost" size="sm" href="/dashboard-3">Cockpit</Button>
+						<Button variant="ghost" size="sm" href="/">All variants</Button>
 					</div>
 				</div>
 			</header>

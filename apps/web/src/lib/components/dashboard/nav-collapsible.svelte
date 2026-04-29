@@ -46,7 +46,8 @@
 			{@const active = isActive(item)}
 			{#if item.items?.length}
 				<Collapsible.Root
-					bind:open={openSections[item.title]}
+					open={openSections[item.title] ?? false}
+					onOpenChange={(value) => (openSections[item.title] = value)}
 					class="group/collapsible"
 				>
 					<Sidebar.MenuItem>

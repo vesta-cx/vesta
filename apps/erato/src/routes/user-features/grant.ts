@@ -1,38 +1,35 @@
 /** @format */
 
-import { eq } from "drizzle-orm";
 import { Hono } from "hono";
 import { itemResponse } from "@mia-cx/drizzle-query-factory";
-import { requireAuth, hasScope } from "../../auth/helpers";
+import { requireAuth, requireScope } from "../../auth/helpers";
+import { ADMIN_SCOPE } from "../../auth/types";
 import { getDB } from "../../db";
-import { features, userFeatures } from "../../db/schema";
-import { conflict, forbidden, notFound } from "../../lib/errors";
+import { userFeatures } from "../../db/schema";
+import {
+	expectOne,
+	isForeignKeyConstraintError,
+	isUniqueConstraintError,
+} from "../../lib/db-helpers";
+import { conflict, notFound } from "../../lib/errors";
 import { parseBody, isResponse } from "../../lib/validation";
-import { grantUserFeatureSchema } from "../../services/subscriptions";
+import { grantUserFeatureSchema } from "../../services/features";
 import type { AppEnv } from "../../env";
 import type { RouteMetadata } from "../../registry";
 
 const route = new Hono<AppEnv>();
+const PATH = "/users/:userId/features" as const;
 
-route.post("/users/:userId/features", async (c) => {
+route.post(PATH, async (c) => {
 	const auth = requireAuth(c.get("auth"));
-	if (!hasScope(auth, "admin")) return forbidden(c);
+	requireScope(auth, ADMIN_SCOPE);
 
 	const userId = c.req.param("userId");
 	const parsed = await parseBody(c, grantUserFeatureSchema);
 	if (isResponse(parsed)) return parsed;
 
-	const db = getDB(c.env.DB);
-
-	const [existingFeature] = await db
-		.select()
-		.from(features)
-		.where(eq(features.slug, parsed.featureSlug))
-		.limit(1);
-	if (!existingFeature) return notFound(c, "Feature");
-
 	try {
-		const [row] = await db
+		const rows = await getDB(c.env.DB)
 			.insert(userFeatures)
 			.values({
 				userId,
@@ -40,20 +37,25 @@ route.post("/users/:userId/features", async (c) => {
 				limitValue: parsed.limitValue ?? null,
 			})
 			.returning();
-		return c.json(itemResponse(row!), 201);
+		return c.json(
+			itemResponse(expectOne(rows, "User feature insert")),
+			201,
+		);
 	} catch (err) {
-		if (err instanceof Error && /UNIQUE/i.test(err.message)) {
+		if (isUniqueConstraintError(err)) {
 			return conflict(c, "User already has this feature");
 		}
+		if (isForeignKeyConstraintError(err))
+			return notFound(c, "Feature");
 		throw err;
 	}
 });
 
 export default {
 	route,
-	method: "POST" as RouteMetadata["method"],
-	path: "/users/:userId/features",
+	method: "POST" satisfies RouteMetadata["method"],
+	path: PATH,
 	description: "Grant feature to user",
 	auth_required: true,
-	scopes: ["admin"],
+	scopes: [ADMIN_SCOPE],
 };

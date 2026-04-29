@@ -2,32 +2,24 @@
 
 import { eq } from "drizzle-orm";
 import { Hono } from "hono";
-import { requireAuth, hasScope } from "../../auth/helpers";
+import { requireAuth, requireScope } from "../../auth/helpers";
+import { ADMIN_SCOPE } from "../../auth/types";
 import { getDB } from "../../db";
 import { featurePresets } from "../../db/schema";
-import { forbidden, notFound } from "../../lib/errors";
+import { notFound } from "../../lib/errors";
 import type { AppEnv } from "../../env";
 import type { RouteMetadata } from "../../registry";
 
 const route = new Hono<AppEnv>();
+const PATH = "/feature-presets/:name" as const;
 
-route.delete("/feature-presets/:name", async (c) => {
+route.delete(PATH, async (c) => {
 	const auth = requireAuth(c.get("auth"));
-	if (!hasScope(auth, "admin")) return forbidden(c);
+	requireScope(auth, ADMIN_SCOPE);
 
-	const name = c.req.param("name");
-	const db = getDB(c.env.DB);
-
-	const [existing] = await db
-		.select()
-		.from(featurePresets)
-		.where(eq(featurePresets.name, name))
-		.limit(1);
-	if (!existing) return notFound(c, "Feature preset");
-
-	const [row] = await db
+	const [row] = await getDB(c.env.DB)
 		.delete(featurePresets)
-		.where(eq(featurePresets.name, name))
+		.where(eq(featurePresets.name, c.req.param("name")))
 		.returning();
 	if (!row) return notFound(c, "Feature preset");
 
@@ -36,9 +28,9 @@ route.delete("/feature-presets/:name", async (c) => {
 
 export default {
 	route,
-	method: "DELETE" as RouteMetadata["method"],
-	path: "/feature-presets/:name",
+	method: "DELETE" satisfies RouteMetadata["method"],
+	path: PATH,
 	description: "Delete feature preset",
 	auth_required: true,
-	scopes: ["admin"],
+	scopes: [ADMIN_SCOPE],
 };

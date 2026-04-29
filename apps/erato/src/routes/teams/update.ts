@@ -1,20 +1,23 @@
 /** @format */
 
-import { eq } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 import { Hono } from "hono";
 import { itemResponse } from "@mia-cx/drizzle-query-factory";
 import { hasScope, requireAuth, requireScope } from "../../auth/helpers";
+import { ADMIN_SCOPE } from "../../auth/types";
 import { getDB } from "../../db";
 import { teams } from "../../db/schema";
-import { conflict, forbidden, notFound } from "../../lib/errors";
+import { isUniqueConstraintError } from "../../lib/db-helpers";
+import { conflict, notFound } from "../../lib/errors";
 import { parseBody, isResponse } from "../../lib/validation";
 import { updateTeamSchema } from "../../services/teams";
 import type { AppEnv } from "../../env";
 import type { RouteMetadata } from "../../registry";
 
 const route = new Hono<AppEnv>();
+const PATH = "/teams/:id" as const;
 
-route.put("/teams/:id", async (c) => {
+route.put(PATH, async (c) => {
 	const id = c.req.param("id");
 	const auth = requireAuth(c.get("auth"));
 	requireScope(auth, "teams:write");
@@ -22,43 +25,31 @@ route.put("/teams/:id", async (c) => {
 	const parsed = await parseBody(c, updateTeamSchema);
 	if (isResponse(parsed)) return parsed;
 
-	const db = getDB(c.env.DB);
-
-	const [existing] = await db
-		.select()
-		.from(teams)
-		.where(eq(teams.id, id));
-	if (!existing) return notFound(c, "Team");
-
-	const isAdmin = hasScope(auth, "admin");
-	const isOwner = existing.ownerId === auth.subjectId;
-	if (!isAdmin && !isOwner) return forbidden(c);
-
-	const data: Record<string, unknown> = {
-		updatedAt: new Date(),
-	};
-	if (parsed.name !== undefined) data.name = parsed.name;
+	const where =
+		hasScope(auth, ADMIN_SCOPE) ?
+			eq(teams.id, id)
+		:	and(eq(teams.id, id), eq(teams.ownerId, auth.subjectId));
 
 	try {
-		const [row] = await db
+		const [row] = await getDB(c.env.DB)
 			.update(teams)
-			.set(data)
-			.where(eq(teams.id, id))
+			.set({ ...parsed, updatedAt: new Date() })
+			.where(where)
 			.returning();
-		return c.json(itemResponse(row!));
+		return row ? c.json(itemResponse(row)) : notFound(c, "Team");
 	} catch (err) {
-		if (err instanceof Error && err.message.includes("UNIQUE")) {
+		if (isUniqueConstraintError(err))
 			return conflict(c, "Team update conflict");
-		}
 		throw err;
 	}
 });
 
 export default {
 	route,
-	method: "PUT" as RouteMetadata["method"],
-	path: "/teams/:id",
+	method: "PUT" satisfies RouteMetadata["method"],
+	path: PATH,
 	description: "Update team",
 	auth_required: true,
 	scopes: ["teams:write"],
+	scopes_any: [ADMIN_SCOPE, "teams:write"],
 };

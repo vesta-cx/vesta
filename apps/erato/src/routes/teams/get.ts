@@ -1,39 +1,42 @@
 /** @format */
 
-import { eq } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 import { Hono } from "hono";
 import { itemResponse } from "@mia-cx/drizzle-query-factory";
-import { hasScope, requireAuth } from "../../auth/helpers";
+import { hasScope, requireAuth, requireScope } from "../../auth/helpers";
+import { ADMIN_SCOPE } from "../../auth/types";
 import { getDB } from "../../db";
 import { teams } from "../../db/schema";
-import { forbidden, notFound } from "../../lib/errors";
+import { notFound } from "../../lib/errors";
 import type { AppEnv } from "../../env";
 import type { RouteMetadata } from "../../registry";
 
 const route = new Hono<AppEnv>();
+const PATH = "/teams/:id" as const;
 
-route.get("/teams/:id", async (c) => {
+route.get(PATH, async (c) => {
 	const id = c.req.param("id");
 	const auth = requireAuth(c.get("auth"));
-	if (!hasScope(auth, "teams:read")) return forbidden(c);
+	requireScope(auth, "teams:read");
 
-	const db = getDB(c.env.DB);
-
-	const [row] = await db.select().from(teams).where(eq(teams.id, id));
-	if (!row) return notFound(c, "Team");
-
-	const isAdmin = hasScope(auth, "admin");
-	const isOwner = row.ownerId === auth.subjectId;
-	if (!isAdmin && !isOwner) return forbidden(c);
-
-	return c.json(itemResponse(row));
+	const where =
+		hasScope(auth, ADMIN_SCOPE) ?
+			eq(teams.id, id)
+		:	and(eq(teams.id, id), eq(teams.ownerId, auth.subjectId));
+	const [row] = await getDB(c.env.DB)
+		.select()
+		.from(teams)
+		.where(where)
+		.limit(1);
+	return row ? c.json(itemResponse(row)) : notFound(c, "Team");
 });
 
 export default {
 	route,
-	method: "GET" as RouteMetadata["method"],
-	path: "/teams/:id",
+	method: "GET" satisfies RouteMetadata["method"],
+	path: PATH,
 	description: "Get team by id",
 	auth_required: true,
 	scopes: ["teams:read"],
+	scopes_any: [ADMIN_SCOPE, "teams:read"],
 };

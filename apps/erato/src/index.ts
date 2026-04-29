@@ -1,6 +1,7 @@
 /** @format */
 
 import { Hono } from "hono";
+import { HTTPException } from "hono/http-exception";
 import { API_BASE_PATH } from "./config/api-version";
 import type { AppEnv } from "./env";
 import { browserAuthRoutes } from "./auth/browser";
@@ -11,6 +12,7 @@ import {
 	type RouteMetadataInput,
 } from "./registry";
 import { corsMiddleware } from "./lib/cors";
+import { singleError } from "./lib/errors";
 import healthExport from "./routes/health";
 import * as allRoutes from "./routes/index";
 
@@ -38,6 +40,19 @@ const isRouteExport = (value: unknown): value is RouteExport =>
 	typeof value.path === "string";
 
 const app = new Hono<AppEnv>();
+
+app.onError((error, c) => {
+	if (error instanceof HTTPException) {
+		return singleError(c, error.status, error.message, error.name);
+	}
+
+	console.error("Unhandled Erato request error", {
+		method: c.req.method,
+		path: c.req.path,
+		error,
+	});
+	return singleError(c, 500, "Internal server error", "INTERNAL_ERROR");
+});
 
 // CORS on all routes
 app.use("*", (c, next) => corsMiddleware(c.env.CORS_ORIGINS)(c, next));

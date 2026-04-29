@@ -3,53 +3,47 @@
 import { eq } from "drizzle-orm";
 import { Hono } from "hono";
 import { itemResponse } from "@mia-cx/drizzle-query-factory";
-import { requireAuth, hasScope } from "../../auth/helpers";
+import { requireAuth, requireScope } from "../../auth/helpers";
+import { ADMIN_SCOPE } from "../../auth/types";
 import { getDB } from "../../db";
 import { features } from "../../db/schema";
-import { conflict, forbidden, notFound } from "../../lib/errors";
+import { isUniqueConstraintError } from "../../lib/db-helpers";
+import { conflict, notFound } from "../../lib/errors";
 import { parseBody, isResponse } from "../../lib/validation";
 import { updateFeatureSchema } from "../../services/features";
 import type { AppEnv } from "../../env";
 import type { RouteMetadata } from "../../registry";
 
 const route = new Hono<AppEnv>();
+const PATH = "/features/:slug" as const;
 
-route.put("/features/:slug", async (c) => {
+route.put(PATH, async (c) => {
 	const auth = requireAuth(c.get("auth"));
-	if (!hasScope(auth, "admin")) return forbidden(c);
+	requireScope(auth, ADMIN_SCOPE);
 
 	const slug = c.req.param("slug");
 	const parsed = await parseBody(c, updateFeatureSchema);
 	if (isResponse(parsed)) return parsed;
 
-	const db = getDB(c.env.DB);
-	const [existing] = await db
-		.select()
-		.from(features)
-		.where(eq(features.slug, slug))
-		.limit(1);
-	if (!existing) return notFound(c, "Feature");
-
 	try {
-		const [row] = await db
+		const [row] = await getDB(c.env.DB)
 			.update(features)
 			.set({ ...parsed, updatedAt: new Date() })
 			.where(eq(features.slug, slug))
 			.returning();
 		return row ? c.json(itemResponse(row)) : notFound(c, "Feature");
 	} catch (err) {
-		if (err instanceof Error && /UNIQUE/i.test(err.message)) {
+		if (isUniqueConstraintError(err))
 			return conflict(c, "Conflict on update");
-		}
 		throw err;
 	}
 });
 
 export default {
 	route,
-	method: "PUT" as RouteMetadata["method"],
-	path: "/features/:slug",
+	method: "PUT" satisfies RouteMetadata["method"],
+	path: PATH,
 	description: "Update feature",
 	auth_required: true,
-	scopes: ["admin"],
+	scopes: [ADMIN_SCOPE],
 };

@@ -6,10 +6,11 @@ export type RouteMetadata = {
 	method: "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
 	path: string;
 	description: string;
+	/** Documentation-only; runtime auth is enforced imperatively by route handlers. */
 	auth_required: boolean;
-	/** Scopes that are all required when the route has a single authorization path. */
+	/** Documentation-only scopes that are all required when the route has a single authorization path. */
 	scopes?: readonly Scope[];
-	/** Scopes where any one grants access; use for conditional subject-type policies. */
+	/** Documentation-only scopes where any one grants access; use for conditional subject-type policies. */
 	scopes_any?: readonly Scope[];
 };
 

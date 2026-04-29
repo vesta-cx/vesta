@@ -1,40 +1,27 @@
 /** @format */
 
-import { eq } from "drizzle-orm";
 import { Hono } from "hono";
-import { requireAuth, requireScope, hasScope } from "../../auth/helpers";
+import { requireAuth, requireScope } from "../../auth/helpers";
+import { ADMIN_SCOPE } from "../../auth/types";
 import { getDB } from "../../db";
 import { collections } from "../../db/schema";
-import { forbidden, notFound } from "../../lib/errors";
-import { isCollectionOwner } from "../../services/collections";
+import { notFound } from "../../lib/errors";
+import { collectionMutationWhere } from "../../services/collections";
 import type { AppEnv } from "../../env";
 import type { RouteMetadata } from "../../registry";
 
 const route = new Hono<AppEnv>();
+const PATH = "/collections/:id" as const;
 
-route.delete("/collections/:id", async (c) => {
+route.delete(PATH, async (c) => {
 	const auth = requireAuth(c.get("auth"));
-
 	requireScope(auth, "collections:write");
 
-	const id = c.req.param("id");
 	const db = getDB(c.env.DB);
-
-	const [existing] = await db
-		.select()
-		.from(collections)
-		.where(eq(collections.id, id))
-		.limit(1);
-	if (!existing) return notFound(c, "Collection");
-
-	const isAdmin = hasScope(auth, "admin");
-	const isOwner = await isCollectionOwner(db, existing, auth.subjectId);
-	if (!isAdmin && !isOwner) return forbidden(c);
-
 	const [row] = await db
 		.delete(collections)
-		.where(eq(collections.id, id))
-		.returning();
+		.where(collectionMutationWhere(db, auth, c.req.param("id")))
+		.returning({ id: collections.id });
 	if (!row) return notFound(c, "Collection");
 
 	return c.body(null, 204);
@@ -42,9 +29,10 @@ route.delete("/collections/:id", async (c) => {
 
 export default {
 	route,
-	method: "DELETE" as RouteMetadata["method"],
-	path: "/collections/:id",
+	method: "DELETE" satisfies RouteMetadata["method"],
+	path: PATH,
 	description: "Delete collection",
 	auth_required: true,
 	scopes: ["collections:write"],
+	scopes_any: [ADMIN_SCOPE, "collections:write"],
 };

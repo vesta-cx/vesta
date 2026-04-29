@@ -4,29 +4,44 @@ import { and, eq } from "drizzle-orm";
 import { Hono } from "hono";
 import { runListQuery } from "@mia-cx/drizzle-query-factory";
 import { hasScope, requireAuth } from "../../../auth/helpers";
+import { ADMIN_SCOPE } from "../../../auth/types";
 import { getDB } from "../../../db";
 import { externalLinks } from "../../../db/schema";
-import { forbidden } from "../../../lib/errors";
+import { forbidden, notFound } from "../../../lib/errors";
+import {
+	WORKSPACE_LINK_SUBJECT_TYPE,
+	canReadWorkspace,
+} from "../../../services/workspaces";
 import { externalLinkListConfig } from "../../links/shared";
 import type { AppEnv } from "../../../env";
 import type { RouteMetadata } from "../../../registry";
 
 const route = new Hono<AppEnv>();
+const PATH = "/workspaces/:workspaceId/urls" as const;
 
-route.get("/workspaces/:workspaceId/urls", async (c) => {
+route.get(PATH, async (c) => {
 	const auth = requireAuth(c.get("auth"));
-	if (!hasScope(auth, "workspaces:read")) {
-		return forbidden(c);
+	if (!hasScope(auth, "workspaces:read")) return forbidden(c);
+
+	const db = getDB(c.env.DB);
+	const workspaceId = c.req.param("workspaceId");
+	if (!(await canReadWorkspace(db, auth, workspaceId))) {
+		return notFound(c, "Workspace");
 	}
 
 	const envelope = await runListQuery({
-		db: getDB(c.env.DB),
+		db,
 		table: externalLinks,
-		input: new URL(c.req.url).searchParams,
+		input: new URLSearchParams(
+			c.req.query() as Record<string, string>,
+		),
 		config: externalLinkListConfig,
 		baseWhere: and(
-			eq(externalLinks.subjectType, "workspace"),
-			eq(externalLinks.subjectId, c.req.param("workspaceId")),
+			eq(
+				externalLinks.subjectType,
+				WORKSPACE_LINK_SUBJECT_TYPE,
+			),
+			eq(externalLinks.subjectId, workspaceId),
 		),
 		mode: "envelope",
 	});
@@ -35,9 +50,10 @@ route.get("/workspaces/:workspaceId/urls", async (c) => {
 
 export default {
 	route,
-	method: "GET" as RouteMetadata["method"],
-	path: "/workspaces/:workspaceId/urls",
+	method: "GET" satisfies RouteMetadata["method"],
+	path: PATH,
 	description: "List workspace URLs",
 	auth_required: true,
 	scopes: ["workspaces:read"],
+	scopes_any: [ADMIN_SCOPE, "workspaces:read"],
 };

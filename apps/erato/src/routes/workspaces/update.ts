@@ -1,20 +1,25 @@
 /** @format */
 
-import { eq } from "drizzle-orm";
 import { Hono } from "hono";
 import { itemResponse } from "@mia-cx/drizzle-query-factory";
-import { hasScope, requireAuth, requireScope } from "../../auth/helpers";
+import { requireAuth, requireScope } from "../../auth/helpers";
+import { ADMIN_SCOPE } from "../../auth/types";
 import { getDB } from "../../db";
 import { workspaces } from "../../db/schema";
-import { conflict, forbidden, notFound } from "../../lib/errors";
+import { isUniqueConstraintError } from "../../lib/db-helpers";
+import { conflict, notFound } from "../../lib/errors";
 import { parseBody, isResponse } from "../../lib/validation";
-import { updateWorkspaceSchema } from "../../services/workspaces";
+import {
+	updateWorkspaceSchema,
+	workspaceMutationWhere,
+} from "../../services/workspaces";
 import type { AppEnv } from "../../env";
 import type { RouteMetadata } from "../../registry";
 
 const route = new Hono<AppEnv>();
+const PATH = "/workspaces/:id" as const;
 
-route.put("/workspaces/:id", async (c) => {
+route.put(PATH, async (c) => {
 	const id = c.req.param("id");
 	const auth = requireAuth(c.get("auth"));
 	requireScope(auth, "workspaces:write");
@@ -22,38 +27,17 @@ route.put("/workspaces/:id", async (c) => {
 	const parsed = await parseBody(c, updateWorkspaceSchema);
 	if (isResponse(parsed)) return parsed;
 
-	const db = getDB(c.env.DB);
-
-	const [existing] = await db
-		.select()
-		.from(workspaces)
-		.where(eq(workspaces.id, id));
-	if (!existing) return notFound(c, "Workspace");
-
-	const isAdmin = hasScope(auth, "admin");
-	const isOwner = existing.ownerId === auth.subjectId;
-	if (!isAdmin && !isOwner) return forbidden(c);
-
-	const data: Record<string, unknown> = {
-		updatedAt: new Date(),
-	};
-	if (parsed.name !== undefined) data.name = parsed.name;
-	if (parsed.slug !== undefined) data.slug = parsed.slug;
-	if (parsed.description !== undefined)
-		data.description = parsed.description;
-	if (parsed.avatarUrl !== undefined) data.avatarUrl = parsed.avatarUrl;
-	if (parsed.bannerUrl !== undefined) data.bannerUrl = parsed.bannerUrl;
-	if (parsed.status !== undefined) data.status = parsed.status;
-
 	try {
-		const [row] = await db
+		const [row] = await getDB(c.env.DB)
 			.update(workspaces)
-			.set(data)
-			.where(eq(workspaces.id, id))
+			.set({ ...parsed, updatedAt: new Date() })
+			.where(workspaceMutationWhere(auth, id))
 			.returning();
-		return c.json(itemResponse(row!));
+		return row ?
+				c.json(itemResponse(row))
+			:	notFound(c, "Workspace");
 	} catch (err) {
-		if (err instanceof Error && err.message.includes("UNIQUE")) {
+		if (isUniqueConstraintError(err)) {
 			return conflict(
 				c,
 				"Workspace with this slug already exists",
@@ -66,9 +50,10 @@ route.put("/workspaces/:id", async (c) => {
 
 export default {
 	route,
-	method: "PUT" as RouteMetadata["method"],
-	path: "/workspaces/:id",
+	method: "PUT" satisfies RouteMetadata["method"],
+	path: PATH,
 	description: "Update workspace",
 	auth_required: true,
 	scopes: ["workspaces:write"],
+	scopes_any: [ADMIN_SCOPE, "workspaces:write"],
 };

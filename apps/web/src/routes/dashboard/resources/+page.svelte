@@ -21,12 +21,11 @@
 </script>
 
 <script lang="ts">
-	import { Badge } from '@vesta-cx/ui/components/ui/badge';
 	import { Button } from '@vesta-cx/ui/components/ui/button';
-	import * as Card from '@vesta-cx/ui/components/ui/card';
-	import * as StatCard from '@vesta-cx/ui/components/ui/stat-card';
+	import { Separator } from '@vesta-cx/ui/components/ui/separator';
 	import * as Table from '@vesta-cx/ui/components/ui/table';
 	import SectionHeader from '$lib/components/dashboard/section-header.svelte';
+	import Stat from '$lib/components/dashboard/stat.svelte';
 </script>
 
 <svelte:head>
@@ -43,59 +42,59 @@
 	{/snippet}
 </SectionHeader>
 
-<div class="grid auto-rows-min gap-4 md:grid-cols-2 xl:grid-cols-4">
+<div class="grid gap-6 md:grid-cols-2 xl:grid-cols-4">
 	{#each stats as stat (stat.label)}
-		<StatCard.Root label={stat.label} value={stat.value} helper={stat.helper} />
+		<Stat label={stat.label} value={stat.value} helper={stat.helper} />
 	{/each}
 </div>
 
-<div class="grid gap-4 lg:grid-cols-3">
-	<Card.Root class="lg:col-span-2">
-		<Card.Header>
-			<Card.Title>Top performing resources · 30d</Card.Title>
-			<Card.Description>Ranked by smart-link clicks.</Card.Description>
-		</Card.Header>
-		<Card.Content class="px-0">
-			<Table.Root>
-				<Table.Header>
-					<Table.Row>
-						<Table.Head>Resource</Table.Head>
-						<Table.Head>Type</Table.Head>
-						<Table.Head class="text-end">Clicks</Table.Head>
-						<Table.Head class="text-end">Status</Table.Head>
-					</Table.Row>
-				</Table.Header>
-				<Table.Body>
-					{#each topPerformers as row (row.title)}
-						<Table.Row>
-							<Table.Cell class="font-medium">{row.title}</Table.Cell>
-							<Table.Cell class="text-muted-foreground">{row.kind}</Table.Cell>
-							<Table.Cell class="text-end">{row.clicks.toLocaleString()}</Table.Cell>
-							<Table.Cell class="text-end">
-								<Badge variant="secondary">{row.status}</Badge>
-							</Table.Cell>
-						</Table.Row>
-					{/each}
-				</Table.Body>
-			</Table.Root>
-		</Card.Content>
-	</Card.Root>
+<Separator />
 
-	<Card.Root>
-		<Card.Header>
-			<Card.Title>Recent activity</Card.Title>
-			<Card.Description>Latest edits across drafts and published items.</Card.Description>
-		</Card.Header>
-		<Card.Content class="grid gap-2">
+<div class="grid gap-8 lg:grid-cols-[2fr_1fr]">
+	<section class="space-y-3">
+		<header class="space-y-1">
+			<h2 class="text-base font-medium">Top performing · 30d</h2>
+			<p class="text-sm text-muted-foreground">Ranked by smart-link clicks.</p>
+		</header>
+		<Table.Root>
+			<Table.Header>
+				<Table.Row>
+					<Table.Head>Resource</Table.Head>
+					<Table.Head>Type</Table.Head>
+					<Table.Head class="text-end">Clicks</Table.Head>
+					<Table.Head class="text-end">Status</Table.Head>
+				</Table.Row>
+			</Table.Header>
+			<Table.Body>
+				{#each topPerformers as row (row.title)}
+					<Table.Row>
+						<Table.Cell class="font-medium">{row.title}</Table.Cell>
+						<Table.Cell class="text-muted-foreground">{row.kind}</Table.Cell>
+						<Table.Cell class="text-end">{row.clicks.toLocaleString()}</Table.Cell>
+						<Table.Cell class="text-end text-muted-foreground">{row.status}</Table.Cell>
+					</Table.Row>
+				{/each}
+			</Table.Body>
+		</Table.Root>
+	</section>
+
+	<section class="space-y-3">
+		<header class="space-y-1">
+			<h2 class="text-base font-medium">Recent activity</h2>
+			<p class="text-sm text-muted-foreground">Latest edits across drafts and published items.</p>
+		</header>
+		<ul class="-mx-2 grid">
 			{#each recentActivity as row (row.title)}
-				<a
-					href="/dashboard/resources"
-					class="grid gap-1 rounded-lg border p-3 transition-colors hover:bg-muted/50"
-				>
-					<p class="text-sm font-medium">{row.title}</p>
-					<p class="text-xs text-muted-foreground">{row.kind} · {row.when}</p>
-				</a>
+				<li>
+					<a
+						href="/dashboard/resources"
+						class="grid gap-0.5 rounded-md px-2 py-3 transition-colors hover:bg-muted/50"
+					>
+						<p class="text-sm font-medium">{row.title}</p>
+						<p class="text-xs text-muted-foreground">{row.kind} · {row.when}</p>
+					</a>
+				</li>
 			{/each}
-		</Card.Content>
-	</Card.Root>
+		</ul>
+	</section>
 </div>

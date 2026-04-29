@@ -42,14 +42,13 @@
 </script>
 
 <script lang="ts">
-	import { Badge } from '@vesta-cx/ui/components/ui/badge';
 	import { Button } from '@vesta-cx/ui/components/ui/button';
-	import * as Card from '@vesta-cx/ui/components/ui/card';
-	import * as StatCard from '@vesta-cx/ui/components/ui/stat-card';
+	import { Separator } from '@vesta-cx/ui/components/ui/separator';
 	import ArrowRightIcon from '@lucide/svelte/icons/arrow-right';
 	import MegaphoneIcon from '@lucide/svelte/icons/megaphone';
 	import MusicIcon from '@lucide/svelte/icons/music';
 	import SectionHeader from './section-header.svelte';
+	import Stat from './stat.svelte';
 </script>
 
 <SectionHeader
@@ -57,84 +56,93 @@
 	description="Workspace-wide signal across releases, campaigns, collections, and community."
 />
 
-<div class="grid auto-rows-min gap-4 md:grid-cols-2 xl:grid-cols-4">
+<div class="grid gap-6 md:grid-cols-2 xl:grid-cols-4">
 	{#each stats as stat (stat.label)}
-		<StatCard.Root label={stat.label} value={stat.value} helper={stat.helper} />
+		<Stat label={stat.label} value={stat.value} helper={stat.helper} />
 	{/each}
 </div>
 
-<div class="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-	{#each sections as section (section.title)}
-		<a
-			href={section.href}
-			class="group/section flex flex-col justify-between gap-3 rounded-xl border bg-card p-4 transition-colors hover:bg-muted/50"
-		>
-			<div class="flex items-center justify-between">
-				<span class="text-sm font-medium">{section.title}</span>
-				<ArrowRightIcon
-					class="size-4 text-muted-foreground transition-transform group-hover/section:translate-x-0.5"
-				/>
-			</div>
-			<p class="text-xs text-muted-foreground">{section.summary}</p>
-		</a>
-	{/each}
-</div>
+<Separator />
 
-<div class="grid gap-4 lg:grid-cols-3">
-	<Card.Root class="lg:col-span-2">
-		<Card.Header class="flex flex-row items-center justify-between gap-4">
+<section class="space-y-3">
+	<header class="space-y-1">
+		<h2 class="text-base font-medium">Sections</h2>
+		<p class="text-sm text-muted-foreground">Jump into any surface.</p>
+	</header>
+	<ul class="-mx-2 grid">
+		{#each sections as section (section.title)}
+			<li>
+				<a
+					href={section.href}
+					class="group/section flex items-center justify-between gap-4 rounded-md px-2 py-3 transition-colors hover:bg-muted/50"
+				>
+					<div class="grid gap-0.5">
+						<span class="text-sm font-medium">{section.title}</span>
+						<span class="text-xs text-muted-foreground">{section.summary}</span>
+					</div>
+					<ArrowRightIcon
+						class="size-4 text-muted-foreground transition-transform group-hover/section:translate-x-0.5"
+					/>
+				</a>
+			</li>
+		{/each}
+	</ul>
+</section>
+
+<Separator />
+
+<div class="grid gap-8 lg:grid-cols-[2fr_1fr]">
+	<section class="space-y-3">
+		<header class="flex items-end justify-between gap-4">
 			<div class="space-y-1">
-				<Card.Title>Drafts &amp; scheduled posts</Card.Title>
-				<Card.Description>Campaign content awaiting publish.</Card.Description>
+				<h2 class="text-base font-medium">Drafts &amp; scheduled posts</h2>
+				<p class="text-sm text-muted-foreground">Campaign content awaiting publish.</p>
 			</div>
-			<Button size="sm" href="/dashboard/resources/posts">
+			<Button size="sm" variant="outline" href="/dashboard/resources/posts">
 				<MegaphoneIcon class="size-4" /> New post
 			</Button>
-		</Card.Header>
-		<Card.Content class="grid gap-2">
+		</header>
+		<ul class="-mx-2 grid">
 			{#each drafts as draft (draft.title)}
-				<a
-					href="/dashboard/resources/posts"
-					class="flex items-center justify-between gap-3 rounded-lg border p-3 transition-colors hover:bg-muted/50"
-				>
-					<div class="min-w-0">
-						<p class="truncate text-sm font-medium">{draft.title}</p>
-						<p class="text-xs text-muted-foreground">{draft.updated}</p>
-					</div>
-					<Badge variant="secondary">{draft.status}</Badge>
-				</a>
+				<li>
+					<a
+						href="/dashboard/resources/posts"
+						class="flex items-center justify-between gap-4 rounded-md px-2 py-3 transition-colors hover:bg-muted/50"
+					>
+						<div class="min-w-0">
+							<p class="truncate text-sm font-medium">{draft.title}</p>
+							<p class="text-xs text-muted-foreground">{draft.updated}</p>
+						</div>
+						<span class="shrink-0 text-xs text-muted-foreground">{draft.status}</span>
+					</a>
+				</li>
 			{/each}
-		</Card.Content>
-	</Card.Root>
+		</ul>
+	</section>
 
-	<Card.Root>
-		<Card.Header>
-			<Card.Title>Upcoming releases</Card.Title>
-			<Card.Description>Next two slots on the calendar.</Card.Description>
-		</Card.Header>
-		<Card.Content class="grid gap-2">
+	<section class="space-y-3">
+		<header class="space-y-1">
+			<h2 class="text-base font-medium">Upcoming releases</h2>
+			<p class="text-sm text-muted-foreground">Next two slots on the calendar.</p>
+		</header>
+		<ul class="-mx-2 grid">
 			{#each upcoming as release (release.title)}
-				<a
-					href="/dashboard/resources/releases"
-					class="grid gap-1 rounded-lg border p-3 transition-colors hover:bg-muted/50"
-				>
-					<div class="flex items-center justify-between gap-2">
-						<p class="truncate text-sm font-medium">{release.title}</p>
-						<span class="shrink-0 text-xs font-medium text-muted-foreground">
-							{release.when}
-						</span>
-					</div>
-					<p class="text-xs text-muted-foreground">{release.subtitle}</p>
-				</a>
+				<li>
+					<a
+						href="/dashboard/resources/releases"
+						class="grid gap-0.5 rounded-md px-2 py-3 transition-colors hover:bg-muted/50"
+					>
+						<div class="flex items-center justify-between gap-2">
+							<p class="truncate text-sm font-medium">{release.title}</p>
+							<span class="shrink-0 text-xs text-muted-foreground">{release.when}</span>
+						</div>
+						<p class="text-xs text-muted-foreground">{release.subtitle}</p>
+					</a>
+				</li>
 			{/each}
-			<Button
-				size="sm"
-				variant="outline"
-				class="mt-1 justify-start gap-2"
-				href="/dashboard/resources/releases"
-			>
-				<MusicIcon class="size-4" /> Plan a release
-			</Button>
-		</Card.Content>
-	</Card.Root>
+		</ul>
+		<Button size="sm" variant="outline" class="gap-2" href="/dashboard/resources/releases">
+			<MusicIcon class="size-4" /> Plan a release
+		</Button>
+	</section>
 </div>

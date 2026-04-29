@@ -14,11 +14,10 @@
 </script>
 
 <script lang="ts">
-	import { Badge } from '@vesta-cx/ui/components/ui/badge';
 	import { Button } from '@vesta-cx/ui/components/ui/button';
-	import * as Card from '@vesta-cx/ui/components/ui/card';
-	import * as StatCard from '@vesta-cx/ui/components/ui/stat-card';
+	import { Separator } from '@vesta-cx/ui/components/ui/separator';
 	import SectionHeader from '$lib/components/dashboard/section-header.svelte';
+	import Stat from '$lib/components/dashboard/stat.svelte';
 </script>
 
 <svelte:head>
@@ -35,31 +34,35 @@
 	{/snippet}
 </SectionHeader>
 
-<div class="grid auto-rows-min gap-4 md:grid-cols-3">
+<div class="grid gap-6 md:grid-cols-3">
 	{#each stats as stat (stat.label)}
-		<StatCard.Root label={stat.label} value={stat.value} helper={stat.helper} />
+		<Stat label={stat.label} value={stat.value} helper={stat.helper} />
 	{/each}
 </div>
 
-<Card.Root>
-	<Card.Header>
-		<Card.Title>Recent collections</Card.Title>
-		<Card.Description>What's been edited or added to lately.</Card.Description>
-	</Card.Header>
-	<Card.Content class="grid gap-2 md:grid-cols-2">
+<Separator />
+
+<section class="space-y-3">
+	<header class="space-y-1">
+		<h2 class="text-base font-medium">Recent collections</h2>
+		<p class="text-sm text-muted-foreground">What's been edited or added to lately.</p>
+	</header>
+	<ul class="-mx-2 grid md:grid-cols-2">
 		{#each collections as collection (collection.title)}
-			<a
-				href="/dashboard/collections"
-				class="flex items-start justify-between gap-3 rounded-lg border p-3 transition-colors hover:bg-muted/50"
-			>
-				<div class="min-w-0">
-					<p class="truncate text-sm font-medium">{collection.title}</p>
-					<p class="text-xs text-muted-foreground">
-						{collection.count} items · updated {collection.updated}
-					</p>
-				</div>
-				<Badge variant="secondary">{collection.kind}</Badge>
-			</a>
+			<li>
+				<a
+					href="/dashboard/collections"
+					class="flex items-center justify-between gap-4 rounded-md px-2 py-3 transition-colors hover:bg-muted/50"
+				>
+					<div class="min-w-0">
+						<p class="truncate text-sm font-medium">{collection.title}</p>
+						<p class="text-xs text-muted-foreground">
+							{collection.count} items · updated {collection.updated}
+						</p>
+					</div>
+					<span class="shrink-0 text-xs text-muted-foreground">{collection.kind}</span>
+				</a>
+			</li>
 		{/each}
-	</Card.Content>
-</Card.Root>
+	</ul>
+</section>

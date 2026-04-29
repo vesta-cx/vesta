@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { Button } from '@vesta-cx/ui/components/ui/button';
-	import * as Card from '@vesta-cx/ui/components/ui/card';
+	import { Separator } from '@vesta-cx/ui/components/ui/separator';
 	import SectionHeader from '$lib/components/dashboard/section-header.svelte';
 
 	const links = [
@@ -32,60 +32,60 @@
 	{/snippet}
 </SectionHeader>
 
-<div class="grid gap-4 lg:grid-cols-3">
-	<Card.Root class="lg:col-span-2">
-		<Card.Header>
-			<Card.Title>Profile preview</Card.Title>
-			<Card.Description>How the workspace appears on release pages.</Card.Description>
-		</Card.Header>
-		<Card.Content>
-			<div
-				class="flex items-center gap-4 rounded-xl border p-4"
-				style:background="linear-gradient(135deg, oklch(0.985 0 0), oklch(0.94 0.01 270))"
-			>
-				<div
-					class="flex aspect-square size-16 items-center justify-center rounded-xl text-xl font-semibold text-primary-foreground"
-					style:background="linear-gradient(135deg, oklch(0.45 0.16 290), oklch(0.32 0.12 320))"
-				>
-					HC
-				</div>
-				<div class="grid gap-1">
-					<p class="text-lg font-semibold">Hollow Coast</p>
-					<p class="text-sm text-muted-foreground">
-						Indie folk · Brooklyn / Lisbon · listening for what's underneath.
-					</p>
-				</div>
-			</div>
-		</Card.Content>
-	</Card.Root>
+<section class="space-y-3">
+	<header class="space-y-1">
+		<h2 class="text-base font-medium">Profile preview</h2>
+		<p class="text-sm text-muted-foreground">How the workspace appears on release pages.</p>
+	</header>
+	<div
+		class="flex items-center gap-4 rounded-xl border p-5"
+		style:background="linear-gradient(135deg, oklch(0.985 0 0), oklch(0.94 0.01 270))"
+	>
+		<div
+			class="flex aspect-square size-16 items-center justify-center rounded-xl text-xl font-semibold text-primary-foreground"
+			style:background="linear-gradient(135deg, oklch(0.45 0.16 290), oklch(0.32 0.12 320))"
+		>
+			HC
+		</div>
+		<div class="grid gap-1">
+			<p class="text-lg font-semibold">Hollow Coast</p>
+			<p class="text-sm text-muted-foreground">
+				Indie folk · Brooklyn / Lisbon · listening for what's underneath.
+			</p>
+		</div>
+	</div>
+</section>
 
-	<Card.Root>
-		<Card.Header>
-			<Card.Title>Theme tokens</Card.Title>
-			<Card.Description>Applied across release pages and smart links.</Card.Description>
-		</Card.Header>
-		<Card.Content class="grid gap-2 text-sm">
-			{#each themeTokens as token (token.label)}
-				<div class="flex items-center justify-between gap-3 rounded-lg border p-3">
-					<span class="font-medium">{token.label}</span>
-					<span class="truncate font-mono text-xs text-muted-foreground">{token.value}</span>
-				</div>
+<Separator />
+
+<div class="grid gap-8 lg:grid-cols-2">
+	<section class="space-y-3">
+		<header class="space-y-1">
+			<h2 class="text-base font-medium">External links</h2>
+			<p class="text-sm text-muted-foreground">Where else the workspace lives. Drag to reorder.</p>
+		</header>
+		<ul class="-mx-2 grid">
+			{#each links as link (link.name)}
+				<li class="grid gap-0.5 px-2 py-3">
+					<p class="text-sm font-medium">{link.name}</p>
+					<p class="truncate text-xs text-muted-foreground">{link.url}</p>
+				</li>
 			{/each}
-		</Card.Content>
-	</Card.Root>
-</div>
+		</ul>
+	</section>
 
-<Card.Root>
-	<Card.Header>
-		<Card.Title>External links</Card.Title>
-		<Card.Description>Where else the workspace lives. Drag to reorder.</Card.Description>
-	</Card.Header>
-	<Card.Content class="grid gap-2 md:grid-cols-2">
-		{#each links as link (link.name)}
-			<div class="grid gap-0.5 rounded-lg border p-3">
-				<p class="text-sm font-medium">{link.name}</p>
-				<p class="truncate text-xs text-muted-foreground">{link.url}</p>
-			</div>
-		{/each}
-	</Card.Content>
-</Card.Root>
+	<section class="space-y-3">
+		<header class="space-y-1">
+			<h2 class="text-base font-medium">Theme tokens</h2>
+			<p class="text-sm text-muted-foreground">Applied across release pages and smart links.</p>
+		</header>
+		<ul class="-mx-2 grid">
+			{#each themeTokens as token (token.label)}
+				<li class="flex items-center justify-between gap-3 px-2 py-3">
+					<span class="text-sm font-medium">{token.label}</span>
+					<span class="truncate font-mono text-xs text-muted-foreground">{token.value}</span>
+				</li>
+			{/each}
+		</ul>
+	</section>
+</div>

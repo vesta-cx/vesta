@@ -37,12 +37,11 @@
 </script>
 
 <script lang="ts">
-	import { Badge } from '@vesta-cx/ui/components/ui/badge';
 	import { Button } from '@vesta-cx/ui/components/ui/button';
-	import * as Card from '@vesta-cx/ui/components/ui/card';
-	import * as StatCard from '@vesta-cx/ui/components/ui/stat-card';
+	import { Separator } from '@vesta-cx/ui/components/ui/separator';
 	import LinkIcon from '@lucide/svelte/icons/link';
 	import SectionHeader from '$lib/components/dashboard/section-header.svelte';
+	import Stat from '$lib/components/dashboard/stat.svelte';
 </script>
 
 <svelte:head>
@@ -63,28 +62,32 @@
 	{/snippet}
 </SectionHeader>
 
-<div class="grid auto-rows-min gap-4 md:grid-cols-2 xl:grid-cols-4">
+<div class="grid gap-6 md:grid-cols-2 xl:grid-cols-4">
 	{#each stats as stat (stat.label)}
-		<StatCard.Root label={stat.label} value={stat.value} helper={stat.helper} />
+		<Stat label={stat.label} value={stat.value} helper={stat.helper} />
 	{/each}
 </div>
 
-<div class="grid gap-4 lg:grid-cols-3">
-	<Card.Root class="lg:col-span-2">
-		<Card.Header>
-			<Card.Title>Smart-link routing · last 30 days</Card.Title>
-			<Card.Description>Platform share for fans hitting your release pages.</Card.Description>
-		</Card.Header>
-		<Card.Content class="grid gap-3">
+<Separator />
+
+<div class="grid gap-8 lg:grid-cols-[2fr_1fr]">
+	<section class="space-y-3">
+		<header class="space-y-1">
+			<h2 class="text-base font-medium">Smart-link routing · 30d</h2>
+			<p class="text-sm text-muted-foreground">
+				Platform share for fans hitting your release pages.
+			</p>
+		</header>
+		<div class="grid gap-3">
 			{#each platformPerformance as platform (platform.name)}
 				<div class="grid gap-1.5">
 					<div class="flex items-center justify-between text-sm">
 						<span class="font-medium">{platform.name}</span>
 						<span class="text-muted-foreground">
-							{platform.clicks.toLocaleString()} clicks · {Math.round(platform.share * 100)}%
+							{platform.clicks.toLocaleString()} · {Math.round(platform.share * 100)}%
 						</span>
 					</div>
-					<div class="h-2 overflow-hidden rounded-full bg-muted">
+					<div class="h-1.5 overflow-hidden rounded-full bg-muted">
 						<div
 							class="h-full rounded-full bg-foreground/85"
 							style:width="{Math.round(platform.share * 100)}%"
@@ -92,34 +95,34 @@
 					</div>
 				</div>
 			{/each}
-		</Card.Content>
-	</Card.Root>
+		</div>
+	</section>
 
-	<Card.Root>
-		<Card.Header>
-			<Card.Title>Active campaigns</Card.Title>
-			<Card.Description>Where energy is going this week.</Card.Description>
-		</Card.Header>
-		<Card.Content class="grid gap-2">
+	<section class="space-y-3">
+		<header class="space-y-1">
+			<h2 class="text-base font-medium">Active campaigns</h2>
+			<p class="text-sm text-muted-foreground">Where energy is going this week.</p>
+		</header>
+		<ul class="-mx-2 grid">
 			{#each campaigns as campaign (campaign.title)}
-				<a
-					href="/dashboard/campaigns/smart-links"
-					class="grid gap-1 rounded-lg border p-3 transition-colors hover:bg-muted/50"
-				>
-					<div class="flex items-center justify-between gap-2">
-						<p class="truncate text-sm font-medium">{campaign.title}</p>
-						<Badge variant={campaign.status === 'Live' ? 'default' : 'secondary'}>
-							{campaign.status}
-						</Badge>
-					</div>
-					<p class="text-xs text-muted-foreground">
-						{campaign.release}
-						{#if campaign.signups > 0}
-							· {campaign.signups} signups
-						{/if}
-					</p>
-				</a>
+				<li>
+					<a
+						href="/dashboard/campaigns/smart-links"
+						class="grid gap-0.5 rounded-md px-2 py-3 transition-colors hover:bg-muted/50"
+					>
+						<div class="flex items-center justify-between gap-2">
+							<p class="truncate text-sm font-medium">{campaign.title}</p>
+							<span class="shrink-0 text-xs text-muted-foreground">{campaign.status}</span>
+						</div>
+						<p class="text-xs text-muted-foreground">
+							{campaign.release}
+							{#if campaign.signups > 0}
+								· {campaign.signups} signups
+							{/if}
+						</p>
+					</a>
+				</li>
 			{/each}
-		</Card.Content>
-	</Card.Root>
+		</ul>
+	</section>
 </div>

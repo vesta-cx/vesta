@@ -25,9 +25,9 @@
 
 <script lang="ts">
 	import { Button } from '@vesta-cx/ui/components/ui/button';
-	import * as Card from '@vesta-cx/ui/components/ui/card';
-	import * as StatCard from '@vesta-cx/ui/components/ui/stat-card';
+	import { Separator } from '@vesta-cx/ui/components/ui/separator';
 	import SectionHeader from '$lib/components/dashboard/section-header.svelte';
+	import Stat from '$lib/components/dashboard/stat.svelte';
 </script>
 
 <svelte:head>
@@ -46,47 +46,55 @@
 	{/snippet}
 </SectionHeader>
 
-<div class="grid auto-rows-min gap-4 md:grid-cols-3">
+<div class="grid gap-6 md:grid-cols-3">
 	{#each stats as stat (stat.label)}
-		<StatCard.Root label={stat.label} value={stat.value} helper={stat.helper} />
+		<Stat label={stat.label} value={stat.value} helper={stat.helper} />
 	{/each}
 </div>
 
-<div class="grid gap-4 lg:grid-cols-3">
-	<Card.Root class="lg:col-span-2">
-		<Card.Header>
-			<Card.Title>Inbox · needs a response</Card.Title>
-			<Card.Description>Open conversations from fans, peers, and press.</Card.Description>
-		</Card.Header>
-		<Card.Content class="grid gap-2">
-			{#each inbox as message (message.subject)}
-				<a
-					href="/dashboard/community/inbox"
-					class="grid gap-1 rounded-lg border p-3 transition-colors hover:bg-muted/50"
-				>
-					<div class="flex items-center justify-between gap-2 text-sm">
-						<span class="font-medium">{message.from}</span>
-						<span class="text-xs text-muted-foreground">{message.when}</span>
-					</div>
-					<p class="text-sm">{message.subject}</p>
-					<p class="text-xs text-muted-foreground">{message.handle}</p>
-				</a>
-			{/each}
-		</Card.Content>
-	</Card.Root>
+<Separator />
 
-	<Card.Root>
-		<Card.Header>
-			<Card.Title>Recent supporters</Card.Title>
-			<Card.Description>Followers driving the most engagement lately.</Card.Description>
-		</Card.Header>
-		<Card.Content class="grid gap-2">
+<div class="grid gap-8 lg:grid-cols-[2fr_1fr]">
+	<section class="space-y-3">
+		<header class="space-y-1">
+			<h2 class="text-base font-medium">Inbox · needs a response</h2>
+			<p class="text-sm text-muted-foreground">
+				Open conversations from fans, peers, and press.
+			</p>
+		</header>
+		<ul class="-mx-2 grid">
+			{#each inbox as message (message.subject)}
+				<li>
+					<a
+						href="/dashboard/community/inbox"
+						class="grid gap-0.5 rounded-md px-2 py-3 transition-colors hover:bg-muted/50"
+					>
+						<div class="flex items-center justify-between gap-2 text-sm">
+							<span class="font-medium">{message.from}</span>
+							<span class="text-xs text-muted-foreground">{message.when}</span>
+						</div>
+						<p class="text-sm">{message.subject}</p>
+						<p class="text-xs text-muted-foreground">{message.handle}</p>
+					</a>
+				</li>
+			{/each}
+		</ul>
+	</section>
+
+	<section class="space-y-3">
+		<header class="space-y-1">
+			<h2 class="text-base font-medium">Recent supporters</h2>
+			<p class="text-sm text-muted-foreground">
+				Followers driving the most engagement lately.
+			</p>
+		</header>
+		<ul class="-mx-2 grid">
 			{#each topFollowers as follower (follower.name)}
-				<div class="grid gap-0.5 rounded-lg border p-3">
+				<li class="grid gap-0.5 px-2 py-3">
 					<p class="text-sm font-medium">{follower.name}</p>
 					<p class="text-xs text-muted-foreground">{follower.signal}</p>
-				</div>
+				</li>
 			{/each}
-		</Card.Content>
-	</Card.Root>
+		</ul>
+	</section>
 </div>

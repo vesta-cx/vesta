@@ -1,8 +1,9 @@
-import BarChartIcon from '@lucide/svelte/icons/bar-chart-3';
+import BarChart3Icon from '@lucide/svelte/icons/bar-chart-3';
 import Disc3Icon from '@lucide/svelte/icons/disc-3';
 import FileTextIcon from '@lucide/svelte/icons/file-text';
 import FolderKanbanIcon from '@lucide/svelte/icons/folder-kanban';
 import LibraryIcon from '@lucide/svelte/icons/library';
+import MegaphoneIcon from '@lucide/svelte/icons/megaphone';
 import MicIcon from '@lucide/svelte/icons/mic-2';
 import PaletteIcon from '@lucide/svelte/icons/palette';
 import UsersIcon from '@lucide/svelte/icons/users';
@@ -89,21 +90,24 @@ export const dashboardUser: DashboardUser = {
 };
 
 /**
- * Top-level nav. Mirrors the actual Vesta domain:
+ * Top-level nav. Each parent links to its own analytics surface; the chevron
+ * toggles its sub-routes. Sub-items are filters / specific views, not the
+ * landing page (the parent is).
+ *
  *  - Analytics: workspace overview (smart-link clicks, pre-saves, momentum).
  *  - Resources: songs/albums/posts/statuses (the resources table).
- *  - Collections: playlists, label roster, curated smart-link sets.
+ *  - Collections: playlists, label roster, curated bundles.
+ *  - Campaigns: smart links and pre-save flows tying releases to platforms.
  *  - Branding: workspace profile, external links, theme.
  *  - Community: engagements (followers, mentions, replies).
  */
 export const dashboardNav: NavItem[] = [
-	{ title: 'Analytics', href: '/dashboard', icon: BarChartIcon },
+	{ title: 'Analytics', href: '/dashboard', icon: BarChart3Icon },
 	{
 		title: 'Resources',
 		href: '/dashboard/resources',
 		icon: FileTextIcon,
 		items: [
-			{ title: 'All resources', href: '/dashboard/resources' },
 			{ title: 'Releases', href: '/dashboard/resources/releases' },
 			{ title: 'Posts', href: '/dashboard/resources/posts' },
 			{ title: 'Drafts', href: '/dashboard/resources/drafts' }
@@ -114,10 +118,17 @@ export const dashboardNav: NavItem[] = [
 		href: '/dashboard/collections',
 		icon: FolderKanbanIcon,
 		items: [
-			{ title: 'All collections', href: '/dashboard/collections' },
 			{ title: 'Playlists', href: '/dashboard/collections/playlists' },
-			{ title: 'Roster', href: '/dashboard/collections/roster' },
-			{ title: 'Smart-link sets', href: '/dashboard/collections/smart-links' }
+			{ title: 'Roster', href: '/dashboard/collections/roster' }
+		]
+	},
+	{
+		title: 'Campaigns',
+		href: '/dashboard/campaigns',
+		icon: MegaphoneIcon,
+		items: [
+			{ title: 'Smart links', href: '/dashboard/campaigns/smart-links' },
+			{ title: 'Pre-saves', href: '/dashboard/campaigns/pre-saves' }
 		]
 	},
 	{

@@ -42,7 +42,7 @@ authenticate() {
   if [[ ! "$http_status" =~ ^2[0-9][0-9]$ ]]; then
     echo "Authentication request failed with HTTP ${http_status}." >&2
     if jq -e . <"$response_file" >/dev/null 2>&1; then
-      jq 'del(.access_token, .refresh_token, .pending_authentication_token)' <"$response_file" >&2
+      jq 'del(.access_token, .refresh_token, .pending_authentication_token, .sealedSession, .sealed_session)' <"$response_file" >&2
     else
       echo "(response body omitted because it was not valid JSON)" >&2
     fi
@@ -57,7 +57,7 @@ authenticate() {
 }
 
 print_redacted_auth_json() {
-  jq 'del(.access_token, .refresh_token, .pending_authentication_token)'
+  jq 'del(.access_token, .refresh_token, .pending_authentication_token, .sealedSession, .sealed_session)'
 }
 
 AUTH_JSON="$(

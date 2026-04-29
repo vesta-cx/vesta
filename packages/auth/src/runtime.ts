@@ -27,6 +27,8 @@ import type {
 	AuthSessionResult,
 	AuthSessionWithoutMemberships,
 	AuthTransport,
+	AuthTransportSession,
+	AuthTransportSessionRefreshResult,
 	AuthUser,
 	WorkOSAuthEnv,
 } from "./types.js";
@@ -157,7 +159,7 @@ const maybeProvisionSession = async (input: {
 	session: AuthSession;
 	defaultOrganizationId?: string | undefined;
 	provisioningAdapter?: AuthExchangeInput["provisioningAdapter"];
-}) => {
+}): Promise<AuthSession> => {
 	if (!input.provisioningAdapter) {
 		return input.session;
 	}
@@ -225,6 +227,40 @@ const buildAuthenticatedSession = async (input: {
 		defaultOrganizationId: input.defaultOrganizationId,
 		provisioningAdapter: input.provisioningAdapter,
 	});
+};
+
+const refreshSealedSessionForOrganization = async (input: {
+	sealedSession: string;
+	organizationId: string | null;
+	originalOrganizationId: string | null;
+	loadSession: (sealedSession: string) => Promise<AuthTransportSession>;
+	refreshSession: (
+		sessionTransport: AuthTransportSession,
+		organizationId: string,
+	) => Promise<AuthTransportSessionRefreshResult>;
+}): Promise<string> => {
+	if (
+		!input.organizationId ||
+		input.organizationId === input.originalOrganizationId
+	) {
+		return input.sealedSession;
+	}
+
+	const sessionTransport = await input.loadSession(input.sealedSession);
+	const refreshed = await input.refreshSession(
+		sessionTransport,
+		input.organizationId,
+	);
+
+	if (!refreshed.authenticated) {
+		throw new TerminalAuthError(
+			`Unable to refresh sealed session for organization ${input.organizationId}`,
+			"refreshSealedSession",
+			{ status: 401 },
+		);
+	}
+
+	return refreshed.sealedSession;
 };
 
 const validateOptionalOrganizationName = (name: string | undefined) => {
@@ -412,8 +448,41 @@ export const createAuthRuntime = (config: AuthRuntimeConfig): AuthRuntime => {
 				operation: "authenticateWithCode",
 			});
 
+			const sealedSession =
+				await refreshSealedSessionForOrganization({
+					sealedSession: exchange.sealedSession,
+					organizationId:
+						provisionedSession.organizationId,
+					originalOrganizationId:
+						exchange.session.organizationId,
+					loadSession: (sealedSession) =>
+						runWithRetry(
+							"loadSealedSession",
+							() =>
+								transport.loadSealedSession(
+									{
+										sealedSession,
+										cookiePassword,
+									},
+								),
+						),
+					refreshSession: (
+						sessionTransport,
+						organizationId,
+					) =>
+						runWithRetry(
+							"refreshSealedSession",
+							() =>
+								sessionTransport.refresh(
+									{
+										organizationId,
+									},
+								),
+						),
+				});
+
 			return {
-				sealedSession: exchange.sealedSession,
+				sealedSession,
 				session: provisionedSession,
 			};
 		},

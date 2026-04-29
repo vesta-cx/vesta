@@ -55,6 +55,7 @@ browserAuthRoutes.get("/auth/callback", async (c) => {
 	const storedState = getCookie(c, DEFAULT_OAUTH_STATE_COOKIE_NAME);
 
 	if (!code) {
+		deleteCookie(c, DEFAULT_OAUTH_STATE_COOKIE_NAME, { path: "/" });
 		return singleError(
 			c,
 			400,
@@ -64,6 +65,7 @@ browserAuthRoutes.get("/auth/callback", async (c) => {
 	}
 
 	if (!state || !storedState || state !== storedState) {
+		deleteCookie(c, DEFAULT_OAUTH_STATE_COOKIE_NAME, { path: "/" });
 		return singleError(
 			c,
 			400,

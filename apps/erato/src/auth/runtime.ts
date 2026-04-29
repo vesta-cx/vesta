@@ -7,14 +7,16 @@ import {
 } from "@vesta-cx/auth";
 import { organizations, users } from "@vesta-cx/db";
 import { getDB, type Database } from "../db";
+import type { AppEnv } from "../env";
 
-type EratoAuthBindings = {
-	DB: D1Database;
-	WORKOS_API_KEY: string;
-	WORKOS_CLIENT_ID: string;
-	WORKOS_COOKIE_PASSWORD: string;
-	WORKOS_ORG_ID?: string;
-};
+type EratoAuthBindings = Pick<
+	AppEnv["Bindings"],
+	| "DB"
+	| "WORKOS_API_KEY"
+	| "WORKOS_CLIENT_ID"
+	| "WORKOS_COOKIE_PASSWORD"
+	| "WORKOS_ORG_ID"
+>;
 
 const createVestaProvisioningStore = (
 	db: Database,

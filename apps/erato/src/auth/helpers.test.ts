@@ -34,7 +34,7 @@ const sessionUser: AuthContext = {
 	type: "session",
 	subjectType: "user",
 	subjectId: "user_session",
-	scopes: ["users:read"],
+	scopes: ["resources:read"],
 	session: {
 		sessionId: "session_123",
 		userId: "user_session",
@@ -45,7 +45,7 @@ const sessionUser: AuthContext = {
 		profilePictureUrl: null,
 		organizationId: "org_123",
 		roleSlug: null,
-		permissions: ["users:read"],
+		permissions: ["resources:read"],
 		entitlements: [],
 		memberships: [],
 	},
@@ -134,8 +134,8 @@ describe("hasScope", () => {
 	});
 
 	it("checks sealed session scopes", () => {
-		expect(hasScope(sessionUser, "users:read")).toBe(true);
-		expect(hasScope(sessionUser, "users:write")).toBe(false);
+		expect(hasScope(sessionUser, "resources:read")).toBe(true);
+		expect(hasScope(sessionUser, "resources:write")).toBe(false);
 	});
 });
 

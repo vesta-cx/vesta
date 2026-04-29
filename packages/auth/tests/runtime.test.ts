@@ -244,6 +244,59 @@ describe("createAuthRuntime", () => {
 		expect(result.session.organizationId).toBe("org_provisioned");
 	});
 
+	it("refreshes the sealed session when provisioning changes the active organization", async () => {
+		const refresh = vi.fn(async () => ({
+			authenticated: true as const,
+			sealedSession: "sealed_org_provisioned",
+			session: {
+				...baseSession(),
+				organizationId: "org_provisioned",
+			},
+		}));
+		const transport = createTransport({
+			authenticateWithCode: async () => ({
+				sealedSession: "sealed_session",
+				session: {
+					...baseSession(),
+					organizationId: null,
+				},
+			}),
+			loadSealedSession: async () => ({
+				authenticate: async () => ({
+					authenticated: true,
+					session: baseSession(),
+				}),
+				refresh,
+				getLogoutUrl: async () =>
+					"https://example.com/logout",
+			}),
+			listOrganizationMemberships: async () => [],
+		});
+		const runtime = createAuthRuntime({
+			clientId: "client_123",
+			apiKey: "sk_test",
+			cookiePassword:
+				"test-password-that-is-at-least-32-chars-long!!",
+			defaultOrganizationId: "org_provisioned",
+			transport,
+		});
+
+		const result = await runtime.authenticateWithCode({
+			code: "code_123",
+			provisioningAdapter: {
+				provision: async () => ({
+					activeOrganizationId: "org_provisioned",
+					organizationIds: ["org_provisioned"],
+				}),
+			},
+		});
+
+		expect(result.sealedSession).toBe("sealed_org_provisioned");
+		expect(refresh).toHaveBeenCalledWith({
+			organizationId: "org_provisioned",
+		});
+	});
+
 	it("normalizes plain provisioning errors", async () => {
 		const runtime = createAuthRuntime({
 			clientId: "client_123",

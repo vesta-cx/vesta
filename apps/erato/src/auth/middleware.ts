@@ -37,13 +37,21 @@ const authenticateSession = async (c: Context<AuthEnv>) => {
 	);
 	if (!sealedSession) return false;
 
-	const result = await createEratoAuthRuntime(
-		c.env,
-	).authenticateSealedSession({
-		sealedSession,
-		resolveMemberships: true,
-		provisioningAdapter: createEratoProvisioningAdapter(c.env),
-	});
+	let result;
+	try {
+		result = await createEratoAuthRuntime(
+			c.env,
+		).authenticateSealedSession({
+			sealedSession,
+			resolveMemberships: true,
+			provisioningAdapter: createEratoProvisioningAdapter(
+				c.env,
+			),
+		});
+	} catch (error) {
+		console.warn("Erato session authentication failed", error);
+		return false;
+	}
 
 	if (!result.authenticated) return false;
 

@@ -90,6 +90,31 @@ describe("auth middleware", () => {
 		});
 	});
 	describe("sealed session path", () => {
+		it("sets guest auth when session auth throws", async () => {
+			const warn = vi
+				.spyOn(console, "warn")
+				.mockImplementation(() => {});
+			authenticateSealedSession.mockRejectedValue(
+				new Error("WorkOS unavailable"),
+			);
+			const kv = createMockKV();
+			const { app } = buildApp(kv);
+
+			const res = await makeRequest(app, kv, {
+				Cookie: "session=sealed_session",
+			});
+
+			expect(res.status).toBe(200);
+			await expect(res.json()).resolves.toEqual({
+				type: "guest",
+			});
+			expect(warn).toHaveBeenCalledWith(
+				"Erato session authentication failed",
+				expect.any(Error),
+			);
+			warn.mockRestore();
+		});
+
 		it("sets session auth and provisions when session cookie is valid", async () => {
 			authenticateSealedSession.mockResolvedValue({
 				authenticated: true,
@@ -106,7 +131,7 @@ describe("auth middleware", () => {
 					profilePictureUrl: null,
 					organizationId: "org_123",
 					roleSlug: null,
-					permissions: ["users:read"],
+					permissions: ["resources:read"],
 					entitlements: [],
 					memberships: [],
 				},
@@ -124,7 +149,7 @@ describe("auth middleware", () => {
 				type: "session",
 				subjectType: "user",
 				subjectId: "user_123",
-				scopes: ["users:read"],
+				scopes: ["resources:read"],
 			});
 			expect(authenticateSealedSession).toHaveBeenCalledWith({
 				sealedSession: "sealed_session",

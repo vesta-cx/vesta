@@ -18,7 +18,9 @@ The community-maintained `@hono/sentry` middleware that uses `toucan-js` has bee
 
 Choose the features you want to configure, and this guide will show you how:
 
-Error Monitoring\[ ]Logs\[ ]Tracing
+- [ ] Error Monitoring
+- [ ] Logs
+- [ ] Tracing
 
 Want to learn more about these features?
 

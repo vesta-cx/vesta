@@ -7,7 +7,10 @@ export type RouteMetadata = {
 	path: string;
 	description: string;
 	auth_required: boolean;
+	/** Scopes that are all required when the route has a single authorization path. */
 	scopes?: readonly Scope[];
+	/** Scopes where any one grants access; use for conditional subject-type policies. */
+	scopes_any?: readonly Scope[];
 };
 
 export type RouteMetadataInput = Omit<
@@ -30,6 +33,7 @@ export const recordRouteMetadata = (
 		description: input.description ?? `Route: ${input.path}`,
 		auth_required: input.auth_required ?? true,
 		...(input.scopes ? { scopes: input.scopes } : {}),
+		...(input.scopes_any ? { scopes_any: input.scopes_any } : {}),
 	};
 
 	const existing = registry.find(

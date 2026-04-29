@@ -3,6 +3,7 @@
 import {
 	createAuthRuntime,
 	createVestaProvisioningAdapter,
+	createWorkOSTransport,
 	type VestaProvisioningStore,
 } from "@vesta-cx/auth";
 import { organizations, users } from "@vesta-cx/db";
@@ -20,6 +21,7 @@ type EratoRuntimeBindings = Pick<
 >;
 
 type EratoProvisioningBindings = Pick<EratoAuthBindings, "DB">;
+type EratoWorkOSBindings = Pick<EratoAuthBindings, "WORKOS_API_KEY">;
 
 const createVestaProvisioningStore = (
 	db: Database,
@@ -61,3 +63,6 @@ export const createEratoProvisioningAdapter = (
 	createVestaProvisioningAdapter({
 		store: createVestaProvisioningStore(getDB(env.DB)),
 	});
+
+export const createEratoWorkOSTransport = (env: EratoWorkOSBindings) =>
+	createWorkOSTransport({ apiKey: env.WORKOS_API_KEY });

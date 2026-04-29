@@ -5,37 +5,27 @@ import { itemResponse } from "@mia-cx/drizzle-query-factory";
 import { hasScope, requireAuth } from "../../auth/helpers";
 import { getDB } from "../../db";
 import { externalLinks } from "../../db/schema";
-import { conflict, forbidden, singleError } from "../../lib/errors";
+import { conflict, forbidden } from "../../lib/errors";
+import { expectOne, isUniqueConstraintError } from "../../lib/db-helpers";
 import { parseBody, isResponse } from "../../lib/validation";
 import {
 	addExternalLinkSchema,
-	externalLinkSubjectTypeSchema,
+	parseSubjectType,
 	scopeForSubjectType,
 } from "./shared";
 import type { AppEnv } from "../../env";
 import type { RouteMetadata } from "../../registry";
 
 const route = new Hono<AppEnv>();
+const PATH = "/links/:subjectType/:subjectId" as const;
 
-route.post("/links/:subjectType/:subjectId", async (c) => {
+route.post(PATH, async (c) => {
 	const auth = requireAuth(c.get("auth"));
-	const subjectTypeParsed = externalLinkSubjectTypeSchema.safeParse(
-		c.req.param("subjectType"),
-	);
-	if (!subjectTypeParsed.success) {
-		return singleError(
-			c,
-			422,
-			"Invalid subjectType. Use 'resource' or 'workspace'.",
-			"VALIDATION_ERROR",
-			"subjectType",
-		);
-	}
+	const subjectType = parseSubjectType(c);
+	if (subjectType instanceof Response) return subjectType;
 
-	const writeScope = scopeForSubjectType(subjectTypeParsed.data, "write");
-	if (!hasScope(auth, writeScope)) {
-		return forbidden(c);
-	}
+	const writeScope = scopeForSubjectType(subjectType, "write");
+	if (!hasScope(auth, writeScope)) return forbidden(c);
 
 	const parsed = await parseBody(c, addExternalLinkSchema);
 	if (isResponse(parsed)) return parsed;
@@ -44,17 +34,20 @@ route.post("/links/:subjectType/:subjectId", async (c) => {
 	const subjectId = c.req.param("subjectId");
 
 	try {
-		const [row] = await db
+		const rows = await db
 			.insert(externalLinks)
 			.values({
-				subjectType: subjectTypeParsed.data,
+				subjectType,
 				subjectId,
 				...parsed,
 			})
 			.returning();
-		return c.json(itemResponse(row!), 201);
+		return c.json(
+			itemResponse(expectOne(rows, "External link insert")),
+			201,
+		);
 	} catch (err) {
-		if (err instanceof Error && /UNIQUE/i.test(err.message)) {
+		if (isUniqueConstraintError(err)) {
 			return conflict(
 				c,
 				"URL at this position already exists",
@@ -67,9 +60,9 @@ route.post("/links/:subjectType/:subjectId", async (c) => {
 
 export default {
 	route,
-	method: "POST" as RouteMetadata["method"],
-	path: "/links/:subjectType/:subjectId",
+	method: "POST" satisfies RouteMetadata["method"],
+	path: PATH,
 	description: "Add external link to a subject",
 	auth_required: true,
-	scopes: ["resources:write", "workspaces:write"],
+	scopes_any: ["resources:write", "workspaces:write"],
 };

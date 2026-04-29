@@ -2,7 +2,8 @@
 
 import { eq } from "drizzle-orm";
 import { Hono } from "hono";
-import { requireAuth, hasScope } from "../../auth/helpers";
+import { ADMIN_SCOPE } from "../../auth/types";
+import { requireAuth, requireScope } from "../../auth/helpers";
 import { getDB } from "../../db";
 import { users } from "../../db/schema";
 import { forbidden, notFound } from "../../lib/errors";
@@ -10,14 +11,19 @@ import type { AppEnv } from "../../env";
 import type { RouteMetadata } from "../../registry";
 
 const route = new Hono<AppEnv>();
+const PATH = "/users/:id" as const;
+const WORKOS_USER_ID_PATTERN = /^user_[a-zA-Z0-9_]+$/;
 
-route.delete("/users/:id", async (c) => {
+route.delete(PATH, async (c) => {
 	const auth = requireAuth(c.get("auth"));
-	if (!hasScope(auth, "admin")) {
-		return forbidden(c, "Forbidden: admin scope required");
-	}
+	requireScope(auth, ADMIN_SCOPE);
 
 	const id = c.req.param("id");
+	if (!WORKOS_USER_ID_PATTERN.test(id)) return notFound(c, "User");
+	if (id === auth.subjectId) {
+		return forbidden(c, "Cannot delete your own account");
+	}
+
 	const db = getDB(c.env.DB);
 	const [row] = await db
 		.delete(users)
@@ -30,9 +36,9 @@ route.delete("/users/:id", async (c) => {
 
 export default {
 	route,
-	method: "DELETE" as RouteMetadata["method"],
-	path: "/users/:id",
+	method: "DELETE" satisfies RouteMetadata["method"],
+	path: PATH,
 	description: "Delete user (admin only)",
 	auth_required: true,
-	scopes: ["admin"],
+	scopes: [ADMIN_SCOPE],
 };

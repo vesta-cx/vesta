@@ -10,16 +10,18 @@ import type { AppEnv } from "../../env";
 import type { RouteMetadata } from "../../registry";
 
 const route = new Hono<AppEnv>();
+const PATH = "/permission-actions" as const;
 
-route.get("/permission-actions", async (c) => {
+route.get(PATH, async (c) => {
 	const auth = requireAuth(c.get("auth"));
-
 	requireScope(auth, "permissions:read");
 
 	const envelope = await runListQuery({
 		db: getDB(c.env.DB),
 		table: permissionActions,
-		input: new URL(c.req.url).searchParams,
+		input: new URLSearchParams(
+			c.req.query() as Record<string, string>,
+		),
 		config: permissionActionListConfig,
 		mode: "envelope",
 	});
@@ -28,8 +30,8 @@ route.get("/permission-actions", async (c) => {
 
 export default {
 	route,
-	method: "GET" as RouteMetadata["method"],
-	path: "/permission-actions",
+	method: "GET" satisfies RouteMetadata["method"],
+	path: PATH,
 	description: "List permission actions",
 	auth_required: true,
 	scopes: ["permissions:read"],

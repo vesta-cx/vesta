@@ -3,11 +3,9 @@
 import type { ListQueryConfig } from "@mia-cx/drizzle-query-factory";
 import { z } from "../../lib/validation";
 import { externalLinks } from "../../db/schema";
+import type { Scope } from "../../auth/types";
 
-export const externalLinkSubjectTypeSchema = z.enum([
-	"resource",
-	"workspace",
-]);
+export const externalLinkSubjectTypeSchema = z.enum(["resource", "workspace"]);
 export type ExternalLinkSubjectType = z.infer<
 	typeof externalLinkSubjectTypeSchema
 >;
@@ -39,7 +37,7 @@ export const externalLinkListConfig: ListQueryConfig = {
 export const scopeForSubjectType = (
 	subjectType: ExternalLinkSubjectType,
 	access: "read" | "write",
-) => {
+): Scope => {
 	return subjectType === "resource" ?
 			`resources:${access}`
 		:	`workspaces:${access}`;

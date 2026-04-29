@@ -7,7 +7,12 @@ import { isAuthenticated, requireAuth } from "../auth/helpers";
 import { startBrowserLogin } from "../auth/browser";
 import { getDB } from "../db";
 import { users, workspaces, organizations } from "../db/schema";
-import { createWorkOSTransport, type AuthUser } from "@vesta-cx/auth";
+import {
+	createWorkOSTransport,
+	extractStatus,
+	type AuthOrganization,
+	type AuthUser,
+} from "@vesta-cx/auth";
 import { mergeOrgResponse } from "../services/organizations";
 import { notFound } from "../lib/errors";
 import type { AppEnv } from "../env";
@@ -32,6 +37,17 @@ const mergeUserResponse = (
 
 const route = new Hono<AppEnv>();
 
+const returnNotFoundOnlyFor404 = async <T>(
+	operation: Promise<T>,
+): Promise<T | null> => {
+	try {
+		return await operation;
+	} catch (error) {
+		if (extractStatus(error) === 404) return null;
+		throw error;
+	}
+};
+
 route.get("/me", async (c) => {
 	const currentAuth = c.get("auth");
 	if (!isAuthenticated(currentAuth)) {
@@ -47,40 +63,48 @@ route.get("/me", async (c) => {
 	});
 
 	if (subjectType === "user") {
-		let workosUser;
-		try {
-			workosUser = await workosTransport.getUser({
-				userId: subjectId,
-			});
-		} catch {
-			return notFound(c, "User");
-		}
-		const [extension] = await db
-			.select()
-			.from(users)
-			.where(eq(users.workosUserId, subjectId))
-			.limit(1);
+		const [workosUser, [extension]] = await Promise.all([
+			returnNotFoundOnlyFor404(
+				workosTransport.getUser({ userId: subjectId }),
+			),
+			db
+				.select()
+				.from(users)
+				.where(eq(users.workosUserId, subjectId))
+				.limit(1),
+		]);
+		if (!workosUser) return notFound(c, "User");
 		return c.json(
-			itemResponse(mergeUserResponse(workosUser, extension)),
+			itemResponse(
+				mergeUserResponse(
+					workosUser as AuthUser,
+					extension,
+				),
+			),
 		);
 	}
 
 	if (subjectType === "organization") {
-		let workosOrg;
-		try {
-			workosOrg = await workosTransport.getOrganization({
-				organizationId: subjectId,
-			});
-		} catch {
-			return notFound(c, "Organization");
-		}
-		const [extension] = await db
-			.select()
-			.from(organizations)
-			.where(eq(organizations.workosOrgId, subjectId))
-			.limit(1);
+		const [workosOrg, [extension]] = await Promise.all([
+			returnNotFoundOnlyFor404(
+				workosTransport.getOrganization({
+					organizationId: subjectId,
+				}),
+			),
+			db
+				.select()
+				.from(organizations)
+				.where(eq(organizations.workosOrgId, subjectId))
+				.limit(1),
+		]);
+		if (!workosOrg) return notFound(c, "Organization");
 		return c.json(
-			itemResponse(mergeOrgResponse(workosOrg, extension)),
+			itemResponse(
+				mergeOrgResponse(
+					workosOrg as AuthOrganization,
+					extension,
+				),
+			),
 		);
 	}
 

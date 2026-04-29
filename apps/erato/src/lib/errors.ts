@@ -10,13 +10,15 @@ export type ApiError = {
 };
 
 export type ErrorEnvelope = {
-	error?: string;
+	error: string | undefined;
 	errors: ApiError[];
 };
 
+type HttpErrorStatus = 400 | 401 | 403 | 404 | 409 | 422 | 500;
+
 export const errorResponse = (
 	c: Context,
-	status: 400 | 401 | 403 | 404 | 409 | 422 | 500,
+	status: HttpErrorStatus,
 	errors: ApiError[],
 ) => {
 	const envelope: ErrorEnvelope = {
@@ -28,7 +30,7 @@ export const errorResponse = (
 
 export const singleError = (
 	c: Context,
-	status: 400 | 401 | 403 | 404 | 409 | 422 | 500,
+	status: HttpErrorStatus,
 	message: string,
 	code?: string,
 	path?: string,

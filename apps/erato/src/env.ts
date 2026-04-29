@@ -10,6 +10,7 @@ export type AppEnv = {
 		WORKOS_CLIENT_ID: string;
 		WORKOS_COOKIE_PASSWORD: string;
 		WORKOS_ORG_ID?: string;
+		CORS_ORIGINS?: string;
 	};
 	Variables: { auth: AuthContext };
 };

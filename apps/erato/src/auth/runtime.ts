@@ -9,14 +9,17 @@ import { organizations, users } from "@vesta-cx/db";
 import { getDB, type Database } from "../db";
 import type { AppEnv } from "../env";
 
-type EratoAuthBindings = Pick<
-	AppEnv["Bindings"],
-	| "DB"
+type EratoAuthBindings = AppEnv["Bindings"];
+
+type EratoRuntimeBindings = Pick<
+	EratoAuthBindings,
 	| "WORKOS_API_KEY"
 	| "WORKOS_CLIENT_ID"
 	| "WORKOS_COOKIE_PASSWORD"
 	| "WORKOS_ORG_ID"
 >;
+
+type EratoProvisioningBindings = Pick<EratoAuthBindings, "DB">;
 
 const createVestaProvisioningStore = (
 	db: Database,
@@ -44,17 +47,17 @@ const createVestaProvisioningStore = (
 		db.transaction((tx) => run(createVestaProvisioningStore(tx))),
 });
 
-export const createEratoAuthRuntime = (env: EratoAuthBindings) =>
+export const createEratoAuthRuntime = (env: EratoRuntimeBindings) =>
 	createAuthRuntime({
 		apiKey: env.WORKOS_API_KEY,
 		clientId: env.WORKOS_CLIENT_ID,
 		cookiePassword: env.WORKOS_COOKIE_PASSWORD,
-		...(env.WORKOS_ORG_ID ?
-			{ defaultOrganizationId: env.WORKOS_ORG_ID }
-		:	{}),
+		defaultOrganizationId: env.WORKOS_ORG_ID,
 	});
 
-export const createEratoProvisioningAdapter = (env: EratoAuthBindings) =>
+export const createEratoProvisioningAdapter = (
+	env: EratoProvisioningBindings,
+) =>
 	createVestaProvisioningAdapter({
 		store: createVestaProvisioningStore(getDB(env.DB)),
 	});

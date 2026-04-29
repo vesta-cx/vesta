@@ -20,13 +20,19 @@ import {
 	createEratoProvisioningAdapter,
 } from "./runtime";
 
+const COOKIE_PATH = "/";
+const RETURN_TO_COOKIE_NAME = "vesta_erato_return_to";
+
 const cookieOptions = (url: URL, maxAge: number) => ({
-	path: "/",
+	path: COOKIE_PATH,
 	httpOnly: true,
 	sameSite: "Lax" as const,
 	maxAge,
 	secure: url.protocol === "https:",
 });
+
+const isSafeReturnPath = (value: string | null): value is string =>
+	!!value && value.startsWith("/") && !value.startsWith("//");
 
 export const startBrowserLogin = (c: Context<AppEnv>) => {
 	const url = new URL(c.req.url);
@@ -37,6 +43,16 @@ export const startBrowserLogin = (c: Context<AppEnv>) => {
 		state,
 		cookieOptions(url, DEFAULT_OAUTH_STATE_MAX_AGE),
 	);
+
+	const returnTo = url.searchParams.get("return_to");
+	if (isSafeReturnPath(returnTo)) {
+		setCookie(
+			c,
+			RETURN_TO_COOKIE_NAME,
+			returnTo,
+			cookieOptions(url, DEFAULT_OAUTH_STATE_MAX_AGE),
+		);
+	}
 
 	const authUrl = createEratoAuthRuntime(c.env).getAuthorizationUrl({
 		redirectUri: `${url.origin}${API_BASE_PATH}/auth/callback`,
@@ -53,9 +69,11 @@ browserAuthRoutes.get("/auth/callback", async (c) => {
 	const code = url.searchParams.get("code");
 	const state = url.searchParams.get("state");
 	const storedState = getCookie(c, DEFAULT_OAUTH_STATE_COOKIE_NAME);
+	const returnTo = getCookie(c, RETURN_TO_COOKIE_NAME);
+	deleteCookie(c, DEFAULT_OAUTH_STATE_COOKIE_NAME, { path: COOKIE_PATH });
+	deleteCookie(c, RETURN_TO_COOKIE_NAME, { path: COOKIE_PATH });
 
 	if (!code) {
-		deleteCookie(c, DEFAULT_OAUTH_STATE_COOKIE_NAME, { path: "/" });
 		return singleError(
 			c,
 			400,
@@ -65,7 +83,6 @@ browserAuthRoutes.get("/auth/callback", async (c) => {
 	}
 
 	if (!state || !storedState || state !== storedState) {
-		deleteCookie(c, DEFAULT_OAUTH_STATE_COOKIE_NAME, { path: "/" });
 		return singleError(
 			c,
 			400,
@@ -73,8 +90,6 @@ browserAuthRoutes.get("/auth/callback", async (c) => {
 			"AUTH_CALLBACK_INVALID",
 		);
 	}
-
-	deleteCookie(c, DEFAULT_OAUTH_STATE_COOKIE_NAME, { path: "/" });
 
 	try {
 		const runtime = createEratoAuthRuntime(c.env);
@@ -88,8 +103,8 @@ browserAuthRoutes.get("/auth/callback", async (c) => {
 			provisioningAdapter: createEratoProvisioningAdapter(
 				c.env,
 			),
-			...(ipAddress ? { ipAddress } : {}),
-			...(userAgent ? { userAgent } : {}),
+			ipAddress: ipAddress ?? undefined,
+			userAgent: userAgent ?? undefined,
 		});
 
 		setCookie(
@@ -99,7 +114,12 @@ browserAuthRoutes.get("/auth/callback", async (c) => {
 			cookieOptions(url, DEFAULT_SESSION_MAX_AGE),
 		);
 
-		return c.redirect(`${API_BASE_PATH}/me`, 302);
+		return c.redirect(
+			isSafeReturnPath(returnTo) ? returnTo : (
+				`${API_BASE_PATH}/me`
+			),
+			302,
+		);
 	} catch (error) {
 		if (isExpectedAuthenticationFailure(error)) {
 			return singleError(

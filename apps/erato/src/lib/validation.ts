@@ -2,26 +2,15 @@
 
 import type { Context } from "hono";
 import { z, type ZodSchema } from "zod";
-import { zodErrors } from "./errors";
+import { singleError, zodErrors } from "./errors";
 
 export const parseBody = async <T>(
 	c: Context,
 	schema: ZodSchema<T>,
 ): Promise<T | Response> => {
 	const raw = await c.req.json().catch(() => null);
-	if (!raw) {
-		return c.json(
-			{
-				error: "Invalid JSON body",
-				errors: [
-					{
-						code: "PARSE_ERROR",
-						message: "Invalid JSON body",
-					},
-				],
-			},
-			400,
-		);
+	if (raw === null) {
+		return singleError(c, 400, "Invalid JSON body", "PARSE_ERROR");
 	}
 
 	const result = schema.safeParse(raw);

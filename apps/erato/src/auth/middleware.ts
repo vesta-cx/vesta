@@ -2,39 +2,19 @@
 
 import { DEFAULT_AUTH_COOKIE_NAME } from "@vesta-cx/auth";
 import type { Context } from "hono";
+import { getCookie } from "hono/cookie";
 import { createMiddleware } from "hono/factory";
-import type { AuthContext } from "./types";
+import type { AppEnv } from "../env";
 import { parseApiKeyMeta } from "./types";
 import { hashApiKey } from "./helpers";
+import { API_KEY_KV_PREFIX } from "./keys";
 import {
 	createEratoAuthRuntime,
 	createEratoProvisioningAdapter,
 } from "./runtime";
 
-type AuthEnv = {
-	Bindings: {
-		DB: D1Database;
-		KV: KVNamespace;
-		WORKOS_API_KEY: string;
-		WORKOS_CLIENT_ID: string;
-		WORKOS_COOKIE_PASSWORD: string;
-		WORKOS_ORG_ID?: string;
-	};
-	Variables: { auth: AuthContext };
-};
-
-const readCookie = (header: string | undefined, name: string) =>
-	header
-		?.split(";")
-		.map((cookie) => cookie.trim())
-		.find((cookie) => cookie.startsWith(`${name}=`))
-		?.slice(name.length + 1);
-
-const authenticateSession = async (c: Context<AuthEnv>) => {
-	const sealedSession = readCookie(
-		c.req.header("Cookie"),
-		DEFAULT_AUTH_COOKIE_NAME,
-	);
+const authenticateSession = async (c: Context<AppEnv>) => {
+	const sealedSession = getCookie(c, DEFAULT_AUTH_COOKIE_NAME);
 	if (!sealedSession) return false;
 
 	let result;
@@ -65,17 +45,10 @@ const authenticateSession = async (c: Context<AuthEnv>) => {
 	return true;
 };
 
-export const authMiddleware = createMiddleware<AuthEnv>(async (c, next) => {
+export const authMiddleware = createMiddleware<AppEnv>(async (c, next) => {
 	const header = c.req.header("Authorization");
+	const rawKey = header?.startsWith("Bearer ") ? header.slice(7) : "";
 
-	if (!header || !header.startsWith("Bearer ")) {
-		if (!(await authenticateSession(c))) {
-			c.set("auth", { type: "guest" });
-		}
-		return next();
-	}
-
-	const rawKey = header.slice(7);
 	if (!rawKey) {
 		if (!(await authenticateSession(c))) {
 			c.set("auth", { type: "guest" });
@@ -84,7 +57,7 @@ export const authMiddleware = createMiddleware<AuthEnv>(async (c, next) => {
 	}
 
 	const hash = await hashApiKey(rawKey);
-	const kvValue = await c.env.KV.get(`ak:${hash}`);
+	const kvValue = await c.env.KV.get(`${API_KEY_KV_PREFIX}${hash}`);
 
 	if (!kvValue) {
 		return c.json({ error: "Unauthorized" }, 401);

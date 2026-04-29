@@ -87,7 +87,9 @@ wrangler.env[apiEnv] = mergedEnv;
 // Write back with 2-space indentation
 await writeFile(wranglerPath, JSON.stringify(wrangler, null, 2) + "\n", "utf8");
 
-const appVersionConfig = `export const API_VERSION = "${apiVersion}";
+const appVersionConfig = `/** @format */
+
+export const API_VERSION = "${apiVersion}";
 export const API_BASE_PATH = \`/\${API_VERSION}\`;
 `;
 await writeFile(appVersionConfigPath, appVersionConfig, "utf8");

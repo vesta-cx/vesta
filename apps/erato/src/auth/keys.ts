@@ -4,7 +4,7 @@ import type { ApiKeyMeta } from "./types";
 import { parseApiKeyMeta } from "./types";
 import { hashApiKey } from "./helpers";
 
-const KV_PREFIX = "ak:";
+export const API_KEY_KV_PREFIX = "ak:";
 
 export const generateApiKey = (): string => {
 	const a = crypto.randomUUID().replace(/-/g, "");
@@ -26,12 +26,19 @@ export const storeApiKey = async (
 	const options: KVNamespacePutOptions = {};
 	if (meta.expiresAt) {
 		const ttlMs = new Date(meta.expiresAt).getTime() - Date.now();
-		if (ttlMs > 0) {
-			options.expirationTtl = Math.ceil(ttlMs / 1000);
+		if (ttlMs <= 0) {
+			throw new Error(
+				"Cannot store an already-expired API key",
+			);
 		}
+		options.expirationTtl = Math.ceil(ttlMs / 1000);
 	}
 
-	await kv.put(`${KV_PREFIX}${hash}`, JSON.stringify(fullMeta), options);
+	await kv.put(
+		`${API_KEY_KV_PREFIX}${hash}`,
+		JSON.stringify(fullMeta),
+		options,
+	);
 };
 
 export const revokeApiKey = async (
@@ -39,7 +46,7 @@ export const revokeApiKey = async (
 	rawKey: string,
 ): Promise<void> => {
 	const hash = await hashApiKey(rawKey);
-	await kv.delete(`${KV_PREFIX}${hash}`);
+	await kv.delete(`${API_KEY_KV_PREFIX}${hash}`);
 };
 
 export const getApiKeyMeta = async (
@@ -47,7 +54,7 @@ export const getApiKeyMeta = async (
 	rawKey: string,
 ): Promise<ApiKeyMeta | null> => {
 	const hash = await hashApiKey(rawKey);
-	const value = await kv.get(`${KV_PREFIX}${hash}`);
+	const value = await kv.get(`${API_KEY_KV_PREFIX}${hash}`);
 	if (!value) return null;
 	return parseApiKeyMeta(value);
 };

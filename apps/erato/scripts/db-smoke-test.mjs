@@ -13,6 +13,7 @@ const baseUrl = normalizeBaseUrl(
 	process.env.ERATO_SMOKE_BASE_URL ?? "http://localhost:8787",
 );
 const apiKey = generateApiKey();
+// Mirrors apps/erato/src/auth/helpers.ts because this Node script provisions local KV directly.
 const apiKeyStorageKey = `ak:${await hashApiKey(apiKey)}`;
 const created = {
 	collectionId: null,
@@ -131,14 +132,21 @@ async function request(method, path, body, options = {}) {
 	});
 
 	const text = await response.text();
-	const payload = text ? JSON.parse(text) : null;
 	const allowedStatuses = options.statuses ?? [200, 201];
 	if (!allowedStatuses.includes(response.status)) {
 		throw new Error(
 			`${method} ${path} returned ${response.status}: ${text || response.statusText}`,
 		);
 	}
-	return payload;
+
+	try {
+		return text ? JSON.parse(text) : null;
+	} catch (error) {
+		throw new Error(
+			`${method} ${path} returned non-JSON ${response.status}: ${text || response.statusText}`,
+			{ cause: error },
+		);
+	}
 }
 
 async function optionalDelete(path) {
@@ -174,8 +182,6 @@ async function assertHealth() {
 }
 
 async function exerciseApi() {
-	await assertHealth();
-
 	await request("GET", "/introspect/routes");
 
 	await request("POST", "/users", {
@@ -378,21 +384,15 @@ async function exerciseApi() {
 }
 
 async function cleanup() {
-	if (created.featureSlug) {
-		await optionalDelete(
-			`/users/${created.userId}/features/${created.featureSlug}`,
-		);
-	}
-	if (created.featurePresetName) {
-		await optionalDelete(
-			`/feature-presets/${encodeURIComponent(created.featurePresetName)}`,
-		);
-	}
-	if (created.featureSlug) {
-		await optionalDelete(
-			`/features/${encodeURIComponent(created.featureSlug)}`,
-		);
-	}
+	await optionalDelete(
+		`/users/${created.userId}/features/${created.featureSlug}`,
+	);
+	await optionalDelete(
+		`/feature-presets/${encodeURIComponent(created.featurePresetName)}`,
+	);
+	await optionalDelete(
+		`/features/${encodeURIComponent(created.featureSlug)}`,
+	);
 	if (created.permissionId) {
 		await optionalDelete(`/permissions/${created.permissionId}`);
 	}
@@ -461,20 +461,23 @@ async function main() {
 	console.log(
 		`Running Erato HTTP smoke test against ${baseUrl} (runId: ${runId})`,
 	);
+	await assertHealth();
 	await provisionApiKey();
 	try {
 		await exerciseApi();
 	} finally {
-		await cleanup();
-		await revokeApiKey();
+		try {
+			await cleanup();
+		} finally {
+			await revokeApiKey();
+		}
 	}
 	console.log(
 		"Erato HTTP smoke test passed and cleaned up via API calls.",
 	);
 }
 
-main().catch(async (error) => {
+main().catch((error) => {
 	console.error(error.message);
-	await revokeApiKey();
 	process.exit(1);
 });

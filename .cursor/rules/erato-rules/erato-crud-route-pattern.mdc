@@ -53,6 +53,13 @@ if (isResponse(parsed)) return parsed;
 Use helpers from `lib/errors`: `forbidden(c)`, `notFound(c, "Entity")`, `conflict(c, "msg", "field")`, `zodErrors(c, err)`.
 Unique constraint violations: catch and return `conflict()`.
 
+## Multi-table Mutations
+
+Any handler that performs more than one mutation must wrap the mutation sequence in
+`db.transaction(async (tx) => { ... })`. This is required for parent/child writes
+such as engagements + comments/mentions, and for delete flows that remove dependent
+rows before deleting the parent.
+
 ## Response Envelopes
 
 - List: `listResponse(rows, total, limit, offset)` → `{ data, meta }`

@@ -1,35 +1,26 @@
 /** @format */
 
-import { and, eq } from "drizzle-orm";
 import { Hono } from "hono";
-import { isAuthenticated, requireAuth, hasScope } from "../../auth/helpers";
+import { requireAuth, requireScope } from "../../auth/helpers";
+import { ADMIN_SCOPE } from "../../auth/types";
 import { getDB } from "../../db";
 import { resources } from "../../db/schema";
-import { forbidden, notFound } from "../../lib/errors";
+import { notFound } from "../../lib/errors";
+import { resourceMutationWhere } from "../../services/resources";
 import type { AppEnv } from "../../env";
 import type { RouteMetadata } from "../../registry";
 
 const route = new Hono<AppEnv>();
+const PATH = "/resources/:id" as const;
 
-route.delete("/resources/:id", async (c) => {
+route.delete(PATH, async (c) => {
 	const auth = requireAuth(c.get("auth"));
-	const id = c.req.param("id");
-	const db = getDB(c.env.DB);
+	requireScope(auth, "resources:write");
 
-	const isAdmin = hasScope(auth, "admin");
-	if (!isAdmin && !auth.scopes.includes("resources:write")) {
-		return forbidden(c);
-	}
-
-	const where =
-		isAdmin ?
-			eq(resources.id, id)
-		:	and(
-				eq(resources.id, id),
-				eq(resources.ownerId, auth.subjectId),
-			);
-
-	const [row] = await db.delete(resources).where(where).returning();
+	const [row] = await getDB(c.env.DB)
+		.delete(resources)
+		.where(resourceMutationWhere(auth, c.req.param("id")))
+		.returning({ id: resources.id });
 	if (!row) return notFound(c, "Resource");
 
 	return c.body(null, 204);
@@ -37,9 +28,10 @@ route.delete("/resources/:id", async (c) => {
 
 export default {
 	route,
-	method: "DELETE" as RouteMetadata["method"],
-	path: "/resources/:id",
+	method: "DELETE" satisfies RouteMetadata["method"],
+	path: PATH,
 	description: "Delete resource",
 	auth_required: true,
 	scopes: ["resources:write"],
+	scopes_any: [ADMIN_SCOPE, "resources:write"],
 };

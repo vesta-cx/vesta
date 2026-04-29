@@ -4,6 +4,7 @@ import { eq } from "drizzle-orm";
 import { Hono } from "hono";
 import { itemResponse } from "@mia-cx/drizzle-query-factory";
 import { requireAuth, requireScope } from "../../auth/helpers";
+import { ADMIN_SCOPE } from "../../auth/types";
 import { getDB } from "../../db";
 import {
 	engagementComments,
@@ -15,45 +16,49 @@ import type { AppEnv } from "../../env";
 import type { RouteMetadata } from "../../registry";
 
 const route = new Hono<AppEnv>();
+const PATH = "/engagements/:id" as const;
 
-route.get("/engagements/:id", async (c) => {
+route.get(PATH, async (c) => {
 	const id = c.req.param("id");
 	const auth = requireAuth(c.get("auth"));
-
 	requireScope(auth, "engagements:read");
 
 	const db = getDB(c.env.DB);
-
 	const [engagement] = await db
 		.select()
 		.from(engagements)
-		.where(eq(engagements.id, id));
+		.where(eq(engagements.id, id))
+		.limit(1);
 	if (!engagement) return notFound(c, "Engagement");
 
-	const [comment] = await db
-		.select()
-		.from(engagementComments)
-		.where(eq(engagementComments.engagementId, id));
+	const [commentRows, mentionRows] = await Promise.all([
+		db
+			.select()
+			.from(engagementComments)
+			.where(eq(engagementComments.engagementId, id))
+			.limit(1),
+		db
+			.select()
+			.from(engagementMentions)
+			.where(eq(engagementMentions.engagementId, id))
+			.limit(1),
+	]);
 
-	const [mention] = await db
-		.select()
-		.from(engagementMentions)
-		.where(eq(engagementMentions.engagementId, id));
-
-	const payload = {
-		...engagement,
-		comment: comment ?? null,
-		mention: mention ?? null,
-	};
-
-	return c.json(itemResponse(payload));
+	return c.json(
+		itemResponse({
+			...engagement,
+			comment: commentRows[0] ?? null,
+			mention: mentionRows[0] ?? null,
+		}),
+	);
 });
 
 export default {
 	route,
-	method: "GET" as RouteMetadata["method"],
-	path: "/engagements/:id",
+	method: "GET" satisfies RouteMetadata["method"],
+	path: PATH,
 	description: "Get engagement by id",
 	auth_required: true,
 	scopes: ["engagements:read"],
+	scopes_any: [ADMIN_SCOPE, "engagements:read"],
 };

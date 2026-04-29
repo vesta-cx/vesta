@@ -23,6 +23,7 @@
     "sync:fonts": "node ./scripts/sync-fonts.mjs",
     "test": "vitest run",
     "test:coverage": "vitest run --coverage",
+    "test:db:smoke": "node ./scripts/db-smoke-test.mjs",
     "test:watch": "vitest"
   },
   "dependencies": {

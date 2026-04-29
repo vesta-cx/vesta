@@ -10,6 +10,7 @@ import {
 	createAuthHandle,
 	getRequestMetadata,
 	isExpectedAuthenticationFailure,
+	matchesProtectedPath,
 	readOAuthState,
 } from "../src/sveltekit.js";
 import { TerminalAuthError } from "../src/errors.js";
@@ -133,6 +134,19 @@ describe("isExpectedAuthenticationFailure", () => {
 		expect(thrown).toBeInstanceOf(TerminalAuthError);
 		expect((thrown as TerminalAuthError).status).toBe(401);
 		expect(isExpectedAuthenticationFailure(thrown)).toBe(true);
+	});
+});
+
+describe("protected path matching", () => {
+	it("matches exact paths and child segments only", () => {
+		expect(matchesProtectedPath("/admin", "/admin")).toBe(true);
+		expect(matchesProtectedPath("/admin/settings", "/admin")).toBe(
+			true,
+		);
+		expect(matchesProtectedPath("/admin-assets", "/admin")).toBe(
+			false,
+		);
+		expect(matchesProtectedPath("/dashboard", "/dash")).toBe(false);
 	});
 });
 

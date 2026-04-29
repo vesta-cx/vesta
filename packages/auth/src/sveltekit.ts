@@ -88,7 +88,7 @@ export const isExpectedAuthenticationFailure = (
 const normalizeProtectedPath = (path: string): string =>
 	path === "/" ? "/" : path.replace(/\/+$/, "");
 
-const matchesProtectedPath = (
+export const matchesProtectedPath = (
 	pathname: string,
 	protectedPath: string,
 ): boolean => {

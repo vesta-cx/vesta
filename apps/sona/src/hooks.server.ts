@@ -1,5 +1,5 @@
 import type { Handle } from '@sveltejs/kit';
-import { createAuthHandle, type AuthSession } from '@vesta-cx/auth';
+import { createAuthHandle, matchesProtectedPath, type AuthSession } from '@vesta-cx/auth';
 import { createCorsHandle } from '@vesta-cx/utils/cors';
 import { createSonaAuthRuntime } from '$lib/server/auth';
 import { paraglideMiddleware } from '$lib/paraglide/server';
@@ -24,7 +24,7 @@ export const handle: Handle = async ({ event, resolve }) =>
 			if (!e.platform) {
 				(e.locals as { session: AuthSession | null }).session = null;
 
-				if (protectedPaths.some((path) => e.url.pathname.startsWith(path))) {
+				if (protectedPaths.some((path) => matchesProtectedPath(e.url.pathname, path))) {
 					return new Response('Unauthorized', { status: 401 });
 				}
 

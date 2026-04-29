@@ -77,6 +77,7 @@ browserAuthRoutes.get("/auth/callback", async (c) => {
 	try {
 		const runtime = createEratoAuthRuntime(c.env);
 		const { ipAddress, userAgent } = getRequestMetadata(c.req.raw, {
+			trustCloudflare: true,
 			trustForwardedFor: true,
 		});
 		const exchange = await runtime.authenticateWithCode({

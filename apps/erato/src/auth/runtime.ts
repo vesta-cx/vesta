@@ -3,8 +3,10 @@
 import {
 	createAuthRuntime,
 	createVestaProvisioningAdapter,
+	type VestaProvisioningStore,
 } from "@vesta-cx/auth";
-import { getDB } from "../db";
+import { organizations, users } from "@vesta-cx/db";
+import { getDB, type Database } from "../db";
 
 type EratoAuthBindings = {
 	DB: D1Database;
@@ -13,6 +15,32 @@ type EratoAuthBindings = {
 	WORKOS_COOKIE_PASSWORD: string;
 	WORKOS_ORG_ID?: string;
 };
+
+const createVestaProvisioningStore = (
+	db: Database,
+): VestaProvisioningStore => ({
+	ensureOrganization: (organizationId) =>
+		db
+			.insert(organizations)
+			.values({ workosOrgId: organizationId })
+			.onConflictDoNothing(),
+	upsertUser: (user) =>
+		db
+			.insert(users)
+			.values(user)
+			.onConflictDoUpdate({
+				target: users.workosUserId,
+				set: {
+					email: user.email,
+					displayName: user.displayName,
+					avatarUrl: user.avatarUrl,
+					organizationId: user.organizationId,
+					updatedAt: new Date(),
+				},
+			}),
+	transaction: (run) =>
+		db.transaction((tx) => run(createVestaProvisioningStore(tx))),
+});
 
 export const createEratoAuthRuntime = (env: EratoAuthBindings) =>
 	createAuthRuntime({
@@ -26,5 +54,5 @@ export const createEratoAuthRuntime = (env: EratoAuthBindings) =>
 
 export const createEratoProvisioningAdapter = (env: EratoAuthBindings) =>
 	createVestaProvisioningAdapter({
-		db: getDB(env.DB),
+		store: createVestaProvisioningStore(getDB(env.DB)),
 	});

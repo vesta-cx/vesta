@@ -1,6 +1,6 @@
 /** @format */
 
-import type { Cookies } from "@sveltejs/kit";
+import type { Cookies, RequestEvent } from "@sveltejs/kit";
 import { describe, expect, it, vi } from "vitest";
 import {
 	authenticateSvelteKitSession,
@@ -14,6 +14,8 @@ import {
 	readOAuthState,
 } from "../src/sveltekit.js";
 import { TerminalAuthError } from "../src/errors.js";
+import type { AuthRuntime } from "../src/runtime.js";
+import type { AuthSessionResult } from "../src/types.js";
 import { createVestaProvisioningAdapter } from "../src/vesta-provisioning.js";
 
 const createMockCookies = (initial: Record<string, string> = {}) => {
@@ -48,17 +50,65 @@ const createMockCookies = (initial: Record<string, string> = {}) => {
 			deletions.push({ name, options });
 		},
 		serialize: () => "",
-	} satisfies Partial<Cookies>;
+	} satisfies Cookies;
 
 	return {
-		cookies: cookies as Cookies,
+		cookies,
 		sets,
 		deletions,
 	};
 };
 
+const createRuntime = (
+	authenticateSealedSession: AuthRuntime["authenticateSealedSession"],
+): AuthRuntime => ({
+	getAuthorizationUrl: () => "https://example.com/login",
+	authenticateWithCode: async () => {
+		throw new Error("not implemented");
+	},
+	authenticateSealedSession,
+	getLogoutUrl: async () => null,
+	getUser: async () => {
+		throw new Error("not implemented");
+	},
+	getOrganization: async () => {
+		throw new Error("not implemented");
+	},
+	listOrganizations: async () => ({
+		data: [],
+		before: null,
+		after: null,
+	}),
+	createOrganization: async () => {
+		throw new Error("not implemented");
+	},
+	updateOrganization: async () => {
+		throw new Error("not implemented");
+	},
+	deleteOrganization: async () => undefined,
+	listOrganizationMemberships: async () => [],
+});
+
+const createEvent = (
+	cookies: Cookies,
+	url = "https://example.com/admin",
+): RequestEvent =>
+	({
+		cookies,
+		locals: { session: null },
+		url: new URL(url),
+	}) as RequestEvent;
+
+const unauthenticatedResult = (): AuthSessionResult => ({
+	authenticated: false,
+	refreshed: false,
+	reason: "no_session_cookie_provided",
+	sealedSession: null,
+	session: null,
+});
+
 describe("getRequestMetadata", () => {
-	it("reads cloudflare client IP and user agent", () => {
+	it("reads cloudflare client IP when explicitly trusted", () => {
 		const request = new Request("https://example.com", {
 			headers: {
 				"CF-Connecting-IP": "203.0.113.10",
@@ -66,15 +116,18 @@ describe("getRequestMetadata", () => {
 			},
 		});
 
-		expect(getRequestMetadata(request)).toEqual({
+		expect(
+			getRequestMetadata(request, { trustCloudflare: true }),
+		).toEqual({
 			ipAddress: "203.0.113.10",
 			userAgent: "Mozilla/5.0",
 		});
 	});
 
-	it("does not trust forwarded-for by default", () => {
+	it("does not trust proxy headers by default", () => {
 		const request = new Request("https://example.com", {
 			headers: {
+				"CF-Connecting-IP": "203.0.113.10",
 				"X-Forwarded-For": "203.0.113.11, 198.51.100.7",
 			},
 		});
@@ -106,7 +159,10 @@ describe("getRequestMetadata", () => {
 describe("isExpectedAuthenticationFailure", () => {
 	it("treats real provisioning failures as expected auth failures", async () => {
 		const adapter = createVestaProvisioningAdapter({
-			db: {} as never,
+			store: {
+				ensureOrganization: async () => undefined,
+				upsertUser: async () => undefined,
+			},
 		});
 
 		let thrown: unknown;
@@ -175,13 +231,7 @@ describe("oauth state cookies", () => {
 
 	it("sets secure flag when secure: true", () => {
 		const { cookies, sets } = createMockCookies();
-		commitOAuthState(
-			cookies,
-			"state_123",
-			undefined,
-			undefined,
-			true,
-		);
+		commitOAuthState(cookies, "state_123", { secure: true });
 		expect(sets[0]?.options).toMatchObject({
 			httpOnly: true,
 			sameSite: "lax",
@@ -205,13 +255,7 @@ describe("oauth state cookies", () => {
 
 	it("sets secure flag on session cookie when secure: true", () => {
 		const { cookies, sets } = createMockCookies();
-		commitSealedSession(
-			cookies,
-			"sealed_123",
-			undefined,
-			undefined,
-			true,
-		);
+		commitSealedSession(cookies, "sealed_123", { secure: true });
 		expect(sets[0]?.options).toMatchObject({
 			httpOnly: true,
 			sameSite: "lax",
@@ -229,14 +273,12 @@ describe("createAuthHandle", () => {
 
 		const result = await authenticateSvelteKitSession({
 			cookies,
-			runtime: {
-				authenticateSealedSession: async () => {
-					throw new TerminalAuthError(
-						"failed to decrypt session",
-						"loadSealedSession",
-					);
-				},
-			} as never,
+			runtime: createRuntime(async () => {
+				throw new TerminalAuthError(
+					"failed to decrypt session",
+					"loadSealedSession",
+				);
+			}),
 		});
 
 		expect(result).toEqual({
@@ -260,23 +302,15 @@ describe("createAuthHandle", () => {
 		});
 		const resolve = vi.fn(async () => new Response("ok"));
 		const handle = createAuthHandle({
-			runtime: {
-				authenticateSealedSession: async () => {
-					throw new Error("boom");
-				},
-			} as never,
+			runtime: createRuntime(async () => {
+				throw new Error("boom");
+			}),
 			protectedPaths: [],
 		});
 
 		await expect(
 			handle({
-				event: {
-					cookies,
-					locals: {},
-					url: new URL(
-						"https://example.com/admin",
-					),
-				} as never,
+				event: createEvent(cookies),
 				resolve,
 			}),
 		).rejects.toThrow("boom");
@@ -289,29 +323,33 @@ describe("createAuthHandle", () => {
 		const { cookies } = createMockCookies();
 		const resolve = vi.fn(async () => new Response("ok"));
 		const handle = createAuthHandle({
-			runtime: {
-				authenticateSealedSession: async () => ({
-					authenticated: false,
-					refreshed: false,
-					reason: "no_session_cookie_provided",
-					sealedSession: null,
-					session: null,
-				}),
-			} as never,
+			runtime: createRuntime(async () =>
+				unauthenticatedResult(),
+			),
 			protectedPaths: ["/dash"],
 		});
 
 		const response = await handle({
-			event: {
+			event: createEvent(
 				cookies,
-				locals: {},
-				url: new URL("https://example.com/dashboard"),
-			} as never,
+				"https://example.com/dashboard",
+			),
 			resolve,
 		});
 
 		expect(resolve).toHaveBeenCalledOnce();
 		expect(response).toBeInstanceOf(Response);
 		expect(response.status).toBe(200);
+	});
+
+	it("rejects malformed protected paths", () => {
+		expect(() =>
+			createAuthHandle({
+				runtime: createRuntime(async () =>
+					unauthenticatedResult(),
+				),
+				protectedPaths: ["admin"],
+			}),
+		).toThrow("Protected path must start with /");
 	});
 });

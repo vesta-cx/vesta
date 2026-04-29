@@ -1,6 +1,5 @@
 /** @format */
 
-import { organizations, users } from "@vesta-cx/db";
 import { TerminalAuthError } from "./errors.js";
 import type {
 	AuthOrganizationMembership,
@@ -8,32 +7,29 @@ import type {
 	AuthProvisioningRequest,
 } from "./types.js";
 
-type UserUpsertQuery = PromiseLike<unknown>;
-type OrganizationUpsertQuery = PromiseLike<unknown>;
+export interface VestaProvisioningUserInput {
+	workosUserId: string;
+	email: string;
+	displayName: string | null;
+	avatarUrl: string | null;
+	organizationId: string;
+}
 
-interface VestaProvisioningDb {
-	insert(table: typeof users): {
-		values(value: typeof users.$inferInsert): {
-			onConflictDoUpdate(input: {
-				target: typeof users.workosUserId;
-				set: Partial<typeof users.$inferInsert>;
-			}): UserUpsertQuery;
-		};
-	};
-	insert(table: typeof organizations): {
-		values(value: typeof organizations.$inferInsert): {
-			onConflictDoNothing(): OrganizationUpsertQuery;
-		};
-	};
+export interface VestaProvisioningStore {
+	ensureOrganization(organizationId: string): PromiseLike<unknown>;
+	upsertUser(input: VestaProvisioningUserInput): PromiseLike<unknown>;
+	transaction?<T>(
+		run: (store: VestaProvisioningStore) => Promise<T>,
+	): Promise<T>;
 }
 
 const buildDisplayName = (input: {
 	firstName: string | null;
 	lastName: string | null;
 }): string | null => {
-	const parts = [input.firstName, input.lastName].filter(
-		(value): value is string => Boolean(value && value.trim()),
-	);
+	const parts = [input.firstName, input.lastName]
+		.map((value) => value?.trim())
+		.filter((value): value is string => Boolean(value));
 
 	return parts.length > 0 ? parts.join(" ") : null;
 };
@@ -74,58 +70,54 @@ const resolveActiveOrganizationId = (
 	return organizationId;
 };
 
-export const createVestaProvisioningAdapter = (input: {
-	db: VestaProvisioningDb;
-}): AuthProvisioningAdapter => ({
-	provision: async (request) => {
-		const activeOrganizationId =
-			resolveActiveOrganizationId(request);
-		const organizationIds = collectOrganizationIds({
-			memberships: request.session.memberships,
-			activeOrganizationId,
-		});
+const provisionWithStore = async (
+	store: VestaProvisioningStore,
+	request: AuthProvisioningRequest,
+) => {
+	const activeOrganizationId = resolveActiveOrganizationId(request);
+	const organizationIds = collectOrganizationIds({
+		memberships: request.session.memberships,
+		activeOrganizationId,
+	});
 
+	const writeProvisioningState = async (
+		target: VestaProvisioningStore,
+	) => {
 		for (const organizationId of organizationIds) {
-			await input.db
-				.insert(organizations)
-				.values({
-					workosOrgId: organizationId,
-				})
-				.onConflictDoNothing();
+			await target.ensureOrganization(organizationId);
 		}
 
-		await input.db
-			.insert(users)
-			.values({
-				workosUserId: request.session.userId,
-				email: request.session.email,
-				displayName: buildDisplayName({
-					firstName: request.session.firstName,
-					lastName: request.session.lastName,
-				}),
-				avatarUrl: request.session.profilePictureUrl,
-				organizationId: activeOrganizationId,
-			})
-			.onConflictDoUpdate({
-				target: users.workosUserId,
-				set: {
-					email: request.session.email,
-					displayName: buildDisplayName({
-						firstName: request.session
-							.firstName,
-						lastName: request.session
-							.lastName,
-					}),
-					avatarUrl: request.session
-						.profilePictureUrl,
-					organizationId: activeOrganizationId,
-					updatedAt: new Date(),
-				},
-			});
+		await target.upsertUser({
+			workosUserId: request.session.userId,
+			email: request.session.email,
+			displayName: buildDisplayName({
+				firstName: request.session.firstName,
+				lastName: request.session.lastName,
+			}),
+			avatarUrl: request.session.profilePictureUrl,
+			organizationId: activeOrganizationId,
+		});
+	};
 
-		return {
-			activeOrganizationId,
-			organizationIds,
-		};
-	},
+	if (store.transaction) {
+		await store.transaction(writeProvisioningState);
+	} else {
+		await writeProvisioningState(store);
+	}
+
+	return {
+		activeOrganizationId,
+		organizationIds,
+	};
+};
+
+/**
+ * Creates the first-party Vesta provisioning adapter from app-owned storage
+ * operations. The auth package owns session-to-provisioning mapping; apps own
+ * their concrete database schema and transaction implementation.
+ */
+export const createVestaProvisioningAdapter = (input: {
+	store: VestaProvisioningStore;
+}): AuthProvisioningAdapter => ({
+	provision: (request) => provisionWithStore(input.store, request),
 });

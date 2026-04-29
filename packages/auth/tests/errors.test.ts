@@ -26,4 +26,15 @@ describe("normalizeAuthError", () => {
 
 		expect(normalized).toBeInstanceOf(RetryableAuthError);
 	});
+
+	it("ignores non-HTTP numeric status fields", () => {
+		const normalized = normalizeAuthError("authenticateWithCode", {
+			message: "bad local code",
+			code: -1,
+			status: Number.NaN,
+		});
+
+		expect(normalized.status).toBeUndefined();
+		expect(normalized).toBeInstanceOf(TerminalAuthError);
+	});
 });

@@ -3,6 +3,7 @@
 import { describe, expect, it, vi } from "vitest";
 import {
 	createAuthRuntime,
+	createAuthRuntimeFromEnv,
 	type AuthTransport,
 	type AuthTransportSession,
 	type AuthSessionWithoutMemberships,
@@ -190,6 +191,36 @@ describe("createAuthRuntime", () => {
 		expect(authenticateWithCode).toHaveBeenCalledTimes(2);
 	});
 
+	it("honors zero retry options from env config", async () => {
+		const authenticateWithCode = vi.fn(async () => {
+			throw new RetryableAuthError(
+				"temporary failure",
+				"authenticateWithCode",
+			);
+		});
+
+		const runtime = createAuthRuntimeFromEnv(
+			{
+				PRIVATE_WORKOS_CLIENT_ID: "client_123",
+				PRIVATE_WORKOS_API_KEY: "sk_test",
+				PRIVATE_WORKOS_COOKIE_PASSWORD:
+					"test-password-that-is-at-least-32-chars-long!!",
+			},
+			{
+				transport: createTransport({
+					authenticateWithCode,
+				}),
+				retryAttempts: 0,
+				retryBaseDelayMs: 0,
+			},
+		);
+
+		await expect(
+			runtime.authenticateWithCode({ code: "retry_never" }),
+		).rejects.toBeInstanceOf(RetryableAuthError);
+		expect(authenticateWithCode).toHaveBeenCalledOnce();
+	});
+
 	it("applies the provisioning adapter after a successful exchange", async () => {
 		const provision = vi.fn(async () => ({
 			activeOrganizationId: "org_provisioned",
@@ -211,6 +242,48 @@ describe("createAuthRuntime", () => {
 
 		expect(provision).toHaveBeenCalledOnce();
 		expect(result.session.organizationId).toBe("org_provisioned");
+	});
+
+	it("normalizes plain provisioning errors", async () => {
+		const runtime = createAuthRuntime({
+			clientId: "client_123",
+			apiKey: "sk_test",
+			cookiePassword:
+				"test-password-that-is-at-least-32-chars-long!!",
+			transport: createTransport(),
+		});
+
+		await expect(
+			runtime.authenticateWithCode({
+				code: "code_123",
+				provisioningAdapter: {
+					provision: async () => {
+						throw new Error("db offline");
+					},
+				},
+			}),
+		).rejects.toMatchObject({
+			operation: "provision",
+		});
+	});
+
+	it("rejects empty organization update names", async () => {
+		const updateOrganization = vi.fn();
+		const runtime = createAuthRuntime({
+			clientId: "client_123",
+			apiKey: "sk_test",
+			cookiePassword:
+				"test-password-that-is-at-least-32-chars-long!!",
+			transport: createTransport({ updateOrganization }),
+		});
+
+		await expect(
+			runtime.updateOrganization({
+				organizationId: "org_123",
+				name: " ",
+			}),
+		).rejects.toBeInstanceOf(TerminalAuthError);
+		expect(updateOrganization).not.toHaveBeenCalled();
 	});
 
 	it("refreshes an invalid sealed session", async () => {

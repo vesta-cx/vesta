@@ -27,7 +27,9 @@ export const load: PageServerLoad = async ({ url, cookies, platform, request }) 
 	clearOAuthState(cookies);
 
 	const runtime = createWebAuthRuntime(platform);
-	const { ipAddress, userAgent } = getRequestMetadata(request);
+	const { ipAddress, userAgent } = getRequestMetadata(request, {
+		trustCloudflare: true
+	});
 
 	try {
 		await completeSvelteKitLogin({

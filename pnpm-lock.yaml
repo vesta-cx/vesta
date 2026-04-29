@@ -433,15 +433,9 @@ importers:
 
   packages/auth:
     dependencies:
-      "@vesta-cx/db":
-        specifier: workspace:^
-        version: link:../db
       "@workos-inc/node":
         specifier: ^8.9.0
         version: 8.9.0
-      drizzle-orm:
-        specifier: ^0.45.1
-        version: 0.45.1(@cloudflare/workers-types@4.20260228.0)(@libsql/client@0.17.0)(kysely@0.27.6)(postgres@3.4.8)
       effect:
         specifier: ^4.0.0-beta.37
         version: 4.0.0-beta.37

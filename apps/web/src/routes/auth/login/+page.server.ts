@@ -18,7 +18,7 @@ export const load: PageServerLoad = async ({ cookies, platform, url }) => {
 	}
 
 	const state = createOAuthState();
-	commitOAuthState(cookies, state, undefined, undefined, url.protocol === 'https:');
+	commitOAuthState(cookies, state, { secure: url.protocol === 'https:' });
 
 	const authUrl = runtime.getAuthorizationUrl({
 		redirectUri: `${url.origin}/auth/callback`,

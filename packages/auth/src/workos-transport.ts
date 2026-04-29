@@ -154,6 +154,21 @@ const isAutoPaginatable = <T>(
 	);
 };
 
+const requireSdkSurface = (
+	client: unknown,
+	key: "userManagement" | "organizations",
+): Record<string, unknown> => {
+	const surface = asRecord(client)[key];
+	if (!surface || typeof surface !== "object") {
+		throw new AuthConfigurationError(
+			`WorkOS SDK surface "${key}" is not available`,
+			`transport.${key}`,
+		);
+	}
+
+	return surface as Record<string, unknown>;
+};
+
 const bindMethod = <TArgs extends unknown[], TReturn>(
 	target: Record<string, unknown>,
 	key: string,
@@ -342,16 +357,22 @@ const toRefreshResult = (value: unknown): AuthTransportSessionRefreshResult => {
 	};
 };
 
+/**
+ * Creates an auth transport backed by the official WorkOS Node SDK.
+ *
+ * `apiKey` is required for every operation. `clientId` is required for AuthKit
+ * URL generation, OAuth code exchange, and sealed-session helpers; organization
+ * read/write methods can be used without it.
+ */
 export const createWorkOSTransport = (config: {
 	apiKey: string;
 	clientId?: string;
 }): AuthTransport => {
 	const client = new WorkOS(config.apiKey, {
 		...(config.clientId ? { clientId: config.clientId } : {}),
-	}) as unknown as {
-		userManagement: Record<string, unknown>;
-		organizations: Record<string, unknown>;
-	};
+	});
+	const userManagement = requireSdkSurface(client, "userManagement");
+	const organizations = requireSdkSurface(client, "organizations");
 	const requireClientId = (): string => {
 		if (!config.clientId) {
 			throw new AuthConfigurationError(
@@ -375,7 +396,7 @@ export const createWorkOSTransport = (config: {
 				},
 			],
 			Promise<unknown>
-		>(client.userManagement, "loadSealedSession");
+		>(userManagement, "loadSealedSession");
 
 		return asRecord(
 			await loadSealedSession({
@@ -401,7 +422,7 @@ export const createWorkOSTransport = (config: {
 					},
 				],
 				string
-			>(client.userManagement, "getAuthorizationUrl");
+			>(userManagement, "getAuthorizationUrl");
 
 			return getAuthorizationUrl({
 				provider: "authkit",
@@ -437,7 +458,7 @@ export const createWorkOSTransport = (config: {
 					},
 				],
 				Promise<unknown>
-			>(client.userManagement, "authenticateWithCode");
+			>(userManagement, "authenticateWithCode");
 
 			const response = asRecord(
 				await authenticateWithCode({
@@ -539,7 +560,7 @@ export const createWorkOSTransport = (config: {
 
 		getUser: async ({ userId }) => {
 			const getUser = bindMethod<[string], Promise<unknown>>(
-				client.userManagement,
+				userManagement,
 				"getUser",
 			);
 
@@ -550,7 +571,7 @@ export const createWorkOSTransport = (config: {
 			const getOrganization = bindMethod<
 				[string],
 				Promise<unknown>
-			>(client.organizations, "getOrganization");
+			>(organizations, "getOrganization");
 
 			return toAuthOrganization(
 				await getOrganization(organizationId),
@@ -563,7 +584,7 @@ export const createWorkOSTransport = (config: {
 			const listOrganizations = bindMethod<
 				[AuthOrganizationListInput?],
 				Promise<unknown>
-			>(client.organizations, "listOrganizations");
+			>(organizations, "listOrganizations");
 
 			const response = asRecord(
 				await listOrganizations(input),
@@ -572,12 +593,13 @@ export const createWorkOSTransport = (config: {
 				Array.isArray(response.data) ?
 					response.data.map(toAuthOrganization)
 				:	[];
+			const camelMetadata = asRecord(response.listMetadata);
 			const listMetadata =
 				(
-					asRecord(response.listMetadata)
-						.before !== undefined
+					camelMetadata.before !== undefined ||
+					camelMetadata.after !== undefined
 				) ?
-					asRecord(response.listMetadata)
+					camelMetadata
 				:	asRecord(response.list_metadata);
 
 			return {
@@ -595,7 +617,7 @@ export const createWorkOSTransport = (config: {
 					},
 				],
 				Promise<unknown>
-			>(client.organizations, "createOrganization");
+			>(organizations, "createOrganization");
 
 			return toAuthOrganization(
 				await createOrganization({ name }),
@@ -611,12 +633,12 @@ export const createWorkOSTransport = (config: {
 					},
 				],
 				Promise<unknown>
-			>(client.organizations, "updateOrganization");
+			>(organizations, "updateOrganization");
 
 			return toAuthOrganization(
 				await updateOrganization({
 					organization: organizationId,
-					...(name ? { name } : {}),
+					...(name !== undefined ? { name } : {}),
 				}),
 			);
 		},
@@ -625,7 +647,7 @@ export const createWorkOSTransport = (config: {
 			const deleteOrganization = bindMethod<
 				[string],
 				Promise<void>
-			>(client.organizations, "deleteOrganization");
+			>(organizations, "deleteOrganization");
 
 			await deleteOrganization(organizationId);
 		},
@@ -644,7 +666,7 @@ export const createWorkOSTransport = (config: {
 					},
 				],
 				Promise<unknown>
-			>(client.userManagement, "listOrganizationMemberships");
+			>(userManagement, "listOrganizationMemberships");
 
 			const response = await listOrganizationMemberships({
 				...(userId ? { userId } : {}),

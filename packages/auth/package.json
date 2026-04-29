@@ -45,9 +45,7 @@
     "test:watch": "vitest"
   },
   "dependencies": {
-    "@vesta-cx/db": "workspace:^",
     "@workos-inc/node": "^8.9.0",
-    "drizzle-orm": "^0.45.1",
     "effect": "^4.0.0-beta.37"
   },
   "devDependencies": {

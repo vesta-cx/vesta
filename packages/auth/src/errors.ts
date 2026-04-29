@@ -36,12 +36,22 @@ export class TerminalAuthError extends AuthError {
 	readonly kind = "terminal" as const;
 }
 
-const readNumericProperty = (
+const MIN_HTTP_STATUS = 100;
+const MAX_HTTP_STATUS = 599;
+
+const readHttpStatusProperty = (
 	value: Record<string, unknown>,
 	key: string,
 ): number | undefined => {
 	const property = value[key];
-	return typeof property === "number" ? property : undefined;
+	return (
+			typeof property === "number" &&
+				Number.isInteger(property) &&
+				property >= MIN_HTTP_STATUS &&
+				property <= MAX_HTTP_STATUS
+		) ?
+			property
+		:	undefined;
 };
 
 export const extractStatus = (error: unknown): number | undefined => {
@@ -49,9 +59,9 @@ export const extractStatus = (error: unknown): number | undefined => {
 
 	const record = error as Record<string, unknown>;
 	return (
-		readNumericProperty(record, "status") ??
-		readNumericProperty(record, "statusCode") ??
-		readNumericProperty(record, "code")
+		readHttpStatusProperty(record, "status") ??
+		readHttpStatusProperty(record, "statusCode") ??
+		readHttpStatusProperty(record, "code")
 	);
 };
 

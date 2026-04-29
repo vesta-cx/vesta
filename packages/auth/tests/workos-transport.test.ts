@@ -1,10 +1,11 @@
 /** @format */
 
-import { describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const listOrganizationMembershipsMock = vi.fn();
 const authenticateWithCodeMock = vi.fn();
 const loadSealedSessionMock = vi.fn();
+const listOrganizationsMock = vi.fn();
 
 vi.mock("@workos-inc/node", () => ({
 	WorkOS: class {
@@ -15,7 +16,9 @@ vi.mock("@workos-inc/node", () => ({
 			loadSealedSession: loadSealedSessionMock,
 		};
 
-		organizations = {};
+		organizations = {
+			listOrganizations: listOrganizationsMock,
+		};
 
 		constructor(_apiKey: string) {}
 	},
@@ -24,6 +27,10 @@ vi.mock("@workos-inc/node", () => ({
 import { createWorkOSTransport } from "../src/workos-transport.js";
 
 describe("createWorkOSTransport", () => {
+	beforeEach(() => {
+		vi.resetAllMocks();
+	});
+
 	it("hydrates login sessions from the sealed session claims", async () => {
 		authenticateWithCodeMock.mockResolvedValueOnce({
 			user: {
@@ -78,6 +85,26 @@ describe("createWorkOSTransport", () => {
 				permissions: ["posts:create"],
 				entitlements: ["audit-logs"],
 			}),
+		});
+	});
+
+	it("keeps pagination metadata when only an after cursor is present", async () => {
+		listOrganizationsMock.mockResolvedValueOnce({
+			data: [],
+			listMetadata: {
+				after: "org_after",
+				before: null,
+			},
+		});
+
+		const transport = createWorkOSTransport({
+			apiKey: "sk_test",
+		});
+
+		await expect(transport.listOrganizations()).resolves.toEqual({
+			data: [],
+			before: null,
+			after: "org_after",
 		});
 	});
 

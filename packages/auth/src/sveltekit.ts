@@ -17,6 +17,14 @@ import type {
 } from "./types.js";
 import type { AuthRuntime } from "./runtime.js";
 
+declare global {
+	namespace App {
+		interface Locals {
+			session: AuthSession | null;
+		}
+	}
+}
+
 export interface SvelteKitAuthHandleConfig {
 	runtime: AuthRuntime;
 	protectedPaths: string[];
@@ -51,6 +59,23 @@ export interface AuthenticateSvelteKitSessionInput {
 	preferredOrganizationId?: string;
 	resolveMemberships?: boolean;
 	provisioningAdapter?: AuthProvisioningAdapter;
+}
+
+export interface SessionCookieOptions {
+	cookieName?: string;
+	maxAge?: number;
+	secure?: boolean;
+}
+
+export interface OAuthStateCookieOptions {
+	cookieName?: string;
+	maxAge?: number;
+	secure?: boolean;
+}
+
+export interface RequestMetadataOptions {
+	trustCloudflare?: boolean;
+	trustForwardedFor?: boolean;
 }
 
 const cookieOptions = (maxAge: number, secure?: boolean) => ({
@@ -88,6 +113,18 @@ export const isExpectedAuthenticationFailure = (
 const normalizeProtectedPath = (path: string): string =>
 	path === "/" ? "/" : path.replace(/\/+$/, "");
 
+const validateProtectedPath = (path: string): string => {
+	if (!path || !path.startsWith("/")) {
+		throw new TerminalAuthError(
+			`Protected path must start with /: ${path || "<empty>"}`,
+			"createAuthHandle",
+			{ status: 400 },
+		);
+	}
+
+	return normalizeProtectedPath(path);
+};
+
 export const matchesProtectedPath = (
 	pathname: string,
 	protectedPath: string,
@@ -109,11 +146,16 @@ export const readSessionCookie = (
 export const commitSealedSession = (
 	cookies: Cookies,
 	sealedSession: string,
-	cookieName = DEFAULT_AUTH_COOKIE_NAME,
-	maxAge = DEFAULT_SESSION_MAX_AGE,
-	secure?: boolean,
+	options: SessionCookieOptions = {},
 ): void => {
-	cookies.set(cookieName, sealedSession, cookieOptions(maxAge, secure));
+	cookies.set(
+		options.cookieName ?? DEFAULT_AUTH_COOKIE_NAME,
+		sealedSession,
+		cookieOptions(
+			options.maxAge ?? DEFAULT_SESSION_MAX_AGE,
+			options.secure,
+		),
+	);
 };
 
 export const clearSealedSession = (
@@ -133,11 +175,16 @@ export const readOAuthState = (
 export const commitOAuthState = (
 	cookies: Cookies,
 	state: string,
-	cookieName = DEFAULT_OAUTH_STATE_COOKIE_NAME,
-	maxAge = DEFAULT_OAUTH_STATE_MAX_AGE,
-	secure?: boolean,
+	options: OAuthStateCookieOptions = {},
 ): void => {
-	cookies.set(cookieName, state, cookieOptions(maxAge, secure));
+	cookies.set(
+		options.cookieName ?? DEFAULT_OAUTH_STATE_COOKIE_NAME,
+		state,
+		cookieOptions(
+			options.maxAge ?? DEFAULT_OAUTH_STATE_MAX_AGE,
+			options.secure,
+		),
+	);
 };
 
 export const clearOAuthState = (
@@ -167,13 +214,15 @@ export const completeSvelteKitLogin = async (
 	});
 
 	const secure = input.url?.protocol === "https:";
-	commitSealedSession(
-		input.cookies,
-		exchange.sealedSession,
-		input.cookieName,
-		input.sessionMaxAge,
+	commitSealedSession(input.cookies, exchange.sealedSession, {
+		...(input.cookieName !== undefined ?
+			{ cookieName: input.cookieName }
+		:	{}),
+		...(input.sessionMaxAge !== undefined ?
+			{ maxAge: input.sessionMaxAge }
+		:	{}),
 		secure,
-	);
+	});
 
 	return exchange.session;
 };
@@ -217,24 +266,23 @@ export const authenticateSvelteKitSession = async (
 
 export const getRequestMetadata = (
 	request: Request,
-	options?: {
-		trustForwardedFor?: boolean;
-	},
+	options: RequestMetadataOptions = {},
 ): {
 	ipAddress: string | undefined;
 	userAgent: string | undefined;
 } => {
+	const cloudflareIp =
+		options.trustCloudflare ?
+			request.headers.get("cf-connecting-ip") || undefined
+		:	undefined;
 	const forwardedFor =
-		options?.trustForwardedFor ?
+		options.trustForwardedFor ?
 			request.headers
 				.get("x-forwarded-for")
 				?.split(",")[0]
 				?.trim() || undefined
 		:	undefined;
-	const ipAddress =
-		request.headers.get("cf-connecting-ip") ??
-		forwardedFor ??
-		undefined;
+	const ipAddress = cloudflareIp ?? forwardedFor;
 
 	return {
 		ipAddress,
@@ -246,6 +294,7 @@ export const createAuthHandle = (config: SvelteKitAuthHandleConfig): Handle => {
 	const loginPath = config.loginPath ?? DEFAULT_LOGIN_PATH;
 	const cookieName = config.cookieName ?? DEFAULT_AUTH_COOKIE_NAME;
 	const sessionMaxAge = config.sessionMaxAge ?? DEFAULT_SESSION_MAX_AGE;
+	const protectedPaths = config.protectedPaths.map(validateProtectedPath);
 
 	return async ({ event, resolve }) => {
 		const existing = readSessionCookie(event.cookies, cookieName);
@@ -279,22 +328,20 @@ export const createAuthHandle = (config: SvelteKitAuthHandleConfig): Handle => {
 				commitSealedSession(
 					event.cookies,
 					result.sealedSession,
-					cookieName,
-					sessionMaxAge,
-					secure,
+					{
+						cookieName,
+						maxAge: sessionMaxAge,
+						secure,
+					},
 				);
 			}
 		} else if (existing) {
 			clearSealedSession(event.cookies, cookieName);
 		}
 
-		(
-			event.locals as {
-				session: AuthSession | null;
-			}
-		).session = session;
+		event.locals.session = session;
 
-		const isProtected = config.protectedPaths.some((path) =>
+		const isProtected = protectedPaths.some((path) =>
 			matchesProtectedPath(event.url.pathname, path),
 		);
 

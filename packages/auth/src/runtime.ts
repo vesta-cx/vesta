@@ -25,6 +25,7 @@ import type {
 	AuthSessionCookieInput,
 	AuthSessionFailureReason,
 	AuthSessionResult,
+	AuthSessionWithoutMemberships,
 	AuthTransport,
 	AuthUser,
 	WorkOSAuthEnv,
@@ -161,22 +162,81 @@ const maybeProvisionSession = async (input: {
 		return input.session;
 	}
 
-	const provisioned = await input.provisioningAdapter.provision(
-		input.defaultOrganizationId ?
-			{
-				session: input.session,
-				fallbackOrganizationId:
-					input.defaultOrganizationId,
-			}
-		:	{
-				session: input.session,
-			},
-	);
+	try {
+		const provisioned = await input.provisioningAdapter.provision(
+			input.defaultOrganizationId ?
+				{
+					session: input.session,
+					fallbackOrganizationId:
+						input.defaultOrganizationId,
+				}
+			:	{
+					session: input.session,
+				},
+		);
 
-	return {
-		...input.session,
-		organizationId: provisioned.activeOrganizationId,
-	};
+		return {
+			...input.session,
+			organizationId: provisioned.activeOrganizationId,
+		};
+	} catch (error) {
+		throw normalizeAuthError("provision", error);
+	}
+};
+
+const buildAuthenticatedSession = async (input: {
+	transportSession: AuthSessionWithoutMemberships;
+	preferredOrganizationId?: string | undefined;
+	defaultOrganizationId?: string | undefined;
+	resolveMemberships?: boolean;
+	provisioningAdapter?: AuthExchangeInput["provisioningAdapter"];
+	runtime: Pick<AuthRuntime, "listOrganizationMemberships">;
+}): Promise<AuthSession> => {
+	const memberships = await maybeResolveMemberships({
+		...(input.resolveMemberships !== undefined ?
+			{ resolveMemberships: input.resolveMemberships }
+		:	{}),
+		userId: input.transportSession.userId,
+		runtime: input.runtime,
+	});
+
+	return maybeProvisionSession({
+		session: {
+			...input.transportSession,
+			organizationId: resolveActiveOrganizationId({
+				sessionOrganizationId:
+					input.transportSession.organizationId,
+				...(input.preferredOrganizationId ?
+					{
+						preferredOrganizationId:
+							input.preferredOrganizationId,
+					}
+				:	{}),
+				...(input.defaultOrganizationId ?
+					{
+						defaultOrganizationId:
+							input.defaultOrganizationId,
+					}
+				:	{}),
+				memberships,
+			}),
+			memberships,
+		},
+		defaultOrganizationId: input.defaultOrganizationId,
+		provisioningAdapter: input.provisioningAdapter,
+	});
+};
+
+const validateOptionalOrganizationName = (name: string | undefined) => {
+	if (name !== undefined && !name.trim()) {
+		throw new TerminalAuthError(
+			"Organization name cannot be empty",
+			"updateOrganization",
+			{ status: 400 },
+		);
+	}
+
+	return name;
 };
 
 const makeRetryEffect = <T>(
@@ -378,154 +438,90 @@ export const createAuthRuntime = (config: AuthRuntimeConfig): AuthRuntime => {
 				() => sessionTransport.authenticate(),
 			);
 
-			if (!authenticated.authenticated) {
-				if (
-					authenticated.reason ===
-					"no_session_cookie_provided"
-				) {
-					return unauthenticated(
-						"no_session_cookie_provided",
-					);
-				}
-
-				const refreshed = await runWithRetry(
-					"refreshSealedSession",
-					() =>
-						sessionTransport.refresh(
-							(
-								input.preferredOrganizationId
-							) ?
-								{
-									organizationId:
-										input.preferredOrganizationId,
-								}
-							:	undefined,
-						),
-				);
-
-				if (!refreshed.authenticated) {
-					return unauthenticated(
-						(
-							refreshed.reason ===
-								"session_expired"
-						) ?
-							"session_expired"
-						:	"invalid_session",
-					);
-				}
-
-				const memberships =
-					await maybeResolveMemberships({
+			if (authenticated.authenticated) {
+				const session = await buildAuthenticatedSession(
+					{
+						transportSession:
+							authenticated.session,
 						resolveMemberships:
 							input.resolveMemberships ??
 							false,
-						userId: refreshed.session
-							.userId,
+						preferredOrganizationId:
+							input.preferredOrganizationId,
+						defaultOrganizationId:
+							config.defaultOrganizationId,
+						provisioningAdapter:
+							input.provisioningAdapter,
 						runtime,
-					});
-
-				const session = await maybeProvisionSession({
-					session: {
-						...refreshed.session,
-						organizationId:
-							resolveActiveOrganizationId(
-								{
-									sessionOrganizationId:
-										refreshed
-											.session
-											.organizationId,
-									...((
-										input.preferredOrganizationId
-									) ?
-										{
-											preferredOrganizationId:
-												input.preferredOrganizationId,
-										}
-									:	{}),
-									...((
-										config.defaultOrganizationId
-									) ?
-										{
-											defaultOrganizationId:
-												config.defaultOrganizationId,
-										}
-									:	{}),
-									memberships,
-								},
-							),
-						memberships,
 					},
-					defaultOrganizationId:
-						config.defaultOrganizationId,
-					provisioningAdapter:
-						input.provisioningAdapter,
-				});
+				);
 
 				config.observer?.({
-					type: "auth.session.refreshed",
+					type: "auth.session.authenticated",
 					operation: "authenticateSealedSession",
 				});
 
 				return {
 					authenticated: true,
-					refreshed: true,
+					refreshed: false,
 					reason: null,
-					sealedSession: refreshed.sealedSession,
+					sealedSession: input.sealedSession,
 					session,
 				};
 			}
 
-			const memberships = await maybeResolveMemberships({
+			if (
+				authenticated.reason ===
+				"no_session_cookie_provided"
+			) {
+				return unauthenticated(
+					"no_session_cookie_provided",
+				);
+			}
+
+			const refreshed = await runWithRetry(
+				"refreshSealedSession",
+				() =>
+					sessionTransport.refresh(
+						input.preferredOrganizationId ?
+							{
+								organizationId:
+									input.preferredOrganizationId,
+							}
+						:	undefined,
+					),
+			);
+
+			if (!refreshed.authenticated) {
+				return unauthenticated(
+					refreshed.reason === "session_expired" ?
+						"session_expired"
+					:	"invalid_session",
+				);
+			}
+
+			const session = await buildAuthenticatedSession({
+				transportSession: refreshed.session,
 				resolveMemberships:
 					input.resolveMemberships ?? false,
-				userId: authenticated.session.userId,
-				runtime,
-			});
-
-			const session = await maybeProvisionSession({
-				session: {
-					...authenticated.session,
-					organizationId:
-						resolveActiveOrganizationId({
-							sessionOrganizationId:
-								authenticated
-									.session
-									.organizationId,
-							...((
-								input.preferredOrganizationId
-							) ?
-								{
-									preferredOrganizationId:
-										input.preferredOrganizationId,
-								}
-							:	{}),
-							...((
-								config.defaultOrganizationId
-							) ?
-								{
-									defaultOrganizationId:
-										config.defaultOrganizationId,
-								}
-							:	{}),
-							memberships,
-						}),
-					memberships,
-				},
+				preferredOrganizationId:
+					input.preferredOrganizationId,
 				defaultOrganizationId:
 					config.defaultOrganizationId,
 				provisioningAdapter: input.provisioningAdapter,
+				runtime,
 			});
 
 			config.observer?.({
-				type: "auth.session.authenticated",
+				type: "auth.session.refreshed",
 				operation: "authenticateSealedSession",
 			});
 
 			return {
 				authenticated: true,
-				refreshed: false,
+				refreshed: true,
 				reason: null,
-				sealedSession: input.sealedSession,
+				sealedSession: refreshed.sealedSession,
 				session,
 			};
 		},
@@ -579,13 +575,18 @@ export const createAuthRuntime = (config: AuthRuntimeConfig): AuthRuntime => {
 				transport.createOrganization({ name }),
 			),
 
-		updateOrganization: ({ organizationId, name }) =>
-			runWithRetry("updateOrganization", () =>
+		updateOrganization: async ({ organizationId, name }) => {
+			const validatedName =
+				validateOptionalOrganizationName(name);
+			return runWithRetry("updateOrganization", () =>
 				transport.updateOrganization({
 					organizationId,
-					...(name ? { name } : {}),
+					...(validatedName !== undefined ?
+						{ name: validatedName }
+					:	{}),
 				}),
-			),
+			);
+		},
 
 		deleteOrganization: ({ organizationId }) =>
 			runWithRetry("deleteOrganization", () =>
@@ -639,10 +640,10 @@ export const createAuthRuntimeFromEnv = (
 					env.PRIVATE_WORKOS_ORG_ID,
 			}
 		:	{}),
-		...(options?.retryAttempts ?
+		...(options?.retryAttempts !== undefined ?
 			{ retryAttempts: options.retryAttempts }
 		:	{}),
-		...(options?.retryBaseDelayMs ?
+		...(options?.retryBaseDelayMs !== undefined ?
 			{ retryBaseDelayMs: options.retryBaseDelayMs }
 		:	{}),
 		...(options?.observer ? { observer: options.observer } : {}),

@@ -10,14 +10,15 @@ Shared WorkOS auth runtime for Vesta apps.
 - `createAuthRuntimeFromEnv(...)` builds the same runtime from `PRIVATE_WORKOS_*` env values.
 - `createAuthHandle(...)` wires the runtime into SvelteKit protected-route hydration.
 - `completeSvelteKitLogin(...)`, `commitSealedSession(...)`, and `clearSealedSession(...)` handle browser session cookie flows.
-- `createVestaProvisioningAdapter(...)` is the first-party adapter for local Vesta user and organization upserts.
+- `commitSealedSession(...)` and `commitOAuthState(...)` take options objects for cookie name, max age, and secure flags.
+- `createVestaProvisioningAdapter(...)` maps auth sessions into app-owned Vesta provisioning store operations.
 
 ## Architecture
 
 - `runtime.ts` owns the high-level auth workflows, retry policy, failure mapping, and membership/provisioning orchestration.
 - `workos-transport.ts` is the concrete WorkOS transport boundary.
 - `sveltekit.ts` keeps framework glue thin at the app boundary.
-- `vesta-provisioning.ts` keeps local DB writes out of the core auth runtime.
+- `vesta-provisioning.ts` owns Vesta provisioning semantics while concrete DB writes stay in app-owned stores.
 
 ## Notes
 

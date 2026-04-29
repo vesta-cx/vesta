@@ -1,7 +1,9 @@
 /** @format */
 
+/** WorkOS organization membership states exposed by the shared auth boundary. */
 export type AuthMembershipStatus = "active" | "inactive" | "pending";
 
+/** User profile fields normalized from WorkOS user responses. */
 export interface AuthUser {
 	id: string;
 	email: string;
@@ -14,6 +16,7 @@ export interface AuthUser {
 	updatedAt: string;
 }
 
+/** Organization fields normalized from WorkOS organization responses. */
 export interface AuthOrganization {
 	id: string;
 	name: string;
@@ -21,6 +24,7 @@ export interface AuthOrganization {
 	updatedAt: string;
 }
 
+/** A user's relationship to an organization, including role and status metadata. */
 export interface AuthOrganizationMembership {
 	id: string;
 	userId: string;
@@ -33,6 +37,7 @@ export interface AuthOrganizationMembership {
 	updatedAt: string;
 }
 
+/** Application session claims normalized from a WorkOS sealed session. */
 export interface AuthSession {
 	sessionId: string | null;
 	userId: string;
@@ -48,11 +53,10 @@ export interface AuthSession {
 	memberships: AuthOrganizationMembership[];
 }
 
-export interface AuthSessionWithoutMemberships extends Omit<
-	AuthSession,
-	"memberships"
-> {}
+/** Session claims before optional organization membership enrichment. */
+export type AuthSessionWithoutMemberships = Omit<AuthSession, "memberships">;
 
+/** Stable failure reasons returned when a sealed session cannot authenticate. */
 export type AuthSessionFailureReason =
 	| "missing_session"
 	| "no_session_cookie_provided"
@@ -60,6 +64,7 @@ export type AuthSessionFailureReason =
 	| "session_expired"
 	| "authentication_failed";
 
+/** Successful sealed-session authentication result. */
 export interface AuthenticatedSessionResult {
 	authenticated: true;
 	refreshed: boolean;
@@ -68,6 +73,7 @@ export interface AuthenticatedSessionResult {
 	session: AuthSession;
 }
 
+/** Failed sealed-session authentication result. */
 export interface UnauthenticatedSessionResult {
 	authenticated: false;
 	refreshed: false;
@@ -76,10 +82,12 @@ export interface UnauthenticatedSessionResult {
 	session: null;
 }
 
+/** Discriminated result for sealed-session authentication. */
 export type AuthSessionResult =
 	| AuthenticatedSessionResult
 	| UnauthenticatedSessionResult;
 
+/** Inputs for building a WorkOS AuthKit authorization URL. */
 export interface AuthAuthorizationUrlInput {
 	redirectUri: string;
 	organizationId?: string;
@@ -87,6 +95,7 @@ export interface AuthAuthorizationUrlInput {
 	screenHint?: "sign-in" | "sign-up";
 }
 
+/** Inputs for exchanging an OAuth authorization code for a sealed session. */
 export interface AuthExchangeInput {
 	code: string;
 	ipAddress?: string;
@@ -96,11 +105,13 @@ export interface AuthExchangeInput {
 	provisioningAdapter?: AuthProvisioningAdapter;
 }
 
+/** Successful OAuth exchange output, including the cookie-ready sealed session. */
 export interface AuthExchangeResult {
 	sealedSession: string;
 	session: AuthSession;
 }
 
+/** Inputs for authenticating or refreshing an existing sealed-session cookie. */
 export interface AuthSessionCookieInput {
 	sealedSession: string | undefined;
 	preferredOrganizationId?: string;
@@ -108,18 +119,21 @@ export interface AuthSessionCookieInput {
 	provisioningAdapter?: AuthProvisioningAdapter;
 }
 
+/** Cursor pagination input for listing organizations. */
 export interface AuthOrganizationListInput {
 	limit?: number;
 	before?: string;
 	after?: string;
 }
 
+/** Cursor pagination result for organization listings. */
 export interface AuthOrganizationListResult {
 	data: AuthOrganization[];
 	before: string | null;
 	after: string | null;
 }
 
+/** Observability event emitted by the auth runtime for retries and session work. */
 export interface AuthRuntimeObserverEvent {
 	type:
 		| "auth.retry"
@@ -127,17 +141,18 @@ export interface AuthRuntimeObserverEvent {
 		| "auth.login.provisioned"
 		| "auth.session.authenticated"
 		| "auth.session.refreshed"
-		| "auth.session.cleared"
 		| "auth.memberships.resolved";
 	operation: string;
 	attempt?: number;
 	detail?: string;
 }
 
+/** Callback for auth runtime telemetry. Must not throw. */
 export interface AuthRuntimeObserver {
 	(event: AuthRuntimeObserverEvent): void;
 }
 
+/** Configuration for the shared auth runtime and retry policy. */
 export interface AuthRuntimeConfig {
 	clientId: string;
 	apiKey: string;
@@ -149,6 +164,7 @@ export interface AuthRuntimeConfig {
 	transport?: AuthTransport;
 }
 
+/** Environment binding names used by SvelteKit/private WorkOS configuration. */
 export interface WorkOSAuthEnv {
 	PRIVATE_WORKOS_CLIENT_ID: string;
 	PRIVATE_WORKOS_API_KEY: string;
@@ -156,35 +172,42 @@ export interface WorkOSAuthEnv {
 	PRIVATE_WORKOS_ORG_ID?: string;
 }
 
+/** Successful transport-level sealed-session authentication. */
 export interface AuthTransportSessionAuthentication {
 	authenticated: true;
 	session: AuthSessionWithoutMemberships;
 }
 
+/** Failed transport-level sealed-session authentication. */
 export interface AuthTransportSessionAuthenticationFailure {
 	authenticated: false;
 	reason: AuthSessionFailureReason;
 }
 
+/** Transport result for authenticating loaded sealed sessions. */
 export type AuthTransportSessionAuthenticateResult =
 	| AuthTransportSessionAuthentication
 	| AuthTransportSessionAuthenticationFailure;
 
+/** Successful transport-level session refresh. */
 export interface AuthTransportSessionRefresh {
 	authenticated: true;
 	sealedSession: string;
 	session: AuthSessionWithoutMemberships;
 }
 
+/** Failed transport-level session refresh. */
 export interface AuthTransportSessionRefreshFailure {
 	authenticated: false;
 	reason: AuthSessionFailureReason;
 }
 
+/** Transport result for refreshing loaded sealed sessions. */
 export type AuthTransportSessionRefreshResult =
 	| AuthTransportSessionRefresh
 	| AuthTransportSessionRefreshFailure;
 
+/** Loaded sealed-session operations supplied by an auth transport. */
 export interface AuthTransportSession {
 	authenticate(): Promise<AuthTransportSessionAuthenticateResult>;
 	refresh(input?: {
@@ -193,6 +216,7 @@ export interface AuthTransportSession {
 	getLogoutUrl(input?: { returnTo?: string }): Promise<string>;
 }
 
+/** Boundary implemented by WorkOS or test transports used by the runtime. */
 export interface AuthTransport {
 	getAuthorizationUrl(input: AuthAuthorizationUrlInput): string;
 	authenticateWithCode(input: {
@@ -228,16 +252,19 @@ export interface AuthTransport {
 	}): Promise<AuthOrganizationMembership[]>;
 }
 
+/** Data passed to app-specific provisioning after authentication succeeds. */
 export interface AuthProvisioningRequest {
 	session: AuthSession;
 	fallbackOrganizationId?: string;
 }
 
+/** Local provisioning result used to resolve the session's active org. */
 export interface AuthProvisioningResult {
 	activeOrganizationId: string;
 	organizationIds: string[];
 }
 
+/** App-owned provisioning adapter invoked by the auth runtime after login/session auth. */
 export interface AuthProvisioningAdapter {
 	provision(
 		input: AuthProvisioningRequest,

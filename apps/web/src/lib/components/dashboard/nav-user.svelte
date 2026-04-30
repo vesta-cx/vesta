@@ -4,6 +4,8 @@
 		name: string;
 		email: string;
 		emailVerified: boolean;
+		firstName: string;
+		lastName: string;
 		avatarUrl?: string;
 		/** Vesta-owned public display name. */
 		displayName: string;
@@ -63,10 +65,6 @@
 			.toUpperCase() || displayName.slice(0, 2).toUpperCase()
 	);
 
-	// Best-effort split until WorkOS first/last names propagate end-to-end.
-	const [splitFirst, ...rest] = user.name.split(' ');
-	const splitLast = rest.join(' ');
-
 	/**
 	 * Profile        = Vesta-owned public surface (display name, handle, bio).
 	 * Account        = WorkOS-owned identity (legal name, email).
@@ -118,7 +116,7 @@
 {/snippet}
 
 {#snippet accountContent()}
-	<AccountSettings firstName={splitFirst} lastName={splitLast} email={user.email} />
+	<AccountSettings firstName={user.firstName} lastName={user.lastName} email={user.email} />
 {/snippet}
 
 {#snippet securityContent()}

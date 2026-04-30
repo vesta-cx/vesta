@@ -689,6 +689,40 @@ export const createWorkOSTransport = (config: {
 			return toAuthUser(await getUser(userId));
 		},
 
+		updateUserDetails: async ({
+			userId,
+			email,
+			firstName,
+			lastName,
+		}) => {
+			const updateUser = bindMethod<
+				[
+					{
+						userId: string;
+						email?: string;
+						firstName?: string | null;
+						lastName?: string | null;
+					},
+				],
+				Promise<unknown>
+			>(userManagement, "updateUser");
+
+			return toAuthUser(
+				await updateUser({
+					userId,
+					...(email !== undefined ?
+						{ email }
+					:	{}),
+					...(firstName !== undefined ?
+						{ firstName }
+					:	{}),
+					...(lastName !== undefined ?
+						{ lastName }
+					:	{}),
+				}),
+			);
+		},
+
 		updateUserPassword: async ({ userId, password }) => {
 			const updateUser = bindMethod<
 				[

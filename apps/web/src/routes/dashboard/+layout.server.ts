@@ -11,8 +11,10 @@ export const load: LayoutServerLoad = async ({ locals, platform }) => {
 	if (!locals.session) redirect(302, '/auth/login');
 	if (!platform) error(500, 'Platform not available');
 
-	const { firstName, lastName, email, emailVerified, profilePictureUrl, userId } = locals.session;
-	const legalName = [firstName, lastName].filter(Boolean).join(' ');
+	const { userId } = locals.session;
+	const runtime = createWebAuthRuntime(platform);
+	const account = await runtime.getUser({ userId });
+	const legalName = [account.firstName, account.lastName].filter(Boolean).join(' ');
 
 	const db = getDb(platform);
 	const [profile] = await db
@@ -29,18 +31,20 @@ export const load: LayoutServerLoad = async ({ locals, platform }) => {
 		[];
 	let securityUnavailable = false;
 	try {
-		authFactors = await createWebAuthRuntime(platform).listAuthFactors({ userId });
+		authFactors = await runtime.listAuthFactors({ userId });
 	} catch {
 		securityUnavailable = true;
 	}
 
 	return {
 		user: {
-			name: legalName || email,
-			email,
-			emailVerified,
-			avatarUrl: profilePictureUrl ?? undefined,
-			displayName: profile?.displayName ?? legalName ?? email,
+			name: legalName || account.email,
+			firstName: account.firstName ?? '',
+			lastName: account.lastName ?? '',
+			email: account.email,
+			emailVerified: account.emailVerified,
+			avatarUrl: account.profilePictureUrl ?? undefined,
+			displayName: profile?.displayName ?? legalName ?? account.email,
 			handle: profile?.handle ?? null,
 			bio: profile?.bio ?? null
 		},

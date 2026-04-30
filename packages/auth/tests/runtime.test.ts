@@ -58,6 +58,17 @@ const createTransport = (
 		createdAt: "2026-03-23T00:00:00.000Z",
 		updatedAt: "2026-03-23T00:00:00.000Z",
 	}),
+	updateUserDetails: async ({ userId, email, firstName, lastName }) => ({
+		id: userId,
+		email: email ?? "mia@example.com",
+		firstName: firstName ?? "Mia",
+		lastName: lastName ?? "Example",
+		emailVerified: email ? false : true,
+		profilePictureUrl: null,
+		organizationId: "org_primary",
+		createdAt: "2026-03-23T00:00:00.000Z",
+		updatedAt: "2026-03-23T00:00:00.000Z",
+	}),
 	authenticateWithPassword: async ({ email }) => ({
 		id: "user_123",
 		email,
@@ -383,6 +394,48 @@ describe("createAuthRuntime", () => {
 			}),
 		).rejects.toMatchObject({
 			operation: "provision",
+		});
+	});
+
+	it("updates WorkOS-owned user details", async () => {
+		const updateUserDetails = vi.fn(
+			async ({ userId, email, firstName, lastName }) => ({
+				id: userId,
+				email: email ?? "mia@example.com",
+				firstName: firstName ?? null,
+				lastName: lastName ?? null,
+				emailVerified: false,
+				profilePictureUrl: null,
+				organizationId: "org_primary",
+				createdAt: "2026-03-23T00:00:00.000Z",
+				updatedAt: "2026-03-23T00:00:00.000Z",
+			}),
+		);
+		const runtime = createAuthRuntime({
+			clientId: "client_123",
+			apiKey: "sk_test",
+			cookiePassword:
+				"test-password-that-is-at-least-32-chars-long!!",
+			transport: createTransport({ updateUserDetails }),
+		});
+
+		await expect(
+			runtime.updateUserDetails({
+				userId: "user_123",
+				email: "new@example.com",
+				firstName: "New",
+				lastName: "Name",
+			}),
+		).resolves.toMatchObject({
+			email: "new@example.com",
+			firstName: "New",
+			lastName: "Name",
+		});
+		expect(updateUserDetails).toHaveBeenCalledWith({
+			userId: "user_123",
+			email: "new@example.com",
+			firstName: "New",
+			lastName: "Name",
 		});
 	});
 

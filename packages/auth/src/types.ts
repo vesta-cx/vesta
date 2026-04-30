@@ -279,6 +279,12 @@ export interface AuthTransport {
 		cookiePassword: string;
 	}): Promise<AuthTransportSession>;
 	getUser(input: { userId: string }): Promise<AuthUser>;
+	updateUserDetails(input: {
+		userId: string;
+		email?: string;
+		firstName?: string | null;
+		lastName?: string | null;
+	}): Promise<AuthUser>;
 	updateUserPassword(input: {
 		userId: string;
 		password: string;

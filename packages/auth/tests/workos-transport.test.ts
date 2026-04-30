@@ -137,6 +137,42 @@ describe("createWorkOSTransport", () => {
 		});
 	});
 
+	it("updates WorkOS-owned user details", async () => {
+		updateUserMock.mockResolvedValueOnce({
+			id: "user_123",
+			email: "new@example.com",
+			first_name: "New",
+			last_name: "Name",
+			email_verified: false,
+			created_at: "2026-03-24T00:00:00.000Z",
+			updated_at: "2026-03-24T00:00:00.000Z",
+		});
+
+		const transport = createWorkOSTransport({
+			apiKey: "sk_test",
+			clientId: "client_123",
+		});
+
+		await expect(
+			transport.updateUserDetails({
+				userId: "user_123",
+				email: "new@example.com",
+				firstName: "New",
+				lastName: "Name",
+			}),
+		).resolves.toMatchObject({
+			email: "new@example.com",
+			firstName: "New",
+			lastName: "Name",
+		});
+		expect(updateUserMock).toHaveBeenCalledWith({
+			userId: "user_123",
+			email: "new@example.com",
+			firstName: "New",
+			lastName: "Name",
+		});
+	});
+
 	it("updates a user's password through WorkOS user management", async () => {
 		updateUserMock.mockResolvedValueOnce({
 			id: "user_123",

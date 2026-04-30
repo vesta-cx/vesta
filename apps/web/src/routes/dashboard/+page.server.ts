@@ -1,4 +1,5 @@
 import { fail } from '@sveltejs/kit';
+import { eq } from 'drizzle-orm';
 import { Result, Schema } from 'effect';
 import { TerminalAuthError } from '@vesta-cx/auth';
 import { users } from '@vesta-cx/db';
@@ -50,6 +51,21 @@ const HandleSchema = Schema.NullOr(
 	)
 );
 
+const AccountNameSchema = Schema.String.check(
+	Schema.makeFilter((value: string) => value.length <= 80 || 'Use 80 characters or fewer.'),
+	Schema.makeFilter(
+		(value: string) => isSingleLineSafe(value) || 'Names cannot contain line breaks.'
+	)
+);
+
+const AccountEmailSchema = Schema.String.check(
+	Schema.makeFilter((value: string) => value.length > 0 || 'Enter an email address.'),
+	Schema.makeFilter((value: string) => value.length <= 254 || 'Use 254 characters or fewer.'),
+	Schema.makeFilter(
+		(value: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value) || 'Enter a valid email address.'
+	)
+);
+
 const DisplayNameSchema = Schema.NullOr(
 	Schema.String.check(
 		Schema.makeFilter(
@@ -74,6 +90,8 @@ const BioSchema = Schema.NullOr(
 );
 
 const decodeHandle = Schema.decodeUnknownResult(HandleSchema);
+const decodeAccountName = Schema.decodeUnknownResult(AccountNameSchema);
+const decodeAccountEmail = Schema.decodeUnknownResult(AccountEmailSchema);
 const decodeDisplayName = Schema.decodeUnknownResult(DisplayNameSchema);
 const PasswordSchema = Schema.String.check(
 	Schema.makeFilter((value: string) => value.length > 0 || 'Enter your password.')
@@ -126,6 +144,29 @@ const validateProfile = (raw: {
 	};
 };
 
+const validateAccount = (raw: { firstName: string; lastName: string; email: string }) => {
+	const firstName = decodeAccountName(raw.firstName);
+	const lastName = decodeAccountName(raw.lastName);
+	const email = decodeAccountEmail(raw.email);
+
+	const errors: Record<string, [string]> = {};
+	if (Result.isFailure(firstName)) errors.firstName = [String(firstName.failure)];
+	if (Result.isFailure(lastName)) errors.lastName = [String(lastName.failure)];
+	if (Result.isFailure(email)) errors.email = [String(email.failure)];
+
+	if (Object.keys(errors).length > 0) {
+		return { ok: false as const, errors };
+	}
+	return {
+		ok: true as const,
+		values: {
+			firstName: (firstName as Result.Success<string, never>).success.trim() || null,
+			lastName: (lastName as Result.Success<string, never>).success.trim() || null,
+			email: (email as Result.Success<string, never>).success.trim().toLowerCase()
+		}
+	};
+};
+
 const validatePasswordChange = (raw: {
 	currentPassword: string;
 	newPassword: string;
@@ -159,6 +200,39 @@ const validatePasswordChange = (raw: {
 };
 
 export const actions: Actions = {
+	updateAccount: async ({ request, locals, platform }) => {
+		if (!locals.session) return fail(401, { message: 'Unauthenticated' });
+		if (!platform) return fail(500, { message: 'Platform not available' });
+
+		const form = await request.formData();
+		const raw = {
+			firstName: String(form.get('firstName') ?? ''),
+			lastName: String(form.get('lastName') ?? ''),
+			email: String(form.get('email') ?? '')
+		};
+		const result = validateAccount(raw);
+		if (!result.ok) return fail(400, { values: raw, errors: result.errors });
+
+		try {
+			const account = await createWebAuthRuntime(platform).updateUserDetails({
+				userId: locals.session.userId,
+				firstName: result.values.firstName,
+				lastName: result.values.lastName,
+				email: result.values.email
+			});
+
+			await getDb(platform)
+				.update(users)
+				.set({ email: account.email, updatedAt: new Date() })
+				.where(eq(users.workosUserId, locals.session.userId));
+
+			return { account };
+		} catch {
+			return fail(500, {
+				message: 'Account details could not be saved. Try again in a moment.'
+			});
+		}
+	},
 	updateProfile: async ({ request, locals, platform }) => {
 		console.log('[updateProfile] hit', {
 			hasSession: Boolean(locals.session),

@@ -53,6 +53,12 @@ export interface AuthRuntime {
 		returnTo?: string;
 	}): Promise<string | null>;
 	getUser(input: { userId: string }): Promise<AuthUser>;
+	updateUserDetails(input: {
+		userId: string;
+		email?: string;
+		firstName?: string | null;
+		lastName?: string | null;
+	}): Promise<AuthUser>;
 	changePassword(input: {
 		userId: string;
 		email: string;
@@ -652,6 +658,22 @@ export const createAuthRuntime = (config: AuthRuntimeConfig): AuthRuntime => {
 		getUser: ({ userId }) =>
 			runWithRetry("getUser", () =>
 				transport.getUser({ userId }),
+			),
+
+		updateUserDetails: ({ userId, email, firstName, lastName }) =>
+			runWithRetry("updateUserDetails", () =>
+				transport.updateUserDetails({
+					userId,
+					...(email !== undefined ?
+						{ email }
+					:	{}),
+					...(firstName !== undefined ?
+						{ firstName }
+					:	{}),
+					...(lastName !== undefined ?
+						{ lastName }
+					:	{}),
+				}),
 			),
 
 		changePassword: async (input) => {

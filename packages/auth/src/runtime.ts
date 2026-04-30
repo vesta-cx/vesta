@@ -752,15 +752,26 @@ export const createAuthRuntime = (config: AuthRuntimeConfig): AuthRuntime => {
 			challengeId,
 			code,
 		}) => {
-			const factors = await runtime.listAuthFactors({
-				userId,
-			});
-			if (!factors.some((factor) => factor.id === factorId)) {
-				throw new TerminalAuthError(
-					"Authentication factor does not belong to this user",
-					"verifyTotpEnrollment",
-					{ status: 404 },
-				);
+			const ensureFactorBelongsToUser = async () => {
+				const factors = await runtime.listAuthFactors({
+					userId,
+				});
+				if (
+					!factors.some(
+						(factor) =>
+							factor.id === factorId,
+					)
+				) {
+					throw new TerminalAuthError(
+						"Authentication factor does not belong to this user",
+						"verifyTotpEnrollment",
+						{ status: 404 },
+					);
+				}
+			};
+
+			if (!challengeId) {
+				await ensureFactorBelongsToUser();
 			}
 
 			const verificationChallengeId =
@@ -801,6 +812,10 @@ export const createAuthRuntime = (config: AuthRuntimeConfig): AuthRuntime => {
 					"verifyTotpEnrollment",
 					{ status: 400 },
 				);
+			}
+
+			if (challengeId) {
+				await ensureFactorBelongsToUser();
 			}
 
 			return verification;

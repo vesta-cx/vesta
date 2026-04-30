@@ -20,7 +20,7 @@
 			"binding": "DB",
 			"database_name": "vesta-db",
 			"database_id": "TODO_SET_DATABASE_ID",
-			"migrations_dir": "drizzle"
+			"migrations_dir": "node_modules/@vesta-cx/db/drizzle"
 		}
 	]
 }

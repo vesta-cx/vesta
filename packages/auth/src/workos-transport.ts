@@ -854,6 +854,23 @@ export const createWorkOSTransport = (config: {
 			);
 		},
 
+		challengeAuthFactor: async ({ factorId }) => {
+			const challengeFactor = bindMethod<
+				[
+					{
+						authenticationFactorId: string;
+					},
+				],
+				Promise<unknown>
+			>(mfa, "challengeFactor");
+
+			return toAuthFactorChallenge(
+				await challengeFactor({
+					authenticationFactorId: factorId,
+				}),
+			);
+		},
+
 		verifyAuthFactorChallenge: async ({ challengeId, code }) => {
 			const verifyChallenge = bindMethod<
 				[

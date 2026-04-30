@@ -84,7 +84,6 @@ export interface AuthRuntime {
 	verifyTotpEnrollment(input: {
 		userId: string;
 		factorId: string;
-		challengeId: string;
 		code: string;
 	}): ReturnType<AuthTransport["verifyAuthFactorChallenge"]>;
 	deleteAuthFactor(input: {
@@ -746,12 +745,7 @@ export const createAuthRuntime = (config: AuthRuntimeConfig): AuthRuntime => {
 				}),
 			),
 
-		verifyTotpEnrollment: async ({
-			userId,
-			factorId,
-			challengeId,
-			code,
-		}) => {
+		verifyTotpEnrollment: async ({ userId, factorId, code }) => {
 			const factors = await runtime.listAuthFactors({
 				userId,
 			});
@@ -763,11 +757,18 @@ export const createAuthRuntime = (config: AuthRuntimeConfig): AuthRuntime => {
 				);
 			}
 
+			const challenge = await runWithRetry(
+				"challengeAuthFactor",
+				() =>
+					transport.challengeAuthFactor({
+						factorId,
+					}),
+			);
 			const verification = await runWithRetry(
 				"verifyAuthFactorChallenge",
 				() =>
 					transport.verifyAuthFactorChallenge({
-						challengeId,
+						challengeId: challenge.id,
 						code,
 					}),
 			);

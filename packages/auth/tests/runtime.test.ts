@@ -146,6 +146,13 @@ const createTransport = (
 			expiresAt: null,
 		},
 	}),
+	challengeAuthFactor: async ({ factorId }) => ({
+		id: "challenge_fresh",
+		authenticationFactorId: factorId,
+		createdAt: "2026-03-23T00:00:00.000Z",
+		updatedAt: "2026-03-23T00:00:00.000Z",
+		expiresAt: null,
+	}),
 	verifyAuthFactorChallenge: async ({ challengeId }) => ({
 		challenge: {
 			id: challengeId,
@@ -607,7 +614,14 @@ describe("createAuthRuntime", () => {
 		});
 	});
 
-	it("verifies factor ownership before verifying a TOTP challenge", async () => {
+	it("creates a fresh challenge before verifying a TOTP code", async () => {
+		const challengeAuthFactor = vi.fn(async ({ factorId }) => ({
+			id: "challenge_fresh",
+			authenticationFactorId: factorId,
+			createdAt: "2026-03-23T00:00:00.000Z",
+			updatedAt: "2026-03-23T00:00:00.000Z",
+			expiresAt: null,
+		}));
 		const verifyAuthFactorChallenge = vi.fn(
 			async ({ challengeId }) => ({
 				challenge: {
@@ -626,6 +640,7 @@ describe("createAuthRuntime", () => {
 			cookiePassword:
 				"test-password-that-is-at-least-32-chars-long!!",
 			transport: createTransport({
+				challengeAuthFactor,
 				verifyAuthFactorChallenge,
 			}),
 		});
@@ -634,12 +649,14 @@ describe("createAuthRuntime", () => {
 			runtime.verifyTotpEnrollment({
 				userId: "user_123",
 				factorId: "factor_totp",
-				challengeId: "challenge_totp",
 				code: "123456",
 			}),
 		).resolves.toMatchObject({ valid: true });
+		expect(challengeAuthFactor).toHaveBeenCalledWith({
+			factorId: "factor_totp",
+		});
 		expect(verifyAuthFactorChallenge).toHaveBeenCalledWith({
-			challengeId: "challenge_totp",
+			challengeId: "challenge_fresh",
 			code: "123456",
 		});
 	});
@@ -671,7 +688,6 @@ describe("createAuthRuntime", () => {
 			runtime.verifyTotpEnrollment({
 				userId: "user_123",
 				factorId: "factor_totp",
-				challengeId: "challenge_totp",
 				code: "000000",
 			}),
 		).rejects.toBeInstanceOf(TerminalAuthError);

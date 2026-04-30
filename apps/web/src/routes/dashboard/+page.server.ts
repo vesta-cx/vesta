@@ -371,10 +371,9 @@ export const actions: Actions = {
 
 		const form = await request.formData();
 		const factorId = String(form.get('factorId') ?? '');
-		const challengeId = String(form.get('challengeId') ?? '');
 		const code = String(form.get('code') ?? '').replace(/\s+/g, '');
 		const decodedCode = decodeVerificationCode(code);
-		if (!factorId || !challengeId) {
+		if (!factorId) {
 			return fail(400, { message: 'Authenticator setup session is missing.' });
 		}
 		if (Result.isFailure(decodedCode)) {
@@ -385,7 +384,6 @@ export const actions: Actions = {
 			await createWebAuthRuntime(platform).verifyTotpEnrollment({
 				userId: locals.session.userId,
 				factorId,
-				challengeId,
 				code: (decodedCode as Result.Success<string, never>).success
 			});
 		} catch {

@@ -303,6 +303,9 @@ export interface AuthTransport {
 		issuer?: string;
 		label?: string;
 	}): Promise<AuthTotpEnrollment>;
+	challengeAuthFactor(input: {
+		factorId: string;
+	}): Promise<AuthFactorChallenge>;
 	verifyAuthFactorChallenge(input: {
 		challengeId: string;
 		code: string;

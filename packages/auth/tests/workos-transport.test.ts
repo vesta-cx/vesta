@@ -9,6 +9,7 @@ const updateUserMock = vi.fn();
 const listAuthFactorsMock = vi.fn();
 const enrollAuthFactorMock = vi.fn();
 const deleteFactorMock = vi.fn();
+const challengeFactorMock = vi.fn();
 const verifyChallengeMock = vi.fn();
 const loadSealedSessionMock = vi.fn();
 const listOrganizationsMock = vi.fn();
@@ -28,6 +29,7 @@ vi.mock("@workos-inc/node", () => ({
 
 		mfa = {
 			deleteFactor: deleteFactorMock,
+			challengeFactor: challengeFactorMock,
 			verifyChallenge: verifyChallengeMock,
 		};
 
@@ -364,6 +366,28 @@ describe("createWorkOSTransport", () => {
 			type: "totp",
 			totpIssuer: "Vesta",
 			totpUser: "mia@example.com",
+		});
+	});
+
+	it("creates auth factor challenges through the MFA API", async () => {
+		challengeFactorMock.mockResolvedValueOnce({
+			id: "challenge_fresh",
+			authentication_factor_id: "factor_totp",
+			created_at: "2026-03-24T00:00:00.000Z",
+			updated_at: "2026-03-24T00:00:00.000Z",
+		});
+		const transport = createWorkOSTransport({
+			apiKey: "sk_test",
+			clientId: "client_123",
+		});
+
+		await expect(
+			transport.challengeAuthFactor({
+				factorId: "factor_totp",
+			}),
+		).resolves.toMatchObject({ id: "challenge_fresh" });
+		expect(challengeFactorMock).toHaveBeenCalledWith({
+			authenticationFactorId: "factor_totp",
 		});
 	});
 

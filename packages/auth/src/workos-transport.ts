@@ -724,6 +724,9 @@ export const createWorkOSTransport = (config: {
 		},
 
 		sendEmailChangeCode: async ({ userId, newEmail }) => {
+			// The SDK's sendVerificationEmail/verifyEmail methods target the user's
+			// current WorkOS email. Email changes need WorkOS's pending-email endpoints
+			// so the new address is not written until its code is confirmed.
 			const response = await fetch(
 				`https://api.workos.com/user_management/users/${userId}/email_change/send`,
 				{

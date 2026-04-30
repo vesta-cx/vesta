@@ -38,8 +38,8 @@
 			</Dialog.Description>
 		</Dialog.Header>
 
-		<div class="grid min-h-[30rem] grid-cols-[12rem_1fr]">
-			<nav class="flex flex-col gap-1 border-e bg-muted/30 p-3">
+		<div class="grid h-[34rem] grid-cols-[12rem_1fr]">
+			<nav class="flex flex-col gap-1 overflow-y-auto border-e bg-muted/30 p-3">
 				<p class="px-2 pb-1 text-xs font-medium text-muted-foreground">Settings</p>
 				{#each categories as category (category.id)}
 					{@const isActive = category.id === activeId}
@@ -59,7 +59,7 @@
 				{/each}
 			</nav>
 
-			<div class="max-h-[36rem] overflow-y-auto p-6">
+			<div class="overflow-y-auto p-6">
 				{#if active?.content}
 					{@render active.content()}
 				{/if}

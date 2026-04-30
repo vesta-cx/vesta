@@ -3,6 +3,7 @@
 		/** WorkOS legal name. */
 		name: string;
 		email: string;
+		emailVerified: boolean;
 		avatarUrl?: string;
 		/** Vesta-owned public display name. */
 		displayName: string;
@@ -10,6 +11,11 @@
 		handle: string | null;
 		/** Vesta-owned bio. */
 		bio: string | null;
+	};
+
+	export type DashboardSecurity = {
+		unavailable: boolean;
+		authFactors: import('@vesta-cx/auth').AuthFactor[];
 	};
 </script>
 
@@ -39,7 +45,7 @@
 	} from '$lib/components/settings/settings-dialog.svelte';
 	import { IN_DEVELOPMENT_TOOLTIP } from './nav-collapsible.svelte';
 
-	let { user }: { user: DashboardUser } = $props();
+	let { user, security }: { user: DashboardUser; security: DashboardSecurity } = $props();
 
 	const sidebar = useSidebar();
 	let settingsOpen = $state(false);
@@ -116,7 +122,7 @@
 {/snippet}
 
 {#snippet securityContent()}
-	<SecuritySettings />
+	<SecuritySettings {security} email={user.email} emailVerified={user.emailVerified} />
 {/snippet}
 
 {#snippet dataPrivacyContent()}

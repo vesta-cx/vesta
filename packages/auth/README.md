@@ -12,6 +12,7 @@ Shared WorkOS auth runtime for Vesta apps.
 - `completeSvelteKitLogin(...)`, `commitSealedSession(...)`, and `clearSealedSession(...)` handle browser session cookie flows.
 - `commitSealedSession(...)` and `commitOAuthState(...)` take options objects for cookie name, max age, and secure flags.
 - `createVestaProvisioningAdapter(...)` maps auth sessions into app-owned Vesta provisioning store operations.
+- `listAuthFactors(...)`, `enrollTotpFactor(...)`, `verifyTotpEnrollment(...)`, and `deleteAuthFactor(...)` expose WorkOS TOTP management without leaking SDK calls into apps.
 
 ## Architecture
 
@@ -23,6 +24,7 @@ Shared WorkOS auth runtime for Vesta apps.
 ## Notes
 
 - This package uses `@workos-inc/node` directly.
+- WorkOS AuthKit passkeys are currently hosted-UI only; custom server-side factor management is limited to TOTP until WorkOS exposes passkey management APIs.
 - Session cookies use the WorkOS sealed-session model rather than the legacy custom cookie payload.
 - The local Effect source reference lives in `.references/effect-v4-beta/` and is for read-only implementation context only.
 - The broader stack reference pack lives under `.references/` too: `workos-node`, `hono`, `sveltekit`, and `drizzle-orm`.

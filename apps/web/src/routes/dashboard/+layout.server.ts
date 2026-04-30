@@ -1,6 +1,7 @@
 import { error, redirect } from '@sveltejs/kit';
 import { eq } from 'drizzle-orm';
 import { users } from '@vesta-cx/db';
+import { createWebAuthRuntime } from '$lib/server/auth';
 import { getDb } from '$lib/server/db';
 import type { LayoutServerLoad } from './$types';
 
@@ -10,7 +11,7 @@ export const load: LayoutServerLoad = async ({ locals, platform }) => {
 	if (!locals.session) redirect(302, '/auth/login');
 	if (!platform) error(500, 'Platform not available');
 
-	const { firstName, lastName, email, profilePictureUrl, userId } = locals.session;
+	const { firstName, lastName, email, emailVerified, profilePictureUrl, userId } = locals.session;
 	const legalName = [firstName, lastName].filter(Boolean).join(' ');
 
 	const db = getDb(platform);
@@ -24,14 +25,28 @@ export const load: LayoutServerLoad = async ({ locals, platform }) => {
 		.where(eq(users.workosUserId, userId))
 		.limit(1);
 
+	let authFactors: Awaited<ReturnType<ReturnType<typeof createWebAuthRuntime>['listAuthFactors']>> =
+		[];
+	let securityUnavailable = false;
+	try {
+		authFactors = await createWebAuthRuntime(platform).listAuthFactors({ userId });
+	} catch {
+		securityUnavailable = true;
+	}
+
 	return {
 		user: {
 			name: legalName || email,
 			email,
+			emailVerified,
 			avatarUrl: profilePictureUrl ?? undefined,
 			displayName: profile?.displayName ?? legalName ?? email,
 			handle: profile?.handle ?? null,
 			bio: profile?.bio ?? null
+		},
+		security: {
+			unavailable: securityUnavailable,
+			authFactors
 		}
 	};
 };

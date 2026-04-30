@@ -80,6 +80,50 @@ const createTransport = (
 		createdAt: "2026-03-23T00:00:00.000Z",
 		updatedAt: "2026-03-23T00:00:00.000Z",
 	}),
+	listAuthFactors: async ({ userId }) => [
+		{
+			id: "factor_totp",
+			userId,
+			type: "totp",
+			totp: { issuer: "Vesta", user: "mia@example.com" },
+			createdAt: "2026-03-23T00:00:00.000Z",
+			updatedAt: "2026-03-23T00:00:00.000Z",
+		},
+	],
+	enrollTotpFactor: async ({ userId }) => ({
+		factor: {
+			id: "factor_new",
+			userId,
+			type: "totp",
+			totp: {
+				issuer: "Vesta",
+				user: "mia@example.com",
+				qrCode: "data:image/png;base64,abc",
+				secret: "SECRET",
+				uri: "otpauth://totp/Vesta:mia@example.com",
+			},
+			createdAt: "2026-03-23T00:00:00.000Z",
+			updatedAt: "2026-03-23T00:00:00.000Z",
+		},
+		challenge: {
+			id: "challenge_new",
+			authenticationFactorId: "factor_new",
+			createdAt: "2026-03-23T00:00:00.000Z",
+			updatedAt: "2026-03-23T00:00:00.000Z",
+			expiresAt: null,
+		},
+	}),
+	verifyAuthFactorChallenge: async ({ challengeId }) => ({
+		challenge: {
+			id: challengeId,
+			authenticationFactorId: "factor_totp",
+			createdAt: "2026-03-23T00:00:00.000Z",
+			updatedAt: "2026-03-23T00:00:00.000Z",
+			expiresAt: null,
+		},
+		valid: true,
+	}),
+	deleteAuthFactor: async () => undefined,
 	getOrganization: async ({ organizationId }) => ({
 		id: organizationId,
 		name: "Primary Org",
@@ -392,6 +436,146 @@ describe("createAuthRuntime", () => {
 			userId: "user_123",
 			password: "new-password",
 		});
+	});
+
+	it("lists auth factors for a user", async () => {
+		const listAuthFactors = vi.fn(async ({ userId }) => [
+			{
+				id: "factor_totp",
+				userId,
+				type: "totp" as const,
+				totp: {
+					issuer: "Vesta",
+					user: "mia@example.com",
+				},
+				createdAt: "2026-03-23T00:00:00.000Z",
+				updatedAt: "2026-03-23T00:00:00.000Z",
+			},
+		]);
+		const runtime = createAuthRuntime({
+			clientId: "client_123",
+			apiKey: "sk_test",
+			cookiePassword:
+				"test-password-that-is-at-least-32-chars-long!!",
+			transport: createTransport({ listAuthFactors }),
+		});
+
+		await expect(
+			runtime.listAuthFactors({ userId: "user_123" }),
+		).resolves.toHaveLength(1);
+		expect(listAuthFactors).toHaveBeenCalledWith({
+			userId: "user_123",
+		});
+	});
+
+	it("verifies factor ownership before verifying a TOTP challenge", async () => {
+		const verifyAuthFactorChallenge = vi.fn(
+			async ({ challengeId }) => ({
+				challenge: {
+					id: challengeId,
+					authenticationFactorId: "factor_totp",
+					createdAt: "2026-03-23T00:00:00.000Z",
+					updatedAt: "2026-03-23T00:00:00.000Z",
+					expiresAt: null,
+				},
+				valid: true,
+			}),
+		);
+		const runtime = createAuthRuntime({
+			clientId: "client_123",
+			apiKey: "sk_test",
+			cookiePassword:
+				"test-password-that-is-at-least-32-chars-long!!",
+			transport: createTransport({
+				verifyAuthFactorChallenge,
+			}),
+		});
+
+		await expect(
+			runtime.verifyTotpEnrollment({
+				userId: "user_123",
+				factorId: "factor_totp",
+				challengeId: "challenge_totp",
+				code: "123456",
+			}),
+		).resolves.toMatchObject({ valid: true });
+		expect(verifyAuthFactorChallenge).toHaveBeenCalledWith({
+			challengeId: "challenge_totp",
+			code: "123456",
+		});
+	});
+
+	it("rejects invalid TOTP challenge codes", async () => {
+		const runtime = createAuthRuntime({
+			clientId: "client_123",
+			apiKey: "sk_test",
+			cookiePassword:
+				"test-password-that-is-at-least-32-chars-long!!",
+			transport: createTransport({
+				verifyAuthFactorChallenge: async ({
+					challengeId,
+				}) => ({
+					challenge: {
+						id: challengeId,
+						authenticationFactorId:
+							"factor_totp",
+						createdAt: "2026-03-23T00:00:00.000Z",
+						updatedAt: "2026-03-23T00:00:00.000Z",
+						expiresAt: null,
+					},
+					valid: false,
+				}),
+			}),
+		});
+
+		await expect(
+			runtime.verifyTotpEnrollment({
+				userId: "user_123",
+				factorId: "factor_totp",
+				challengeId: "challenge_totp",
+				code: "000000",
+			}),
+		).rejects.toBeInstanceOf(TerminalAuthError);
+	});
+
+	it("verifies factor ownership before deleting an auth factor", async () => {
+		const deleteAuthFactor = vi.fn(async () => undefined);
+		const runtime = createAuthRuntime({
+			clientId: "client_123",
+			apiKey: "sk_test",
+			cookiePassword:
+				"test-password-that-is-at-least-32-chars-long!!",
+			transport: createTransport({ deleteAuthFactor }),
+		});
+
+		await expect(
+			runtime.deleteAuthFactor({
+				userId: "user_123",
+				factorId: "factor_totp",
+			}),
+		).resolves.toBeUndefined();
+		expect(deleteAuthFactor).toHaveBeenCalledWith({
+			factorId: "factor_totp",
+		});
+	});
+
+	it("rejects deleting another user's auth factor", async () => {
+		const deleteAuthFactor = vi.fn(async () => undefined);
+		const runtime = createAuthRuntime({
+			clientId: "client_123",
+			apiKey: "sk_test",
+			cookiePassword:
+				"test-password-that-is-at-least-32-chars-long!!",
+			transport: createTransport({ deleteAuthFactor }),
+		});
+
+		await expect(
+			runtime.deleteAuthFactor({
+				userId: "user_123",
+				factorId: "factor_other",
+			}),
+		).rejects.toBeInstanceOf(TerminalAuthError);
+		expect(deleteAuthFactor).not.toHaveBeenCalled();
 	});
 
 	it("rejects password changes authenticated as another user", async () => {

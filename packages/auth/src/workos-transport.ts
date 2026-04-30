@@ -4,6 +4,9 @@ import { WorkOS } from "@workos-inc/node";
 import { AuthConfigurationError } from "./errors.js";
 import type {
 	AuthAuthorizationUrlInput,
+	AuthFactor,
+	AuthFactorChallenge,
+	AuthFactorChallengeVerification,
 	AuthMembershipStatus,
 	AuthOrganization,
 	AuthOrganizationListInput,
@@ -14,6 +17,7 @@ import type {
 	AuthTransport,
 	AuthTransportSession,
 	AuthTransportSessionAuthenticateResult,
+	AuthTotpEnrollment,
 	AuthTransportSessionRefreshResult,
 	AuthUser,
 } from "./types.js";
@@ -156,7 +160,7 @@ const isAutoPaginatable = <T>(
 
 const requireSdkSurface = (
 	client: unknown,
-	key: "userManagement" | "organizations",
+	key: "userManagement" | "organizations" | "mfa",
 ): Record<string, unknown> => {
 	const surface = asRecord(client)[key];
 	if (!surface || typeof surface !== "object") {
@@ -295,6 +299,91 @@ const toAuthOrganizationMembership = (
 	};
 };
 
+const toAuthFactor = (value: unknown): AuthFactor => {
+	const record = asRecord(value);
+	const totp = asRecord(record.totp);
+
+	return {
+		id: requireString("toAuthFactor", record, "id"),
+		userId: readFirstString(record, ["userId", "user_id"]),
+		type: "totp",
+		totp: {
+			issuer: requireString("toAuthFactor", totp, "issuer"),
+			user: requireString("toAuthFactor", totp, "user"),
+			...(readFirstString(totp, ["qrCode", "qr_code"]) ?
+				{
+					qrCode: readFirstString(totp, [
+						"qrCode",
+						"qr_code",
+					])!,
+				}
+			:	{}),
+			...(readString(totp, "secret") ?
+				{ secret: readString(totp, "secret")! }
+			:	{}),
+			...(readString(totp, "uri") ?
+				{ uri: readString(totp, "uri")! }
+			:	{}),
+		},
+		createdAt: requireFirstString("toAuthFactor", record, [
+			"createdAt",
+			"created_at",
+		]),
+		updatedAt: requireFirstString("toAuthFactor", record, [
+			"updatedAt",
+			"updated_at",
+		]),
+	};
+};
+
+const toAuthFactorChallenge = (value: unknown): AuthFactorChallenge => {
+	const record = asRecord(value);
+
+	return {
+		id: requireString("toAuthFactorChallenge", record, "id"),
+		authenticationFactorId: requireFirstString(
+			"toAuthFactorChallenge",
+			record,
+			["authenticationFactorId", "authentication_factor_id"],
+		),
+		createdAt: requireFirstString("toAuthFactorChallenge", record, [
+			"createdAt",
+			"created_at",
+		]),
+		updatedAt: requireFirstString("toAuthFactorChallenge", record, [
+			"updatedAt",
+			"updated_at",
+		]),
+		expiresAt: readFirstString(record, ["expiresAt", "expires_at"]),
+	};
+};
+
+const toAuthTotpEnrollment = (value: unknown): AuthTotpEnrollment => {
+	const record = asRecord(value);
+
+	return {
+		factor: toAuthFactor(
+			record.authenticationFactor ??
+				record.authentication_factor,
+		),
+		challenge: toAuthFactorChallenge(
+			record.authenticationChallenge ??
+				record.authentication_challenge,
+		),
+	};
+};
+
+const toAuthFactorChallengeVerification = (
+	value: unknown,
+): AuthFactorChallengeVerification => {
+	const record = asRecord(value);
+
+	return {
+		challenge: toAuthFactorChallenge(record.challenge),
+		valid: readBoolean(record, "valid") ?? false,
+	};
+};
+
 const toAuthSession = (value: unknown): AuthSessionWithoutMemberships => {
 	const record = asRecord(value);
 	const user = toAuthUser(record.user);
@@ -373,6 +462,7 @@ export const createWorkOSTransport = (config: {
 	});
 	const userManagement = requireSdkSurface(client, "userManagement");
 	const organizations = requireSdkSurface(client, "organizations");
+	const mfa = requireSdkSurface(client, "mfa");
 	const requireClientId = (): string => {
 		if (!config.clientId) {
 			throw new AuthConfigurationError(
@@ -616,6 +706,96 @@ export const createWorkOSTransport = (config: {
 					password,
 				}),
 			);
+		},
+
+		listAuthFactors: async ({ userId }) => {
+			const listAuthFactorsMethod =
+				(
+					typeof userManagement.listUserAuthFactors ===
+					"function"
+				) ?
+					"listUserAuthFactors"
+				:	"listAuthFactors";
+			const listAuthFactors = bindMethod<
+				[
+					{
+						userId: string;
+					},
+				],
+				Promise<unknown>
+			>(userManagement, listAuthFactorsMethod);
+
+			const response = await listAuthFactors({ userId });
+			if (isAutoPaginatable<unknown>(response)) {
+				return (await response.autoPagination()).map(
+					toAuthFactor,
+				);
+			}
+
+			const record = asRecord(response);
+			return Array.isArray(record.data) ?
+					record.data.map(toAuthFactor)
+				:	[];
+		},
+
+		enrollTotpFactor: async ({ userId, issuer, label }) => {
+			const enrollMethod =
+				(
+					typeof userManagement.createUserAuthFactor ===
+					"function"
+				) ?
+					"createUserAuthFactor"
+				:	"enrollAuthFactor";
+			const enrollAuthFactor = bindMethod<
+				[
+					{
+						userId: string;
+						type: "totp";
+						totpIssuer?: string;
+						totpUser?: string;
+					},
+				],
+				Promise<unknown>
+			>(userManagement, enrollMethod);
+
+			return toAuthTotpEnrollment(
+				await enrollAuthFactor({
+					userId,
+					type: "totp",
+					...(issuer ?
+						{ totpIssuer: issuer }
+					:	{}),
+					...(label ? { totpUser: label } : {}),
+				}),
+			);
+		},
+
+		verifyAuthFactorChallenge: async ({ challengeId, code }) => {
+			const verifyChallenge = bindMethod<
+				[
+					{
+						authenticationChallengeId: string;
+						code: string;
+					},
+				],
+				Promise<unknown>
+			>(mfa, "verifyChallenge");
+
+			return toAuthFactorChallengeVerification(
+				await verifyChallenge({
+					authenticationChallengeId: challengeId,
+					code,
+				}),
+			);
+		},
+
+		deleteAuthFactor: async ({ factorId }) => {
+			const deleteFactor = bindMethod<
+				[string],
+				Promise<void>
+			>(mfa, "deleteFactor");
+
+			await deleteFactor(factorId);
 		},
 
 		getOrganization: async ({ organizationId }) => {

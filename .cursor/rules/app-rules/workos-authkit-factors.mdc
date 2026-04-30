@@ -1,0 +1,10 @@
+---
+description: WorkOS AuthKit factor management constraints. Apply when editing packages/auth or app Security settings for MFA, TOTP, passkeys, or sign-in methods. Keeps unsupported passkey APIs out of custom UI/server code.
+globs: packages/auth/src/**, packages/auth/tests/**, apps/*/src/**/settings/**, apps/*/src/routes/**
+---
+
+# WorkOS AuthKit factor management
+
+- Keep WorkOS calls behind `packages/auth`; app settings must use `createWebAuthRuntime(...)` or package exports, never `@workos-inc/node` directly.
+- TOTP can be listed/enrolled through WorkOS user-management auth-factor APIs and deleted through the MFA `deleteFactor` API. Verify factor ownership in `AuthRuntime` before deletion because the delete API accepts only a factor id.
+- Passkeys are hosted-AuthKit only in current WorkOS docs/API. Do not promise custom passkey list/delete/enroll flows until WorkOS exposes server APIs; show a hosted-only/unsupported state instead.

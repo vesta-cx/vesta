@@ -79,6 +79,10 @@ const PasswordSchema = Schema.String.check(
 	Schema.makeFilter((value: string) => value.length > 0 || 'Enter your password.')
 );
 
+const TotpCodeSchema = Schema.String.check(
+	Schema.makeFilter((value: string) => /^\d{6}$/.test(value) || 'Enter the 6-digit code.')
+);
+
 const NewPasswordSchema = Schema.String.check(
 	Schema.makeFilter((value: string) => value.length >= 8 || 'Use at least 8 characters.'),
 	Schema.makeFilter((value: string) => value.length <= 72 || 'Use 72 characters or fewer.')
@@ -86,6 +90,7 @@ const NewPasswordSchema = Schema.String.check(
 
 const decodeBio = Schema.decodeUnknownResult(BioSchema);
 const decodePassword = Schema.decodeUnknownResult(PasswordSchema);
+const decodeTotpCode = Schema.decodeUnknownResult(TotpCodeSchema);
 const decodeNewPassword = Schema.decodeUnknownResult(NewPasswordSchema);
 
 const trimToNull = (value: FormDataEntryValue | null): string | null => {
@@ -228,6 +233,78 @@ export const actions: Actions = {
 				});
 			}
 			throw caught;
+		}
+
+		return { success: true };
+	},
+	enrollTotp: async ({ locals, platform }) => {
+		if (!locals.session) return fail(401, { message: 'Unauthenticated' });
+		if (!platform) return fail(500, { message: 'Platform not available' });
+
+		try {
+			const enrollment = await createWebAuthRuntime(platform).enrollTotpFactor({
+				userId: locals.session.userId,
+				issuer: 'Vesta',
+				label: locals.session.email
+			});
+
+			return { enrollment };
+		} catch {
+			return fail(500, {
+				message: 'Authenticator app setup could not be started. Try again in a moment.'
+			});
+		}
+	},
+	verifyTotpEnrollment: async ({ request, locals, platform }) => {
+		if (!locals.session) return fail(401, { message: 'Unauthenticated' });
+		if (!platform) return fail(500, { message: 'Platform not available' });
+
+		const form = await request.formData();
+		const factorId = String(form.get('factorId') ?? '');
+		const challengeId = String(form.get('challengeId') ?? '');
+		const code = String(form.get('code') ?? '').replace(/\s+/g, '');
+		const decodedCode = decodeTotpCode(code);
+		if (!factorId || !challengeId) {
+			return fail(400, { message: 'Authenticator setup session is missing.' });
+		}
+		if (Result.isFailure(decodedCode)) {
+			return fail(400, { errors: { code: [String(decodedCode.failure)] } });
+		}
+
+		try {
+			await createWebAuthRuntime(platform).verifyTotpEnrollment({
+				userId: locals.session.userId,
+				factorId,
+				challengeId,
+				code: (decodedCode as Result.Success<string, never>).success
+			});
+		} catch {
+			return fail(400, {
+				errors: { code: ['That code did not verify. Try the latest code from your app.'] }
+			});
+		}
+
+		return { success: true };
+	},
+	deleteAuthFactor: async ({ request, locals, platform }) => {
+		if (!locals.session) return fail(401, { message: 'Unauthenticated' });
+		if (!platform) return fail(500, { message: 'Platform not available' });
+
+		const form = await request.formData();
+		const factorId = String(form.get('factorId') ?? '');
+		if (!factorId) {
+			return fail(400, { message: 'Choose an authentication factor to remove.' });
+		}
+
+		try {
+			await createWebAuthRuntime(platform).deleteAuthFactor({
+				userId: locals.session.userId,
+				factorId
+			});
+		} catch {
+			return fail(500, {
+				message: 'Authentication factor could not be removed. Try again in a moment.'
+			});
 		}
 
 		return { success: true };

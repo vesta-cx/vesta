@@ -37,6 +37,46 @@ export interface AuthOrganizationMembership {
 	updatedAt: string;
 }
 
+/** TOTP metadata attached to a WorkOS authentication factor. */
+export interface AuthTotpFactorDetails {
+	issuer: string;
+	user: string;
+	qrCode?: string;
+	secret?: string;
+	uri?: string;
+}
+
+/** Authentication factor normalized from WorkOS user-management MFA APIs. */
+export interface AuthFactor {
+	id: string;
+	userId: string | null;
+	type: "totp";
+	totp: AuthTotpFactorDetails;
+	createdAt: string;
+	updatedAt: string;
+}
+
+/** Authentication challenge returned when enrolling a new factor. */
+export interface AuthFactorChallenge {
+	id: string;
+	authenticationFactorId: string;
+	createdAt: string;
+	updatedAt: string;
+	expiresAt: string | null;
+}
+
+/** Result for creating a TOTP factor that still needs user verification. */
+export interface AuthTotpEnrollment {
+	factor: AuthFactor;
+	challenge: AuthFactorChallenge;
+}
+
+/** Result for verifying an auth-factor challenge code. */
+export interface AuthFactorChallengeVerification {
+	challenge: AuthFactorChallenge;
+	valid: boolean;
+}
+
 /** Application session claims normalized from a WorkOS sealed session. */
 export interface AuthSession {
 	sessionId: string | null;
@@ -243,6 +283,17 @@ export interface AuthTransport {
 		userId: string;
 		password: string;
 	}): Promise<AuthUser>;
+	listAuthFactors(input: { userId: string }): Promise<AuthFactor[]>;
+	enrollTotpFactor(input: {
+		userId: string;
+		issuer?: string;
+		label?: string;
+	}): Promise<AuthTotpEnrollment>;
+	verifyAuthFactorChallenge(input: {
+		challengeId: string;
+		code: string;
+	}): Promise<AuthFactorChallengeVerification>;
+	deleteAuthFactor(input: { factorId: string }): Promise<void>;
 	getOrganization(input: {
 		organizationId: string;
 	}): Promise<AuthOrganization>;

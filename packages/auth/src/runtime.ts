@@ -15,6 +15,7 @@ import {
 import type {
 	AuthExchangeInput,
 	AuthExchangeResult,
+	AuthFactor,
 	AuthMembershipStatus,
 	AuthOrganization,
 	AuthOrganizationListInput,
@@ -60,6 +61,22 @@ export interface AuthRuntime {
 		ipAddress?: string;
 		userAgent?: string;
 	}): Promise<AuthUser>;
+	listAuthFactors(input: { userId: string }): Promise<AuthFactor[]>;
+	enrollTotpFactor(input: {
+		userId: string;
+		issuer?: string;
+		label?: string;
+	}): ReturnType<AuthTransport["enrollTotpFactor"]>;
+	verifyTotpEnrollment(input: {
+		userId: string;
+		factorId: string;
+		challengeId: string;
+		code: string;
+	}): ReturnType<AuthTransport["verifyAuthFactorChallenge"]>;
+	deleteAuthFactor(input: {
+		userId: string;
+		factorId: string;
+	}): Promise<void>;
 	getOrganization(input: {
 		organizationId: string;
 	}): Promise<AuthOrganization>;
@@ -669,6 +686,73 @@ export const createAuthRuntime = (config: AuthRuntimeConfig): AuthRuntime => {
 					userId: input.userId,
 					password: input.newPassword,
 				}),
+			);
+		},
+
+		listAuthFactors: ({ userId }) =>
+			runWithRetry("listAuthFactors", () =>
+				transport.listAuthFactors({ userId }),
+			),
+
+		enrollTotpFactor: ({ userId, issuer, label }) =>
+			runWithRetry("enrollTotpFactor", () =>
+				transport.enrollTotpFactor({
+					userId,
+					...(issuer ? { issuer } : {}),
+					...(label ? { label } : {}),
+				}),
+			),
+
+		verifyTotpEnrollment: async ({
+			userId,
+			factorId,
+			challengeId,
+			code,
+		}) => {
+			const factors = await runtime.listAuthFactors({
+				userId,
+			});
+			if (!factors.some((factor) => factor.id === factorId)) {
+				throw new TerminalAuthError(
+					"Authentication factor does not belong to this user",
+					"verifyTotpEnrollment",
+					{ status: 404 },
+				);
+			}
+
+			const verification = await runWithRetry(
+				"verifyAuthFactorChallenge",
+				() =>
+					transport.verifyAuthFactorChallenge({
+						challengeId,
+						code,
+					}),
+			);
+			if (!verification.valid) {
+				throw new TerminalAuthError(
+					"Authentication factor challenge code is invalid",
+					"verifyTotpEnrollment",
+					{ status: 400 },
+				);
+			}
+
+			return verification;
+		},
+
+		deleteAuthFactor: async ({ userId, factorId }) => {
+			const factors = await runtime.listAuthFactors({
+				userId,
+			});
+			if (!factors.some((factor) => factor.id === factorId)) {
+				throw new TerminalAuthError(
+					"Authentication factor does not belong to this user",
+					"deleteAuthFactor",
+					{ status: 404 },
+				);
+			}
+
+			return runWithRetry("deleteAuthFactor", () =>
+				transport.deleteAuthFactor({ factorId }),
 			);
 		},
 

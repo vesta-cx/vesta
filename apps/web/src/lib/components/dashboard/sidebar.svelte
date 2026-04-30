@@ -15,7 +15,13 @@
 	import NavUser, { type DashboardUser } from './nav-user.svelte';
 	import WorkspaceSwitcher from './workspace-switcher.svelte';
 
-	let { user }: { user: DashboardUser } = $props();
+	let {
+		user,
+		security
+	}: {
+		user: DashboardUser;
+		security: import('./nav-user.svelte').DashboardSecurity;
+	} = $props();
 
 	let active = $state<Workspace>(dashboardWorkspaces[0]);
 
@@ -57,6 +63,6 @@
 	</Sidebar.Content>
 
 	<Sidebar.Footer>
-		<NavUser {user} />
+		<NavUser {user} {security} />
 	</Sidebar.Footer>
 </Sidebar.Root>

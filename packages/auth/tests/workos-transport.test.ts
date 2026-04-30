@@ -6,6 +6,10 @@ const listOrganizationMembershipsMock = vi.fn();
 const authenticateWithCodeMock = vi.fn();
 const authenticateWithPasswordMock = vi.fn();
 const updateUserMock = vi.fn();
+const listAuthFactorsMock = vi.fn();
+const enrollAuthFactorMock = vi.fn();
+const deleteFactorMock = vi.fn();
+const verifyChallengeMock = vi.fn();
 const loadSealedSessionMock = vi.fn();
 const listOrganizationsMock = vi.fn();
 
@@ -17,7 +21,14 @@ vi.mock("@workos-inc/node", () => ({
 			authenticateWithCode: authenticateWithCodeMock,
 			authenticateWithPassword: authenticateWithPasswordMock,
 			updateUser: updateUserMock,
+			listAuthFactors: listAuthFactorsMock,
+			enrollAuthFactor: enrollAuthFactorMock,
 			loadSealedSession: loadSealedSessionMock,
+		};
+
+		mfa = {
+			deleteFactor: deleteFactorMock,
+			verifyChallenge: verifyChallengeMock,
 		};
 
 		organizations = {
@@ -152,6 +163,128 @@ describe("createWorkOSTransport", () => {
 			userId: "user_123",
 			password: "new-password",
 		});
+	});
+
+	it("lists user auth factors through WorkOS user management", async () => {
+		listAuthFactorsMock.mockResolvedValueOnce({
+			data: [
+				{
+					id: "factor_totp",
+					user_id: "user_123",
+					type: "totp",
+					totp: {
+						issuer: "Vesta",
+						user: "mia@example.com",
+					},
+					created_at: "2026-03-24T00:00:00.000Z",
+					updated_at: "2026-03-24T00:00:00.000Z",
+				},
+			],
+		});
+
+		const transport = createWorkOSTransport({
+			apiKey: "sk_test",
+			clientId: "client_123",
+		});
+
+		await expect(
+			transport.listAuthFactors({ userId: "user_123" }),
+		).resolves.toEqual([
+			expect.objectContaining({
+				id: "factor_totp",
+				userId: "user_123",
+				type: "totp",
+			}),
+		]);
+		expect(listAuthFactorsMock).toHaveBeenCalledWith({
+			userId: "user_123",
+		});
+	});
+
+	it("enrolls TOTP factors through WorkOS user management", async () => {
+		enrollAuthFactorMock.mockResolvedValueOnce({
+			authentication_factor: {
+				id: "factor_totp",
+				user_id: "user_123",
+				type: "totp",
+				totp: {
+					issuer: "Vesta",
+					user: "mia@example.com",
+					qr_code: "data:image/png;base64,abc",
+					secret: "SECRET",
+					uri: "otpauth://totp/Vesta:mia@example.com",
+				},
+				created_at: "2026-03-24T00:00:00.000Z",
+				updated_at: "2026-03-24T00:00:00.000Z",
+			},
+			authentication_challenge: {
+				id: "challenge_totp",
+				authentication_factor_id: "factor_totp",
+				created_at: "2026-03-24T00:00:00.000Z",
+				updated_at: "2026-03-24T00:00:00.000Z",
+			},
+		});
+
+		const transport = createWorkOSTransport({
+			apiKey: "sk_test",
+			clientId: "client_123",
+		});
+
+		await expect(
+			transport.enrollTotpFactor({
+				userId: "user_123",
+				issuer: "Vesta",
+				label: "mia@example.com",
+			}),
+		).resolves.toMatchObject({
+			factor: { id: "factor_totp" },
+			challenge: { id: "challenge_totp" },
+		});
+		expect(enrollAuthFactorMock).toHaveBeenCalledWith({
+			userId: "user_123",
+			type: "totp",
+			totpIssuer: "Vesta",
+			totpUser: "mia@example.com",
+		});
+	});
+
+	it("verifies auth factor challenges through the MFA API", async () => {
+		verifyChallengeMock.mockResolvedValueOnce({
+			challenge: {
+				id: "challenge_totp",
+				authentication_factor_id: "factor_totp",
+				created_at: "2026-03-24T00:00:00.000Z",
+				updated_at: "2026-03-24T00:00:00.000Z",
+			},
+			valid: true,
+		});
+		const transport = createWorkOSTransport({
+			apiKey: "sk_test",
+			clientId: "client_123",
+		});
+
+		await expect(
+			transport.verifyAuthFactorChallenge({
+				challengeId: "challenge_totp",
+				code: "123456",
+			}),
+		).resolves.toMatchObject({ valid: true });
+		expect(verifyChallengeMock).toHaveBeenCalledWith({
+			authenticationChallengeId: "challenge_totp",
+			code: "123456",
+		});
+	});
+
+	it("deletes auth factors through the MFA API", async () => {
+		const transport = createWorkOSTransport({
+			apiKey: "sk_test",
+			clientId: "client_123",
+		});
+
+		await expect(
+			transport.deleteAuthFactor({ factorId: "factor_totp" }),
+		).resolves.toBeUndefined();
+		expect(deleteFactorMock).toHaveBeenCalledWith("factor_totp");
 	});
 
 	it("keeps pagination metadata when only an after cursor is present", async () => {

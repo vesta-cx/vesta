@@ -117,6 +117,25 @@ const trimToNull = (value: FormDataEntryValue | null): string | null => {
 	return trimmed.length === 0 ? null : trimmed;
 };
 
+const toClientSafeError = (caught: unknown) => {
+	if (!(caught instanceof Error)) return { message: String(caught) };
+	const details = caught as Error & {
+		code?: unknown;
+		status?: unknown;
+		statusCode?: unknown;
+		requestId?: unknown;
+	};
+
+	return {
+		name: caught.name,
+		message: caught.message,
+		...(details.code ? { code: String(details.code) } : {}),
+		...(details.status ? { status: String(details.status) } : {}),
+		...(details.statusCode ? { statusCode: String(details.statusCode) } : {}),
+		...(details.requestId ? { requestId: String(details.requestId) } : {})
+	};
+};
+
 const validateProfile = (raw: {
 	handle: string | null;
 	displayName: string | null;
@@ -388,9 +407,12 @@ export const actions: Actions = {
 				...(challengeId ? { challengeId } : {}),
 				code: (decodedCode as Result.Success<string, never>).success
 			});
-		} catch {
+		} catch (caught) {
+			const debug = toClientSafeError(caught);
+			console.error('[verifyTotpEnrollment] WorkOS verification failed', debug, caught);
 			return fail(400, {
-				errors: { code: ['That code did not verify. Try the latest code from your app.'] }
+				errors: { code: ['That code did not verify. Try the latest code from your app.'] },
+				debug
 			});
 		}
 

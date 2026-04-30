@@ -223,6 +223,7 @@
 									enrollment = null;
 									await update({ reset: true, invalidateAll: true });
 								} else if (result.type === 'failure') {
+									console.error('[security-settings] TOTP verification failed', result.data);
 									showFailure(result.data);
 								}
 							};

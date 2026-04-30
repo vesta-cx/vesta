@@ -4,6 +4,8 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const listOrganizationMembershipsMock = vi.fn();
 const authenticateWithCodeMock = vi.fn();
+const authenticateWithPasswordMock = vi.fn();
+const updateUserMock = vi.fn();
 const loadSealedSessionMock = vi.fn();
 const listOrganizationsMock = vi.fn();
 
@@ -13,6 +15,8 @@ vi.mock("@workos-inc/node", () => ({
 			listOrganizationMemberships:
 				listOrganizationMembershipsMock,
 			authenticateWithCode: authenticateWithCodeMock,
+			authenticateWithPassword: authenticateWithPasswordMock,
+			updateUser: updateUserMock,
 			loadSealedSession: loadSealedSessionMock,
 		};
 
@@ -85,6 +89,68 @@ describe("createWorkOSTransport", () => {
 				permissions: ["posts:create"],
 				entitlements: ["audit-logs"],
 			}),
+		});
+	});
+
+	it("authenticates a user with password without sealing a new session", async () => {
+		authenticateWithPasswordMock.mockResolvedValueOnce({
+			user: {
+				id: "user_123",
+				email: "mia@example.com",
+				first_name: "Mia",
+				last_name: "Example",
+				email_verified: true,
+				created_at: "2026-03-24T00:00:00.000Z",
+				updated_at: "2026-03-24T00:00:00.000Z",
+			},
+		});
+
+		const transport = createWorkOSTransport({
+			apiKey: "sk_test",
+			clientId: "client_123",
+		});
+
+		await expect(
+			transport.authenticateWithPassword({
+				email: "mia@example.com",
+				password: "current-password",
+			}),
+		).resolves.toMatchObject({
+			id: "user_123",
+			email: "mia@example.com",
+		});
+		expect(authenticateWithPasswordMock).toHaveBeenCalledWith({
+			clientId: "client_123",
+			email: "mia@example.com",
+			password: "current-password",
+		});
+	});
+
+	it("updates a user's password through WorkOS user management", async () => {
+		updateUserMock.mockResolvedValueOnce({
+			id: "user_123",
+			email: "mia@example.com",
+			first_name: "Mia",
+			last_name: "Example",
+			email_verified: true,
+			created_at: "2026-03-24T00:00:00.000Z",
+			updated_at: "2026-03-24T00:00:00.000Z",
+		});
+
+		const transport = createWorkOSTransport({
+			apiKey: "sk_test",
+			clientId: "client_123",
+		});
+
+		await expect(
+			transport.updateUserPassword({
+				userId: "user_123",
+				password: "new-password",
+			}),
+		).resolves.toMatchObject({ id: "user_123" });
+		expect(updateUserMock).toHaveBeenCalledWith({
+			userId: "user_123",
+			password: "new-password",
 		});
 	});
 

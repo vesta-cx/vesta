@@ -1,6 +1,6 @@
 import { fail } from '@sveltejs/kit';
-import { eq } from 'drizzle-orm';
 import { Result, Schema } from 'effect';
+import { TerminalAuthError } from '@vesta-cx/auth';
 import { users } from '@vesta-cx/db';
 import {
 	RESERVED_HANDLES,
@@ -10,6 +10,7 @@ import {
 	isMultiLineSafe,
 	isSingleLineSafe
 } from '@vesta-cx/db/entity-schemas';
+import { createWebAuthRuntime } from '$lib/server/auth';
 import { getDb } from '$lib/server/db';
 import type { Actions } from './$types';
 
@@ -74,7 +75,18 @@ const BioSchema = Schema.NullOr(
 
 const decodeHandle = Schema.decodeUnknownResult(HandleSchema);
 const decodeDisplayName = Schema.decodeUnknownResult(DisplayNameSchema);
+const PasswordSchema = Schema.String.check(
+	Schema.makeFilter((value: string) => value.length > 0 || 'Enter your password.')
+);
+
+const NewPasswordSchema = Schema.String.check(
+	Schema.makeFilter((value: string) => value.length >= 8 || 'Use at least 8 characters.'),
+	Schema.makeFilter((value: string) => value.length <= 72 || 'Use 72 characters or fewer.')
+);
+
 const decodeBio = Schema.decodeUnknownResult(BioSchema);
+const decodePassword = Schema.decodeUnknownResult(PasswordSchema);
+const decodeNewPassword = Schema.decodeUnknownResult(NewPasswordSchema);
 
 const trimToNull = (value: FormDataEntryValue | null): string | null => {
 	if (typeof value !== 'string') return null;
@@ -82,7 +94,7 @@ const trimToNull = (value: FormDataEntryValue | null): string | null => {
 	return trimmed.length === 0 ? null : trimmed;
 };
 
-const validate = (raw: {
+const validateProfile = (raw: {
 	handle: string | null;
 	displayName: string | null;
 	bio: string | null;
@@ -109,6 +121,38 @@ const validate = (raw: {
 	};
 };
 
+const validatePasswordChange = (raw: {
+	currentPassword: string;
+	newPassword: string;
+	confirmPassword: string;
+}) => {
+	const currentPassword = decodePassword(raw.currentPassword);
+	const newPassword = decodeNewPassword(raw.newPassword);
+	const confirmPassword = decodePassword(raw.confirmPassword);
+
+	const errors: Record<string, [string]> = {};
+	if (Result.isFailure(currentPassword)) errors.currentPassword = [String(currentPassword.failure)];
+	if (Result.isFailure(newPassword)) errors.newPassword = [String(newPassword.failure)];
+	if (Result.isFailure(confirmPassword)) errors.confirmPassword = [String(confirmPassword.failure)];
+	if (raw.newPassword && raw.confirmPassword && raw.newPassword !== raw.confirmPassword) {
+		errors.confirmPassword = ['Passwords do not match.'];
+	}
+	if (raw.currentPassword && raw.newPassword && raw.currentPassword === raw.newPassword) {
+		errors.newPassword = ['Choose a password you are not already using.'];
+	}
+
+	if (Object.keys(errors).length > 0) {
+		return { ok: false as const, errors };
+	}
+	return {
+		ok: true as const,
+		values: {
+			currentPassword: (currentPassword as Result.Success<string, never>).success,
+			newPassword: (newPassword as Result.Success<string, never>).success
+		}
+	};
+};
+
 export const actions: Actions = {
 	updateProfile: async ({ request, locals, platform }) => {
 		console.log('[updateProfile] hit', {
@@ -128,7 +172,7 @@ export const actions: Actions = {
 		};
 		console.log('[updateProfile] raw input', raw);
 
-		const result = validate(raw);
+		const result = validateProfile(raw);
 		if (!result.ok) {
 			console.log('[updateProfile] validation failed', result.errors);
 			return fail(400, { values: raw, errors: result.errors });
@@ -184,6 +228,45 @@ export const actions: Actions = {
 				});
 			}
 			throw caught;
+		}
+
+		return { success: true };
+	},
+	changePassword: async ({ request, locals, platform, getClientAddress }) => {
+		if (!locals.session) return fail(401, { message: 'Unauthenticated' });
+		if (!platform) return fail(500, { message: 'Platform not available' });
+
+		const form = await request.formData();
+		const raw = {
+			currentPassword: String(form.get('currentPassword') ?? ''),
+			newPassword: String(form.get('newPassword') ?? ''),
+			confirmPassword: String(form.get('confirmPassword') ?? '')
+		};
+
+		const result = validatePasswordChange(raw);
+		if (!result.ok) return fail(400, { errors: result.errors });
+
+		try {
+			await createWebAuthRuntime(platform).changePassword({
+				userId: locals.session.userId,
+				email: locals.session.email,
+				currentPassword: result.values.currentPassword,
+				newPassword: result.values.newPassword,
+				ipAddress: getClientAddress(),
+				userAgent: request.headers.get('user-agent') ?? undefined
+			});
+		} catch (caught) {
+			if (caught instanceof TerminalAuthError && caught.operation === 'authenticateWithPassword') {
+				return fail(400, {
+					errors: {
+						currentPassword: ['Current password does not match this account.']
+					}
+				});
+			}
+
+			return fail(500, {
+				message: 'Password could not be changed. Try again in a moment.'
+			});
 		}
 
 		return { success: true };

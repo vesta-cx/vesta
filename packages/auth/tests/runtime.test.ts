@@ -58,6 +58,28 @@ const createTransport = (
 		createdAt: "2026-03-23T00:00:00.000Z",
 		updatedAt: "2026-03-23T00:00:00.000Z",
 	}),
+	authenticateWithPassword: async ({ email }) => ({
+		id: "user_123",
+		email,
+		firstName: "Mia",
+		lastName: "Example",
+		emailVerified: true,
+		profilePictureUrl: null,
+		organizationId: "org_primary",
+		createdAt: "2026-03-23T00:00:00.000Z",
+		updatedAt: "2026-03-23T00:00:00.000Z",
+	}),
+	updateUserPassword: async ({ userId }) => ({
+		id: userId,
+		email: "mia@example.com",
+		firstName: "Mia",
+		lastName: "Example",
+		emailVerified: true,
+		profilePictureUrl: null,
+		organizationId: "org_primary",
+		createdAt: "2026-03-23T00:00:00.000Z",
+		updatedAt: "2026-03-23T00:00:00.000Z",
+	}),
 	getOrganization: async ({ organizationId }) => ({
 		id: organizationId,
 		name: "Primary Org",
@@ -318,6 +340,94 @@ describe("createAuthRuntime", () => {
 		).rejects.toMatchObject({
 			operation: "provision",
 		});
+	});
+
+	it("verifies the current password before changing it", async () => {
+		const authenticateWithPassword = vi.fn(async ({ email }) => ({
+			id: "user_123",
+			email,
+			firstName: "Mia",
+			lastName: "Example",
+			emailVerified: true,
+			profilePictureUrl: null,
+			organizationId: "org_primary",
+			createdAt: "2026-03-23T00:00:00.000Z",
+			updatedAt: "2026-03-23T00:00:00.000Z",
+		}));
+		const updateUserPassword = vi.fn(async ({ userId }) => ({
+			id: userId,
+			email: "mia@example.com",
+			firstName: "Mia",
+			lastName: "Example",
+			emailVerified: true,
+			profilePictureUrl: null,
+			organizationId: "org_primary",
+			createdAt: "2026-03-23T00:00:00.000Z",
+			updatedAt: "2026-03-23T00:00:00.000Z",
+		}));
+		const runtime = createAuthRuntime({
+			clientId: "client_123",
+			apiKey: "sk_test",
+			cookiePassword:
+				"test-password-that-is-at-least-32-chars-long!!",
+			transport: createTransport({
+				authenticateWithPassword,
+				updateUserPassword,
+			}),
+		});
+
+		await expect(
+			runtime.changePassword({
+				userId: "user_123",
+				email: "mia@example.com",
+				currentPassword: "old-password",
+				newPassword: "new-password",
+			}),
+		).resolves.toMatchObject({ id: "user_123" });
+		expect(authenticateWithPassword).toHaveBeenCalledWith({
+			email: "mia@example.com",
+			password: "old-password",
+		});
+		expect(updateUserPassword).toHaveBeenCalledWith({
+			userId: "user_123",
+			password: "new-password",
+		});
+	});
+
+	it("rejects password changes authenticated as another user", async () => {
+		const updateUserPassword = vi.fn();
+		const runtime = createAuthRuntime({
+			clientId: "client_123",
+			apiKey: "sk_test",
+			cookiePassword:
+				"test-password-that-is-at-least-32-chars-long!!",
+			transport: createTransport({
+				authenticateWithPassword: async ({
+					email,
+				}) => ({
+					id: "user_other",
+					email,
+					firstName: "Mallory",
+					lastName: "Example",
+					emailVerified: true,
+					profilePictureUrl: null,
+					organizationId: "org_primary",
+					createdAt: "2026-03-23T00:00:00.000Z",
+					updatedAt: "2026-03-23T00:00:00.000Z",
+				}),
+				updateUserPassword,
+			}),
+		});
+
+		await expect(
+			runtime.changePassword({
+				userId: "user_123",
+				email: "mia@example.com",
+				currentPassword: "old-password",
+				newPassword: "new-password",
+			}),
+		).rejects.toBeInstanceOf(TerminalAuthError);
+		expect(updateUserPassword).not.toHaveBeenCalled();
 	});
 
 	it("rejects empty organization update names", async () => {

@@ -502,6 +502,38 @@ export const createWorkOSTransport = (config: {
 			};
 		},
 
+		authenticateWithPassword: async ({
+			email,
+			password,
+			ipAddress,
+			userAgent,
+		}) => {
+			const authenticateWithPassword = bindMethod<
+				[
+					{
+						clientId: string;
+						email: string;
+						password: string;
+						ipAddress?: string;
+						userAgent?: string;
+					},
+				],
+				Promise<unknown>
+			>(userManagement, "authenticateWithPassword");
+
+			const response = asRecord(
+				await authenticateWithPassword({
+					clientId: requireClientId(),
+					email,
+					password,
+					...(ipAddress ? { ipAddress } : {}),
+					...(userAgent ? { userAgent } : {}),
+				}),
+			);
+
+			return toAuthUser(response.user);
+		},
+
 		loadSealedSession: async ({
 			sealedSession,
 			cookiePassword,
@@ -565,6 +597,25 @@ export const createWorkOSTransport = (config: {
 			);
 
 			return toAuthUser(await getUser(userId));
+		},
+
+		updateUserPassword: async ({ userId, password }) => {
+			const updateUser = bindMethod<
+				[
+					{
+						userId: string;
+						password: string;
+					},
+				],
+				Promise<unknown>
+			>(userManagement, "updateUser");
+
+			return toAuthUser(
+				await updateUser({
+					userId,
+					password,
+				}),
+			);
 		},
 
 		getOrganization: async ({ organizationId }) => {

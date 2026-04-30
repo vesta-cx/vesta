@@ -52,6 +52,14 @@ export interface AuthRuntime {
 		returnTo?: string;
 	}): Promise<string | null>;
 	getUser(input: { userId: string }): Promise<AuthUser>;
+	changePassword(input: {
+		userId: string;
+		email: string;
+		currentPassword: string;
+		newPassword: string;
+		ipAddress?: string;
+		userAgent?: string;
+	}): Promise<AuthUser>;
 	getOrganization(input: {
 		organizationId: string;
 	}): Promise<AuthOrganization>;
@@ -628,6 +636,41 @@ export const createAuthRuntime = (config: AuthRuntimeConfig): AuthRuntime => {
 			runWithRetry("getUser", () =>
 				transport.getUser({ userId }),
 			),
+
+		changePassword: async (input) => {
+			const authenticatedUser = await runWithRetry(
+				"authenticateWithPassword",
+				() =>
+					transport.authenticateWithPassword({
+						email: input.email,
+						password: input.currentPassword,
+						...(input.ipAddress ?
+							{
+								ipAddress: input.ipAddress,
+							}
+						:	{}),
+						...(input.userAgent ?
+							{
+								userAgent: input.userAgent,
+							}
+						:	{}),
+					}),
+			);
+
+			if (authenticatedUser.id !== input.userId) {
+				throw new TerminalAuthError(
+					"Current password authenticated a different user",
+					"changePassword",
+				);
+			}
+
+			return runWithRetry("updateUserPassword", () =>
+				transport.updateUserPassword({
+					userId: input.userId,
+					password: input.newPassword,
+				}),
+			);
+		},
 
 		getOrganization: ({ organizationId }) =>
 			runWithRetry("getOrganization", () =>

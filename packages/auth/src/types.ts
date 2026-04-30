@@ -228,11 +228,21 @@ export interface AuthTransport {
 		sealedSession: string;
 		session: AuthSessionWithoutMemberships;
 	}>;
+	authenticateWithPassword(input: {
+		email: string;
+		password: string;
+		ipAddress?: string;
+		userAgent?: string;
+	}): Promise<AuthUser>;
 	loadSealedSession(input: {
 		sealedSession: string | undefined;
 		cookiePassword: string;
 	}): Promise<AuthTransportSession>;
 	getUser(input: { userId: string }): Promise<AuthUser>;
+	updateUserPassword(input: {
+		userId: string;
+		password: string;
+	}): Promise<AuthUser>;
 	getOrganization(input: {
 		organizationId: string;
 	}): Promise<AuthOrganization>;

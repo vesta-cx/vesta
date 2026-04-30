@@ -230,6 +230,7 @@
 						class="space-y-2"
 					>
 						<input type="hidden" name="factorId" value={enrollment.factor.id} />
+						<input type="hidden" name="challengeId" value={enrollment.challenge.id} />
 						<Label for="security-totp-code">Verification code</Label>
 						<div class="flex gap-2">
 							<Input

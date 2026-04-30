@@ -614,7 +614,47 @@ describe("createAuthRuntime", () => {
 		});
 	});
 
-	it("creates a fresh challenge before verifying a TOTP code", async () => {
+	it("verifies TOTP enrollment with the enrollment challenge", async () => {
+		const challengeAuthFactor = vi.fn();
+		const verifyAuthFactorChallenge = vi.fn(
+			async ({ challengeId }) => ({
+				challenge: {
+					id: challengeId,
+					authenticationFactorId: "factor_totp",
+					createdAt: "2026-03-23T00:00:00.000Z",
+					updatedAt: "2026-03-23T00:00:00.000Z",
+					expiresAt: null,
+				},
+				valid: true,
+			}),
+		);
+		const runtime = createAuthRuntime({
+			clientId: "client_123",
+			apiKey: "sk_test",
+			cookiePassword:
+				"test-password-that-is-at-least-32-chars-long!!",
+			transport: createTransport({
+				challengeAuthFactor,
+				verifyAuthFactorChallenge,
+			}),
+		});
+
+		await expect(
+			runtime.verifyTotpEnrollment({
+				userId: "user_123",
+				factorId: "factor_totp",
+				challengeId: "challenge_enrollment",
+				code: "123456",
+			}),
+		).resolves.toMatchObject({ valid: true });
+		expect(challengeAuthFactor).not.toHaveBeenCalled();
+		expect(verifyAuthFactorChallenge).toHaveBeenCalledWith({
+			challengeId: "challenge_enrollment",
+			code: "123456",
+		});
+	});
+
+	it("creates a fresh challenge when no enrollment challenge is provided", async () => {
 		const challengeAuthFactor = vi.fn(async ({ factorId }) => ({
 			id: "challenge_fresh",
 			authenticationFactorId: factorId,

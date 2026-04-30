@@ -84,6 +84,7 @@ export interface AuthRuntime {
 	verifyTotpEnrollment(input: {
 		userId: string;
 		factorId: string;
+		challengeId?: string;
 		code: string;
 	}): ReturnType<AuthTransport["verifyAuthFactorChallenge"]>;
 	deleteAuthFactor(input: {
@@ -745,7 +746,12 @@ export const createAuthRuntime = (config: AuthRuntimeConfig): AuthRuntime => {
 				}),
 			),
 
-		verifyTotpEnrollment: async ({ userId, factorId, code }) => {
+		verifyTotpEnrollment: async ({
+			userId,
+			factorId,
+			challengeId,
+			code,
+		}) => {
 			const factors = await runtime.listAuthFactors({
 				userId,
 			});
@@ -757,21 +763,38 @@ export const createAuthRuntime = (config: AuthRuntimeConfig): AuthRuntime => {
 				);
 			}
 
-			const challenge = await runWithRetry(
-				"challengeAuthFactor",
-				() =>
-					transport.challengeAuthFactor({
-						factorId,
-					}),
-			);
+			const verificationChallengeId =
+				challengeId ??
+				(
+					await runWithRetry(
+						"challengeAuthFactor",
+						() =>
+							transport.challengeAuthFactor(
+								{
+									factorId,
+								},
+							),
+					)
+				).id;
 			const verification = await runWithRetry(
 				"verifyAuthFactorChallenge",
 				() =>
 					transport.verifyAuthFactorChallenge({
-						challengeId: challenge.id,
+						challengeId:
+							verificationChallengeId,
 						code,
 					}),
 			);
+			if (
+				verification.challenge
+					.authenticationFactorId !== factorId
+			) {
+				throw new TerminalAuthError(
+					"Authentication challenge does not belong to this factor",
+					"verifyTotpEnrollment",
+					{ status: 404 },
+				);
+			}
 			if (!verification.valid) {
 				throw new TerminalAuthError(
 					"Authentication factor challenge code is invalid",

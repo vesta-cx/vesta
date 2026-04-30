@@ -371,6 +371,7 @@ export const actions: Actions = {
 
 		const form = await request.formData();
 		const factorId = String(form.get('factorId') ?? '');
+		const challengeId = String(form.get('challengeId') ?? '');
 		const code = String(form.get('code') ?? '').replace(/\s+/g, '');
 		const decodedCode = decodeVerificationCode(code);
 		if (!factorId) {
@@ -384,6 +385,7 @@ export const actions: Actions = {
 			await createWebAuthRuntime(platform).verifyTotpEnrollment({
 				userId: locals.session.userId,
 				factorId,
+				...(challengeId ? { challengeId } : {}),
 				code: (decodedCode as Result.Success<string, never>).success
 			});
 		} catch {

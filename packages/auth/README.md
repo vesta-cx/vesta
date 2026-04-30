@@ -16,7 +16,7 @@ Shared WorkOS auth runtime for Vesta apps.
 - `sendEmailChangeCode(...)` sends a WorkOS one-time code to the requested new email.
 - `confirmEmailChange(...)` confirms the emailed one-time code before the new email is accepted.
 - `listAuthFactors(...)`, `enrollTotpFactor(...)`, `verifyTotpEnrollment(...)`, and `deleteAuthFactor(...)` expose WorkOS TOTP management without leaking SDK calls into apps.
-- `verifyTotpEnrollment(...)` creates a fresh MFA challenge before verifying the submitted TOTP code, instead of reusing the enrollment response challenge.
+- `verifyTotpEnrollment(...)` verifies the enrollment response challenge for first-time setup, with a fresh MFA challenge fallback when no enrollment challenge is available.
 
 ## Architecture
 

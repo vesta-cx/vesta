@@ -7,5 +7,5 @@ globs: packages/auth/src/**, packages/auth/tests/**, apps/*/src/**/settings/**, 
 
 - Keep WorkOS calls behind `packages/auth`; app settings must use `createWebAuthRuntime(...)` or package exports, never `@workos-inc/node` directly.
 - TOTP can be listed/enrolled through WorkOS user-management auth-factor APIs and deleted through the MFA `deleteFactor` API. Verify factor ownership in `AuthRuntime` before deletion because the delete API accepts only a factor id.
-- Verify TOTP enrollment by creating a fresh MFA challenge with `mfa.challengeFactor({ authenticationFactorId })`, then verifying that challenge with `mfa.verifyChallenge(...)`; do not rely on the challenge returned by enrollment for user-entered authenticator codes.
+- Verify TOTP enrollment with the `authentication_challenge` returned by WorkOS user-management enrollment. Only create a fresh MFA challenge with `mfa.challengeFactor({ authenticationFactorId })` when verifying an already-enrolled factor or when no enrollment challenge is available.
 - Passkeys are hosted-AuthKit only in current WorkOS docs/API. Do not promise custom passkey list/delete/enroll flows until WorkOS exposes server APIs; show a hosted-only/unsupported state instead.

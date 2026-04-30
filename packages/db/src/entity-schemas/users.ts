@@ -36,6 +36,37 @@ export const USER_HANDLE_PATTERN = /^[a-z0-9](?:[a-z0-9_-]*[a-z0-9])?$/;
 export const USER_HANDLE_MIN_LENGTH = 3;
 export const USER_HANDLE_MAX_LENGTH = 32;
 
+/** Strip every character that isn't part of the handle charset. */
+export const sanitizeUserHandle = (input: string): string =>
+	input.toLowerCase().replace(/[^a-z0-9_-]/g, "");
+
+/**
+ * Charset rules for free-form profile fields. Single-line fields strip ASCII
+ * + C1 control characters — including newlines. Multi-line fields preserve
+ * tab, line feed, and carriage return so users can format paragraphs;
+ * everything else in the control range is stripped.
+ *
+ * Each rule is exported as both a sanitizer (idempotent transform, used by
+ * inputs to reject disallowed characters as the user types) and a validator
+ * (predicate, used by the server to reject inputs that bypassed the UI).
+ */
+const SINGLE_LINE_DISALLOWED = /[\u0000-\u001F\u007F-\u009F]/u;
+const MULTI_LINE_DISALLOWED =
+	/[\u0000-\u0008\u000B\u000C\u000E-\u001F\u007F-\u009F]/u;
+
+export const isSingleLineSafe = (input: string): boolean =>
+	!SINGLE_LINE_DISALLOWED.test(input);
+export const isMultiLineSafe = (input: string): boolean =>
+	!MULTI_LINE_DISALLOWED.test(input);
+
+export const sanitizeSingleLine = (input: string): string =>
+	input.replace(/[\u0000-\u001F\u007F-\u009F]/gu, "");
+export const sanitizeMultiLine = (input: string): string =>
+	input.replace(
+		/[\u0000-\u0008\u000B\u000C\u000E-\u001F\u007F-\u009F]/gu,
+		"",
+	);
+
 /**
  * Public handle. Shared namespace with workspace slugs (see schema/users.ts).
  */

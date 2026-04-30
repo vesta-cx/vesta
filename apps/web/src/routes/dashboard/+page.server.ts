@@ -6,7 +6,9 @@ import {
 	RESERVED_HANDLES,
 	USER_HANDLE_MAX_LENGTH,
 	USER_HANDLE_MIN_LENGTH,
-	USER_HANDLE_PATTERN
+	USER_HANDLE_PATTERN,
+	isMultiLineSafe,
+	isSingleLineSafe
 } from '@vesta-cx/db/entity-schemas';
 import { getDb } from '$lib/server/db';
 import type { Actions } from './$types';
@@ -25,18 +27,6 @@ import type { Actions } from './$types';
  * - Bio: any Unicode character except control characters, with tab, line
  *   feed, and carriage return allowed so users can format paragraphs.
  */
-
-const CONTROL_CHAR_PATTERN = /\p{Cc}/u;
-
-const hasDisallowedControlChars = (value: string, allowed: ReadonlySet<string> = new Set()) => {
-	for (const ch of value) {
-		if (allowed.has(ch)) continue;
-		if (CONTROL_CHAR_PATTERN.test(ch)) return true;
-	}
-	return false;
-};
-
-const BIO_ALLOWED_CONTROL = new Set(['\t', '\n', '\r']);
 
 const HandleSchema = Schema.NullOr(
 	Schema.String.check(
@@ -66,8 +56,7 @@ const DisplayNameSchema = Schema.NullOr(
 		),
 		Schema.makeFilter(
 			(value: string) =>
-				!hasDisallowedControlChars(value) ||
-				'Display name cannot contain control characters or line breaks.'
+				isSingleLineSafe(value) || 'Display name cannot contain control characters or line breaks.'
 		)
 	)
 );
@@ -78,9 +67,7 @@ const BioSchema = Schema.NullOr(
 			(value: string) => value.length <= 500 || 'Keep your bio under 500 characters.'
 		),
 		Schema.makeFilter(
-			(value: string) =>
-				!hasDisallowedControlChars(value, BIO_ALLOWED_CONTROL) ||
-				'Bio cannot contain control characters.'
+			(value: string) => isMultiLineSafe(value) || 'Bio cannot contain control characters.'
 		)
 	)
 );

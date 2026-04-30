@@ -33,7 +33,7 @@
 
 	// Mirrors USER_HANDLE_PATTERN in @vesta-cx/db/entity-schemas. Used on the
 	// native input as a belt-and-suspenders submit-time check.
-	const HANDLE_PATTERN = '[a-z0-9](?:[a-z0-9_-]*[a-z0-9])?';
+	const HANDLE_PATTERN = '[a-z0-9](?:[a-z0-9_\\-]*[a-z0-9])?';
 
 	/**
 	 * Sanitize-as-you-type. Each handler filters the candidate value through

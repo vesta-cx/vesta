@@ -7,13 +7,18 @@ export const load: LayoutServerLoad = async ({ locals }) => {
 	if (!locals.session) redirect(302, '/auth/login');
 
 	const { firstName, lastName, email, profilePictureUrl } = locals.session;
-	const fullName = [firstName, lastName].filter(Boolean).join(' ');
+	const legalName = [firstName, lastName].filter(Boolean).join(' ');
 
+	// TODO: Read displayName and username from the Vesta user profile once that
+	// surface lands. Until then we fall back to the WorkOS legal name + the
+	// email local-part so the user picker has reasonable defaults.
 	return {
 		user: {
-			name: fullName || email,
+			name: legalName || email,
 			email,
-			avatarUrl: profilePictureUrl ?? undefined
+			avatarUrl: profilePictureUrl ?? undefined,
+			displayName: legalName || email,
+			username: email.split('@')[0] ?? email
 		}
 	};
 };

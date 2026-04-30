@@ -158,6 +158,15 @@ const isAutoPaginatable = <T>(
 	);
 };
 
+const uniqueById = <T extends { id: string }>(items: T[]): T[] => {
+	const seen = new Set<string>();
+	return items.filter((item) => {
+		if (seen.has(item.id)) return false;
+		seen.add(item.id);
+		return true;
+	});
+};
+
 const requireSdkSurface = (
 	client: unknown,
 	key: "userManagement" | "organizations" | "mfa",
@@ -814,14 +823,18 @@ export const createWorkOSTransport = (config: {
 
 			const response = await listAuthFactors({ userId });
 			if (isAutoPaginatable<unknown>(response)) {
-				return (await response.autoPagination()).map(
-					toAuthFactor,
+				return uniqueById(
+					(await response.autoPagination()).map(
+						toAuthFactor,
+					),
 				);
 			}
 
 			const record = asRecord(response);
 			return Array.isArray(record.data) ?
-					record.data.map(toAuthFactor)
+					uniqueById(
+						record.data.map(toAuthFactor),
+					)
 				:	[];
 		},
 

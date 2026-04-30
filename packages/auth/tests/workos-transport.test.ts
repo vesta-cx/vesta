@@ -322,6 +322,32 @@ describe("createWorkOSTransport", () => {
 		});
 	});
 
+	it("deduplicates auth factors returned by WorkOS", async () => {
+		const factor = {
+			id: "factor_totp",
+			user_id: "user_123",
+			type: "totp",
+			totp: {
+				issuer: "Vesta",
+				user: "mia@example.com",
+			},
+			created_at: "2026-03-24T00:00:00.000Z",
+			updated_at: "2026-03-24T00:00:00.000Z",
+		};
+		listAuthFactorsMock.mockResolvedValueOnce({
+			data: [factor, factor],
+		});
+
+		const transport = createWorkOSTransport({
+			apiKey: "sk_test",
+			clientId: "client_123",
+		});
+
+		await expect(
+			transport.listAuthFactors({ userId: "user_123" }),
+		).resolves.toHaveLength(1);
+	});
+
 	it("enrolls TOTP factors through WorkOS user management", async () => {
 		enrollAuthFactorMock.mockResolvedValueOnce({
 			authentication_factor: {

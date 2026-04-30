@@ -25,6 +25,13 @@ const runtimeCache = new WeakMap<
 const createVestaProvisioningStore = (db: Database): VestaProvisioningStore => ({
 	ensureOrganization: (organizationId) =>
 		db.insert(organizations).values({ workosOrgId: organizationId }).onConflictDoNothing(),
+	/**
+	 * On insert we seed the user with the values WorkOS has at provisioning
+	 * time. On conflict we only sync WorkOS-owned fields (email,
+	 * organizationId) — Vesta-owned fields like displayName, handle, bio,
+	 * and avatarUrl are user-editable, so provisioning must not clobber
+	 * them on every authenticated request.
+	 */
 	upsertUser: (user) =>
 		db
 			.insert(users)
@@ -33,8 +40,6 @@ const createVestaProvisioningStore = (db: Database): VestaProvisioningStore => (
 				target: users.workosUserId,
 				set: {
 					email: user.email,
-					displayName: user.displayName,
-					avatarUrl: user.avatarUrl,
 					organizationId: user.organizationId,
 					updatedAt: new Date()
 				}

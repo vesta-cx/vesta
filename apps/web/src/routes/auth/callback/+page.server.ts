@@ -49,5 +49,5 @@ export const load: PageServerLoad = async ({ url, cookies, platform, request }) 
 		throw input;
 	}
 
-	redirect(302, '/');
+	redirect(302, '/dashboard');
 };

@@ -5,7 +5,6 @@
 	import {
 		dashboardNav,
 		dashboardOrganizations,
-		dashboardUser,
 		dashboardWorkspaces,
 		organizationSettingsHref,
 		workspaceSettingsHref,
@@ -13,8 +12,10 @@
 	} from './data.js';
 	import NavCollapsible from './nav-collapsible.svelte';
 	import NavSecondary from './nav-secondary.svelte';
-	import NavUser from './nav-user.svelte';
+	import NavUser, { type DashboardUser } from './nav-user.svelte';
 	import WorkspaceSwitcher from './workspace-switcher.svelte';
+
+	let { user }: { user: DashboardUser } = $props();
 
 	let active = $state<Workspace>(dashboardWorkspaces[0]);
 
@@ -56,6 +57,6 @@
 	</Sidebar.Content>
 
 	<Sidebar.Footer>
-		<NavUser user={dashboardUser} />
+		<NavUser {user} />
 	</Sidebar.Footer>
 </Sidebar.Root>

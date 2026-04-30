@@ -5,12 +5,8 @@
 	import ChevronsUpDownIcon from '@lucide/svelte/icons/chevrons-up-down';
 	import PlusIcon from '@lucide/svelte/icons/plus';
 	import SettingsIcon from '@lucide/svelte/icons/settings';
-	import {
-		dashboardOrganizations,
-		workspaceSettingsHref,
-		type Organization,
-		type Workspace
-	} from './data.js';
+	import { dashboardOrganizations, type Organization, type Workspace } from './data.js';
+	import { IN_DEVELOPMENT_TOOLTIP } from './nav-collapsible.svelte';
 
 	let {
 		workspaces,
@@ -104,14 +100,14 @@
 										aria-label="Active workspace"
 									></span>
 								{/if}
-								<a
-									href={workspaceSettingsHref(workspace.id)}
-									class="flex size-7 items-center justify-center rounded-md text-muted-foreground opacity-0 transition-opacity hover:bg-accent hover:text-foreground focus-visible:opacity-100 group-hover/workspace:opacity-100 group-focus-within/workspace:opacity-100"
+								<span
+									aria-disabled="true"
+									title={IN_DEVELOPMENT_TOOLTIP}
+									class="pointer-events-none flex size-7 items-center justify-center rounded-md text-muted-foreground opacity-0 transition-opacity group-hover/workspace:opacity-60 group-focus-within/workspace:opacity-60"
 									aria-label="Open {workspace.name} settings"
-									onclick={(event) => event.stopPropagation()}
 								>
 									<SettingsIcon class="size-3.5" />
-								</a>
+								</span>
 							</DropdownMenu.Item>
 						{/each}
 					</DropdownMenu.Group>
@@ -122,25 +118,27 @@
 
 				<DropdownMenu.Separator />
 
-				<DropdownMenu.Item class="gap-2 p-2">
+				<DropdownMenu.Item
+					disabled
+					class="gap-2 p-2"
+					title={IN_DEVELOPMENT_TOOLTIP}
+				>
 					<div class="flex size-6 items-center justify-center rounded-md border bg-transparent">
 						<PlusIcon class="size-3.5" />
 					</div>
 					<span class="text-sm font-medium text-muted-foreground">New workspace</span>
 				</DropdownMenu.Item>
-				<DropdownMenu.Item class="gap-2 p-2">
-					{#snippet child({ props }: { props?: Record<string, unknown> })}
-						<a href="/dashboard/organizations" {...props}>
-							<div
-								class="flex size-6 items-center justify-center rounded-md border bg-transparent"
-							>
-								<SettingsIcon class="size-3.5" />
-							</div>
-							<span class="text-sm font-medium text-muted-foreground">
-								Manage organizations
-							</span>
-						</a>
-					{/snippet}
+				<DropdownMenu.Item
+					disabled
+					class="gap-2 p-2"
+					title={IN_DEVELOPMENT_TOOLTIP}
+				>
+					<div class="flex size-6 items-center justify-center rounded-md border bg-transparent">
+						<SettingsIcon class="size-3.5" />
+					</div>
+					<span class="text-sm font-medium text-muted-foreground">
+						Manage organizations
+					</span>
 				</DropdownMenu.Item>
 			</DropdownMenu.Content>
 		</DropdownMenu.Root>

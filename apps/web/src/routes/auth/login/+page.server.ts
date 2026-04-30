@@ -14,7 +14,7 @@ export const load: PageServerLoad = async ({ cookies, platform, url }) => {
 	const existingSession = await authenticateSvelteKitSession({ runtime, cookies });
 
 	if (existingSession.authenticated) {
-		redirect(302, '/');
+		redirect(302, '/dashboard');
 	}
 
 	const state = createOAuthState();

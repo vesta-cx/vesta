@@ -9,7 +9,6 @@ import PaletteIcon from '@lucide/svelte/icons/palette';
 import UsersIcon from '@lucide/svelte/icons/users';
 
 import type { NavItem } from './nav-collapsible.svelte';
-import type { DashboardUser } from './nav-user.svelte';
 
 /**
  * Vesta is release-marketing infrastructure for independent music.
@@ -83,11 +82,6 @@ export const dashboardWorkspaces: Workspace[] = [
 		organizationId: 'org_unspoken'
 	}
 ];
-
-export const dashboardUser: DashboardUser = {
-	name: 'Mia Rivera',
-	email: 'mia@vesta.cx'
-};
 
 /**
  * Top-level nav. Each parent links to its own analytics surface; the chevron

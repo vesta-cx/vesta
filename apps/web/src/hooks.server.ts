@@ -20,7 +20,7 @@ export const handle: Handle = async ({ event, resolve }) => {
 
 	const handleAuth = createAuthHandle({
 		runtime: createWebAuthRuntime(event.platform),
-		protectedPaths: []
+		protectedPaths: ['/dashboard']
 	});
 
 	return handleAuth({

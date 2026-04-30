@@ -1,14 +1,18 @@
 <script lang="ts" module>
 	import type { Component } from 'svelte';
 
-	export type NavSubItem = { title: string; href: string };
+	export type NavSubItem = { title: string; href: string; enabled?: boolean };
 
 	export type NavItem = {
 		title: string;
 		href: string;
 		icon: Component;
 		items?: NavSubItem[];
+		/** Defaults to false while routes are unbuilt; flip to true when wired. */
+		enabled?: boolean;
 	};
+
+	export const IN_DEVELOPMENT_TOOLTIP = 'In development';
 </script>
 
 <script lang="ts">
@@ -51,12 +55,22 @@
 					class="group/collapsible"
 				>
 					<Sidebar.MenuItem>
-						<Sidebar.MenuButton tooltipContent={item.title} isActive={active}>
+						<Sidebar.MenuButton
+							tooltipContent={item.enabled ? item.title : IN_DEVELOPMENT_TOOLTIP}
+							isActive={active}
+						>
 							{#snippet child({ props }: { props?: Record<string, unknown> })}
-								<a href={item.href} {...props}>
-									<item.icon />
-									<span>{item.title}</span>
-								</a>
+								{#if item.enabled}
+									<a href={item.href} {...props}>
+										<item.icon />
+										<span>{item.title}</span>
+									</a>
+								{:else}
+									<span aria-disabled="true" {...props}>
+										<item.icon />
+										<span>{item.title}</span>
+									</span>
+								{/if}
 							{/snippet}
 						</Sidebar.MenuButton>
 						<Collapsible.Trigger>
@@ -76,9 +90,19 @@
 									<Sidebar.MenuSubItem>
 										<Sidebar.MenuSubButton isActive={page.url.pathname === sub.href}>
 											{#snippet child({ props }: { props?: Record<string, unknown> })}
-												<a href={sub.href} {...props}>
-													<span>{sub.title}</span>
-												</a>
+												{#if sub.enabled}
+													<a href={sub.href} {...props}>
+														<span>{sub.title}</span>
+													</a>
+												{:else}
+													<span
+														aria-disabled="true"
+														title={IN_DEVELOPMENT_TOOLTIP}
+														{...props}
+													>
+														<span>{sub.title}</span>
+													</span>
+												{/if}
 											{/snippet}
 										</Sidebar.MenuSubButton>
 									</Sidebar.MenuSubItem>
@@ -89,12 +113,22 @@
 				</Collapsible.Root>
 			{:else}
 				<Sidebar.MenuItem>
-					<Sidebar.MenuButton tooltipContent={item.title} isActive={active}>
+					<Sidebar.MenuButton
+						tooltipContent={item.enabled ? item.title : IN_DEVELOPMENT_TOOLTIP}
+						isActive={active}
+					>
 						{#snippet child({ props }: { props?: Record<string, unknown> })}
-							<a href={item.href} {...props}>
-								<item.icon />
-								<span>{item.title}</span>
-							</a>
+							{#if item.enabled}
+								<a href={item.href} {...props}>
+									<item.icon />
+									<span>{item.title}</span>
+								</a>
+							{:else}
+								<span aria-disabled="true" {...props}>
+									<item.icon />
+									<span>{item.title}</span>
+								</span>
+							{/if}
 						{/snippet}
 					</Sidebar.MenuButton>
 				</Sidebar.MenuItem>

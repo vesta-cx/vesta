@@ -7,7 +7,7 @@
 	import DashboardSidebar from '$lib/components/dashboard/sidebar.svelte';
 	import { dashboardNav } from '$lib/components/dashboard/data';
 
-	let { children } = $props();
+	let { data, children } = $props();
 
 	const segments = $derived(page.url.pathname.split('/').filter(Boolean).slice(1));
 
@@ -33,7 +33,7 @@
 
 {#if browser}
 	<Sidebar.Provider>
-		<DashboardSidebar />
+		<DashboardSidebar user={data.user} />
 		<Sidebar.Inset>
 			<header
 				class="sticky top-0 z-10 flex h-14 shrink-0 items-center gap-2 transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-12"

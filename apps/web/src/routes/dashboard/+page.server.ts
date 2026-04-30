@@ -401,12 +401,22 @@ export const actions: Actions = {
 		}
 
 		try {
-			await createWebAuthRuntime(platform).verifyTotpEnrollment({
+			const runtime = createWebAuthRuntime(platform);
+			await runtime.verifyTotpEnrollment({
 				userId: locals.session.userId,
 				factorId,
 				...(challengeId ? { challengeId } : {}),
 				code: (decodedCode as Result.Success<string, never>).success
 			});
+
+			const factors = await runtime.listAuthFactors({ userId: locals.session.userId });
+			await Promise.all(
+				factors
+					.filter((factor) => factor.type === 'totp' && factor.id !== factorId)
+					.map((factor) =>
+						runtime.deleteAuthFactor({ userId: locals.session.userId, factorId: factor.id })
+					)
+			);
 		} catch (caught) {
 			const debug = toClientSafeError(caught);
 			console.error('[verifyTotpEnrollment] WorkOS verification failed', debug, caught);

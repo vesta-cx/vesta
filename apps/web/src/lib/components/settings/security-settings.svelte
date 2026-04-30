@@ -183,7 +183,7 @@
 									}}
 								>
 									<input type="hidden" name="factorId" value={factor.id} />
-									<Button variant="outline" size="sm" disabled={busyFactorId === factor.id}>
+									<Button type="submit" variant="outline" size="sm" disabled={busyFactorId === factor.id}>
 										{busyFactorId === factor.id ? 'Removing…' : 'Remove'}
 									</Button>
 								</form>

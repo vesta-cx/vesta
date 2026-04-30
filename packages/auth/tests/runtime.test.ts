@@ -69,6 +69,28 @@ const createTransport = (
 		createdAt: "2026-03-23T00:00:00.000Z",
 		updatedAt: "2026-03-23T00:00:00.000Z",
 	}),
+	sendEmailChangeCode: async ({ userId }) => ({
+		id: userId,
+		email: "current@example.com",
+		firstName: "Mia",
+		lastName: "Example",
+		emailVerified: true,
+		profilePictureUrl: null,
+		organizationId: "org_primary",
+		createdAt: "2026-03-23T00:00:00.000Z",
+		updatedAt: "2026-03-23T00:00:00.000Z",
+	}),
+	confirmEmailChange: async ({ userId }) => ({
+		id: userId,
+		email: "new@example.com",
+		firstName: "Mia",
+		lastName: "Example",
+		emailVerified: true,
+		profilePictureUrl: null,
+		organizationId: "org_primary",
+		createdAt: "2026-03-23T00:00:00.000Z",
+		updatedAt: "2026-03-23T00:00:00.000Z",
+	}),
 	authenticateWithPassword: async ({ email }) => ({
 		id: "user_123",
 		email,
@@ -436,6 +458,70 @@ describe("createAuthRuntime", () => {
 			email: "new@example.com",
 			firstName: "New",
 			lastName: "Name",
+		});
+	});
+
+	it("sends WorkOS email change codes", async () => {
+		const sendEmailChangeCode = vi.fn(async ({ userId }) => ({
+			id: userId,
+			email: "current@example.com",
+			firstName: "Mia",
+			lastName: "Example",
+			emailVerified: true,
+			profilePictureUrl: null,
+			organizationId: "org_primary",
+			createdAt: "2026-03-23T00:00:00.000Z",
+			updatedAt: "2026-03-23T00:00:00.000Z",
+		}));
+		const runtime = createAuthRuntime({
+			clientId: "client_123",
+			apiKey: "sk_test",
+			cookiePassword:
+				"test-password-that-is-at-least-32-chars-long!!",
+			transport: createTransport({ sendEmailChangeCode }),
+		});
+
+		await expect(
+			runtime.sendEmailChangeCode({
+				userId: "user_123",
+				newEmail: "new@example.com",
+			}),
+		).resolves.toMatchObject({ email: "current@example.com" });
+		expect(sendEmailChangeCode).toHaveBeenCalledWith({
+			userId: "user_123",
+			newEmail: "new@example.com",
+		});
+	});
+
+	it("confirms WorkOS email changes", async () => {
+		const confirmEmailChange = vi.fn(async ({ userId }) => ({
+			id: userId,
+			email: "new@example.com",
+			firstName: "Mia",
+			lastName: "Example",
+			emailVerified: true,
+			profilePictureUrl: null,
+			organizationId: "org_primary",
+			createdAt: "2026-03-23T00:00:00.000Z",
+			updatedAt: "2026-03-23T00:00:00.000Z",
+		}));
+		const runtime = createAuthRuntime({
+			clientId: "client_123",
+			apiKey: "sk_test",
+			cookiePassword:
+				"test-password-that-is-at-least-32-chars-long!!",
+			transport: createTransport({ confirmEmailChange }),
+		});
+
+		await expect(
+			runtime.confirmEmailChange({
+				userId: "user_123",
+				code: "123456",
+			}),
+		).resolves.toMatchObject({ email: "new@example.com" });
+		expect(confirmEmailChange).toHaveBeenCalledWith({
+			userId: "user_123",
+			code: "123456",
 		});
 	});
 

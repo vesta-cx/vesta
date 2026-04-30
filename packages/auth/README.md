@@ -12,7 +12,9 @@ Shared WorkOS auth runtime for Vesta apps.
 - `completeSvelteKitLogin(...)`, `commitSealedSession(...)`, and `clearSealedSession(...)` handle browser session cookie flows.
 - `commitSealedSession(...)` and `commitOAuthState(...)` take options objects for cookie name, max age, and secure flags.
 - `createVestaProvisioningAdapter(...)` maps auth sessions into app-owned Vesta provisioning store operations.
-- `updateUserDetails(...)` updates WorkOS-owned legal name and sign-in email through the shared auth boundary.
+- `updateUserDetails(...)` updates WorkOS-owned legal name. Do not use it for email changes.
+- `sendEmailChangeCode(...)` sends a WorkOS one-time code to the requested new email.
+- `confirmEmailChange(...)` confirms the emailed one-time code before the new email is accepted.
 - `listAuthFactors(...)`, `enrollTotpFactor(...)`, `verifyTotpEnrollment(...)`, and `deleteAuthFactor(...)` expose WorkOS TOTP management without leaking SDK calls into apps.
 
 ## Architecture

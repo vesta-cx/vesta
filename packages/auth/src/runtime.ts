@@ -59,6 +59,14 @@ export interface AuthRuntime {
 		firstName?: string | null;
 		lastName?: string | null;
 	}): Promise<AuthUser>;
+	sendEmailChangeCode(input: {
+		userId: string;
+		newEmail: string;
+	}): Promise<AuthUser>;
+	confirmEmailChange(input: {
+		userId: string;
+		code: string;
+	}): Promise<AuthUser>;
 	changePassword(input: {
 		userId: string;
 		email: string;
@@ -674,6 +682,19 @@ export const createAuthRuntime = (config: AuthRuntimeConfig): AuthRuntime => {
 						{ lastName }
 					:	{}),
 				}),
+			),
+
+		sendEmailChangeCode: ({ userId, newEmail }) =>
+			runWithRetry("sendEmailChangeCode", () =>
+				transport.sendEmailChangeCode({
+					userId,
+					newEmail,
+				}),
+			),
+
+		confirmEmailChange: ({ userId, code }) =>
+			runWithRetry("confirmEmailChange", () =>
+				transport.confirmEmailChange({ userId, code }),
 			),
 
 		changePassword: async (input) => {

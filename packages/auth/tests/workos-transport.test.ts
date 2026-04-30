@@ -44,6 +44,7 @@ import { createWorkOSTransport } from "../src/workos-transport.js";
 describe("createWorkOSTransport", () => {
 	beforeEach(() => {
 		vi.resetAllMocks();
+		vi.unstubAllGlobals();
 	});
 
 	it("hydrates login sessions from the sealed session claims", async () => {
@@ -171,6 +172,88 @@ describe("createWorkOSTransport", () => {
 			firstName: "New",
 			lastName: "Name",
 		});
+	});
+
+	it("sends email change codes through the WorkOS API", async () => {
+		const fetchMock = vi.fn(async () =>
+			Response.json({
+				object: "email_change",
+				user: {
+					id: "user_123",
+					email: "current@example.com",
+					first_name: "Mia",
+					last_name: "Example",
+					email_verified: true,
+					created_at: "2026-03-24T00:00:00.000Z",
+					updated_at: "2026-03-24T00:00:00.000Z",
+				},
+			}),
+		);
+		vi.stubGlobal("fetch", fetchMock);
+
+		const transport = createWorkOSTransport({
+			apiKey: "sk_test",
+			clientId: "client_123",
+		});
+
+		await expect(
+			transport.sendEmailChangeCode({
+				userId: "user_123",
+				newEmail: "new@example.com",
+			}),
+		).resolves.toMatchObject({
+			email: "current@example.com",
+			emailVerified: true,
+		});
+		expect(fetchMock).toHaveBeenCalledWith(
+			"https://api.workos.com/user_management/users/user_123/email_change/send",
+			expect.objectContaining({
+				method: "POST",
+				body: JSON.stringify({
+					new_email: "new@example.com",
+				}),
+			}),
+		);
+	});
+
+	it("confirms email changes through the WorkOS API", async () => {
+		const fetchMock = vi.fn(async () =>
+			Response.json({
+				object: "email_change_confirmation",
+				user: {
+					id: "user_123",
+					email: "new@example.com",
+					first_name: "Mia",
+					last_name: "Example",
+					email_verified: true,
+					created_at: "2026-03-24T00:00:00.000Z",
+					updated_at: "2026-03-24T00:00:00.000Z",
+				},
+			}),
+		);
+		vi.stubGlobal("fetch", fetchMock);
+
+		const transport = createWorkOSTransport({
+			apiKey: "sk_test",
+			clientId: "client_123",
+		});
+
+		await expect(
+			transport.confirmEmailChange({
+				userId: "user_123",
+				code: "123456",
+			}),
+		).resolves.toMatchObject({
+			email: "new@example.com",
+			emailVerified: true,
+		});
+		expect(fetchMock).toHaveBeenCalledWith(
+			"https://api.workos.com/user_management/users/user_123/email_change/confirm",
+			expect.objectContaining({
+				method: "POST",
+				body: JSON.stringify({ code: "123456" }),
+			}),
+		);
 	});
 
 	it("updates a user's password through WorkOS user management", async () => {

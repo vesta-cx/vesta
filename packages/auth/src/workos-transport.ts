@@ -723,6 +723,56 @@ export const createWorkOSTransport = (config: {
 			);
 		},
 
+		sendEmailChangeCode: async ({ userId, newEmail }) => {
+			const response = await fetch(
+				`https://api.workos.com/user_management/users/${userId}/email_change/send`,
+				{
+					method: "POST",
+					headers: {
+						"Authorization": `Bearer ${config.apiKey}`,
+						"Content-Type":
+							"application/json",
+					},
+					body: JSON.stringify({
+						new_email: newEmail,
+					}),
+				},
+			);
+
+			if (!response.ok) {
+				throw new Error(
+					`sendEmailChangeCode failed with status ${response.status}`,
+				);
+			}
+
+			const payload = asRecord(await response.json());
+			return toAuthUser(payload.user);
+		},
+
+		confirmEmailChange: async ({ userId, code }) => {
+			const response = await fetch(
+				`https://api.workos.com/user_management/users/${userId}/email_change/confirm`,
+				{
+					method: "POST",
+					headers: {
+						"Authorization": `Bearer ${config.apiKey}`,
+						"Content-Type":
+							"application/json",
+					},
+					body: JSON.stringify({ code }),
+				},
+			);
+
+			if (!response.ok) {
+				throw new Error(
+					`confirmEmailChange failed with status ${response.status}`,
+				);
+			}
+
+			const payload = asRecord(await response.json());
+			return toAuthUser(payload.user);
+		},
+
 		updateUserPassword: async ({ userId, password }) => {
 			const updateUser = bindMethod<
 				[

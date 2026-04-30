@@ -1,4 +1,5 @@
 import { fail } from '@sveltejs/kit';
+import { eq } from 'drizzle-orm';
 import { Result, Schema } from 'effect';
 import { TerminalAuthError } from '@vesta-cx/auth';
 import { users } from '@vesta-cx/db';
@@ -96,7 +97,7 @@ const PasswordSchema = Schema.String.check(
 	Schema.makeFilter((value: string) => value.length > 0 || 'Enter your password.')
 );
 
-const TotpCodeSchema = Schema.String.check(
+const VerificationCodeSchema = Schema.String.check(
 	Schema.makeFilter((value: string) => /^\d{6}$/.test(value) || 'Enter the 6-digit code.')
 );
 
@@ -107,7 +108,7 @@ const NewPasswordSchema = Schema.String.check(
 
 const decodeBio = Schema.decodeUnknownResult(BioSchema);
 const decodePassword = Schema.decodeUnknownResult(PasswordSchema);
-const decodeTotpCode = Schema.decodeUnknownResult(TotpCodeSchema);
+const decodeVerificationCode = Schema.decodeUnknownResult(VerificationCodeSchema);
 const decodeNewPassword = Schema.decodeUnknownResult(NewPasswordSchema);
 
 const trimToNull = (value: FormDataEntryValue | null): string | null => {
@@ -215,25 +216,56 @@ export const actions: Actions = {
 		try {
 			const runtime = createWebAuthRuntime(platform);
 			const currentAccount = await runtime.getUser({ userId: locals.session.userId });
-			if (result.values.email !== currentAccount.email.toLowerCase()) {
-				return fail(409, {
-					values: raw,
-					errors: {
-						email: ['Email changes require verification before they can be applied.']
-					}
-				});
-			}
-
+			const emailChanged = result.values.email !== currentAccount.email.toLowerCase();
 			const account = await runtime.updateUserDetails({
 				userId: locals.session.userId,
 				firstName: result.values.firstName,
 				lastName: result.values.lastName
 			});
 
-			return { account };
+			if (emailChanged) {
+				await runtime.sendEmailChangeCode({
+					userId: locals.session.userId,
+					newEmail: result.values.email
+				});
+			}
+
+			return {
+				account,
+				...(emailChanged ? { pendingEmail: result.values.email } : {})
+			};
 		} catch {
 			return fail(500, {
 				message: 'Account details could not be saved. Try again in a moment.'
+			});
+		}
+	},
+	confirmEmailChange: async ({ request, locals, platform }) => {
+		if (!locals.session) return fail(401, { message: 'Unauthenticated' });
+		if (!platform) return fail(500, { message: 'Platform not available' });
+
+		const form = await request.formData();
+		const code = String(form.get('code') ?? '').replace(/\s+/g, '');
+		const decodedCode = decodeVerificationCode(code);
+		if (Result.isFailure(decodedCode)) {
+			return fail(400, { errors: { code: [String(decodedCode.failure)] } });
+		}
+
+		try {
+			const account = await createWebAuthRuntime(platform).confirmEmailChange({
+				userId: locals.session.userId,
+				code: (decodedCode as Result.Success<string, never>).success
+			});
+
+			await getDb(platform)
+				.update(users)
+				.set({ email: account.email, updatedAt: new Date() })
+				.where(eq(users.workosUserId, locals.session.userId));
+
+			return { account };
+		} catch {
+			return fail(400, {
+				errors: { code: ['That code did not verify. Try the latest code from your email.'] }
 			});
 		}
 	},
@@ -341,7 +373,7 @@ export const actions: Actions = {
 		const factorId = String(form.get('factorId') ?? '');
 		const challengeId = String(form.get('challengeId') ?? '');
 		const code = String(form.get('code') ?? '').replace(/\s+/g, '');
-		const decodedCode = decodeTotpCode(code);
+		const decodedCode = decodeVerificationCode(code);
 		if (!factorId || !challengeId) {
 			return fail(400, { message: 'Authenticator setup session is missing.' });
 		}

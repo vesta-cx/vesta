@@ -285,6 +285,14 @@ export interface AuthTransport {
 		firstName?: string | null;
 		lastName?: string | null;
 	}): Promise<AuthUser>;
+	sendEmailChangeCode(input: {
+		userId: string;
+		newEmail: string;
+	}): Promise<AuthUser>;
+	confirmEmailChange(input: {
+		userId: string;
+		code: string;
+	}): Promise<AuthUser>;
 	updateUserPassword(input: {
 		userId: string;
 		password: string;

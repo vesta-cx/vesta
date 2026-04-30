@@ -27,15 +27,24 @@ export const RESERVED_HANDLES: ReadonlySet<string> = new Set([
 ]);
 
 /**
- * Public handle: lowercase alphanumeric, hyphens, underscores. 3–32 chars.
- * Shared namespace with workspace slugs (see schema/users.ts).
+ * Pattern for a public handle: lowercase letters, digits, hyphens, and
+ * underscores; must start and end with an alphanumeric. Shared between the
+ * Zod entity schemas and any Effect schemas that re-validate at the edge.
+ */
+export const USER_HANDLE_PATTERN = /^[a-z0-9](?:[a-z0-9_-]*[a-z0-9])?$/;
+
+export const USER_HANDLE_MIN_LENGTH = 3;
+export const USER_HANDLE_MAX_LENGTH = 32;
+
+/**
+ * Public handle. Shared namespace with workspace slugs (see schema/users.ts).
  */
 export const userHandleSchema = z
 	.string()
-	.min(3)
-	.max(32)
+	.min(USER_HANDLE_MIN_LENGTH)
+	.max(USER_HANDLE_MAX_LENGTH)
 	.regex(
-		/^[a-z0-9](?:[a-z0-9_-]*[a-z0-9])?$/,
+		USER_HANDLE_PATTERN,
 		"Use lowercase letters, numbers, hyphens, or underscores.",
 	)
 	.refine((value) => !RESERVED_HANDLES.has(value), {

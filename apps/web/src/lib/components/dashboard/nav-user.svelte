@@ -20,12 +20,17 @@
 	import BellIcon from '@lucide/svelte/icons/bell';
 	import ChevronsUpDownIcon from '@lucide/svelte/icons/chevrons-up-down';
 	import CreditCardIcon from '@lucide/svelte/icons/credit-card';
+	import DatabaseIcon from '@lucide/svelte/icons/database';
 	import HelpCircleIcon from '@lucide/svelte/icons/help-circle';
+	import IdCardIcon from '@lucide/svelte/icons/id-card';
 	import LogOutIcon from '@lucide/svelte/icons/log-out';
+	import PackageIcon from '@lucide/svelte/icons/package';
 	import ShieldIcon from '@lucide/svelte/icons/shield';
 	import SettingsIcon from '@lucide/svelte/icons/settings';
 	import UserRoundIcon from '@lucide/svelte/icons/user-round';
 	import AccountSettings from '$lib/components/settings/account-settings.svelte';
+	import DataPrivacySettings from '$lib/components/settings/data-privacy-settings.svelte';
+	import ProfileSettings from '$lib/components/settings/profile-settings.svelte';
 	import SecuritySettings from '$lib/components/settings/security-settings.svelte';
 	import SettingsDialog, {
 		type SettingsCategory
@@ -55,12 +60,20 @@
 	const splitLast = rest.join(' ');
 
 	/**
-	 * Account = WorkOS-owned identity (legal name, email).
-	 * Security = sign-in surface (password, 2FA, sessions).
-	 * Vesta profile (display name, handle, bio) lives outside this dialog
-	 * because it's a public surface, not an account preference.
+	 * Profile        = Vesta-owned public surface (display name, handle, bio).
+	 * Account        = WorkOS-owned identity (legal name, email).
+	 * Security       = sign-in surface (password, 2FA, sessions).
+	 * Data & Privacy = GDPR controls (export, processing log, deletion).
+	 * Notifications, Subscriptions, Billing are queued in the rail.
 	 */
 	const settingsCategories: SettingsCategory[] = [
+		{
+			id: 'profile',
+			title: 'Profile',
+			icon: IdCardIcon,
+			enabled: true,
+			content: profileContent
+		},
 		{
 			id: 'account',
 			title: 'Account',
@@ -75,10 +88,22 @@
 			enabled: true,
 			content: securityContent
 		},
+		{
+			id: 'data-privacy',
+			title: 'Data & privacy',
+			icon: DatabaseIcon,
+			enabled: true,
+			content: dataPrivacyContent
+		},
 		{ id: 'notifications', title: 'Notifications', icon: BellIcon, enabled: false },
+		{ id: 'subscriptions', title: 'Subscriptions', icon: PackageIcon, enabled: false },
 		{ id: 'billing', title: 'Billing', icon: CreditCardIcon, enabled: false }
 	];
 </script>
+
+{#snippet profileContent()}
+	<ProfileSettings displayName={user.displayName ?? ''} handle={user.username ?? ''} />
+{/snippet}
 
 {#snippet accountContent()}
 	<AccountSettings firstName={splitFirst} lastName={splitLast} email={user.email} />
@@ -86,6 +111,10 @@
 
 {#snippet securityContent()}
 	<SecuritySettings />
+{/snippet}
+
+{#snippet dataPrivacyContent()}
+	<DataPrivacySettings />
 {/snippet}
 
 {#snippet identity()}
@@ -171,5 +200,5 @@
 <SettingsDialog
 	bind:open={settingsOpen}
 	categories={settingsCategories}
-	initialCategoryId="account"
+	initialCategoryId="profile"
 />

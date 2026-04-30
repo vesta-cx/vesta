@@ -115,16 +115,44 @@ export const actions: Actions = {
 		}
 		console.log('[updateProfile] validated values', result.values);
 
+		const { userId, email, organizationId, profilePictureUrl } = locals.session;
+		if (!organizationId) {
+			return fail(409, {
+				values: raw,
+				message: 'Your account is not linked to an organization yet.'
+			});
+		}
+
 		const db = getDb(platform);
 		try {
-			const updateResult = await db
-				.update(users)
-				.set({ ...result.values, updatedAt: new Date() })
-				.where(eq(users.workosUserId, locals.session.userId))
+			// Upsert: provisioning may not have populated the row (e.g. a fresh
+			// D1 after a session was already issued). On insert we fill the
+			// non-form columns from the session; on conflict we only touch what
+			// the form actually owns.
+			const upsertResult = await db
+				.insert(users)
+				.values({
+					workosUserId: userId,
+					email,
+					organizationId,
+					avatarUrl: profilePictureUrl ?? null,
+					handle: result.values.handle,
+					displayName: result.values.displayName,
+					bio: result.values.bio
+				})
+				.onConflictDoUpdate({
+					target: users.workosUserId,
+					set: {
+						handle: result.values.handle,
+						displayName: result.values.displayName,
+						bio: result.values.bio,
+						updatedAt: new Date()
+					}
+				})
 				.returning({ workosUserId: users.workosUserId, handle: users.handle });
-			console.log('[updateProfile] db update result', {
-				workosUserId: locals.session.userId,
-				rows: updateResult
+			console.log('[updateProfile] db upsert result', {
+				workosUserId: userId,
+				rows: upsertResult
 			});
 		} catch (caught) {
 			const message = caught instanceof Error ? caught.message : '';

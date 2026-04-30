@@ -11,15 +11,23 @@
 	import * as DropdownMenu from '@vesta-cx/ui/components/ui/dropdown-menu';
 	import * as Sidebar from '@vesta-cx/ui/components/ui/sidebar';
 	import { useSidebar } from '@vesta-cx/ui/components/ui/sidebar';
+	import BellIcon from '@lucide/svelte/icons/bell';
 	import ChevronsUpDownIcon from '@lucide/svelte/icons/chevrons-up-down';
 	import CreditCardIcon from '@lucide/svelte/icons/credit-card';
 	import HelpCircleIcon from '@lucide/svelte/icons/help-circle';
 	import LogOutIcon from '@lucide/svelte/icons/log-out';
 	import UserRoundIcon from '@lucide/svelte/icons/user-round';
+	import AccountSettings from '$lib/components/settings/account-settings.svelte';
+	import SettingsDialog, {
+		type SettingsCategory
+	} from '$lib/components/settings/settings-dialog.svelte';
+	import { IN_DEVELOPMENT_TOOLTIP } from './nav-collapsible.svelte';
 
 	let { user }: { user: DashboardUser } = $props();
 
 	const sidebar = useSidebar();
+	let settingsOpen = $state(false);
+
 	const initials = $derived(
 		user.name
 			.split(/\s+/)
@@ -29,7 +37,27 @@
 			.join('')
 			.toUpperCase() || user.email.slice(0, 2).toUpperCase()
 	);
+
+	// Best-effort split until WorkOS first/last names propagate end-to-end.
+	const [splitFirst, ...rest] = user.name.split(' ');
+	const splitLast = rest.join(' ');
+
+	const settingsCategories: SettingsCategory[] = [
+		{
+			id: 'account',
+			title: 'Account',
+			icon: UserRoundIcon,
+			enabled: true,
+			content: accountContent
+		},
+		{ id: 'notifications', title: 'Notifications', icon: BellIcon, enabled: false },
+		{ id: 'billing', title: 'Billing', icon: CreditCardIcon, enabled: false }
+	];
 </script>
+
+{#snippet accountContent()}
+	<AccountSettings firstName={splitFirst} lastName={splitLast} email={user.email} />
+{/snippet}
 
 <Sidebar.Menu>
 	<Sidebar.MenuItem>
@@ -77,25 +105,35 @@
 				</DropdownMenu.Label>
 				<DropdownMenu.Separator />
 				<DropdownMenu.Group>
-					<DropdownMenu.Item>
+					<DropdownMenu.Item onSelect={() => (settingsOpen = true)}>
 						<UserRoundIcon />
-						Profile
+						Account
 					</DropdownMenu.Item>
-					<DropdownMenu.Item>
+					<DropdownMenu.Item disabled title={IN_DEVELOPMENT_TOOLTIP}>
 						<CreditCardIcon />
 						Billing
 					</DropdownMenu.Item>
-					<DropdownMenu.Item>
+					<DropdownMenu.Item disabled title={IN_DEVELOPMENT_TOOLTIP}>
 						<HelpCircleIcon />
 						Help &amp; support
 					</DropdownMenu.Item>
 				</DropdownMenu.Group>
 				<DropdownMenu.Separator />
 				<DropdownMenu.Item>
-					<LogOutIcon />
-					Log out
+					{#snippet child({ props }: { props?: Record<string, unknown> })}
+						<a href="/auth/logout" {...props}>
+							<LogOutIcon />
+							Log out
+						</a>
+					{/snippet}
 				</DropdownMenu.Item>
 			</DropdownMenu.Content>
 		</DropdownMenu.Root>
 	</Sidebar.MenuItem>
 </Sidebar.Menu>
+
+<SettingsDialog
+	bind:open={settingsOpen}
+	categories={settingsCategories}
+	initialCategoryId="account"
+/>

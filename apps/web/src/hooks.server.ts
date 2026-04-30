@@ -1,4 +1,5 @@
 import type { Handle } from '@sveltejs/kit';
+import { dev } from '$app/environment';
 import { createAuthHandle } from '@vesta-cx/auth';
 import { createWebAuthRuntime, createWebProvisioningAdapter } from '$lib/server/auth';
 import { paraglideMiddleware } from '$lib/paraglide/server';
@@ -18,10 +19,14 @@ export const handle: Handle = async ({ event, resolve }) => {
 		return handleParaglide({ event, resolve });
 	}
 
+	// In dev we re-provision the user/organization rows on every authenticated
+	// request so D1 wipes (migration squashes, fresh-clone setups) self-heal
+	// without forcing a logout. In prod the OAuth callback is the only
+	// provisioning surface — each request becomes a no-op write otherwise.
 	const handleAuth = createAuthHandle({
 		runtime: createWebAuthRuntime(event.platform),
-		provisioningAdapter: createWebProvisioningAdapter(event.platform),
-		protectedPaths: ['/dashboard']
+		protectedPaths: ['/dashboard'],
+		...(dev ? { provisioningAdapter: createWebProvisioningAdapter(event.platform) } : {})
 	});
 
 	return handleAuth({

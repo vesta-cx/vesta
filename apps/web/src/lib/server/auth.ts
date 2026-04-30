@@ -13,6 +13,15 @@ const runtimeCache = new WeakMap<
 	ReturnType<typeof createAuthRuntimeFromEnv>
 >();
 
+/**
+ * Provisioning writes (insert org with onConflictDoNothing + upsert user)
+ * are individually idempotent. We deliberately omit `transaction` here
+ * because Cloudflare D1 does not support BEGIN/COMMIT over its API; the
+ * Drizzle SQLite driver would otherwise emit a `begin` statement that D1
+ * rejects (see TerminalAuthError 'Failed query: begin'). Sequential writes
+ * are safe given the conflict policies, and D1 batching can be added later
+ * if multi-statement atomicity becomes necessary.
+ */
 const createVestaProvisioningStore = (db: Database): VestaProvisioningStore => ({
 	ensureOrganization: (organizationId) =>
 		db.insert(organizations).values({ workosOrgId: organizationId }).onConflictDoNothing(),
@@ -29,8 +38,7 @@ const createVestaProvisioningStore = (db: Database): VestaProvisioningStore => (
 					organizationId: user.organizationId,
 					updatedAt: new Date()
 				}
-			}),
-	transaction: (run) => db.transaction((tx) => run(createVestaProvisioningStore(tx)))
+			})
 });
 
 export const createWebAuthRuntime = (platform: App.Platform) => {

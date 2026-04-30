@@ -103,13 +103,14 @@
 			bind:value={emailValue}
 			maxlength={254}
 			autocomplete="email"
+			readonly
 			required
 		/>
 		{#if fieldError('email')}
 			<p class="text-xs text-destructive">{fieldError('email')}</p>
 		{/if}
 		<p class="text-xs text-muted-foreground">
-			Changing email may require verification before it is trusted for sign-in.
+			Email changes require verification before they can be applied.
 		</p>
 	</div>
 

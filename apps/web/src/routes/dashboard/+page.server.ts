@@ -1,5 +1,4 @@
 import { fail } from '@sveltejs/kit';
-import { eq } from 'drizzle-orm';
 import { Result, Schema } from 'effect';
 import { TerminalAuthError } from '@vesta-cx/auth';
 import { users } from '@vesta-cx/db';
@@ -214,17 +213,22 @@ export const actions: Actions = {
 		if (!result.ok) return fail(400, { values: raw, errors: result.errors });
 
 		try {
-			const account = await createWebAuthRuntime(platform).updateUserDetails({
+			const runtime = createWebAuthRuntime(platform);
+			const currentAccount = await runtime.getUser({ userId: locals.session.userId });
+			if (result.values.email !== currentAccount.email.toLowerCase()) {
+				return fail(409, {
+					values: raw,
+					errors: {
+						email: ['Email changes require verification before they can be applied.']
+					}
+				});
+			}
+
+			const account = await runtime.updateUserDetails({
 				userId: locals.session.userId,
 				firstName: result.values.firstName,
-				lastName: result.values.lastName,
-				email: result.values.email
+				lastName: result.values.lastName
 			});
-
-			await getDb(platform)
-				.update(users)
-				.set({ email: account.email, updatedAt: new Date() })
-				.where(eq(users.workosUserId, locals.session.userId));
 
 			return { account };
 		} catch {

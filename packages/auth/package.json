@@ -46,7 +46,7 @@
   },
   "dependencies": {
     "@workos-inc/node": "^8.9.0",
-    "effect": "^4.0.0-beta.37"
+    "effect": "4.0.0-beta.59"
   },
   "devDependencies": {
     "@sveltejs/kit": "^2.53.0",

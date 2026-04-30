@@ -1,24 +1,37 @@
-import { redirect } from '@sveltejs/kit';
+import { error, redirect } from '@sveltejs/kit';
+import { eq } from 'drizzle-orm';
+import { users } from '@vesta-cx/db';
+import { getDb } from '$lib/server/db';
 import type { LayoutServerLoad } from './$types';
 
-export const load: LayoutServerLoad = async ({ locals }) => {
+export const load: LayoutServerLoad = async ({ locals, platform }) => {
 	// hooks.server.ts protects /dashboard, but guard explicitly so the layout
 	// always has a session when it renders.
 	if (!locals.session) redirect(302, '/auth/login');
+	if (!platform) error(500, 'Platform not available');
 
-	const { firstName, lastName, email, profilePictureUrl } = locals.session;
+	const { firstName, lastName, email, profilePictureUrl, userId } = locals.session;
 	const legalName = [firstName, lastName].filter(Boolean).join(' ');
 
-	// TODO: Read displayName and username from the Vesta user profile once that
-	// surface lands. Until then we fall back to the WorkOS legal name + the
-	// email local-part so the user picker has reasonable defaults.
+	const db = getDb(platform);
+	const [profile] = await db
+		.select({
+			handle: users.handle,
+			displayName: users.displayName,
+			bio: users.bio
+		})
+		.from(users)
+		.where(eq(users.workosUserId, userId))
+		.limit(1);
+
 	return {
 		user: {
 			name: legalName || email,
 			email,
 			avatarUrl: profilePictureUrl ?? undefined,
-			displayName: legalName || email,
-			username: email.split('@')[0] ?? email
+			displayName: profile?.displayName ?? legalName ?? email,
+			handle: profile?.handle ?? null,
+			bio: profile?.bio ?? null
 		}
 	};
 };

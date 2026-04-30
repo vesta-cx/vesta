@@ -4,10 +4,12 @@
 		name: string;
 		email: string;
 		avatarUrl?: string;
-		/** Vesta-owned public display name; falls back to {@link name}. */
-		displayName?: string;
-		/** Vesta-owned slug; falls back to email local-part. */
-		username?: string;
+		/** Vesta-owned public display name. */
+		displayName: string;
+		/** Vesta-owned handle; null when the user hasn't picked one yet. */
+		handle: string | null;
+		/** Vesta-owned bio. */
+		bio: string | null;
 	};
 </script>
 
@@ -42,8 +44,8 @@
 	const sidebar = useSidebar();
 	let settingsOpen = $state(false);
 
-	const displayName = $derived(user.displayName ?? user.name);
-	const username = $derived(user.username ?? user.email.split('@')[0] ?? user.email);
+	const displayName = $derived(user.displayName);
+	const handleLine = $derived(user.handle ? `@${user.handle}` : user.email);
 
 	const initials = $derived(
 		displayName
@@ -102,7 +104,11 @@
 </script>
 
 {#snippet profileContent()}
-	<ProfileSettings displayName={user.displayName ?? ''} handle={user.username ?? ''} />
+	<ProfileSettings
+		displayName={user.displayName}
+		handle={user.handle}
+		bio={user.bio}
+	/>
 {/snippet}
 
 {#snippet accountContent()}
@@ -126,7 +132,7 @@
 	</Avatar.Root>
 	<div class="grid min-w-0 flex-1 text-start text-sm leading-tight">
 		<span class="truncate font-medium">{displayName}</span>
-		<span class="truncate text-xs text-muted-foreground">@{username}</span>
+		<span class="truncate text-xs text-muted-foreground">{handleLine}</span>
 	</div>
 {/snippet}
 

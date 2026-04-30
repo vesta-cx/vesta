@@ -21,11 +21,12 @@
 	import ChevronsUpDownIcon from '@lucide/svelte/icons/chevrons-up-down';
 	import CreditCardIcon from '@lucide/svelte/icons/credit-card';
 	import HelpCircleIcon from '@lucide/svelte/icons/help-circle';
-	import IdCardIcon from '@lucide/svelte/icons/id-card';
 	import LogOutIcon from '@lucide/svelte/icons/log-out';
+	import ShieldIcon from '@lucide/svelte/icons/shield';
 	import SettingsIcon from '@lucide/svelte/icons/settings';
 	import UserRoundIcon from '@lucide/svelte/icons/user-round';
 	import AccountSettings from '$lib/components/settings/account-settings.svelte';
+	import SecuritySettings from '$lib/components/settings/security-settings.svelte';
 	import SettingsDialog, {
 		type SettingsCategory
 	} from '$lib/components/settings/settings-dialog.svelte';
@@ -54,8 +55,10 @@
 	const splitLast = rest.join(' ');
 
 	/**
-	 * Account = WorkOS-owned identity (legal name, email, password, 2FA).
-	 * Profile = Vesta-owned public presence (username/slug, display name, bio).
+	 * Account = WorkOS-owned identity (legal name, email).
+	 * Security = sign-in surface (password, 2FA, sessions).
+	 * Vesta profile (display name, handle, bio) lives outside this dialog
+	 * because it's a public surface, not an account preference.
 	 */
 	const settingsCategories: SettingsCategory[] = [
 		{
@@ -65,7 +68,13 @@
 			enabled: true,
 			content: accountContent
 		},
-		{ id: 'profile', title: 'Profile', icon: IdCardIcon, enabled: false },
+		{
+			id: 'security',
+			title: 'Security',
+			icon: ShieldIcon,
+			enabled: true,
+			content: securityContent
+		},
 		{ id: 'notifications', title: 'Notifications', icon: BellIcon, enabled: false },
 		{ id: 'billing', title: 'Billing', icon: CreditCardIcon, enabled: false }
 	];
@@ -73,6 +82,10 @@
 
 {#snippet accountContent()}
 	<AccountSettings firstName={splitFirst} lastName={splitLast} email={user.email} />
+{/snippet}
+
+{#snippet securityContent()}
+	<SecuritySettings />
 {/snippet}
 
 {#snippet identity()}

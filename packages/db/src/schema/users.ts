@@ -10,6 +10,13 @@ import { workspaces } from "./workspaces";
 export const users = sqliteTable("users", {
 	workosUserId: text("workos_user_id").primaryKey(),
 	email: text("email").notNull(),
+	/**
+	 * Vesta-owned public handle. Nullable so WorkOS-provisioned users can be
+	 * created before they pick one. Unique within users; cross-table
+	 * uniqueness with `workspaces.slug` is enforced at the application layer
+	 * (the public `/@<handle>` namespace is shared).
+	 */
+	handle: text("handle").unique(),
 	displayName: text("display_name"),
 	avatarUrl: text("avatar_url"),
 	bio: text("bio"),

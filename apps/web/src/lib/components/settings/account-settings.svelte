@@ -1,7 +1,6 @@
 <script lang="ts">
 	import { Input } from '@vesta-cx/ui/components/ui/input';
 	import { Label } from '@vesta-cx/ui/components/ui/label';
-	import { Separator } from '@vesta-cx/ui/components/ui/separator';
 	import { IN_DEVELOPMENT_TOOLTIP } from '$lib/components/dashboard/nav-collapsible.svelte';
 
 	type Props = {
@@ -16,61 +15,38 @@
 <div class="space-y-6">
 	<header class="space-y-1">
 		<h2 class="text-lg font-semibold">Account</h2>
-		<p class="text-sm text-muted-foreground">
-			Your identity for sign-in, billing, and any organization you belong to. For your
-			public Vesta presence (display name, username, bio), use Profile.
-		</p>
+		<p class="text-sm text-muted-foreground">Your legal identity. Managed via WorkOS.</p>
 	</header>
 
-	<Separator />
-
-	<section class="space-y-4">
-		<header class="space-y-0.5">
-			<h3 class="text-sm font-medium">Legal name</h3>
-			<p class="text-xs text-muted-foreground">
-				Used for billing and contracts. Visible to organizations you join.
-			</p>
-		</header>
-		<div class="grid gap-4 sm:grid-cols-2">
-			<div class="space-y-1.5">
-				<Label for="account-first-name">First name</Label>
-				<Input
-					id="account-first-name"
-					value={firstName}
-					disabled
-					title={IN_DEVELOPMENT_TOOLTIP}
-				/>
-			</div>
-			<div class="space-y-1.5">
-				<Label for="account-last-name">Last name</Label>
-				<Input
-					id="account-last-name"
-					value={lastName}
-					disabled
-					title={IN_DEVELOPMENT_TOOLTIP}
-				/>
-			</div>
-		</div>
-	</section>
-
-	<Separator />
-
-	<section class="space-y-4">
-		<header class="space-y-0.5">
-			<h3 class="text-sm font-medium">Email</h3>
-			<p class="text-xs text-muted-foreground">
-				Used to sign in. Updating sends a verification email.
-			</p>
-		</header>
+	<div class="grid gap-4 sm:grid-cols-2">
 		<div class="space-y-1.5">
-			<Label for="account-email">Email address</Label>
+			<Label for="account-first-name">First name</Label>
 			<Input
-				id="account-email"
-				type="email"
-				value={email}
+				id="account-first-name"
+				value={firstName}
 				disabled
 				title={IN_DEVELOPMENT_TOOLTIP}
 			/>
 		</div>
-	</section>
+		<div class="space-y-1.5">
+			<Label for="account-last-name">Last name</Label>
+			<Input
+				id="account-last-name"
+				value={lastName}
+				disabled
+				title={IN_DEVELOPMENT_TOOLTIP}
+			/>
+		</div>
+	</div>
+
+	<div class="space-y-1.5">
+		<Label for="account-email">Email</Label>
+		<Input
+			id="account-email"
+			type="email"
+			value={email}
+			disabled
+			title={IN_DEVELOPMENT_TOOLTIP}
+		/>
+	</div>
 </div>

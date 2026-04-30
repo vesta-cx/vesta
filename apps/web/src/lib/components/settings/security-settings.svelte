@@ -145,7 +145,7 @@
 		<header class="space-y-1">
 			<h2 class="text-lg font-semibold">Authenticator app</h2>
 			<p class="text-sm text-muted-foreground">
-				Manage time-based one-time passwords stored in WorkOS.
+				Set up or replace the one-time password app stored in WorkOS.
 			</p>
 		</header>
 
@@ -154,8 +154,11 @@
 		{:else}
 			<div class="space-y-3">
 				{#if totpFactors.length === 0}
-					<p class="text-sm text-muted-foreground">No authenticator app is enrolled.</p>
+					<p class="text-sm text-muted-foreground">No authenticator app is set up.</p>
 				{:else}
+					<p class="text-sm text-muted-foreground">
+						Your authenticator app is set up. Run setup again to replace it.
+					</p>
 					<ul class="divide-y rounded-md border">
 						{#each totpFactors as factor (factor.id)}
 							<li class="flex items-center justify-between gap-3 px-3 py-2.5">
@@ -275,7 +278,7 @@
 						};
 					}}
 				>
-					<Button type="submit" disabled={saving}>{saving ? 'Starting…' : 'Add authenticator'}</Button>
+					<Button type="submit" disabled={saving}>{saving ? 'Starting…' : 'Set up authenticator'}</Button>
 				</form>
 			</div>
 		{/if}
@@ -329,7 +332,7 @@
 			<ActionRow
 				title="Authenticator app"
 				description={hasTotp
-					? `${totpFactors.length} TOTP ${totpFactors.length === 1 ? 'factor' : 'factors'} enabled.`
+					? 'Authenticator app is set up.'
 					: 'Use one-time codes from an authenticator app.'}
 			>
 				{#snippet action()}

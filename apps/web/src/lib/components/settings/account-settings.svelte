@@ -18,7 +18,8 @@
 	<header class="space-y-1">
 		<h2 class="text-lg font-semibold">Account</h2>
 		<p class="text-sm text-muted-foreground">
-			Manage your WorkOS profile, sign-in details, and authentication.
+			Your identity for sign-in, billing, and any organization you belong to.
+			For your public Vesta presence (display name, username, bio), use Profile.
 		</p>
 	</header>
 
@@ -26,8 +27,10 @@
 
 	<section class="space-y-4">
 		<header class="space-y-0.5">
-			<h3 class="text-sm font-medium">Profile</h3>
-			<p class="text-xs text-muted-foreground">Your name as it appears on Vesta.</p>
+			<h3 class="text-sm font-medium">Legal name</h3>
+			<p class="text-xs text-muted-foreground">
+				Used for billing and contracts. Visible to organizations you join.
+			</p>
 		</header>
 		<div class="grid gap-4 sm:grid-cols-2">
 			<div class="space-y-1.5">

@@ -15,6 +15,7 @@
 	import ChevronsUpDownIcon from '@lucide/svelte/icons/chevrons-up-down';
 	import CreditCardIcon from '@lucide/svelte/icons/credit-card';
 	import HelpCircleIcon from '@lucide/svelte/icons/help-circle';
+	import IdCardIcon from '@lucide/svelte/icons/id-card';
 	import LogOutIcon from '@lucide/svelte/icons/log-out';
 	import UserRoundIcon from '@lucide/svelte/icons/user-round';
 	import AccountSettings from '$lib/components/settings/account-settings.svelte';
@@ -42,6 +43,11 @@
 	const [splitFirst, ...rest] = user.name.split(' ');
 	const splitLast = rest.join(' ');
 
+	/**
+	 * Account = WorkOS-owned identity (legal name, email, password, 2FA).
+	 * Profile = Vesta-owned public presence (username/slug, display name, bio).
+	 * Two distinct surfaces; only Account is wired right now.
+	 */
 	const settingsCategories: SettingsCategory[] = [
 		{
 			id: 'account',
@@ -50,6 +56,7 @@
 			enabled: true,
 			content: accountContent
 		},
+		{ id: 'profile', title: 'Profile', icon: IdCardIcon, enabled: false },
 		{ id: 'notifications', title: 'Notifications', icon: BellIcon, enabled: false },
 		{ id: 'billing', title: 'Billing', icon: CreditCardIcon, enabled: false }
 	];

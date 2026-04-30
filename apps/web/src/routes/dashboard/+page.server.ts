@@ -14,7 +14,30 @@ import type { Actions } from './$types';
 /**
  * Form-side validation schemas. We re-validate at the edge (don't trust the
  * client) and surface field-keyed messages for the dialog form.
+ *
+ * Charset rules:
+ * - Handle: lowercase letters, digits, hyphens, underscores. A subset of
+ *   RFC 3986 "unreserved" so the handle survives a URL path segment without
+ *   percent-encoding. Period and tilde are technically unreserved too but
+ *   excluded for legibility.
+ * - Display name: any Unicode character except control characters (Cc).
+ *   Single line — newlines are control chars and therefore rejected.
+ * - Bio: any Unicode character except control characters, with tab, line
+ *   feed, and carriage return allowed so users can format paragraphs.
  */
+
+const CONTROL_CHAR_PATTERN = /\p{Cc}/u;
+
+const hasDisallowedControlChars = (value: string, allowed: ReadonlySet<string> = new Set()) => {
+	for (const ch of value) {
+		if (allowed.has(ch)) continue;
+		if (CONTROL_CHAR_PATTERN.test(ch)) return true;
+	}
+	return false;
+};
+
+const BIO_ALLOWED_CONTROL = new Set(['\t', '\n', '\r']);
+
 const HandleSchema = Schema.NullOr(
 	Schema.String.check(
 		Schema.makeFilter(
@@ -40,6 +63,11 @@ const DisplayNameSchema = Schema.NullOr(
 	Schema.String.check(
 		Schema.makeFilter(
 			(value: string) => value.length <= 80 || 'Keep your display name under 80 characters.'
+		),
+		Schema.makeFilter(
+			(value: string) =>
+				!hasDisallowedControlChars(value) ||
+				'Display name cannot contain control characters or line breaks.'
 		)
 	)
 );
@@ -48,6 +76,11 @@ const BioSchema = Schema.NullOr(
 	Schema.String.check(
 		Schema.makeFilter(
 			(value: string) => value.length <= 500 || 'Keep your bio under 500 characters.'
+		),
+		Schema.makeFilter(
+			(value: string) =>
+				!hasDisallowedControlChars(value, BIO_ALLOWED_CONTROL) ||
+				'Bio cannot contain control characters.'
 		)
 	)
 );

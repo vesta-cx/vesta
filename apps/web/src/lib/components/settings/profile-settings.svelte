@@ -13,6 +13,9 @@
 
 	let { displayName = '', handle = '', bio = '' }: Props = $props();
 
+	// Mirrors USER_HANDLE_PATTERN in @vesta-cx/db/entity-schemas.
+	const HANDLE_PATTERN = '[a-z0-9](?:[a-z0-9_-]*[a-z0-9])?';
+
 	let saving = $state(false);
 	let saved = $state(false);
 	let errors = $state<Record<string, string[] | undefined> | null>(null);
@@ -75,13 +78,16 @@
 			name="handle"
 			bind:value={handleValue}
 			maxlength={32}
+			minlength={3}
+			pattern={HANDLE_PATTERN}
+			inputmode="url"
 			placeholder="yourname"
 			autocomplete="off"
 			autocapitalize="off"
 			spellcheck={false}
 		/>
 		<p class="text-xs text-muted-foreground">
-			Your public profile lives at
+			Lowercase letters, numbers, hyphens, or underscores. Your public profile lives at
 			<span class="font-mono">vesta.cx/user/{handlePreview}</span>.
 		</p>
 		{#if fieldError('handle')}

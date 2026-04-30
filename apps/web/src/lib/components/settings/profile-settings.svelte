@@ -26,11 +26,18 @@
 <form
 	method="post"
 	action="/dashboard?/updateProfile"
-	use:enhance={() => {
+	use:enhance={({ formData, action }) => {
+		console.log('[profile form] submitting', {
+			action: action.toString(),
+			handle: formData.get('handle'),
+			displayName: formData.get('displayName'),
+			bio: formData.get('bio')
+		});
 		saving = true;
 		saved = false;
 		errors = null;
 		return async ({ result, update }) => {
+			console.log('[profile form] result', result);
 			saving = false;
 			if (result.type === 'success') {
 				saved = true;

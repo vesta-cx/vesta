@@ -91,6 +91,12 @@ const validate = (raw: {
 
 export const actions: Actions = {
 	updateProfile: async ({ request, locals, platform }) => {
+		console.log('[updateProfile] hit', {
+			hasSession: Boolean(locals.session),
+			hasPlatform: Boolean(platform),
+			hasDb: Boolean(platform?.env.DB)
+		});
+
 		if (!locals.session) return fail(401, { message: 'Unauthenticated' });
 		if (!platform) return fail(500, { message: 'Platform not available' });
 
@@ -100,20 +106,29 @@ export const actions: Actions = {
 			displayName: trimToNull(form.get('displayName')),
 			bio: trimToNull(form.get('bio'))
 		};
+		console.log('[updateProfile] raw input', raw);
 
 		const result = validate(raw);
 		if (!result.ok) {
+			console.log('[updateProfile] validation failed', result.errors);
 			return fail(400, { values: raw, errors: result.errors });
 		}
+		console.log('[updateProfile] validated values', result.values);
 
 		const db = getDb(platform);
 		try {
-			await db
+			const updateResult = await db
 				.update(users)
 				.set({ ...result.values, updatedAt: new Date() })
-				.where(eq(users.workosUserId, locals.session.userId));
+				.where(eq(users.workosUserId, locals.session.userId))
+				.returning({ workosUserId: users.workosUserId, handle: users.handle });
+			console.log('[updateProfile] db update result', {
+				workosUserId: locals.session.userId,
+				rows: updateResult
+			});
 		} catch (caught) {
 			const message = caught instanceof Error ? caught.message : '';
+			console.log('[updateProfile] db error', message);
 			if (/UNIQUE constraint failed/i.test(message)) {
 				return fail(409, {
 					values: raw,

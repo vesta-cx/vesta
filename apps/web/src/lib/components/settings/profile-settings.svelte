@@ -1,8 +1,8 @@
 <script lang="ts">
 	import { enhance } from '$app/forms';
-	import CheckIcon from '@lucide/svelte/icons/check';
+	import CircleCheckIcon from '@lucide/svelte/icons/circle-check';
+	import CircleXIcon from '@lucide/svelte/icons/circle-x';
 	import LoaderCircleIcon from '@lucide/svelte/icons/loader-circle';
-	import XIcon from '@lucide/svelte/icons/x';
 	import { Button } from '@vesta-cx/ui/components/ui/button';
 	import { Input } from '@vesta-cx/ui/components/ui/input';
 	import { Label } from '@vesta-cx/ui/components/ui/label';
@@ -40,9 +40,9 @@
 	const handleChanged = $derived(handleValue.trim() !== (handle ?? '').trim());
 	const handleStatus = $derived(
 		handleChanged && handleAvailability.state === 'available'
-			? { icon: CheckIcon, label: 'Available', class: 'bg-emerald-500 text-white' }
+			? { icon: CircleCheckIcon, label: 'Available', class: 'text-emerald-500' }
 			: handleChanged && handleAvailability.state === 'unavailable'
-				? { icon: XIcon, label: 'Not available', class: 'bg-destructive text-destructive-foreground' }
+				? { icon: CircleXIcon, label: 'Not available', class: 'text-destructive' }
 				: handleChanged && handleAvailability.state === 'checking'
 					? { icon: LoaderCircleIcon, label: 'Checking', class: 'bg-muted text-muted-foreground' }
 					: null
@@ -173,9 +173,7 @@
 				spellcheck={false}
 			/>
 			{#if handleStatus}
-				<span class={`me-3 grid size-4 shrink-0 place-items-center rounded-full ${handleStatus.class}`}>
-					<handleStatus.icon class="size-3" />
-				</span>
+				<handleStatus.icon class={`me-3 size-4 shrink-0 ${handleStatus.class}`} />
 			{/if}
 		</div>
 		<p class="text-xs text-muted-foreground">

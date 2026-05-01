@@ -13,7 +13,7 @@
 	let arcElement: SVGCircleElement;
 
 	const HEAD_START = 12.5;
-	const TAIL_START_DELAY = 0.28;
+	const TAIL_START_DELAY = 0.38;
 	const DEFAULT_DURATION_MS = 1800;
 
 	const easeInOut = (value: number): number => 0.5 - Math.cos(Math.PI * value) / 2;

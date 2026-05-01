@@ -98,20 +98,24 @@
 
 	<div class="space-y-1.5">
 		<Label for="profile-handle">Handle</Label>
-		<Input
-			id="profile-handle"
-			name="handle"
-			value={handleValue}
-			oninput={(event) => sanitize(event, sanitizeUserHandle, (next) => (handleValue = next))}
-			maxlength={USER_HANDLE_MAX_LENGTH}
-			minlength={USER_HANDLE_MIN_LENGTH}
-			pattern={HANDLE_PATTERN}
-			inputmode="url"
-			placeholder="yourname"
-			autocomplete="off"
-			autocapitalize="off"
-			spellcheck={false}
-		/>
+		<div class="flex items-center rounded-md border bg-background focus-within:ring-[3px] focus-within:ring-ring/50">
+			<span class="ps-3 text-sm text-muted-foreground">@</span>
+			<Input
+				id="profile-handle"
+				class="border-0 ps-1 shadow-none focus-visible:ring-0"
+				name="handle"
+				value={handleValue}
+				oninput={(event) => sanitize(event, sanitizeUserHandle, (next) => (handleValue = next))}
+				maxlength={USER_HANDLE_MAX_LENGTH}
+				minlength={USER_HANDLE_MIN_LENGTH}
+				pattern={HANDLE_PATTERN}
+				inputmode="url"
+				placeholder="yourname"
+				autocomplete="off"
+				autocapitalize="off"
+				spellcheck={false}
+			/>
+		</div>
 		<p class="text-xs text-muted-foreground">
 			Lowercase letters, numbers, hyphens, or underscores. Your public profile lives at
 			<span class="font-mono">vesta.cx/user/{handlePreview}</span>.

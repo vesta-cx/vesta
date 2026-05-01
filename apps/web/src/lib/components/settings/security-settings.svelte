@@ -347,10 +347,20 @@
 				{/snippet}
 			</ActionRow>
 
-			<ActionRow
-				title="Passkeys"
-				description="Supported by our auth provider, but passkey management is not available here yet."
-			>
+			<ActionRow title="Passkeys">
+				{#snippet descriptionContent()}
+					<p class="text-xs text-muted-foreground">
+						Not available yet.
+						<a
+							class="underline underline-offset-2 hover:text-foreground"
+							href="https://workos.com/docs/authkit/passkeys#integrating-via-the-api"
+							target="_blank"
+							rel="noreferrer"
+						>
+							Read more
+						</a>
+					</p>
+				{/snippet}
 				{#snippet action()}
 					<Button variant="outline" size="sm" disabled>Unavailable</Button>
 				{/snippet}

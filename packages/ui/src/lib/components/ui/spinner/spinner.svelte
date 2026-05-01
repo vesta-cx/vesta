@@ -69,9 +69,11 @@
 	}
 
 	@keyframes windows-spinner-rotate {
-		0%,
-		38% {
+		0% {
 			transform: rotate(0deg);
+		}
+		38% {
+			transform: rotate(54deg);
 		}
 		78%,
 		100% {

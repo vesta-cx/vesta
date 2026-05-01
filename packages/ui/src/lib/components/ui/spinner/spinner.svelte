@@ -54,8 +54,8 @@
 		--spinner-front: 12.5;
 		--spinner-back: 0;
 		animation:
-			windows-spinner-front var(--spinner-duration) cubic-bezier(0.33, 1, 0.68, 1) infinite,
-			windows-spinner-back var(--spinner-duration) cubic-bezier(0.32, 0, 0.67, 0) infinite;
+			windows-spinner-front var(--spinner-duration) cubic-bezier(0.42, 0, 0.58, 1) infinite,
+			windows-spinner-back var(--spinner-duration) cubic-bezier(0.72, 0, 0.86, 0.34) infinite;
 		stroke: currentColor;
 		stroke-dasharray: calc(var(--spinner-front) - var(--spinner-back))
 			calc(100 - (var(--spinner-front) - var(--spinner-back)));

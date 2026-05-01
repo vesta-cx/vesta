@@ -38,49 +38,53 @@
 		opacity: 0.16;
 	}
 
-	@property --spinner-front {
+	@property --spinner-length {
 		syntax: '<number>';
 		inherits: false;
 		initial-value: 12.5;
 	}
 
-	@property --spinner-back {
+	@property --spinner-offset {
 		syntax: '<number>';
 		inherits: false;
 		initial-value: 0;
 	}
 
 	.windows-spinner__arc {
-		--spinner-front: 12.5;
-		--spinner-back: 0;
+		--spinner-length: 12.5;
+		--spinner-offset: 0;
 		animation:
-			windows-spinner-front var(--spinner-duration) ease-in-out infinite,
-			windows-spinner-back var(--spinner-duration) linear infinite;
+			windows-spinner-length var(--spinner-duration) linear infinite,
+			windows-spinner-offset var(--spinner-duration) linear infinite;
 		stroke: currentColor;
-		stroke-dasharray: calc(var(--spinner-front) - var(--spinner-back))
-			calc(100 - (var(--spinner-front) - var(--spinner-back)));
-		stroke-dashoffset: calc(var(--spinner-back) * -1);
+		stroke-dasharray: var(--spinner-length) calc(100 - var(--spinner-length));
+		stroke-dashoffset: var(--spinner-offset);
 		transform-box: fill-box;
 		transform-origin: center;
 	}
 
-	@keyframes windows-spinner-front {
-		from {
-			--spinner-front: 12.5;
+	@keyframes windows-spinner-length {
+		0% {
+			animation-timing-function: ease-in-out;
+			--spinner-length: 12.5;
 		}
-		to {
-			--spinner-front: 112.5;
+		50% {
+			animation-timing-function: ease-in-out;
+			--spinner-length: 87.5;
+		}
+		100% {
+			--spinner-length: 12.5;
 		}
 	}
 
-	@keyframes windows-spinner-back {
+	@keyframes windows-spinner-offset {
 		0%,
-		25% {
-			--spinner-back: 0;
+		50% {
 			animation-timing-function: ease-in-out;
+			--spinner-offset: 0;
 		}
 		100% {
-			--spinner-back: 100;
+			--spinner-offset: -100;
 		}
 	}
 

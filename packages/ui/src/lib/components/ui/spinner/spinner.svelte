@@ -38,29 +38,74 @@
 		opacity: 0.16;
 	}
 
+	@property --spinner-front {
+		syntax: '<number>';
+		inherits: false;
+		initial-value: 12.5;
+	}
+
+	@property --spinner-back {
+		syntax: '<number>';
+		inherits: false;
+		initial-value: 0;
+	}
+
 	.windows-spinner__arc {
-		animation: windows-spinner-dash var(--spinner-duration) linear infinite;
+		--spinner-front: 12.5;
+		--spinner-back: 0;
+		animation:
+			windows-spinner-front var(--spinner-duration) ease-in-out infinite,
+			windows-spinner-back var(--spinner-duration) ease-in-out infinite;
 		stroke: currentColor;
-		stroke-dasharray: 12.5 87.5;
-		stroke-dashoffset: 0;
+		stroke-dasharray: calc(var(--spinner-front) - var(--spinner-back))
+			calc(100 - (var(--spinner-front) - var(--spinner-back)));
+		stroke-dashoffset: calc(var(--spinner-back) * -1);
 		transform-box: fill-box;
 		transform-origin: center;
 	}
 
-	@keyframes windows-spinner-dash {
+	@keyframes windows-spinner-front {
 		0% {
-			animation-timing-function: ease-in;
-			stroke-dasharray: 12.5 87.5;
-			stroke-dashoffset: 0;
+			--spinner-front: 12.5;
+		}
+		18% {
+			--spinner-front: 24;
+		}
+		36% {
+			--spinner-front: 58;
 		}
 		50% {
-			animation-timing-function: ease-out;
-			stroke-dasharray: 87.5 12.5;
-			stroke-dashoffset: 0;
+			--spinner-front: 87.5;
+		}
+		68% {
+			--spinner-front: 102;
+		}
+		84% {
+			--spinner-front: 110;
 		}
 		100% {
-			stroke-dasharray: 12.5 87.5;
-			stroke-dashoffset: -100;
+			--spinner-front: 112.5;
+		}
+	}
+
+	@keyframes windows-spinner-back {
+		0% {
+			--spinner-back: 0;
+		}
+		32% {
+			--spinner-back: 0;
+		}
+		50% {
+			--spinner-back: 12.5;
+		}
+		64% {
+			--spinner-back: 42;
+		}
+		82% {
+			--spinner-back: 83;
+		}
+		100% {
+			--spinner-back: 100;
 		}
 	}
 

@@ -149,11 +149,11 @@
 	</div>
 
 	<div class="space-y-1.5">
-		<div class="flex items-center justify-between gap-3">
+		<div class="grid min-h-5 grid-cols-[1fr_auto] items-center gap-3">
 			<Label for="profile-handle">Handle</Label>
-			{#if handleStatus}
-				<p class="text-xs text-muted-foreground" aria-live="polite">{handleStatus.label}</p>
-			{/if}
+			<p class="text-xs text-muted-foreground" aria-live="polite">
+				{handleStatus?.label ?? ''}
+			</p>
 		</div>
 		<div class="flex items-center rounded-md border border-input bg-background shadow-xs focus-within:border-ring focus-within:ring-[3px] focus-within:ring-ring/50 dark:bg-input/30">
 			<span class="ps-3 text-sm text-muted-foreground">@</span>

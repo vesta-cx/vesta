@@ -43,7 +43,7 @@
 			windows-spinner-dash var(--spinner-duration) ease-in-out infinite,
 			windows-spinner-rotate var(--spinner-duration) ease-in-out infinite;
 		stroke: currentColor;
-		stroke-dasharray: 0 100;
+		stroke-dasharray: 12.5 87.5;
 		stroke-dashoffset: 0;
 		transform-box: fill-box;
 		transform-origin: center;
@@ -51,15 +51,15 @@
 
 	@keyframes windows-spinner-dash {
 		0% {
-			stroke-dasharray: 0 100;
+			stroke-dasharray: 12.5 87.5;
 			stroke-dashoffset: 0;
 		}
 		50% {
-			stroke-dasharray: 75 25;
+			stroke-dasharray: 87.5 12.5;
 			stroke-dashoffset: 0;
 		}
 		100% {
-			stroke-dasharray: 0 100;
+			stroke-dasharray: 12.5 87.5;
 			stroke-dashoffset: -75;
 		}
 	}

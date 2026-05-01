@@ -74,12 +74,26 @@
 	}
 
 	@keyframes windows-spinner-back {
-		0%,
+		0% {
+			--spinner-back: -12.5;
+		}
+		14% {
+			--spinner-back: -6;
+		}
 		28% {
 			--spinner-back: 0;
 		}
+		50% {
+			--spinner-back: 12.5;
+		}
+		64% {
+			--spinner-back: 42;
+		}
+		82% {
+			--spinner-back: 83;
+		}
 		100% {
-			--spinner-back: 100;
+			--spinner-back: 87.5;
 		}
 	}
 

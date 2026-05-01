@@ -54,8 +54,8 @@
 		</Dialog.Header>
 
 		<div class="grid h-[34rem] grid-cols-[12rem_1fr]">
-			<nav class="flex flex-col gap-1 overflow-y-auto border-e bg-muted/30 p-3">
-				<p class="px-2 pb-1 text-xs font-medium text-muted-foreground">Settings</p>
+			<nav class="flex flex-col gap-1 overflow-y-auto border-e bg-muted/30 px-3 py-6">
+				<p class="px-2 pb-2 text-xs font-medium text-muted-foreground">Settings</p>
 				{#each categories as category (category.id)}
 					{@const isActive = category.id === activeId}
 					{@const disabled = category.enabled === false}

@@ -28,8 +28,21 @@
 	let saving = $state(false);
 	let saved = $state(false);
 	let errors = $state<Record<string, string[] | undefined> | null>(null);
+	let handleAvailability = $state<{
+		state: 'idle' | 'checking' | 'available' | 'unavailable';
+		reason?: string | null;
+	}>({ state: 'idle' });
 
 	const handlePreview = $derived(handleValue.trim() || 'handle');
+	const handleStatus = $derived(
+		handleAvailability.state === 'available'
+			? { symbol: '✓', label: 'Available', class: 'bg-emerald-500 text-white' }
+			: handleAvailability.state === 'unavailable'
+				? { symbol: '×', label: 'Not available', class: 'bg-destructive text-destructive-foreground' }
+				: handleAvailability.state === 'checking'
+					? { symbol: '…', label: 'Checking', class: 'bg-muted text-muted-foreground' }
+					: null
+	);
 	const fieldError = (key: string) => errors?.[key]?.[0] ?? null;
 
 	// Mirrors USER_HANDLE_PATTERN in @vesta-cx/db/entity-schemas. Used on the
@@ -54,6 +67,41 @@
 		}
 		bind(next);
 	};
+
+	$effect(() => {
+		const handle = handleValue.trim();
+		if (!handle) {
+			handleAvailability = { state: 'idle' };
+			return;
+		}
+
+		handleAvailability = { state: 'checking' };
+		const controller = new AbortController();
+		const timeout = window.setTimeout(async () => {
+			try {
+				const response = await fetch(
+					`/dashboard/handle-availability?handle=${encodeURIComponent(handle)}`,
+					{ signal: controller.signal }
+				);
+				const result = (await response.json()) as {
+					available?: boolean;
+					reason?: string | null;
+				};
+				handleAvailability = {
+					state: result.available ? 'available' : 'unavailable',
+					reason: result.reason ?? null
+				};
+			} catch (error) {
+				if (error instanceof DOMException && error.name === 'AbortError') return;
+				handleAvailability = { state: 'idle' };
+			}
+		}, 250);
+
+		return () => {
+			controller.abort();
+			window.clearTimeout(timeout);
+		};
+	});
 </script>
 
 <form
@@ -97,7 +145,17 @@
 	</div>
 
 	<div class="space-y-1.5">
-		<Label for="profile-handle">Handle</Label>
+		<div class="flex items-center justify-between gap-3">
+			<Label for="profile-handle">Handle</Label>
+			{#if handleStatus}
+				<div class="flex items-center gap-1.5 text-xs text-muted-foreground" aria-live="polite">
+					<span class={`grid size-4 place-items-center rounded-full text-[0.65rem] ${handleStatus.class}`}>
+						{handleStatus.symbol}
+					</span>
+					<span>{handleStatus.label}</span>
+				</div>
+			{/if}
+		</div>
 		<div class="flex items-center rounded-md border border-input bg-background shadow-xs focus-within:border-ring focus-within:ring-[3px] focus-within:ring-ring/50 dark:bg-input/30">
 			<span class="ps-3 text-sm text-muted-foreground">@</span>
 			<Input

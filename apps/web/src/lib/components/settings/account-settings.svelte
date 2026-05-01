@@ -71,7 +71,9 @@
 	>
 		<header class="space-y-1">
 			<h2 class="text-lg font-semibold">Account</h2>
-			<p class="text-sm text-muted-foreground">Your WorkOS legal identity and sign-in email.</p>
+			<p class="text-sm text-muted-foreground">
+				How we refer to you in communications, billing, and sign-in.
+			</p>
 		</header>
 
 		<div class="grid gap-4 sm:grid-cols-2">
@@ -118,7 +120,7 @@
 				<p class="text-xs text-destructive">{fieldError('email')}</p>
 			{/if}
 			<p class="text-xs text-muted-foreground">
-				Changing email sends a code to the new address before WorkOS applies it.
+				Changing email sends a code to the new address before it becomes your sign-in email.
 			</p>
 		</div>
 
@@ -164,7 +166,7 @@
 			<div class="space-y-1">
 				<p class="text-sm font-medium">Verify {pendingEmail}</p>
 				<p class="text-xs text-muted-foreground">
-					Enter the 6-digit code WorkOS sent to finish changing your sign-in email.
+					Enter the 6-digit code we sent to finish changing your sign-in email.
 				</p>
 			</div>
 			<div class="space-y-1.5">

@@ -134,6 +134,11 @@
 		description="How you appear publicly on Vesta."
 	/>
 
+	<div class="flex items-center gap-3 rounded-md border border-dashed p-3 text-sm text-muted-foreground">
+		<Spinner class="size-10 [--spinner-duration:5s]" aria-label="Debug loading animation" />
+		<span>Spinner debug</span>
+	</div>
+
 	<div class="space-y-1.5">
 		<Label for="profile-display-name">Display name</Label>
 		<Input

@@ -98,11 +98,11 @@
 
 	<div class="space-y-1.5">
 		<Label for="profile-handle">Handle</Label>
-		<div class="flex items-center rounded-md border bg-background focus-within:ring-[3px] focus-within:ring-ring/50">
+		<div class="flex items-center rounded-md border border-input bg-background shadow-xs focus-within:border-ring focus-within:ring-[3px] focus-within:ring-ring/50 dark:bg-input/30">
 			<span class="ps-3 text-sm text-muted-foreground">@</span>
 			<Input
 				id="profile-handle"
-				class="border-0 ps-1 shadow-none focus-visible:ring-0"
+				class="border-0 bg-transparent ps-1 shadow-none focus-visible:ring-0 dark:bg-transparent"
 				name="handle"
 				value={handleValue}
 				oninput={(event) => sanitize(event, sanitizeUserHandle, (next) => (handleValue = next))}

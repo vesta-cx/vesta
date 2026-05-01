@@ -12,9 +12,10 @@
 		firstName?: string;
 		lastName?: string;
 		email: string;
+		emailVerified?: boolean;
 	};
 
-	let { firstName = '', lastName = '', email }: Props = $props();
+	let { firstName = '', lastName = '', email, emailVerified = false }: Props = $props();
 
 	const initialAccount = () => ({ firstName, lastName, email });
 	const initial = initialAccount();
@@ -106,7 +107,10 @@
 		</div>
 
 		<div class="space-y-1.5">
-			<Label for="account-email">Email</Label>
+			<div class="flex items-center justify-between gap-3">
+				<Label for="account-email">Email</Label>
+				<span class="text-xs text-muted-foreground">{emailVerified ? 'Verified' : 'Not verified'}</span>
+			</div>
 			<Input
 				id="account-email"
 				name="email"

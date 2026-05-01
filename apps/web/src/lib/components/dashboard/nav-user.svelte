@@ -116,7 +116,12 @@
 {/snippet}
 
 {#snippet accountContent()}
-	<AccountSettings firstName={user.firstName} lastName={user.lastName} email={user.email} />
+	<AccountSettings
+		firstName={user.firstName}
+		lastName={user.lastName}
+		email={user.email}
+		emailVerified={user.emailVerified}
+	/>
 {/snippet}
 
 {#snippet securityContent()}

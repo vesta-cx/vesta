@@ -358,10 +358,10 @@
 
 			<ActionRow
 				title="Email verification"
-				description={emailVerified ? `${email} is verified.` : `${email} is not verified yet.`}
+				description="Use one-time email codes as an additional sign-in check."
 			>
 				{#snippet action()}
-					<span class="text-xs text-muted-foreground">{emailVerified ? 'Enabled' : 'Pending'}</span>
+					<span class="text-xs text-muted-foreground">Unavailable</span>
 				{/snippet}
 			</ActionRow>
 

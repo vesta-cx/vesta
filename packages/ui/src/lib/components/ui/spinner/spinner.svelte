@@ -12,8 +12,8 @@
 	let spinnerElement: SVGSVGElement;
 	let arcElement: SVGCircleElement;
 
-	const MIN_LENGTH = 12.5;
-	const MAX_LENGTH = 87.5;
+	const HEAD_START = 12.5;
+	const TAIL_START_DELAY = 0.28;
 	const DEFAULT_DURATION_MS = 1800;
 
 	const easeInOut = (value: number): number => 0.5 - Math.cos(Math.PI * value) / 2;
@@ -38,16 +38,16 @@
 		const animate = (timestamp: number) => {
 			startedAt ??= timestamp;
 			const progress = ((timestamp - startedAt) % duration) / duration;
-			const phase = progress < 0.5 ? progress * 2 : (progress - 0.5) * 2;
-			const eased = easeInOut(phase);
-			const length =
-				progress < 0.5
-					? MIN_LENGTH + (MAX_LENGTH - MIN_LENGTH) * eased
-					: MAX_LENGTH - (MAX_LENGTH - MIN_LENGTH) * eased;
-			const back = progress < 0.5 ? 0 : 100 * eased;
+			const tailProgress =
+				progress <= TAIL_START_DELAY ?
+					0
+				: 	(progress - TAIL_START_DELAY) / (1 - TAIL_START_DELAY);
+			const head = HEAD_START + 100 * easeInOut(progress);
+			const tail = 100 * easeInOut(tailProgress);
+			const length = head - tail;
 
 			arcElement.style.strokeDasharray = `${length} ${100 - length}`;
-			arcElement.style.strokeDashoffset = String(-back);
+			arcElement.style.strokeDashoffset = String(-tail);
 			frame = window.requestAnimationFrame(animate);
 		};
 

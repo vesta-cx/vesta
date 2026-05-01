@@ -68,11 +68,19 @@
 			.join('')
 			.toUpperCase() || displayName.slice(0, 2).toUpperCase()
 	);
-	const settingsPath = $derived(page.url.searchParams.get('settings'));
-	const activeSettingsCategory = $derived(settingsPath?.split('/')[0] ?? null);
+	const settingsSegments = $derived(
+		page.url.pathname
+			.split('/')
+			.filter(Boolean)
+			.slice(2)
+	);
+	const settingsPath = $derived(
+		page.url.pathname.startsWith('/dashboard/settings') ? settingsSegments.join('/') : null
+	);
+	const activeSettingsCategory = $derived(settingsSegments[0] ?? null);
 	let openedFromUrl = $state(false);
 	$effect(() => {
-		if (settingsPath) {
+		if (settingsPath !== null) {
 			openedFromUrl = true;
 			settingsOpen = true;
 		} else if (openedFromUrl) {
@@ -81,10 +89,8 @@
 		}
 	});
 	$effect(() => {
-		if (!settingsOpen && settingsPath) {
-			const nextUrl = new URL(page.url);
-			nextUrl.searchParams.delete('settings');
-			void goto(nextUrl, { keepFocus: true, noScroll: true });
+		if (!settingsOpen && settingsPath !== null) {
+			void goto('/dashboard', { keepFocus: true, noScroll: true });
 		}
 	});
 

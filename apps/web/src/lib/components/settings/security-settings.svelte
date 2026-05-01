@@ -366,14 +366,6 @@
 				{/snippet}
 			</ActionRow>
 
-			<ActionRow
-				title="Email verification"
-				description="Use one-time email codes as an additional sign-in check."
-			>
-				{#snippet action()}
-					<span class="text-xs text-muted-foreground">Unavailable</span>
-				{/snippet}
-			</ActionRow>
 
 			<ActionRow
 				title="Active sessions"

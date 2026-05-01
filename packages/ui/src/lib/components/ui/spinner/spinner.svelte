@@ -56,7 +56,7 @@
 		animation:
 			windows-spinner-head var(--spinner-duration) linear infinite,
 			windows-spinner-tail var(--spinner-duration) linear infinite,
-			windows-spinner-rotate calc(var(--spinner-duration) * 0.5) linear infinite;
+			windows-spinner-rotate calc(var(--spinner-duration) * 0.25) linear infinite;
 		stroke: currentColor;
 		stroke-dasharray: calc(var(--spinner-head) - var(--spinner-tail))
 			calc(100 - (var(--spinner-head) - var(--spinner-tail)));

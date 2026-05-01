@@ -7,6 +7,7 @@
 	import { Button } from '@vesta-cx/ui/components/ui/button';
 	import { Input } from '@vesta-cx/ui/components/ui/input';
 	import { Label } from '@vesta-cx/ui/components/ui/label';
+	import SettingsHeading from './settings-heading.svelte';
 
 	type Props = {
 		firstName?: string;
@@ -70,12 +71,11 @@
 		}}
 		class="space-y-6"
 	>
-		<header class="space-y-1">
-			<h2 class="text-lg font-semibold">Account</h2>
-			<p class="text-sm text-muted-foreground">
-				How we refer to you in communications, billing, and sign-in.
-			</p>
-		</header>
+		<SettingsHeading
+			section="Account"
+			title="Account"
+			description="How we refer to you in communications, billing, and sign-in."
+		/>
 
 		<div class="grid gap-4 sm:grid-cols-2">
 			<div class="space-y-1.5">

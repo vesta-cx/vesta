@@ -1,16 +1,16 @@
 <script lang="ts">
 	import { Button } from '@vesta-cx/ui/components/ui/button';
+	import SettingsHeading from './settings-heading.svelte';
 	import { IN_DEVELOPMENT_TOOLTIP } from '$lib/components/dashboard/nav-collapsible.svelte';
 	import ActionRow from './action-row.svelte';
 </script>
 
 <div class="space-y-6">
-	<header class="space-y-1">
-		<h2 class="text-lg font-semibold">Data &amp; privacy</h2>
-		<p class="text-sm text-muted-foreground">
-			GDPR controls: export, rectify, restrict, delete.
-		</p>
-	</header>
+	<SettingsHeading
+		section="Data & privacy"
+		title="Data & privacy"
+		description="GDPR controls: export, rectify, restrict, delete."
+	/>
 
 	<ul class="divide-y">
 		<ActionRow

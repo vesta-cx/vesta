@@ -4,6 +4,7 @@
 	import { Input } from '@vesta-cx/ui/components/ui/input';
 	import { Label } from '@vesta-cx/ui/components/ui/label';
 	import { Textarea } from '@vesta-cx/ui/components/ui/textarea';
+	import SettingsHeading from './settings-heading.svelte';
 	import {
 		USER_HANDLE_MAX_LENGTH,
 		USER_HANDLE_MIN_LENGTH,
@@ -75,10 +76,11 @@
 	}}
 	class="space-y-6"
 >
-	<header class="space-y-1">
-		<h2 class="text-lg font-semibold">Profile</h2>
-		<p class="text-sm text-muted-foreground">How you appear publicly on Vesta.</p>
-	</header>
+	<SettingsHeading
+		section="Profile"
+		title="Profile"
+		description="How you appear publicly on Vesta."
+	/>
 
 	<div class="space-y-1.5">
 		<Label for="profile-display-name">Display name</Label>

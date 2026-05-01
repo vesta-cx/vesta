@@ -15,6 +15,7 @@
 	import { Input } from '@vesta-cx/ui/components/ui/input';
 	import { Label } from '@vesta-cx/ui/components/ui/label';
 	import ActionRow from './action-row.svelte';
+	import SettingsHeading from './settings-heading.svelte';
 
 	let {
 		security,
@@ -84,12 +85,11 @@
 		}}
 		class="space-y-6"
 	>
-		<header class="space-y-1">
-			<h2 class="text-lg font-semibold">Change password</h2>
-			<p class="text-sm text-muted-foreground">
-				Enter your current password before choosing a new one.
-			</p>
-		</header>
+		<SettingsHeading
+			section="Security"
+			title="Change password"
+			description="Enter your current password before choosing a new one."
+		/>
 
 		<div class="space-y-1.5">
 			<Label for="security-current-password">Current password</Label>
@@ -155,12 +155,11 @@
 	</form>
 {:else if mode === 'totp'}
 	<div class="space-y-6">
-		<header class="space-y-1">
-			<h2 class="text-lg font-semibold">Authenticator app</h2>
-			<p class="text-sm text-muted-foreground">
-				Set up or replace the one-time password app stored in WorkOS.
-			</p>
-		</header>
+		<SettingsHeading
+			section="Security"
+			title="Authenticator app"
+			description="Set up or replace the one-time password app stored in WorkOS."
+		/>
 
 		{#if security.unavailable}
 			<p class="text-sm text-destructive">Security methods are temporarily unavailable.</p>
@@ -298,12 +297,11 @@
 	</div>
 {:else if mode === 'sessions'}
 	<div class="space-y-6">
-		<header class="space-y-1">
-			<h2 class="text-lg font-semibold">Sessions</h2>
-			<p class="text-sm text-muted-foreground">
-				Review active sign-ins and revoke any devices you don't recognize.
-			</p>
-		</header>
+		<SettingsHeading
+			section="Security"
+			title="Sessions"
+			description="Review active sign-ins and revoke any devices you don't recognize."
+		/>
 
 		{#if message}
 			<p class="text-sm text-destructive">{message}</p>
@@ -385,12 +383,11 @@
 	</div>
 {:else if mode === 'passkeys'}
 	<div class="space-y-6">
-		<header class="space-y-1">
-			<h2 class="text-lg font-semibold">Passkeys</h2>
-			<p class="text-sm text-muted-foreground">
-				WorkOS currently exposes passkey enrollment through hosted AuthKit only.
-			</p>
-		</header>
+		<SettingsHeading
+			section="Security"
+			title="Passkeys"
+			description="WorkOS currently exposes passkey enrollment through hosted AuthKit only."
+		/>
 
 		<div class="rounded-md border p-3 text-sm text-muted-foreground">
 			Passkeys count as a first and second factor when AuthKit verifies user presence, but the
@@ -403,10 +400,7 @@
 	</div>
 {:else}
 	<div class="space-y-6">
-		<header class="space-y-1">
-			<h2 class="text-lg font-semibold">Security</h2>
-			<p class="text-sm text-muted-foreground">Sign-in and authentication.</p>
-		</header>
+		<SettingsHeading section="Security" title="Security" description="Sign-in and authentication." />
 
 		<ul class="divide-y">
 			<ActionRow title="Password" description="Change the password used for email sign-in.">

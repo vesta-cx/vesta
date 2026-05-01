@@ -54,8 +54,8 @@
 		--spinner-front: 12.5;
 		--spinner-back: 0;
 		animation:
-			windows-spinner-front var(--spinner-duration) ease-in-out infinite,
-			windows-spinner-back var(--spinner-duration) ease-in-out infinite;
+			windows-spinner-front var(--spinner-duration) linear infinite,
+			windows-spinner-back var(--spinner-duration) linear infinite;
 		stroke: currentColor;
 		stroke-dasharray: calc(var(--spinner-front) - var(--spinner-back))
 			calc(100 - (var(--spinner-front) - var(--spinner-back)));
@@ -65,10 +65,19 @@
 	}
 
 	@keyframes windows-spinner-front {
-		from {
+		0% {
 			--spinner-front: 12.5;
 		}
-		to {
+		14.6% {
+			--spinner-front: 25;
+		}
+		50% {
+			--spinner-front: 62.5;
+		}
+		85.4% {
+			--spinner-front: 100;
+		}
+		100% {
 			--spinner-front: 112.5;
 		}
 	}
@@ -77,20 +86,14 @@
 		0% {
 			--spinner-back: -12.5;
 		}
-		14% {
-			--spinner-back: -6;
-		}
-		28% {
-			--spinner-back: 0;
+		14.6% {
+			--spinner-back: -11.5;
 		}
 		50% {
 			--spinner-back: 12.5;
 		}
-		64% {
-			--spinner-back: 42;
-		}
-		82% {
-			--spinner-back: 83;
+		85.4% {
+			--spinner-back: 66.5;
 		}
 		100% {
 			--spinner-back: 87.5;

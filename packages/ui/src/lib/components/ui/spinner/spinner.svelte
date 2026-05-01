@@ -38,12 +38,11 @@
 		const animate = (timestamp: number) => {
 			startedAt ??= timestamp;
 			const progress = ((timestamp - startedAt) % duration) / duration;
-			const tailProgress =
-				progress <= TAIL_START_DELAY ?
-					0
-				: 	(progress - TAIL_START_DELAY) / (1 - TAIL_START_DELAY);
+			const tailCycle = progress - TAIL_START_DELAY;
+			const tailIteration = Math.floor(tailCycle);
+			const tailProgress = tailCycle - tailIteration;
 			const head = HEAD_START + 100 * easeInOut(progress);
-			const tail = 100 * easeInOut(tailProgress);
+			const tail = 100 * (tailIteration + easeInOut(tailProgress));
 			const length = head - tail;
 
 			arcElement.style.strokeDasharray = `${length} ${100 - length}`;

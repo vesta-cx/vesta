@@ -18,14 +18,19 @@
 	let {
 		open = $bindable(false),
 		categories,
-		initialCategoryId
+		initialCategoryId,
+		activeCategoryId
 	}: {
 		open?: boolean;
 		categories: SettingsCategory[];
 		initialCategoryId?: string;
+		activeCategoryId?: string | null;
 	} = $props();
 
 	let activeId = $state(initialCategoryId ?? categories.find((c) => c.enabled)?.id ?? categories[0]?.id);
+	$effect(() => {
+		if (activeCategoryId) activeId = activeCategoryId;
+	});
 	const active = $derived(categories.find((c) => c.id === activeId) ?? categories[0]);
 </script>
 

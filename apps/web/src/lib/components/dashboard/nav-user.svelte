@@ -24,6 +24,8 @@
 </script>
 
 <script lang="ts">
+	import { goto } from '$app/navigation';
+	import { page } from '$app/state';
 	import * as Avatar from '@vesta-cx/ui/components/ui/avatar';
 	import * as DropdownMenu from '@vesta-cx/ui/components/ui/dropdown-menu';
 	import * as Sidebar from '@vesta-cx/ui/components/ui/sidebar';
@@ -66,6 +68,25 @@
 			.join('')
 			.toUpperCase() || displayName.slice(0, 2).toUpperCase()
 	);
+	const settingsPath = $derived(page.url.searchParams.get('settings'));
+	const activeSettingsCategory = $derived(settingsPath?.split('/')[0] ?? null);
+	let openedFromUrl = $state(false);
+	$effect(() => {
+		if (settingsPath) {
+			openedFromUrl = true;
+			settingsOpen = true;
+		} else if (openedFromUrl) {
+			openedFromUrl = false;
+			settingsOpen = false;
+		}
+	});
+	$effect(() => {
+		if (!settingsOpen && settingsPath) {
+			const nextUrl = new URL(page.url);
+			nextUrl.searchParams.delete('settings');
+			void goto(nextUrl, { keepFocus: true, noScroll: true });
+		}
+	});
 
 	/**
 	 * Profile        = Vesta-owned public surface (display name, handle, bio).
@@ -218,4 +239,5 @@
 	bind:open={settingsOpen}
 	categories={settingsCategories}
 	initialCategoryId="profile"
+	activeCategoryId={activeSettingsCategory}
 />

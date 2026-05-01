@@ -11,6 +11,8 @@
 
 <script lang="ts">
 	import { enhance } from '$app/forms';
+	import { goto } from '$app/navigation';
+	import { page } from '$app/state';
 	import { Button } from '@vesta-cx/ui/components/ui/button';
 	import { Input } from '@vesta-cx/ui/components/ui/input';
 	import { Label } from '@vesta-cx/ui/components/ui/label';
@@ -27,7 +29,9 @@
 		emailVerified: boolean;
 	} = $props();
 
-	let mode = $state<'overview' | 'password' | 'totp' | 'passkeys' | 'sessions'>('overview');
+	type SecurityMode = 'overview' | 'password' | 'totp' | 'passkeys' | 'sessions';
+
+	let mode = $state<SecurityMode>('overview');
 	let saving = $state(false);
 	let saved = $state(false);
 	let busyFactorId = $state<string | null>(null);
@@ -42,6 +46,32 @@
 	const otherActiveSessions = $derived(
 		activeSessions.filter((session) => session.id !== security.currentSessionId)
 	);
+
+	const urlModeMap: Record<string, SecurityMode> = {
+		password: 'password',
+		'authenticator-app': 'totp',
+		passkeys: 'passkeys',
+		sessions: 'sessions'
+	};
+	const modeUrlMap: Record<SecurityMode, string> = {
+		overview: 'security',
+		password: 'security/password',
+		totp: 'security/authenticator-app',
+		passkeys: 'security/passkeys',
+		sessions: 'security/sessions'
+	};
+	$effect(() => {
+		const settingsPath = page.url.searchParams.get('settings');
+		const [category, panel] = settingsPath?.split('/') ?? [];
+		if (category === 'security') mode = panel ? (urlModeMap[panel] ?? 'overview') : 'overview';
+	});
+
+	const setMode = async (nextMode: SecurityMode) => {
+		mode = nextMode;
+		const nextUrl = new URL(page.url);
+		nextUrl.searchParams.set('settings', modeUrlMap[nextMode]);
+		await goto(nextUrl, { keepFocus: true, noScroll: true });
+	};
 
 	const fieldError = (key: string) => errors?.[key]?.[0] ?? null;
 	const formatSessionDate = (value: string) =>
@@ -76,7 +106,7 @@
 				saving = false;
 				if (result.type === 'success') {
 					saved = true;
-					mode = 'overview';
+					void setMode('overview');
 					await update({ reset: true, invalidateAll: false });
 				} else if (result.type === 'failure') {
 					showFailure(result.data);
@@ -145,7 +175,7 @@
 				variant="ghost"
 				onclick={() => {
 					resetPasswordForm();
-					mode = 'overview';
+					void setMode('overview');
 				}}
 			>
 				Cancel
@@ -271,7 +301,7 @@
 			{/if}
 
 			<div class="flex items-center justify-between gap-3">
-				<Button type="button" variant="ghost" onclick={() => (mode = 'overview')}>Back</Button>
+				<Button type="button" variant="ghost" onclick={() => void setMode('overview')}>Back</Button>
 				<form
 					method="post"
 					action="/dashboard?/enrollTotp"
@@ -358,7 +388,7 @@
 		</div>
 
 		<div class="flex items-center justify-between gap-3">
-			<Button type="button" variant="ghost" onclick={() => (mode = 'overview')}>Back</Button>
+			<Button type="button" variant="ghost" onclick={() => void setMode('overview')}>Back</Button>
 			<form
 				method="post"
 				action="/dashboard?/revokeOtherSessions"
@@ -395,7 +425,7 @@
 		</div>
 
 		<div class="flex justify-start">
-			<Button type="button" variant="ghost" onclick={() => (mode = 'overview')}>Back</Button>
+			<Button type="button" variant="ghost" onclick={() => void setMode('overview')}>Back</Button>
 		</div>
 	</div>
 {:else}
@@ -414,7 +444,7 @@
 							size="sm"
 							onclick={() => {
 								resetPasswordForm();
-								mode = 'password';
+								void setMode('password');
 							}}
 						>
 							Change
@@ -434,7 +464,7 @@
 						variant="outline"
 						size="sm"
 						disabled={security.unavailable}
-						onclick={() => (mode = 'totp')}
+						onclick={() => void setMode('totp')}
 					>
 						Manage
 					</Button>
@@ -467,7 +497,7 @@
 						variant="outline"
 						size="sm"
 						disabled={security.unavailable}
-						onclick={() => (mode = 'sessions')}
+						onclick={() => void setMode('sessions')}
 					>
 						Manage
 					</Button>

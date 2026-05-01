@@ -39,7 +39,7 @@
 	}
 
 	.windows-spinner__arc {
-		animation: windows-spinner-dash var(--spinner-duration) ease-in-out infinite;
+		animation: windows-spinner-dash var(--spinner-duration) linear infinite;
 		stroke: currentColor;
 		stroke-dasharray: 12.5 87.5;
 		stroke-dashoffset: 0;
@@ -49,10 +49,12 @@
 
 	@keyframes windows-spinner-dash {
 		0% {
+			animation-timing-function: ease-in;
 			stroke-dasharray: 12.5 87.5;
 			stroke-dashoffset: 0;
 		}
 		50% {
+			animation-timing-function: ease-out;
 			stroke-dasharray: 87.5 12.5;
 			stroke-dashoffset: 0;
 		}

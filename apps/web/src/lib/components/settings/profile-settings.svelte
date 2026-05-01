@@ -2,7 +2,7 @@
 	import { enhance } from '$app/forms';
 	import CircleCheckIcon from '@lucide/svelte/icons/circle-check';
 	import CircleXIcon from '@lucide/svelte/icons/circle-x';
-	import LoaderCircleIcon from '@lucide/svelte/icons/loader-circle';
+	import { Spinner } from '@vesta-cx/ui/components/ui/spinner';
 	import { Button } from '@vesta-cx/ui/components/ui/button';
 	import { Input } from '@vesta-cx/ui/components/ui/input';
 	import { Label } from '@vesta-cx/ui/components/ui/label';
@@ -44,7 +44,7 @@
 			: handleChanged && handleAvailability.state === 'unavailable'
 				? { icon: CircleXIcon, label: 'Not available', class: 'text-destructive' }
 				: handleChanged && handleAvailability.state === 'checking'
-					? { icon: LoaderCircleIcon, label: 'Checking', class: 'bg-muted text-muted-foreground' }
+					? { icon: Spinner, label: 'Checking', class: 'text-muted-foreground' }
 					: null
 	);
 	const fieldError = (key: string) => errors?.[key]?.[0] ?? null;

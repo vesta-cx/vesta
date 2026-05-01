@@ -65,11 +65,11 @@
 
 	@keyframes windows-spinner-length {
 		0% {
-			animation-timing-function: ease-in-out;
+			animation-timing-function: ease-in;
 			--spinner-length: 12.5;
 		}
 		50% {
-			animation-timing-function: ease-in-out;
+			animation-timing-function: ease-out;
 			--spinner-length: 87.5;
 		}
 		100% {
@@ -80,7 +80,7 @@
 	@keyframes windows-spinner-offset {
 		0%,
 		50% {
-			animation-timing-function: ease-in-out;
+			animation-timing-function: ease-out;
 			--spinner-offset: 0;
 		}
 		100% {

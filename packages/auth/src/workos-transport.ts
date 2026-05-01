@@ -20,6 +20,7 @@ import type {
 	AuthTotpEnrollment,
 	AuthTransportSessionRefreshResult,
 	AuthUser,
+	AuthUserSession,
 } from "./types.js";
 
 const asRecord = (value: unknown): Record<string, unknown> =>
@@ -390,6 +391,47 @@ const toAuthFactorChallengeVerification = (
 	return {
 		challenge: toAuthFactorChallenge(record.challenge),
 		valid: readBoolean(record, "valid") ?? false,
+	};
+};
+
+const toAuthUserSession = (value: unknown): AuthUserSession => {
+	const record = asRecord(value);
+
+	return {
+		id: requireString("toAuthUserSession", record, "id"),
+		userId: requireFirstString("toAuthUserSession", record, [
+			"userId",
+			"user_id",
+		]),
+		ipAddress: readFirstString(record, ["ipAddress", "ip_address"]),
+		userAgent: readFirstString(record, ["userAgent", "user_agent"]),
+		organizationId: readFirstString(record, [
+			"organizationId",
+			"organization_id",
+		]),
+		authMethod:
+			readFirstString(record, [
+				"authMethod",
+				"auth_method",
+			]) ?? "unknown",
+		status: requireString(
+			"toAuthUserSession",
+			record,
+			"status",
+		) as AuthUserSession["status"],
+		expiresAt: requireFirstString("toAuthUserSession", record, [
+			"expiresAt",
+			"expires_at",
+		]),
+		endedAt: readFirstString(record, ["endedAt", "ended_at"]),
+		createdAt: requireFirstString("toAuthUserSession", record, [
+			"createdAt",
+			"created_at",
+		]),
+		updatedAt: requireFirstString("toAuthUserSession", record, [
+			"updatedAt",
+			"updated_at",
+		]),
 	};
 };
 
@@ -913,6 +955,34 @@ export const createWorkOSTransport = (config: {
 			>(mfa, "deleteFactor");
 
 			await deleteFactor(factorId);
+		},
+
+		listSessions: async ({ userId }) => {
+			const listSessions = bindMethod<
+				[string],
+				Promise<unknown>
+			>(userManagement, "listSessions");
+			const response = await listSessions(userId);
+
+			if (isAutoPaginatable<unknown>(response)) {
+				return (await response.autoPagination()).map(
+					toAuthUserSession,
+				);
+			}
+
+			const record = asRecord(response);
+			return Array.isArray(record.data) ?
+					record.data.map(toAuthUserSession)
+				:	[];
+		},
+
+		revokeSession: async ({ sessionId }) => {
+			const revokeSession = bindMethod<
+				[{ sessionId: string }],
+				Promise<void>
+			>(userManagement, "revokeSession");
+
+			await revokeSession({ sessionId });
 		},
 
 		getOrganization: async ({ organizationId }) => {

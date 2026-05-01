@@ -28,6 +28,7 @@ import type {
 	AuthSessionResult,
 	AuthSessionWithoutMemberships,
 	AuthTransport,
+	AuthUserSession,
 	AuthTransportSession,
 	AuthTransportSessionRefreshResult,
 	AuthUser,
@@ -90,6 +91,15 @@ export interface AuthRuntime {
 	deleteAuthFactor(input: {
 		userId: string;
 		factorId: string;
+	}): Promise<void>;
+	listSessions(input: { userId: string }): Promise<AuthUserSession[]>;
+	revokeSession(input: {
+		userId: string;
+		sessionId: string;
+	}): Promise<void>;
+	revokeOtherSessions(input: {
+		userId: string;
+		currentSessionId: string | null;
 	}): Promise<void>;
 	getOrganization(input: {
 		organizationId: string;
@@ -835,6 +845,51 @@ export const createAuthRuntime = (config: AuthRuntimeConfig): AuthRuntime => {
 
 			return runWithRetry("deleteAuthFactor", () =>
 				transport.deleteAuthFactor({ factorId }),
+			);
+		},
+
+		listSessions: ({ userId }) =>
+			runWithRetry("listSessions", () =>
+				transport.listSessions({ userId }),
+			),
+
+		revokeSession: async ({ userId, sessionId }) => {
+			const sessions = await runtime.listSessions({ userId });
+			if (
+				!sessions.some(
+					(session) => session.id === sessionId,
+				)
+			) {
+				throw new TerminalAuthError(
+					"Session does not belong to this user",
+					"revokeSession",
+					{ status: 404 },
+				);
+			}
+
+			return runWithRetry("revokeSession", () =>
+				transport.revokeSession({ sessionId }),
+			);
+		},
+
+		revokeOtherSessions: async ({ userId, currentSessionId }) => {
+			const sessions = await runtime.listSessions({ userId });
+			const otherSessionIds = sessions
+				.filter(
+					(session) =>
+						session.status === "active" &&
+						session.id !== currentSessionId,
+				)
+				.map((session) => session.id);
+
+			await Promise.all(
+				otherSessionIds.map((sessionId) =>
+					runWithRetry("revokeSession", () =>
+						transport.revokeSession({
+							sessionId,
+						}),
+					),
+				),
 			);
 		},
 

@@ -164,6 +164,22 @@ const createTransport = (
 		valid: true,
 	}),
 	deleteAuthFactor: async () => undefined,
+	listSessions: async ({ userId }) => [
+		{
+			id: "session_123",
+			userId,
+			ipAddress: "127.0.0.1",
+			userAgent: "Vitest",
+			organizationId: "org_primary",
+			authMethod: "password",
+			status: "active",
+			expiresAt: "2026-03-24T00:00:00.000Z",
+			endedAt: null,
+			createdAt: "2026-03-23T00:00:00.000Z",
+			updatedAt: "2026-03-23T00:00:00.000Z",
+		},
+	],
+	revokeSession: async () => undefined,
 	getOrganization: async ({ organizationId }) => ({
 		id: organizationId,
 		name: "Primary Org",

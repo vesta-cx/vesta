@@ -29,9 +29,13 @@ export const load: LayoutServerLoad = async ({ locals, platform }) => {
 
 	let authFactors: Awaited<ReturnType<ReturnType<typeof createWebAuthRuntime>['listAuthFactors']>> =
 		[];
+	let sessions: Awaited<ReturnType<ReturnType<typeof createWebAuthRuntime>['listSessions']>> = [];
 	let securityUnavailable = false;
 	try {
-		authFactors = await runtime.listAuthFactors({ userId });
+		[authFactors, sessions] = await Promise.all([
+			runtime.listAuthFactors({ userId }),
+			runtime.listSessions({ userId })
+		]);
 	} catch {
 		securityUnavailable = true;
 	}
@@ -50,7 +54,9 @@ export const load: LayoutServerLoad = async ({ locals, platform }) => {
 		},
 		security: {
 			unavailable: securityUnavailable,
-			authFactors
+			authFactors,
+			sessions,
+			currentSessionId: locals.session.sessionId
 		}
 	};
 };

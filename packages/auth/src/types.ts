@@ -77,6 +77,21 @@ export interface AuthFactorChallengeVerification {
 	valid: boolean;
 }
 
+/** Active user session metadata normalized from WorkOS session APIs. */
+export interface AuthUserSession {
+	id: string;
+	userId: string;
+	ipAddress: string | null;
+	userAgent: string | null;
+	organizationId: string | null;
+	authMethod: string;
+	status: "active" | "expired" | "revoked";
+	expiresAt: string;
+	endedAt: string | null;
+	createdAt: string;
+	updatedAt: string;
+}
+
 /** Application session claims normalized from a WorkOS sealed session. */
 export interface AuthSession {
 	sessionId: string | null;
@@ -311,6 +326,8 @@ export interface AuthTransport {
 		code: string;
 	}): Promise<AuthFactorChallengeVerification>;
 	deleteAuthFactor(input: { factorId: string }): Promise<void>;
+	listSessions(input: { userId: string }): Promise<AuthUserSession[]>;
+	revokeSession(input: { sessionId: string }): Promise<void>;
 	getOrganization(input: {
 		organizationId: string;
 	}): Promise<AuthOrganization>;

@@ -1,9 +1,11 @@
 <script lang="ts" module>
-	import type { AuthFactor, AuthTotpEnrollment } from '@vesta-cx/auth';
+	import type { AuthFactor, AuthTotpEnrollment, AuthUserSession } from '@vesta-cx/auth';
 
 	export type SecuritySettingsData = {
 		unavailable: boolean;
 		authFactors: AuthFactor[];
+		sessions: AuthUserSession[];
+		currentSessionId: string | null;
 	};
 </script>
 
@@ -12,7 +14,6 @@
 	import { Button } from '@vesta-cx/ui/components/ui/button';
 	import { Input } from '@vesta-cx/ui/components/ui/input';
 	import { Label } from '@vesta-cx/ui/components/ui/label';
-	import { IN_DEVELOPMENT_TOOLTIP } from '$lib/components/dashboard/nav-collapsible.svelte';
 	import ActionRow from './action-row.svelte';
 
 	let {
@@ -25,18 +26,30 @@
 		emailVerified: boolean;
 	} = $props();
 
-	let mode = $state<'overview' | 'password' | 'totp' | 'passkeys'>('overview');
+	let mode = $state<'overview' | 'password' | 'totp' | 'passkeys' | 'sessions'>('overview');
 	let saving = $state(false);
 	let saved = $state(false);
 	let busyFactorId = $state<string | null>(null);
+	let busySessionId = $state<string | null>(null);
 	let enrollment = $state<AuthTotpEnrollment | null>(null);
 	let message = $state<string | null>(null);
 	let errors = $state<Record<string, string[] | undefined> | null>(null);
 
 	const totpFactors = $derived(security.authFactors.filter((factor) => factor.type === 'totp'));
 	const hasTotp = $derived(totpFactors.length > 0);
+	const activeSessions = $derived(security.sessions.filter((session) => session.status === 'active'));
+	const otherActiveSessions = $derived(
+		activeSessions.filter((session) => session.id !== security.currentSessionId)
+	);
 
 	const fieldError = (key: string) => errors?.[key]?.[0] ?? null;
+	const formatSessionDate = (value: string) =>
+		new Intl.DateTimeFormat(undefined, {
+			dateStyle: 'medium',
+			timeStyle: 'short'
+		}).format(new Date(value));
+	const describeSession = (session: AuthUserSession) =>
+		[session.userAgent ?? 'Unknown device', session.ipAddress].filter(Boolean).join(' · ');
 	const resetPasswordForm = () => {
 		saving = false;
 		errors = null;
@@ -283,6 +296,93 @@
 			</div>
 		{/if}
 	</div>
+{:else if mode === 'sessions'}
+	<div class="space-y-6">
+		<header class="space-y-1">
+			<h2 class="text-lg font-semibold">Sessions</h2>
+			<p class="text-sm text-muted-foreground">
+				Review active sign-ins and revoke any devices you don't recognize.
+			</p>
+		</header>
+
+		{#if message}
+			<p class="text-sm text-destructive">{message}</p>
+		{/if}
+
+		<div class="space-y-3">
+			{#each activeSessions as session (session.id)}
+				<div class="flex items-start justify-between gap-4 border-b pb-3 last:border-b-0">
+					<div class="min-w-0 space-y-1">
+						<div class="flex flex-wrap items-center gap-2">
+							<p class="text-sm font-medium">
+								{session.id === security.currentSessionId ? 'Current session' : 'Active session'}
+							</p>
+							{#if session.id === security.currentSessionId}
+								<span class="rounded-full bg-muted px-2 py-0.5 text-[0.65rem] text-muted-foreground">
+									This device
+								</span>
+							{/if}
+						</div>
+						<p class="break-words text-xs text-muted-foreground">{describeSession(session)}</p>
+						<p class="text-xs text-muted-foreground">
+							Signed in with {session.authMethod.replaceAll('_', ' ')} · Expires {formatSessionDate(
+								session.expiresAt
+							)}
+						</p>
+					</div>
+					{#if session.id !== security.currentSessionId}
+						<form
+							method="post"
+							action="/dashboard?/revokeSession"
+							use:enhance={() => {
+								busySessionId = session.id;
+								message = null;
+								return async ({ result, update }) => {
+									busySessionId = null;
+									if (result.type === 'success') {
+										await update({ reset: true, invalidateAll: true });
+									} else if (result.type === 'failure') {
+										showFailure(result.data);
+									}
+								};
+							}}
+						>
+							<input type="hidden" name="sessionId" value={session.id} />
+							<Button type="submit" variant="outline" size="sm" disabled={busySessionId === session.id}>
+								{busySessionId === session.id ? 'Revoking…' : 'Revoke'}
+							</Button>
+						</form>
+					{/if}
+				</div>
+			{:else}
+				<p class="text-sm text-muted-foreground">No active sessions found.</p>
+			{/each}
+		</div>
+
+		<div class="flex items-center justify-between gap-3">
+			<Button type="button" variant="ghost" onclick={() => (mode = 'overview')}>Back</Button>
+			<form
+				method="post"
+				action="/dashboard?/revokeOtherSessions"
+				use:enhance={() => {
+					saving = true;
+					message = null;
+					return async ({ result, update }) => {
+						saving = false;
+						if (result.type === 'success') {
+							await update({ reset: true, invalidateAll: true });
+						} else if (result.type === 'failure') {
+							showFailure(result.data);
+						}
+					};
+				}}
+			>
+				<Button type="submit" variant="outline" disabled={saving || otherActiveSessions.length === 0}>
+					{saving ? 'Revoking…' : 'Revoke all others'}
+				</Button>
+			</form>
+		</div>
+	</div>
 {:else if mode === 'passkeys'}
 	<div class="space-y-6">
 		<header class="space-y-1">
@@ -367,13 +467,15 @@
 			</ActionRow>
 
 
-			<ActionRow
-				title="Active sessions"
-				description="Sign out of any devices you don't recognize."
-			>
+			<ActionRow title="Sessions" description="Sign out of any devices you don't recognize.">
 				{#snippet action()}
-					<Button variant="outline" size="sm" disabled title={IN_DEVELOPMENT_TOOLTIP}>
-						Sign out others
+					<Button
+						variant="outline"
+						size="sm"
+						disabled={security.unavailable}
+						onclick={() => (mode = 'sessions')}
+					>
+						Manage
 					</Button>
 				{/snippet}
 			</ActionRow>

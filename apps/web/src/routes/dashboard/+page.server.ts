@@ -402,20 +402,19 @@ export const actions: Actions = {
 
 		try {
 			const runtime = createWebAuthRuntime(platform);
+			const { userId } = locals.session;
 			await runtime.verifyTotpEnrollment({
-				userId: locals.session.userId,
+				userId,
 				factorId,
 				...(challengeId ? { challengeId } : {}),
 				code: (decodedCode as Result.Success<string, never>).success
 			});
 
-			const factors = await runtime.listAuthFactors({ userId: locals.session.userId });
+			const factors = await runtime.listAuthFactors({ userId });
 			await Promise.all(
 				factors
 					.filter((factor) => factor.type === 'totp' && factor.id !== factorId)
-					.map((factor) =>
-						runtime.deleteAuthFactor({ userId: locals.session.userId, factorId: factor.id })
-					)
+					.map((factor) => runtime.deleteAuthFactor({ userId, factorId: factor.id }))
 			);
 		} catch (caught) {
 			const debug = toClientSafeError(caught);
@@ -447,6 +446,43 @@ export const actions: Actions = {
 			return fail(500, {
 				message: 'Authentication factor could not be removed. Try again in a moment.'
 			});
+		}
+
+		return { success: true };
+	},
+	revokeSession: async ({ request, locals, platform }) => {
+		if (!locals.session) return fail(401, { message: 'Unauthenticated' });
+		if (!platform) return fail(500, { message: 'Platform not available' });
+
+		const form = await request.formData();
+		const sessionId = String(form.get('sessionId') ?? '');
+		if (!sessionId) return fail(400, { message: 'Choose a session to revoke.' });
+		if (sessionId === locals.session.sessionId) {
+			return fail(400, { message: 'Use sign out to end your current session.' });
+		}
+
+		try {
+			await createWebAuthRuntime(platform).revokeSession({
+				userId: locals.session.userId,
+				sessionId
+			});
+		} catch {
+			return fail(500, { message: 'Session could not be revoked. Try again in a moment.' });
+		}
+
+		return { success: true };
+	},
+	revokeOtherSessions: async ({ locals, platform }) => {
+		if (!locals.session) return fail(401, { message: 'Unauthenticated' });
+		if (!platform) return fail(500, { message: 'Platform not available' });
+
+		try {
+			await createWebAuthRuntime(platform).revokeOtherSessions({
+				userId: locals.session.userId,
+				currentSessionId: locals.session.sessionId
+			});
+		} catch {
+			return fail(500, { message: 'Sessions could not be revoked. Try again in a moment.' });
 		}
 
 		return { success: true };

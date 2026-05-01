@@ -18,6 +18,8 @@
 	export type DashboardSecurity = {
 		unavailable: boolean;
 		authFactors: import('@vesta-cx/auth').AuthFactor[];
+		sessions: import('@vesta-cx/auth').AuthUserSession[];
+		currentSessionId: string | null;
 	};
 </script>
 

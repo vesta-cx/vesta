@@ -55,7 +55,7 @@
 		--spinner-back: 0;
 		animation:
 			windows-spinner-front var(--spinner-duration) ease-in-out infinite,
-			windows-spinner-back var(--spinner-duration) ease-in-out infinite;
+			windows-spinner-back var(--spinner-duration) linear infinite;
 		stroke: currentColor;
 		stroke-dasharray: calc(var(--spinner-front) - var(--spinner-back))
 			calc(100 - (var(--spinner-front) - var(--spinner-back)));
@@ -74,10 +74,12 @@
 	}
 
 	@keyframes windows-spinner-back {
-		from {
+		0%,
+		25% {
 			--spinner-back: 0;
+			animation-timing-function: ease-in-out;
 		}
-		to {
+		100% {
 			--spinner-back: 100;
 		}
 	}

@@ -58,7 +58,7 @@
 		}
 		100% {
 			stroke-dasharray: 12.5 87.5;
-			stroke-dashoffset: -75;
+			stroke-dashoffset: -100;
 		}
 	}
 

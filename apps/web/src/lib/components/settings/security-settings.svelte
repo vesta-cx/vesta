@@ -117,6 +117,7 @@
 	>
 		<SettingsHeading
 			section="Security"
+			sectionHref="/dashboard?settings=security"
 			title="Change password"
 			description="Enter your current password before choosing a new one."
 		/>
@@ -187,6 +188,7 @@
 	<div class="space-y-6">
 		<SettingsHeading
 			section="Security"
+			sectionHref="/dashboard?settings=security"
 			title="Authenticator app"
 			description="Set up or replace the one-time password app stored in WorkOS."
 		/>
@@ -329,6 +331,7 @@
 	<div class="space-y-6">
 		<SettingsHeading
 			section="Security"
+			sectionHref="/dashboard?settings=security"
 			title="Sessions"
 			description="Review active sign-ins and revoke any devices you don't recognize."
 		/>
@@ -415,6 +418,7 @@
 	<div class="space-y-6">
 		<SettingsHeading
 			section="Security"
+			sectionHref="/dashboard?settings=security"
 			title="Passkeys"
 			description="WorkOS currently exposes passkey enrollment through hosted AuthKit only."
 		/>

@@ -11,14 +11,12 @@
 </script>
 
 <header class="space-y-1">
-	<p class="text-xs font-medium text-muted-foreground">
-		{#if section === title}
-			{section}
-		{:else}
-			{section} / {title}
+	<div class="flex items-baseline gap-1.5">
+		{#if section !== title}
+			<span class="text-xs font-medium text-muted-foreground">{section} /</span>
 		{/if}
-	</p>
-	<h2 class="text-lg font-semibold">{title}</h2>
+		<h2 class="text-lg font-semibold">{title}</h2>
+	</div>
 	{#if description}
 		<p class="text-sm text-muted-foreground">{description}</p>
 	{/if}

@@ -1,5 +1,8 @@
 <script lang="ts">
 	import { enhance } from '$app/forms';
+	import CheckIcon from '@lucide/svelte/icons/check';
+	import LoaderCircleIcon from '@lucide/svelte/icons/loader-circle';
+	import XIcon from '@lucide/svelte/icons/x';
 	import { Button } from '@vesta-cx/ui/components/ui/button';
 	import { Input } from '@vesta-cx/ui/components/ui/input';
 	import { Label } from '@vesta-cx/ui/components/ui/label';
@@ -34,13 +37,14 @@
 	}>({ state: 'idle' });
 
 	const handlePreview = $derived(handleValue.trim() || 'handle');
+	const handleChanged = $derived(handleValue.trim() !== (handle ?? '').trim());
 	const handleStatus = $derived(
-		handleAvailability.state === 'available'
-			? { symbol: '✓', label: 'Available', class: 'bg-emerald-500 text-white' }
-			: handleAvailability.state === 'unavailable'
-				? { symbol: '×', label: 'Not available', class: 'bg-destructive text-destructive-foreground' }
-				: handleAvailability.state === 'checking'
-					? { symbol: '…', label: 'Checking', class: 'bg-muted text-muted-foreground' }
+		handleChanged && handleAvailability.state === 'available'
+			? { icon: CheckIcon, label: 'Available', class: 'bg-emerald-500 text-white' }
+			: handleChanged && handleAvailability.state === 'unavailable'
+				? { icon: XIcon, label: 'Not available', class: 'bg-destructive text-destructive-foreground' }
+				: handleChanged && handleAvailability.state === 'checking'
+					? { icon: LoaderCircleIcon, label: 'Checking', class: 'bg-muted text-muted-foreground' }
 					: null
 	);
 	const fieldError = (key: string) => errors?.[key]?.[0] ?? null;
@@ -70,7 +74,7 @@
 
 	$effect(() => {
 		const handle = handleValue.trim();
-		if (!handle) {
+		if (!handleChanged || !handle) {
 			handleAvailability = { state: 'idle' };
 			return;
 		}
@@ -169,10 +173,8 @@
 				spellcheck={false}
 			/>
 			{#if handleStatus}
-				<span
-					class={`me-3 grid size-4 shrink-0 place-items-center rounded-full text-[0.65rem] ${handleStatus.class}`}
-				>
-					{handleStatus.symbol}
+				<span class={`me-3 grid size-4 shrink-0 place-items-center rounded-full ${handleStatus.class}`}>
+					<handleStatus.icon class="size-3" />
 				</span>
 			{/if}
 		</div>

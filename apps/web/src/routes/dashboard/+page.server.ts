@@ -8,6 +8,7 @@ import {
 	USER_HANDLE_MAX_LENGTH,
 	USER_HANDLE_MIN_LENGTH,
 	USER_HANDLE_PATTERN,
+	normalizeUserHandle,
 	isMultiLineSafe,
 	isSingleLineSafe
 } from '@vesta-cx/db/entity-schemas';
@@ -20,10 +21,10 @@ import type { Actions } from './$types';
  * client) and surface field-keyed messages for the dialog form.
  *
  * Charset rules:
- * - Handle: lowercase letters, digits, hyphens, underscores. A subset of
- *   RFC 3986 "unreserved" so the handle survives a URL path segment without
+ * - Handle: letters, digits, hyphens, underscores. A subset of RFC 3986
+ *   "unreserved" so the handle survives a URL path segment without
  *   percent-encoding. Period and tilde are technically unreserved too but
- *   excluded for legibility.
+ *   excluded for legibility. Uniqueness is case-insensitive.
  * - Display name: any Unicode character except control characters (Cc).
  *   Single line — newlines are control chars and therefore rejected.
  * - Bio: any Unicode character except control characters, with tab, line
@@ -44,10 +45,12 @@ const HandleSchema = Schema.NullOr(
 		),
 		Schema.makeFilter(
 			(value: string) =>
-				USER_HANDLE_PATTERN.test(value) ||
-				'Use lowercase letters, numbers, hyphens, or underscores.'
+				USER_HANDLE_PATTERN.test(value) || 'Use letters, numbers, hyphens, or underscores.'
 		),
-		Schema.makeFilter((value: string) => !RESERVED_HANDLES.has(value) || 'That handle is reserved.')
+		Schema.makeFilter(
+			(value: string) =>
+				!RESERVED_HANDLES.has(normalizeUserHandle(value)) || 'That handle is reserved.'
+		)
 	)
 );
 
@@ -322,6 +325,9 @@ export const actions: Actions = {
 		}
 
 		const db = getDb(platform);
+		const handleNormalized = result.values.handle
+			? normalizeUserHandle(result.values.handle)
+			: null;
 		try {
 			// Upsert: provisioning may not have populated the row (e.g. a fresh
 			// D1 after a session was already issued). On insert we fill the
@@ -335,6 +341,7 @@ export const actions: Actions = {
 					organizationId,
 					avatarUrl: profilePictureUrl ?? null,
 					handle: result.values.handle,
+					handleNormalized,
 					displayName: result.values.displayName,
 					bio: result.values.bio
 				})
@@ -342,6 +349,7 @@ export const actions: Actions = {
 					target: users.workosUserId,
 					set: {
 						handle: result.values.handle,
+						handleNormalized,
 						displayName: result.values.displayName,
 						bio: result.values.bio,
 						updatedAt: new Date()

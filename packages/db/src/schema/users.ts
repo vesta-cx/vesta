@@ -17,6 +17,7 @@ export const users = sqliteTable("users", {
 	 * (the public `/@<handle>` namespace is shared).
 	 */
 	handle: text("handle").unique(),
+	handleNormalized: text("handle_normalized").unique(),
 	displayName: text("display_name"),
 	avatarUrl: text("avatar_url"),
 	bio: text("bio"),

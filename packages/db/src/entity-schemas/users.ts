@@ -27,18 +27,24 @@ export const RESERVED_HANDLES: ReadonlySet<string> = new Set([
 ]);
 
 /**
- * Pattern for a public handle: lowercase letters, digits, hyphens, and
- * underscores; must start and end with an alphanumeric. Shared between the
- * Zod entity schemas and any Effect schemas that re-validate at the edge.
+ * Pattern for a public handle: letters, digits, hyphens, and underscores;
+ * must start and end with an alphanumeric. Handle uniqueness is enforced on
+ * the lowercase normalized value so users can style capitalization without
+ * creating case-sensitive duplicates.
  */
-export const USER_HANDLE_PATTERN = /^[a-z0-9](?:[a-z0-9_-]*[a-z0-9])?$/;
+export const USER_HANDLE_PATTERN =
+	/^[A-Za-z0-9](?:[A-Za-z0-9_-]*[A-Za-z0-9])?$/;
 
 export const USER_HANDLE_MIN_LENGTH = 3;
 export const USER_HANDLE_MAX_LENGTH = 32;
 
 /** Strip every character that isn't part of the handle charset. */
 export const sanitizeUserHandle = (input: string): string =>
-	input.toLowerCase().replace(/[^a-z0-9_-]/g, "");
+	input.replace(/[^A-Za-z0-9_-]/g, "");
+
+/** Canonical case-insensitive handle key used for uniqueness checks. */
+export const normalizeUserHandle = (input: string): string =>
+	input.toLowerCase();
 
 /**
  * Charset rules for free-form profile fields. Single-line fields strip ASCII
@@ -76,9 +82,9 @@ export const userHandleSchema = z
 	.max(USER_HANDLE_MAX_LENGTH)
 	.regex(
 		USER_HANDLE_PATTERN,
-		"Use lowercase letters, numbers, hyphens, or underscores.",
+		"Use letters, numbers, hyphens, or underscores.",
 	)
-	.refine((value) => !RESERVED_HANDLES.has(value), {
+	.refine((value) => !RESERVED_HANDLES.has(normalizeUserHandle(value)), {
 		message: "That handle is reserved.",
 	});
 

@@ -34,7 +34,7 @@
 
 	// Mirrors USER_HANDLE_PATTERN in @vesta-cx/db/entity-schemas. Used on the
 	// native input as a belt-and-suspenders submit-time check.
-	const HANDLE_PATTERN = '[a-z0-9](?:[a-z0-9_\\-]*[a-z0-9])?';
+	const HANDLE_PATTERN = '[A-Za-z0-9](?:[A-Za-z0-9_\\-]*[A-Za-z0-9])?';
 
 	/**
 	 * Sanitize-as-you-type. Each handler filters the candidate value through
@@ -117,7 +117,8 @@
 			/>
 		</div>
 		<p class="text-xs text-muted-foreground">
-			Lowercase letters, numbers, hyphens, or underscores. Your public profile lives at
+			Letters, numbers, hyphens, or underscores. Capitalization is for display only; handle
+			availability ignores case. Your public profile lives at
 			<span class="font-mono">vesta.cx/user/{handlePreview}</span>.
 		</p>
 		{#if fieldError('handle')}

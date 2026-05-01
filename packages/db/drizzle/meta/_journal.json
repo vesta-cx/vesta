@@ -15,6 +15,13 @@
             "when": 1777566434122,
             "tag": "0001_melodic_vanisher",
             "breakpoints": true
+        },
+        {
+            "idx": 2,
+            "version": "6",
+            "when": 1777628401951,
+            "tag": "0002_casefolded_handles",
+            "breakpoints": true
         }
     ]
 }

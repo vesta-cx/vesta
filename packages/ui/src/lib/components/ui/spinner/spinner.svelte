@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { onMount } from 'svelte';
 	import { cn } from '$lib/utils.js';
 	import type { SVGAttributes } from 'svelte/elements';
 
@@ -7,9 +8,51 @@
 		'aria-label': ariaLabel = 'Loading',
 		...restProps
 	}: SVGAttributes<SVGSVGElement> & { class?: string } = $props();
+
+	let spinnerElement: SVGSVGElement;
+	let arcElement: SVGCircleElement;
+
+	const MIN_LENGTH = 12.5;
+	const MAX_LENGTH = 87.5;
+	const DEFAULT_DURATION_MS = 1800;
+
+	const easeInOut = (value: number): number => 0.5 - Math.cos(Math.PI * value) / 2;
+
+	const parseDuration = (value: string): number => {
+		const trimmed = value.trim();
+		if (trimmed.endsWith('ms')) return Number.parseFloat(trimmed);
+		if (trimmed.endsWith('s')) return Number.parseFloat(trimmed) * 1000;
+		return Number.parseFloat(trimmed) || DEFAULT_DURATION_MS;
+	};
+
+	onMount(() => {
+		const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+		if (reduceMotion.matches) return;
+
+		const duration = parseDuration(
+			getComputedStyle(spinnerElement).getPropertyValue('--spinner-duration')
+		);
+		let frame = 0;
+		let startedAt: number | null = null;
+
+		const animate = (timestamp: number) => {
+			startedAt ??= timestamp;
+			const progress = ((timestamp - startedAt) % duration) / duration;
+			const length = MIN_LENGTH + (MAX_LENGTH - MIN_LENGTH) * Math.sin(Math.PI * progress);
+			const offset = -100 * easeInOut(progress);
+
+			arcElement.style.strokeDasharray = `${length} ${100 - length}`;
+			arcElement.style.strokeDashoffset = String(offset);
+			frame = window.requestAnimationFrame(animate);
+		};
+
+		frame = window.requestAnimationFrame(animate);
+		return () => window.cancelAnimationFrame(frame);
+	});
 </script>
 
 <svg
+	bind:this={spinnerElement}
 	role="status"
 	aria-label={ariaLabel}
 	viewBox="0 0 24 24"
@@ -17,7 +60,14 @@
 	{...restProps}
 >
 	<circle class="windows-spinner__track" cx="12" cy="12" r="9" />
-	<circle class="windows-spinner__arc" cx="12" cy="12" r="9" pathLength="100" />
+	<circle
+		bind:this={arcElement}
+		class="windows-spinner__arc"
+		cx="12"
+		cy="12"
+		r="9"
+		pathLength="100"
+	/>
 </svg>
 
 <style>
@@ -38,59 +88,14 @@
 		opacity: 0.16;
 	}
 
-	@property --spinner-length {
-		syntax: '<number>';
-		inherits: false;
-		initial-value: 12.5;
-	}
-
-	@property --spinner-offset {
-		syntax: '<number>';
-		inherits: false;
-		initial-value: 0;
-	}
-
 	.windows-spinner__arc {
-		--spinner-length: 12.5;
-		--spinner-offset: 0;
-		animation:
-			windows-spinner-length var(--spinner-duration) linear infinite,
-			windows-spinner-offset var(--spinner-duration) linear infinite;
 		stroke: currentColor;
-		stroke-dasharray: var(--spinner-length) calc(100 - var(--spinner-length));
-		stroke-dashoffset: var(--spinner-offset);
-		transform-box: fill-box;
-		transform-origin: center;
-	}
-
-	@keyframes windows-spinner-length {
-		0% {
-			animation-timing-function: ease-in;
-			--spinner-length: 12.5;
-		}
-		50% {
-			animation-timing-function: ease-out;
-			--spinner-length: 87.5;
-		}
-		100% {
-			--spinner-length: 12.5;
-		}
-	}
-
-	@keyframes windows-spinner-offset {
-		0%,
-		50% {
-			animation-timing-function: ease-out;
-			--spinner-offset: 0;
-		}
-		100% {
-			--spinner-offset: -100;
-		}
+		stroke-dasharray: 12.5 87.5;
+		stroke-dashoffset: 0;
 	}
 
 	@media (prefers-reduced-motion: reduce) {
 		.windows-spinner__arc {
-			animation: none;
 			stroke-dasharray: 62 38;
 		}
 	}

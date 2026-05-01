@@ -38,11 +38,16 @@
 		const animate = (timestamp: number) => {
 			startedAt ??= timestamp;
 			const progress = ((timestamp - startedAt) % duration) / duration;
-			const length = MIN_LENGTH + (MAX_LENGTH - MIN_LENGTH) * Math.sin(Math.PI * progress);
-			const offset = -100 * easeInOut(progress);
+			const phase = progress < 0.5 ? progress * 2 : (progress - 0.5) * 2;
+			const eased = easeInOut(phase);
+			const length =
+				progress < 0.5
+					? MIN_LENGTH + (MAX_LENGTH - MIN_LENGTH) * eased
+					: MAX_LENGTH - (MAX_LENGTH - MIN_LENGTH) * eased;
+			const back = progress < 0.5 ? 0 : 100 * eased;
 
 			arcElement.style.strokeDasharray = `${length} ${100 - length}`;
-			arcElement.style.strokeDashoffset = String(offset);
+			arcElement.style.strokeDashoffset = String(-back);
 			frame = window.requestAnimationFrame(animate);
 		};
 

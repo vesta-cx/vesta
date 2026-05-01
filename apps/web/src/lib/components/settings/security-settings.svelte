@@ -349,10 +349,10 @@
 
 			<ActionRow
 				title="Passkeys"
-				description="Hosted AuthKit handles passkey enrollment and sign-in."
+				description="Supported by our auth provider, but passkey management is not available here yet."
 			>
 				{#snippet action()}
-					<Button variant="outline" size="sm" onclick={() => (mode = 'passkeys')}>Manage</Button>
+					<Button variant="outline" size="sm" disabled>Unavailable</Button>
 				{/snippet}
 			</ActionRow>
 

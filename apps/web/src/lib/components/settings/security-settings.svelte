@@ -54,22 +54,23 @@
 		sessions: 'sessions'
 	};
 	const modeUrlMap: Record<SecurityMode, string> = {
-		overview: '/dashboard/settings/security',
-		password: '/dashboard/settings/security/password',
-		totp: '/dashboard/settings/security/authenticator-app',
-		passkeys: '/dashboard/settings/security/passkeys',
-		sessions: '/dashboard/settings/security/sessions'
+		overview: 'security',
+		password: 'security/password',
+		totp: 'security/authenticator-app',
+		passkeys: 'security/passkeys',
+		sessions: 'security/sessions'
 	};
 	$effect(() => {
-		const [, settingsRoot, category, panel] = page.url.pathname.split('/').filter(Boolean);
-		if (settingsRoot === 'settings' && category === 'security') {
-			mode = panel ? (urlModeMap[panel] ?? 'overview') : 'overview';
-		}
+		const settingsPath = page.url.searchParams.get('settings');
+		const [category, panel] = settingsPath?.split('/') ?? [];
+		if (category === 'security') mode = panel ? (urlModeMap[panel] ?? 'overview') : 'overview';
 	});
 
 	const setMode = async (nextMode: SecurityMode) => {
 		mode = nextMode;
-		await goto(modeUrlMap[nextMode], { keepFocus: true, noScroll: true });
+		const nextUrl = new URL(page.url);
+		nextUrl.searchParams.set('settings', modeUrlMap[nextMode]);
+		await goto(nextUrl, { keepFocus: true, noScroll: true });
 	};
 
 	const fieldError = (key: string) => errors?.[key]?.[0] ?? null;

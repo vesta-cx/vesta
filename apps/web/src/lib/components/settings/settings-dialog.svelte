@@ -12,6 +12,8 @@
 </script>
 
 <script lang="ts">
+	import { goto } from '$app/navigation';
+	import { page } from '$app/state';
 	import * as Dialog from '@vesta-cx/ui/components/ui/dialog';
 	import { IN_DEVELOPMENT_TOOLTIP } from '$lib/components/dashboard/nav-collapsible.svelte';
 
@@ -32,6 +34,14 @@
 		if (activeCategoryId) activeId = activeCategoryId;
 	});
 	const active = $derived(categories.find((c) => c.id === activeId) ?? categories[0]);
+
+	const selectCategory = async (category: SettingsCategory) => {
+		if (category.enabled === false) return;
+		activeId = category.id;
+		const nextUrl = new URL(page.url);
+		nextUrl.searchParams.set('settings', category.id);
+		await goto(nextUrl, { keepFocus: true, noScroll: true });
+	};
 </script>
 
 <Dialog.Root bind:open>
@@ -56,7 +66,7 @@
 						aria-disabled={disabled ? 'true' : undefined}
 						title={disabled ? IN_DEVELOPMENT_TOOLTIP : undefined}
 						{disabled}
-						onclick={() => (activeId = category.id)}
+						onclick={() => void selectCategory(category)}
 					>
 						<category.icon class="size-4" />
 						<span>{category.title}</span>

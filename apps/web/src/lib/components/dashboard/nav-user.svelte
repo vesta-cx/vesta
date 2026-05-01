@@ -87,6 +87,12 @@
 			void goto(nextUrl, { keepFocus: true, noScroll: true });
 		}
 	});
+	const openSettings = async () => {
+		settingsOpen = true;
+		const nextUrl = new URL(page.url);
+		nextUrl.searchParams.set('settings', 'profile');
+		await goto(nextUrl, { keepFocus: true, noScroll: true });
+	};
 
 	/**
 	 * Profile        = Vesta-owned public surface (display name, handle, bio).
@@ -202,7 +208,7 @@
 						<UserRoundIcon />
 						Profile
 					</DropdownMenu.Item>
-					<DropdownMenu.Item onSelect={() => (settingsOpen = true)}>
+					<DropdownMenu.Item onSelect={() => void openSettings()}>
 						<SettingsIcon />
 						Settings
 					</DropdownMenu.Item>

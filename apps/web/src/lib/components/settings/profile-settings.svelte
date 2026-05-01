@@ -148,12 +148,7 @@
 		<div class="flex items-center justify-between gap-3">
 			<Label for="profile-handle">Handle</Label>
 			{#if handleStatus}
-				<div class="flex items-center gap-1.5 text-xs text-muted-foreground" aria-live="polite">
-					<span class={`grid size-4 place-items-center rounded-full text-[0.65rem] ${handleStatus.class}`}>
-						{handleStatus.symbol}
-					</span>
-					<span>{handleStatus.label}</span>
-				</div>
+				<p class="text-xs text-muted-foreground" aria-live="polite">{handleStatus.label}</p>
 			{/if}
 		</div>
 		<div class="flex items-center rounded-md border border-input bg-background shadow-xs focus-within:border-ring focus-within:ring-[3px] focus-within:ring-ring/50 dark:bg-input/30">
@@ -173,6 +168,13 @@
 				autocapitalize="off"
 				spellcheck={false}
 			/>
+			{#if handleStatus}
+				<span
+					class={`me-3 grid size-4 shrink-0 place-items-center rounded-full text-[0.65rem] ${handleStatus.class}`}
+				>
+					{handleStatus.symbol}
+				</span>
+			{/if}
 		</div>
 		<p class="text-xs text-muted-foreground">
 			Letters, numbers, hyphens, or underscores. Capitalization is for display only; handle

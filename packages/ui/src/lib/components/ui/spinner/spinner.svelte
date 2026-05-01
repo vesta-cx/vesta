@@ -22,7 +22,7 @@
 
 <style>
 	.windows-spinner {
-		--spinner-duration: 1.8s;
+		--spinner-duration: 7.2s;
 		overflow: visible;
 	}
 
@@ -67,61 +67,71 @@
 			animation-timing-function: ease-in-out;
 			--spinner-head: 12.5;
 		}
-		12.5%,
-		25% {
+		12.5% {
+			animation-timing-function: step-end;
 			--spinner-head: 87.5;
 		}
 		25% {
 			animation-timing-function: ease-in-out;
+			--spinner-head: 87.5;
 		}
-		37.5%,
-		50% {
+		37.5% {
+			animation-timing-function: step-end;
 			--spinner-head: 162.5;
 		}
 		50% {
 			animation-timing-function: ease-in-out;
+			--spinner-head: 162.5;
 		}
-		62.5%,
-		75% {
+		62.5% {
+			animation-timing-function: step-end;
 			--spinner-head: 237.5;
 		}
 		75% {
 			animation-timing-function: ease-in-out;
+			--spinner-head: 237.5;
 		}
-		87.5%,
+		87.5% {
+			animation-timing-function: step-end;
+			--spinner-head: 312.5;
+		}
 		100% {
 			--spinner-head: 312.5;
 		}
 	}
 
 	@keyframes windows-spinner-tail {
-		0%,
-		12.5% {
+		0% {
+			animation-timing-function: step-end;
 			--spinner-tail: 0;
 		}
 		12.5% {
 			animation-timing-function: ease-in-out;
+			--spinner-tail: 0;
 		}
-		25%,
-		37.5% {
+		25% {
+			animation-timing-function: step-end;
 			--spinner-tail: 75;
 		}
 		37.5% {
 			animation-timing-function: ease-in-out;
+			--spinner-tail: 75;
 		}
-		50%,
-		62.5% {
+		50% {
+			animation-timing-function: step-end;
 			--spinner-tail: 150;
 		}
 		62.5% {
 			animation-timing-function: ease-in-out;
+			--spinner-tail: 150;
 		}
-		75%,
-		87.5% {
+		75% {
+			animation-timing-function: step-end;
 			--spinner-tail: 225;
 		}
 		87.5% {
 			animation-timing-function: ease-in-out;
+			--spinner-tail: 225;
 		}
 		100% {
 			--spinner-tail: 300;

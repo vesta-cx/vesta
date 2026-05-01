@@ -40,10 +40,10 @@
 
 	.windows-spinner__arc {
 		animation:
-			windows-spinner-dash var(--spinner-duration) cubic-bezier(0.35, 0, 0.25, 1) infinite,
-			windows-spinner-rotate var(--spinner-duration) linear infinite;
+			windows-spinner-dash var(--spinner-duration) ease-in-out infinite,
+			windows-spinner-rotate var(--spinner-duration) ease-in-out infinite;
 		stroke: currentColor;
-		stroke-dasharray: 1 99;
+		stroke-dasharray: 0 100;
 		stroke-dashoffset: 0;
 		transform-box: fill-box;
 		transform-origin: center;
@@ -51,20 +51,16 @@
 
 	@keyframes windows-spinner-dash {
 		0% {
-			stroke-dasharray: 1 99;
+			stroke-dasharray: 0 100;
 			stroke-dashoffset: 0;
 		}
-		42% {
-			stroke-dasharray: 76 24;
+		50% {
+			stroke-dasharray: 75 25;
 			stroke-dashoffset: 0;
-		}
-		78% {
-			stroke-dasharray: 1 99;
-			stroke-dashoffset: -76;
 		}
 		100% {
-			stroke-dasharray: 1 99;
-			stroke-dashoffset: -100;
+			stroke-dasharray: 0 100;
+			stroke-dashoffset: -75;
 		}
 	}
 
@@ -72,10 +68,9 @@
 		0% {
 			transform: rotate(0deg);
 		}
-		38% {
-			transform: rotate(54deg);
+		50% {
+			transform: rotate(90deg);
 		}
-		78%,
 		100% {
 			transform: rotate(360deg);
 		}

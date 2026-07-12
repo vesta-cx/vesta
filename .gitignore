@@ -42,3 +42,4 @@ agent-reports/
 .references/
 
 apps/old-stuff/
+apps/web/(legacy)/

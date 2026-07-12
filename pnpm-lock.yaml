@@ -736,6 +736,9 @@ importers:
       "@fontsource/geist-sans":
         specifier: ^5.2.5
         version: 5.2.5
+      "@solar-icons/svelte":
+        specifier: ^1.1.0
+        version: 1.1.1(svelte@5.53.2)
       d3:
         specifier: ^7.9.0
         version: 7.9.0
@@ -4412,6 +4415,15 @@ packages:
         integrity: sha512-4aUIteuyxtBUhVdiQqcDhKFitwfd9hqoSDYY2KRXiWtgoWJ9Bmise+KfEPDiVHWeJepvF8xJO9/9+WDIciMFFw==,
       }
     engines: { node: ">=18.0.0" }
+
+  "@solar-icons/svelte@1.1.1":
+    resolution:
+      {
+        integrity: sha512-MPeTQN1eaz5rk9a78JPHHq4BNFhhyPIfPb8MEXG4PWjEs98OW0rTp0th8TO8984DArucB3fOj02QDmUlhiPnbg==,
+      }
+    engines: { node: ">=16" }
+    peerDependencies:
+      svelte: ">= 4.0.0"
 
   "@speed-highlight/core@1.2.14":
     resolution:
@@ -15481,6 +15493,10 @@ snapshots:
     dependencies:
       tslib: 2.8.1
 
+  "@solar-icons/svelte@1.1.1(svelte@5.53.2)":
+    dependencies:
+      svelte: 5.53.2
+
   "@speed-highlight/core@1.2.14": {}
 
   "@sqlite.org/sqlite-wasm@3.48.0-build4": {}
@@ -21424,7 +21440,7 @@ snapshots:
     dependencies:
       "@testing-library/svelte-core": 1.0.0(svelte@5.53.2)
       svelte: 5.53.2
-      vitest: 4.0.18(@types/node@25.3.2)(@vitest/browser-playwright@4.0.18)(happy-dom@20.7.0)(jiti@2.6.1)(lightningcss@1.31.1)(sass-embedded@1.97.3)(sass@1.97.3)(terser@5.46.0)(tsx@4.21.0)(yaml@2.8.3)
+      vitest: 4.0.18(@types/node@24.12.0)(@vitest/browser-playwright@4.0.18)(happy-dom@20.7.0)(jiti@2.6.1)(lightningcss@1.31.1)(sass-embedded@1.97.3)(sass@1.97.3)(terser@5.46.0)(tsx@4.21.0)(yaml@2.8.3)
 
   vitest@4.0.18(@types/node@22.19.11)(@vitest/browser-playwright@4.0.18)(happy-dom@20.7.0)(jiti@2.6.1)(lightningcss@1.31.1)(sass-embedded@1.97.3)(sass@1.97.3)(terser@5.46.0)(tsx@4.21.0)(yaml@2.8.3):
     dependencies:

@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { cn, type WithElementRef } from '$lib/utils.js';
+	import { cn } from '$lib/utils.js';
 	import type { HTMLSelectAttributes } from 'svelte/elements';
 	import ChevronDownIcon from '@lucide/svelte/icons/chevron-down';
 
@@ -9,7 +9,7 @@
 		class: className,
 		children,
 		...restProps
-	}: WithElementRef<HTMLSelectAttributes> = $props();
+	}: HTMLSelectAttributes & { ref?: HTMLSelectElement | null } = $props();
 </script>
 
 <div

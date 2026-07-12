@@ -17,7 +17,7 @@
 	</Header.Logo>
 	<nav class="contents">
 		<ul class="flex gap-6">
-			<li>Components</li>
+			<li><a href="/components">Components</a></li>
 			<li>About</li>
 			<li>GitHub</li>
 		</ul>

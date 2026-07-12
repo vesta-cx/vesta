@@ -43,3 +43,4 @@ agent-reports/
 
 apps/old-stuff/
 apps/web/(legacy)/
+.worktrees/

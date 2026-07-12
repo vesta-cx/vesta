@@ -14,6 +14,7 @@
 	import NavSecondary from './nav-secondary.svelte';
 	import NavUser, { type DashboardUser } from './nav-user.svelte';
 	import WorkspaceSwitcher from './workspace-switcher.svelte';
+	import SettingsManager from '$lib/components/settings/settings-manager.svelte';
 
 	let {
 		user,
@@ -63,6 +64,8 @@
 	</Sidebar.Content>
 
 	<Sidebar.Footer>
-		<NavUser {user} {security} />
+		<NavUser {user} />
 	</Sidebar.Footer>
 </Sidebar.Root>
+
+<SettingsManager {user} {security} />

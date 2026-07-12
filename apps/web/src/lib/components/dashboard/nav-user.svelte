@@ -31,31 +31,16 @@
 	import * as Sidebar from '@vesta-cx/ui/components/ui/sidebar';
 	import { useSidebar } from '@vesta-cx/ui/components/ui/sidebar';
 	import ArrowLeftIcon from '@lucide/svelte/icons/arrow-left';
-	import BellIcon from '@lucide/svelte/icons/bell';
 	import ChevronsUpDownIcon from '@lucide/svelte/icons/chevrons-up-down';
-	import CreditCardIcon from '@lucide/svelte/icons/credit-card';
-	import DatabaseIcon from '@lucide/svelte/icons/database';
 	import HelpCircleIcon from '@lucide/svelte/icons/help-circle';
-	import IdCardIcon from '@lucide/svelte/icons/id-card';
 	import LogOutIcon from '@lucide/svelte/icons/log-out';
-	import PackageIcon from '@lucide/svelte/icons/package';
-	import ShieldIcon from '@lucide/svelte/icons/shield';
 	import SettingsIcon from '@lucide/svelte/icons/settings';
 	import UserRoundIcon from '@lucide/svelte/icons/user-round';
-	import AccountSettings from '$lib/components/settings/account-settings.svelte';
-	import DataPrivacySettings from '$lib/components/settings/data-privacy-settings.svelte';
-	import ProfileSettings from '$lib/components/settings/profile-settings.svelte';
-	import SecuritySettings from '$lib/components/settings/security-settings.svelte';
-	import SettingsDialog, {
-		type SettingsCategory
-	} from '$lib/components/settings/settings-dialog.svelte';
 	import { IN_DEVELOPMENT_TOOLTIP } from './nav-collapsible.svelte';
 
-	let { user, security }: { user: DashboardUser; security: DashboardSecurity } = $props();
+	let { user }: { user: DashboardUser } = $props();
 
 	const sidebar = useSidebar();
-	let settingsOpen = $state(false);
-
 	const displayName = $derived(user.displayName);
 	const handleLine = $derived(user.handle ? `@${user.handle}` : user.email);
 
@@ -68,98 +53,13 @@
 			.join('')
 			.toUpperCase() || displayName.slice(0, 2).toUpperCase()
 	);
-	const settingsPath = $derived(page.url.searchParams.get('settings'));
-	const activeSettingsCategory = $derived(settingsPath?.split('/')[0] ?? null);
-	let openedFromUrl = $state(false);
-	$effect(() => {
-		if (settingsPath) {
-			openedFromUrl = true;
-			settingsOpen = true;
-		} else if (openedFromUrl) {
-			openedFromUrl = false;
-			settingsOpen = false;
-		}
-	});
-	$effect(() => {
-		if (!settingsOpen && settingsPath) {
-			const nextUrl = new URL(page.url);
-			nextUrl.searchParams.delete('settings');
-			void goto(nextUrl, { keepFocus: true, noScroll: true });
-		}
-	});
+
 	const openSettings = async () => {
-		settingsOpen = true;
 		const nextUrl = new URL(page.url);
 		nextUrl.searchParams.set('settings', 'profile');
 		await goto(nextUrl, { keepFocus: true, noScroll: true });
 	};
-
-	/**
-	 * Profile        = Vesta-owned public surface (display name, handle, bio).
-	 * Account        = WorkOS-owned identity (legal name, email).
-	 * Security       = sign-in surface (password, 2FA, sessions).
-	 * Data & Privacy = GDPR controls (export, processing log, deletion).
-	 * Notifications, Subscriptions, Billing are queued in the rail.
-	 */
-	const settingsCategories: SettingsCategory[] = [
-		{
-			id: 'profile',
-			title: 'Profile',
-			icon: IdCardIcon,
-			enabled: true,
-			content: profileContent
-		},
-		{
-			id: 'account',
-			title: 'Account',
-			icon: UserRoundIcon,
-			enabled: true,
-			content: accountContent
-		},
-		{
-			id: 'security',
-			title: 'Security',
-			icon: ShieldIcon,
-			enabled: true,
-			content: securityContent
-		},
-		{
-			id: 'data-privacy',
-			title: 'Data & privacy',
-			icon: DatabaseIcon,
-			enabled: true,
-			content: dataPrivacyContent
-		},
-		{ id: 'notifications', title: 'Notifications', icon: BellIcon, enabled: false },
-		{ id: 'subscriptions', title: 'Subscriptions', icon: PackageIcon, enabled: false },
-		{ id: 'billing', title: 'Billing', icon: CreditCardIcon, enabled: false }
-	];
 </script>
-
-{#snippet profileContent()}
-	<ProfileSettings
-		displayName={user.displayName}
-		handle={user.handle}
-		bio={user.bio}
-	/>
-{/snippet}
-
-{#snippet accountContent()}
-	<AccountSettings
-		firstName={user.firstName}
-		lastName={user.lastName}
-		email={user.email}
-		emailVerified={user.emailVerified}
-	/>
-{/snippet}
-
-{#snippet securityContent()}
-	<SecuritySettings {security} email={user.email} emailVerified={user.emailVerified} />
-{/snippet}
-
-{#snippet dataPrivacyContent()}
-	<DataPrivacySettings />
-{/snippet}
 
 {#snippet identity()}
 	<Avatar.Root class="size-8 rounded-lg">
@@ -240,10 +140,3 @@
 		</DropdownMenu.Root>
 	</Sidebar.MenuItem>
 </Sidebar.Menu>
-
-<SettingsDialog
-	bind:open={settingsOpen}
-	categories={settingsCategories}
-	initialCategoryId="profile"
-	activeCategoryId={activeSettingsCategory}
-/>

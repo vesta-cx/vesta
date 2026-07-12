@@ -2,6 +2,7 @@
 
 export * from "./types";
 export * from "./users";
+export * from "./handles";
 export * from "./workspaces";
 export * from "./resources";
 export * from "./posts";

@@ -1,13 +1,13 @@
 import { json } from '@sveltejs/kit';
-import { and, eq, ne } from 'drizzle-orm';
+import { and, eq, ne, or } from 'drizzle-orm';
 import {
 	RESERVED_HANDLES,
 	USER_HANDLE_MAX_LENGTH,
 	USER_HANDLE_MIN_LENGTH,
 	USER_HANDLE_PATTERN,
-	normalizeUserHandle
+	toHandleLower
 } from '@vesta-cx/db/entity-schemas';
-import { users } from '@vesta-cx/db';
+import { handles } from '@vesta-cx/db';
 import { getDb } from '$lib/server/db';
 import type { RequestHandler } from './$types';
 
@@ -28,19 +28,19 @@ export const GET: RequestHandler = async ({ locals, platform, url }) => {
 		return json({ available: false, reason: 'Use letters, numbers, hyphens, or underscores.' });
 	}
 
-	const handleNormalized = normalizeUserHandle(handle);
-	if (RESERVED_HANDLES.has(handleNormalized)) {
+	const handleLower = toHandleLower(handle);
+	if (RESERVED_HANDLES.has(handleLower)) {
 		return json({ available: false, reason: 'That handle is reserved.' });
 	}
 
 	const db = getDb(platform);
 	const [existing] = await db
-		.select({ workosUserId: users.workosUserId })
-		.from(users)
+		.select({ subjectId: handles.subjectId })
+		.from(handles)
 		.where(
 			and(
-				eq(users.handleNormalized, handleNormalized),
-				ne(users.workosUserId, locals.session.userId)
+				eq(handles.handleLower, handleLower),
+				or(ne(handles.subjectType, 'user'), ne(handles.subjectId, locals.session.userId))
 			)
 		)
 		.limit(1);

@@ -1,14 +1,14 @@
 import { fail } from '@sveltejs/kit';
-import { eq } from 'drizzle-orm';
+import { and, eq } from 'drizzle-orm';
 import { Result, Schema } from 'effect';
 import { TerminalAuthError } from '@vesta-cx/auth';
-import { users } from '@vesta-cx/db';
+import { handles, users } from '@vesta-cx/db';
 import {
 	RESERVED_HANDLES,
 	USER_HANDLE_MAX_LENGTH,
 	USER_HANDLE_MIN_LENGTH,
 	USER_HANDLE_PATTERN,
-	normalizeUserHandle,
+	toHandleLower,
 	isMultiLineSafe,
 	isSingleLineSafe
 } from '@vesta-cx/db/entity-schemas';
@@ -48,8 +48,7 @@ const HandleSchema = Schema.NullOr(
 				USER_HANDLE_PATTERN.test(value) || 'Use letters, numbers, hyphens, or underscores.'
 		),
 		Schema.makeFilter(
-			(value: string) =>
-				!RESERVED_HANDLES.has(normalizeUserHandle(value)) || 'That handle is reserved.'
+			(value: string) => !RESERVED_HANDLES.has(toHandleLower(value)) || 'That handle is reserved.'
 		)
 	)
 );
@@ -325,15 +324,33 @@ export const actions: Actions = {
 		}
 
 		const db = getDb(platform);
-		const handleNormalized = result.values.handle
-			? normalizeUserHandle(result.values.handle)
-			: null;
+		const handleNormalized = result.values.handle ? toHandleLower(result.values.handle) : null;
 		try {
-			// Upsert: provisioning may not have populated the row (e.g. a fresh
-			// D1 after a session was already issued). On insert we fill the
-			// non-form columns from the session; on conflict we only touch what
-			// the form actually owns.
-			const upsertResult = await db
+			// Keep the new global registry and the legacy user columns in one D1
+			// batch. D1 batches are atomic, so a racing handle claim cannot leave
+			// the profile and registry disagreeing about who owns the name.
+			const handleMutation = result.values.handle
+				? db
+						.insert(handles)
+						.values({
+							handle: result.values.handle,
+							subjectType: 'user',
+							subjectId: userId
+						})
+						.onConflictDoUpdate({
+							target: [handles.subjectType, handles.subjectId],
+							set: {
+								handle: result.values.handle,
+								updatedAt: new Date()
+							}
+						})
+				: db
+						.delete(handles)
+						.where(and(eq(handles.subjectType, 'user'), eq(handles.subjectId, userId)));
+
+			// Provisioning may not have populated the row yet. On insert, seed
+			// session-owned fields; on conflict, only touch profile-owned fields.
+			const userUpsert = db
 				.insert(users)
 				.values({
 					workosUserId: userId,
@@ -356,6 +373,8 @@ export const actions: Actions = {
 					}
 				})
 				.returning({ workosUserId: users.workosUserId, handle: users.handle });
+
+			const [, upsertResult] = await db.batch([handleMutation, userUpsert]);
 			console.log('[updateProfile] db upsert result', {
 				workosUserId: userId,
 				rows: upsertResult

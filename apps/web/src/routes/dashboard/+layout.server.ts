@@ -1,6 +1,6 @@
 import { error, redirect } from '@sveltejs/kit';
-import { eq } from 'drizzle-orm';
-import { users } from '@vesta-cx/db';
+import { and, eq } from 'drizzle-orm';
+import { handles, users } from '@vesta-cx/db';
 import { createWebAuthRuntime } from '$lib/server/auth';
 import { getDb } from '$lib/server/db';
 import type { LayoutServerLoad } from './$types';
@@ -19,11 +19,15 @@ export const load: LayoutServerLoad = async ({ locals, platform }) => {
 	const db = getDb(platform);
 	const [profile] = await db
 		.select({
-			handle: users.handle,
+			handle: handles.handle,
 			displayName: users.displayName,
 			bio: users.bio
 		})
 		.from(users)
+		.leftJoin(
+			handles,
+			and(eq(handles.subjectId, users.workosUserId), eq(handles.subjectType, 'user'))
+		)
 		.where(eq(users.workosUserId, userId))
 		.limit(1);
 

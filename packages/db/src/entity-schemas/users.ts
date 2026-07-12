@@ -42,9 +42,11 @@ export const USER_HANDLE_MAX_LENGTH = 32;
 export const sanitizeUserHandle = (input: string): string =>
 	input.replace(/[^A-Za-z0-9_-]/g, "");
 
-/** Canonical case-insensitive handle key used for uniqueness checks. */
-export const normalizeUserHandle = (input: string): string =>
-	input.toLowerCase();
+/** Lowercase handle key used for case-insensitive checks. */
+export const toHandleLower = (input: string): string => input.toLowerCase();
+
+/** @deprecated Use toHandleLower. */
+export const normalizeUserHandle = toHandleLower;
 
 /**
  * Charset rules for free-form profile fields. Single-line fields strip ASCII
@@ -84,7 +86,7 @@ export const userHandleSchema = z
 		USER_HANDLE_PATTERN,
 		"Use letters, numbers, hyphens, or underscores.",
 	)
-	.refine((value) => !RESERVED_HANDLES.has(normalizeUserHandle(value)), {
+	.refine((value) => !RESERVED_HANDLES.has(toHandleLower(value)), {
 		message: "That handle is reserved.",
 	});
 

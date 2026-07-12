@@ -40,9 +40,9 @@
       "@tailwindcss/oxide",
       "better-sqlite3",
       "esbuild",
+      "msgpackr-extract",
       "sharp",
       "svelte-preprocess",
-      "unrs-resolver",
       "workerd"
     ],
     "ignoredBuiltDependencies": [

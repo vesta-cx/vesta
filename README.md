@@ -2,6 +2,13 @@
 
 # vesta
 
+<a href="https://0rwx.com">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="https://0rwx.com/static/AI-W-dark.svg">
+    <img alt="AI:W" src="https://0rwx.com/static/AI-W-light.svg" height="48">
+  </picture>
+</a>
+
 **vesta** is an all-in-one platform helping independent musicians, small labels, and creative publishers manage their catalog, build their brand, and reach their audience.
 
 ## Vision

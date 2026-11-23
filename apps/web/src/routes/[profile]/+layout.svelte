@@ -5,7 +5,7 @@
 	let { children } = $props();
 </script>
 
-<div class="music-blog">
+<div class="music-blog" lang="en">
 	<header class="blog-masthead">
 		<div class="blog-wrap">
 			<a class="blog-brand" href={resolve('/[profile]', { profile: 'shellac-notes' })}>

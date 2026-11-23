@@ -29,6 +29,20 @@ npm run dev
 npm run dev -- --open
 ```
 
+## Preview the music blog
+
+Open `/shellac-notes/west-end-blues` in the local dev server. The post, profile, credits, and related posts use local fixtures in `src/lib/server/blog/posts.ts`. Replace the data in the loader with Erato results when the API is ready. No Erato requests are made from these routes.
+
+The dev server still loads the site's WorkOS middleware. If you don't have local WorkOS configuration, use placeholder values in `.dev.vars` for the public fixture routes only:
+
+```dotenv
+PRIVATE_WORKOS_CLIENT_ID=client_local_fixture
+PRIVATE_WORKOS_API_KEY=sk_local_fixture
+PRIVATE_WORKOS_COOKIE_PASSWORD=local_fixture_password_not_for_deploy
+```
+
+The artwork is the original Okeh label. The preview is a 30-second excerpt of the 1928 recording. Both come from the [Internet Archive transfer](https://archive.org/details/west-end-blues).
+
 ## Building
 
 To create a production version of your app:

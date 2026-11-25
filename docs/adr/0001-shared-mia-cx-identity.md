@@ -19,11 +19,12 @@ Vesta, Tastebase, the Remora chat and Earshot share one WorkOS directory, the **
 - **Tenants**: tenants are ordinary WorkOS organizations. The product lists the user's tenant memberships through the WorkOS API and authorizes in the app, so the active session organization never changes what the app shows. Organization metadata `products` lists the products a tenant has turned on.
 - **Permissions**: permission slugs are scoped by product, for example `vesta:projects:write`. One membership can hold roles for several products.
 - **Sign-in methods**: magic code, passkeys, Google and GitHub. No passwords, so moving to another provider never involves password hashes.
-- **One account per person**: WorkOS matches sign-ins by verified email, so a duplicate account only happens when someone signs up with a second address because they didn't know they already had an account. Every product prevents that in two places:
-  - Before redirecting to AuthKit, the product shows its own sign-in page. It says "Sign in with mia.cx" and shows badges for the other products the account works on. Sign-up and sign-in are the same button. This page moves into a custom AuthKit page on `auth.mia.cx` once the paid custom domain is set up.
+- **Account app**: `accounts.mia.cx` is a mia.cx app of its own, with its own WorkOS application. People manage their mia.cx account there: name, email, sign-in methods, passkeys, sessions, the products they use, and deleting the account. Products link to it and build no account settings themselves. A product stores only its own data, keyed by the WorkOS user ID.
+- **One account per person**: WorkOS matches sign-ins by verified email, so a duplicate account only happens when someone signs up with a second address because they didn't know they already had an account. Two screens prevent that:
+  - Products send sign-in to `accounts.mia.cx/sign-in?product=<slug>`. That page says "Sign in with mia.cx" and shows badges for the other products the account works on. It then redirects to AuthKit with that product's client ID and redirect URI, looked up from the account app's product list and never taken from the query. Sign-up and sign-in are the same button.
   - On a user's first sign-in to a product, the callback adds them to the product organization. If they already belong to another product's organization, the product shows a one-time notice, for example: "You already have a mia.cx account from Vesta, so it works here too."
 - **Code**: products authenticate only through `@vesta-cx/auth`. The package moves to `@mia-cx/auth` when a second product adopts it.
-- **Domain**: the WorkOS-hosted AuthKit domain until the first production launch, then `auth.mia.cx`. `id.mia.cx` belongs to the homelab's Authentik.
+- **Domains**: `accounts.mia.cx` is the account app. AuthKit stays on its WorkOS-hosted domain until the paid custom domain is set up, then moves to `auth.mia.cx`; a custom domain takes the whole hostname, so it can't share `accounts.mia.cx`. `id.mia.cx` belongs to the homelab's Authentik.
 
 ## Out of scope
 
@@ -32,7 +33,8 @@ Vesta, Tastebase, the Remora chat and Earshot share one WorkOS directory, the **
 
 ## Consequences
 
-- One account and single sign-on across the mia.cx products. A new product needs one WorkOS application, not a new environment.
+- One account and single sign-on across the mia.cx products. A new product needs one WorkOS application and an entry in the account app's product list, not a new environment or its own account screens.
+- Deleting an account in the account app deletes it everywhere. Products listen for WorkOS `user.deleted` events and delete their own data for that user.
 - Any product's server key can read and change every user and organization in the directory. One WorkOS outage stops sign-in for every product.
 - The privacy policy must state that a mia.cx account is shared across products. Each product stores only the user ID and the data it needs.
 - Signing in through the product organization bypasses a tenant's own sign-in policy. Revisit this when a tenant asks for enterprise SSO.

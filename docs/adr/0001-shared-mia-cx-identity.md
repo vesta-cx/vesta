@@ -20,7 +20,7 @@ Vesta, Tastebase, the Remora chat and Earshot share one WorkOS directory, the **
 - **Permissions**: permission slugs are scoped by product, for example `vesta:projects:write`. One membership can hold roles for several products.
 - **Sign-in methods**: magic code, passkeys, Google and GitHub. No passwords, so moving to another provider never involves password hashes.
 - **One account per person**: WorkOS matches sign-ins by verified email, so a duplicate account only happens when someone signs up with a second address because they didn't know they already had an account. Every product prevents that in two places:
-  - Its sign-in page says "Sign in with mia.cx" and shows badges for the other products the account works on. Sign-up and sign-in are the same button.
+  - Before redirecting to AuthKit, the product shows its own sign-in page. It says "Sign in with mia.cx" and shows badges for the other products the account works on. Sign-up and sign-in are the same button. This page moves into a custom AuthKit page on `auth.mia.cx` once the paid custom domain is set up.
   - On a user's first sign-in to a product, the callback adds them to the product organization. If they already belong to another product's organization, the product shows a one-time notice, for example: "You already have a mia.cx account from Vesta, so it works here too."
 - **Code**: products authenticate only through `@vesta-cx/auth`. The package moves to `@mia-cx/auth` when a second product adopts it.
 - **Domain**: the WorkOS-hosted AuthKit domain until the first production launch, then `auth.mia.cx`. `id.mia.cx` belongs to the homelab's Authentik.

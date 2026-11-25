@@ -10,7 +10,7 @@ Several mia.cx products need public sign-up, single sign-on, one account per per
 
 ## Decision
 
-Vesta, Tastebase and the Remora chat share one WorkOS directory, the **mia.cx** project.
+Vesta, Tastebase, the Remora chat and Earshot share one WorkOS directory, the **mia.cx** project. Earshot has no tenants; its readers sign in only to save their course progress.
 
 - **WorkOS layout**: one WorkOS team holds two projects, each with staging and production environments:
   - **mia.cx**: the shared directory. Each product is its own WorkOS *application*, with its own client ID, redirect URIs, session policy and AuthKit branding. Users and organizations are shared.
@@ -19,6 +19,9 @@ Vesta, Tastebase and the Remora chat share one WorkOS directory, the **mia.cx** 
 - **Tenants**: tenants are ordinary WorkOS organizations. The product lists the user's tenant memberships through the WorkOS API and authorizes in the app, so the active session organization never changes what the app shows. Organization metadata `products` lists the products a tenant has turned on.
 - **Permissions**: permission slugs are scoped by product, for example `vesta:projects:write`. One membership can hold roles for several products.
 - **Sign-in methods**: magic code, passkeys, Google and GitHub. No passwords, so moving to another provider never involves password hashes.
+- **One account per person**: WorkOS matches sign-ins by verified email, so a duplicate account only happens when someone signs up with a second address because they didn't know they already had an account. Every product prevents that in two places:
+  - Its sign-in page says "Sign in with mia.cx" and shows badges for the other products the account works on. Sign-up and sign-in are the same button.
+  - On a user's first sign-in to a product, the callback adds them to the product organization. If they already belong to another product's organization, the product shows a one-time notice, for example: "You already have a mia.cx account from Vesta, so it works here too."
 - **Code**: products authenticate only through `@vesta-cx/auth`. The package moves to `@mia-cx/auth` when a second product adopts it.
 - **Domain**: the WorkOS-hosted AuthKit domain until the first production launch, then `auth.mia.cx`. `id.mia.cx` belongs to the homelab's Authentik.
 

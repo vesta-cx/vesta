@@ -12,7 +12,7 @@ It resolves a single slug from Cloudflare KV and issues a `302` redirect to a ca
   - `GET /health`
   - `GET /:slug`
 - Backing store: Cloudflare KV binding `SHORT_LINKS`
-- Redirect policy: temporary `302`
+- Redirect policy: temporary `302` (`www.vst.cx` redirects `301` to `vst.cx`, preserving path and query)
 - Allowed destinations: `https://vesta.cx/...` only
 - Lookup behavior: slugs are normalized to lowercase before lookup
 - Query forwarding: incoming query params are appended onto the canonical destination

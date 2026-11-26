@@ -91,3 +91,5 @@ When the user asks to split changes into logical commits, use the `organize-comm
 - Say "I don't know" when uncertain rather than guessing.
 - When showing code changes, add one sentence explaining why each change was made.
 - Bookend long responses with a brief conclusion summarizing key points and next actions.
+
+The README and CONTRIBUTING.md carry the 0rwx AI:W disclosure.

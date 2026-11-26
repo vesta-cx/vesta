@@ -31,6 +31,46 @@ describe("shortener app", () => {
 		vi.restoreAllMocks();
 	});
 
+	it("redirects www requests to the root domain with 301 preserving path and query", async () => {
+		const kv = createMockKV({
+			daybreak: JSON.stringify({
+				destinationUrl:
+					"https://vesta.cx/daybreak/new-release",
+				targetType: "release",
+				updatedAt: "2026-03-23T00:00:00.000Z",
+			}),
+		});
+		const getSpy = vi.spyOn(kv, "get");
+
+		const response = await app.request(
+			"https://www.vst.cx/daybreak?utm_source=instagram&ref=bio",
+			{},
+			{
+				SHORT_LINKS: kv,
+				CANONICAL_ORIGIN: "https://vesta.cx",
+			},
+		);
+
+		expect(response.status).toBe(301);
+		expect(response.headers.get("location")).toBe(
+			"https://vst.cx/daybreak?utm_source=instagram&ref=bio",
+		);
+		expect(getSpy).not.toHaveBeenCalled();
+	});
+
+	it("redirects www requests before route handlers like /health", async () => {
+		const response = await app.request(
+			"https://www.vst.cx/health",
+			{},
+			env(),
+		);
+
+		expect(response.status).toBe(301);
+		expect(response.headers.get("location")).toBe(
+			"https://vst.cx/health",
+		);
+	});
+
 	it("returns health status without hitting KV", async () => {
 		const response = await app.request("/health", {}, env());
 		expect(response.status).toBe(200);

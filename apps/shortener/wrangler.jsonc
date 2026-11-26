@@ -13,6 +13,11 @@
           "pattern": "vst.cx",
           "zone_name": "vst.cx",
           "custom_domain": true
+        },
+        {
+          "pattern": "www.vst.cx",
+          "zone_name": "vst.cx",
+          "custom_domain": true
         }
       ],
       "kv_namespaces": [

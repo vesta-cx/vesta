@@ -6,6 +6,15 @@ import { resolveShortLink } from "./lib/short-link-service";
 
 export const app = new Hono<AppEnv>();
 
+app.use("*", async (c, next) => {
+	const url = new URL(c.req.url);
+	if (url.hostname.startsWith("www.")) {
+		url.hostname = url.hostname.slice(4);
+		return c.redirect(url.toString(), 301);
+	}
+	return next();
+});
+
 app.get("/health", (c) => c.json({ status: "ok" }));
 
 app.get("/:slug", async (c) => {
